@@ -1,0 +1,1572 @@
+{
+  "schemaVersion": "kernel.conformance.v0",
+  "suite": "all",
+  "runtime": ".NET 10.0.11",
+  "operatingSystem": "Microsoft Windows 10.0.22631",
+  "z3Path": null,
+  "generatedAtUtc": "2026-09-03T22:59:31.2221692+00:00",
+  "passed": false,
+  "testCount": 29,
+  "assertionCount": 10893,
+  "passedCount": 28,
+  "failedCount": 1,
+  "results": [
+    {
+      "suite": "core",
+      "name": "canonical-bytes-and-identity",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 8,
+      "elapsedMilliseconds": 157.3055,
+      "evidence": {
+        "canonicalProgram": "{\u0022nodes\u0022:[{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022state.available\u0022,\u0022id\u0022:\u0022n.available\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.enough\u0022,\u0022n.quantity\u0022,\u0022n.zero\u0022],\u0022id\u0022:\u0022n.debit\u0022,\u0022op\u0022:\u0022select\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.quantity\u0022,\u0022n.available\u0022],\u0022id\u0022:\u0022n.enough\u0022,\u0022op\u0022:\u0022i64.le\u0022,\u0022type\u0022:\u0022Bool\u0022},{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022event.quantity\u0022,\u0022id\u0022:\u0022n.quantity\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.available\u0022,\u0022n.debit\u0022],\u0022id\u0022:\u0022n.remaining\u0022,\u0022op\u0022:\u0022i64.sub_checked\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[],\u0022id\u0022:\u0022n.zero\u0022,\u0022op\u0022:\u0022i64.const\u0022,\u0022type\u0022:\u0022I64\u0022,\u0022value\u0022:\u00220\u0022}],\u0022outputs\u0022:{\u0022accepted\u0022:\u0022n.enough\u0022,\u0022available\u0022:\u0022n.remaining\u0022,\u0022reserved\u0022:\u0022n.debit\u0022},\u0022profileId\u0022:\u0022reserve.v0\u0022,\u0022programId\u0022:\u0022reserve\u0022,\u0022schemaVersion\u0022:\u0022kernel.v0\u0022}",
+        "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe"
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "strict-schema-and-graph-rejections",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC4",
+        "AC8"
+      ],
+      "passed": true,
+      "assertions": 55,
+      "elapsedMilliseconds": 15.3405,
+      "evidence": {
+        "rejections": {
+          "duplicate-top-key": "DuplicateField",
+          "duplicate-node-key": "DuplicateField",
+          "unknown-top-property": "SchemaInvalid",
+          "policy-in-program": "SchemaInvalid",
+          "manifest-in-program": "SchemaInvalid",
+          "unknown-node-property": "SchemaInvalid",
+          "negative-zero": "InvalidI64",
+          "numeric-i64": "SchemaInvalid",
+          "i64-leading-plus": "InvalidI64",
+          "i64-exponent": "InvalidI64",
+          "i64-leading-zero": "InvalidI64",
+          "i64-too-large": "InvalidI64",
+          "unknown-type": "UnsupportedType",
+          "non-ascii-id": "SchemaInvalid",
+          "wrong-profile": "ProfileMismatch",
+          "missing-field": "SchemaInvalid",
+          "unknown-input": "SchemaInvalid",
+          "io-opcode": "UnsupportedOpcode",
+          "dangling": "DanglingReference",
+          "cycle": "CycleDetected",
+          "dead": "UnreachableNode",
+          "duplicate-id": "DuplicateId",
+          "wrong-output-type": "TypeMismatch",
+          "wrong-operand-type": "TypeMismatch",
+          "wrong-arity": "ArityMismatch"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "checked-arithmetic-and-strict-select",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC8",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 97,
+      "elapsedMilliseconds": 43.077,
+      "evidence": {
+        "boundaryVectors": 10
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "reserve-independent-business-grid",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 294,
+      "elapsedMilliseconds": 4.2728,
+      "evidence": {
+        "vectors": 42
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "seeded-200-dags-independent-oracle",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 9854,
+      "elapsedMilliseconds": 220.9914,
+      "evidence": {
+        "seed": 20260904,
+        "graphs": 200,
+        "inputsPerGraph": 6,
+        "opcodes": [
+          "bool.and",
+          "bool.const",
+          "bool.not",
+          "bool.or",
+          "i64.add_checked",
+          "i64.const",
+          "i64.eq",
+          "i64.le",
+          "i64.sub_checked",
+          "input",
+          "select"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "ir-validation-rejects-invalid-input",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 5,
+      "elapsedMilliseconds": 3.2251,
+      "evidence": {},
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "real-z3-reserve-and-counterexample",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 18,
+      "elapsedMilliseconds": 770.1472,
+      "evidence": {
+        "verified": {
+          "semanticsVersion": "kernel.v0",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRevision": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "encoderVersion": "kernel.v0.encoder.1",
+          "referenceVersion": "kernel.v0.reference.1",
+          "interpreterVersion": "kernel.v0.ir-interpreter.1",
+          "loweringVersion": "kernel.v0.lowering.1",
+          "solver": {
+            "version": "5.1.0",
+            "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+          },
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "e72daed9cdbf394d060e36a931b1f27b8e5996e9115cfb253858f357805c0b57",
+              "status": "sat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (- v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "counterexample",
+              "queryDigest": "5ca7e3707e1531f75403a24c49a8dc0c0c0f1f3a8dff815e8b2edce224162ca2",
+              "status": "unsat",
+              "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (- v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+              "stdout": "unsat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ]
+        },
+        "counterexample": {
+          "status": 1,
+          "ir": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "instructions": [
+              {
+                "destinationIndex": 0,
+                "originNodeId": "n.available",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "state.available",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 1,
+                "originNodeId": "n.quantity",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "event.quantity",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 2,
+                "originNodeId": "n.enough",
+                "opcode": "i64.le",
+                "operandIndices": [
+                  1,
+                  0
+                ],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 3,
+                "originNodeId": "n.zero",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 0,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 4,
+                "originNodeId": "n.debit",
+                "opcode": "select",
+                "operandIndices": [
+                  2,
+                  1,
+                  3
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 5,
+                "originNodeId": "n.remaining",
+                "opcode": "i64.add_checked",
+                "operandIndices": [
+                  0,
+                  4
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              }
+            ],
+            "outputs": {
+              "accepted": 2,
+              "available": 5,
+              "reserved": 4
+            }
+          },
+          "evidence": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "irRevision": "5c31100db236d8ef1f8716bf5dc46a08dbe9ed33372814b2984571a3e39652f4",
+            "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "encoderVersion": "kernel.v0.encoder.1",
+            "referenceVersion": "kernel.v0.reference.1",
+            "interpreterVersion": "kernel.v0.ir-interpreter.1",
+            "loweringVersion": "kernel.v0.lowering.1",
+            "solver": {
+              "version": "5.1.0",
+              "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+            },
+            "obligations": [
+              {
+                "name": "domain",
+                "queryDigest": "637adbc39f377106d955aec00c8c4d547950505f9426c959f60703b54eff75b8",
+                "status": "sat",
+                "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "counterexample",
+                "queryDigest": "09fec5433a9d4d86f8516b8cc809146f3c501d87bf515986ae1590777a3fbbd0",
+                "status": "sat",
+                "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "witness",
+                "queryDigest": "05642143048a123ace1aa35afb9cdeed51da8891cfa62dde2bec0c08303c007a",
+                "status": "sat",
+                "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (available quantity))\n(exit)\n",
+                "stdout": "sat\r\n((available 1)\r\n (quantity 1))\r\n",
+                "stderr": "",
+                "exitCode": 0
+              }
+            ]
+          },
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": {
+              "available": 1,
+              "quantity": 1
+            },
+            "allowedRepairs": []
+          },
+          "witness": {
+            "available": 1,
+            "quantity": 1
+          },
+          "witnessReplay": {
+            "output": {
+              "accepted": true,
+              "available": 2,
+              "reserved": 1
+            },
+            "trace": [
+              {
+                "nodeId": "n.available",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.quantity",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.enough",
+                "opcode": "i64.le",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 1,
+                  "number": 0,
+                  "boolean": true
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.zero",
+                "opcode": "i64.const",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 0,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.debit",
+                "opcode": "select",
+                "operands": [
+                  {
+                    "type": 1,
+                    "number": 0,
+                    "boolean": true
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 0,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.remaining",
+                "opcode": "i64.add_checked",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 0,
+                  "number": 2,
+                  "boolean": false
+                },
+                "errorCode": null
+              }
+            ],
+            "usedFuel": 6,
+            "error": null,
+            "success": true
+          },
+          "isVerified": false
+        },
+        "strictReserveOverflow": {
+          "status": 1,
+          "ir": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "instructions": [
+              {
+                "destinationIndex": 0,
+                "originNodeId": "n.available",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "state.available",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 1,
+                "originNodeId": "n.false",
+                "opcode": "bool.const",
+                "operandIndices": [],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": false
+              },
+              {
+                "destinationIndex": 2,
+                "originNodeId": "n.one",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 1,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 3,
+                "originNodeId": "n.overflow",
+                "opcode": "i64.add_checked",
+                "operandIndices": [
+                  0,
+                  2
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 4,
+                "originNodeId": "n.quantity",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "event.quantity",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 5,
+                "originNodeId": "n.enough",
+                "opcode": "i64.le",
+                "operandIndices": [
+                  4,
+                  0
+                ],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 6,
+                "originNodeId": "n.zero",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 0,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 7,
+                "originNodeId": "n.safezero",
+                "opcode": "select",
+                "operandIndices": [
+                  1,
+                  3,
+                  6
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 8,
+                "originNodeId": "n.debit",
+                "opcode": "select",
+                "operandIndices": [
+                  5,
+                  4,
+                  7
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 9,
+                "originNodeId": "n.remaining",
+                "opcode": "i64.sub_checked",
+                "operandIndices": [
+                  0,
+                  8
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              }
+            ],
+            "outputs": {
+              "accepted": 5,
+              "available": 9,
+              "reserved": 8
+            }
+          },
+          "evidence": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "irRevision": "0a219b1f281e3d5a0a1ba9a1f41c76dc96ae995bc60bd9f03dc705e9a372a579",
+            "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "encoderVersion": "kernel.v0.encoder.1",
+            "referenceVersion": "kernel.v0.reference.1",
+            "interpreterVersion": "kernel.v0.ir-interpreter.1",
+            "loweringVersion": "kernel.v0.lowering.1",
+            "solver": {
+              "version": "5.1.0",
+              "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+            },
+            "obligations": [
+              {
+                "name": "domain",
+                "queryDigest": "74b3922ffd4fa8a2bc898b792c039e94fe371eed557ac2055ff6a48465aa0c5f",
+                "status": "sat",
+                "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "counterexample",
+                "queryDigest": "cdbfa859fed75f0ffb47e0dedd5cc479ad1218ad665509a1e64ec0edebd3201d",
+                "status": "sat",
+                "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "witness",
+                "queryDigest": "3962c15c56991e3090d1590b7e54b3e380d1c45f46c1d769d98bc26fa9703ddd",
+                "status": "sat",
+                "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (available quantity))\n(exit)\n",
+                "stdout": "sat\r\n((available 9223372036854775807)\r\n (quantity 9223372036854775807))\r\n",
+                "stderr": "",
+                "exitCode": 0
+              }
+            ]
+          },
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": {
+              "available": 9223372036854775807,
+              "quantity": 9223372036854775807
+            },
+            "allowedRepairs": []
+          },
+          "witness": {
+            "available": 9223372036854775807,
+            "quantity": 9223372036854775807
+          },
+          "witnessReplay": {
+            "output": null,
+            "trace": [
+              {
+                "nodeId": "n.available",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 9223372036854775807,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.false",
+                "opcode": "bool.const",
+                "operands": [],
+                "value": {
+                  "type": 1,
+                  "number": 0,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.one",
+                "opcode": "i64.const",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.overflow",
+                "opcode": "i64.add_checked",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 9223372036854775807,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": null,
+                "errorCode": "ArithmeticOverflow"
+              }
+            ],
+            "usedFuel": 4,
+            "error": {
+              "schemaVersion": "kernel.v0",
+              "stage": "execution",
+              "code": "ArithmeticOverflow",
+              "entityId": "n.overflow",
+              "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+              "stateRevision": null,
+              "policyRevision": null,
+              "details": {},
+              "witness": {
+                "available": 9223372036854775807,
+                "quantity": 9223372036854775807
+              },
+              "allowedRepairs": []
+            },
+            "success": false
+          },
+          "isVerified": false
+        },
+        "arithmeticProbe": {
+          "status": 1,
+          "witness": 9223372036854775807,
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "1735f0680a11796ac433dae9138507606426e6be2fe612abb66c995a3d787277",
+              "status": "sat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "counterexample",
+              "queryDigest": "bac76f7d2b1f26515d8de5265a1ac635cdfea1e82411e54b4287c5f072b59d13",
+              "status": "sat",
+              "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "witness",
+              "queryDigest": "6fb5bdce35a1515363948823629064166d3f4fbdade4e0757b6139840c0f071a",
+              "status": "sat",
+              "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (x))\n(exit)\n",
+              "stdout": "sat\r\n((x 9223372036854775807))\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ],
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": null,
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {
+              "x": "9223372036854775807",
+              "operation": "i64.add_checked"
+            },
+            "witness": null,
+            "allowedRepairs": []
+          }
+        },
+        "impossibleDomain": {
+          "status": 4,
+          "witness": null,
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "1b534d4deef1372fa169f047a151177bf51b3c6bf159d3f325242641b3a2bb31",
+              "status": "unsat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x) (\u003C x 0)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "unsat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ],
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "DomainUnsatisfiable",
+            "entityId": null,
+            "programRevision": null,
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": null,
+            "allowedRepairs": []
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "solver-fail-closed-statuses",
+      "acceptanceCriteria": [
+        "AC3"
+      ],
+      "passed": true,
+      "assertions": 23,
+      "elapsedMilliseconds": 5.2863,
+      "evidence": {
+        "rejections": {
+          "unknown": "SolverUnknown",
+          "missing-status": "SolverMalformedResponse",
+          "crash": "SolverFailure",
+          "timeout": "SolverTimeout",
+          "multiple-statuses": "SolverMalformedResponse",
+          "solver-error": "SolverMalformedResponse"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "business-decisions-retry-restart",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC7",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 39,
+      "elapsedMilliseconds": 1025.7554,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\4e01b581e564465d994dd9be59adca5e\\kernel.sqlite",
+        "firstReceipt": {
+          "receiptId": "7b1426ca84941ef203dcda5f95d67c103923d0048819942458b45b0c544dd063",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-first",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 3
+          },
+          "eventDigest": "c124db81771b3f673cec0ced6f08f87bfc731e9bb9c38abea1f42cd287066d96",
+          "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+          "committedStateRevision": "9536ed3bc7dd654d98aa34dcaad1c25c704f7227e2c607ac0724357a4ea530f9",
+          "inputRef": "2d335ccc858d3664cc17f396208b73d73ed09939ee72035a7d335fb475545416",
+          "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+          "output": {
+            "accepted": true,
+            "available": 7,
+            "reserved": 3
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "forged-input-capability-and-token-owner",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 31,
+      "elapsedMilliseconds": 460.306,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\9c1c603f5b2a46aaabd9e4b5f3764564\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "sqlite-write-failures-roll-back",
+      "acceptanceCriteria": [
+        "AC7"
+      ],
+      "passed": true,
+      "assertions": 18,
+      "elapsedMilliseconds": 693.7787,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\ded5a6bf047649cea98ef59e087b5c6d\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "process-stop-before-after-commit",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 1452.0598,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\20ce65333d03495cacea3ab329f78dd1\\kernel.sqlite",
+        "BeforeCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<original-checkout>\\artifacts\\conformance-data\\823d2eb61a1c4cbc913ddd60356b77d7\\kernel.sqlite"
+        },
+        "AfterCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<original-checkout>\\artifacts\\conformance-data\\20ce65333d03495cacea3ab329f78dd1\\kernel.sqlite"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "concurrent-cas-and-same-event",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 21,
+      "elapsedMilliseconds": 730.0362,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\abb2c19dcaf245e89335e3de2e334620\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "commit-rechecks-program-policy-manifest",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 15,
+      "elapsedMilliseconds": 776.604,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\49fd278a687049e4b6b53d133630732b\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "snapshot-consistency-during-competing-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 436.1267,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\dd54e6ba12aa46469d571d0106217cdd\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "acl-update-serialized-with-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 6,
+      "elapsedMilliseconds": 227.9934,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\9b39e1834be0439e8ded27a85457854d\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "revoked-authorization-on-every-read",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 37,
+      "elapsedMilliseconds": 423.0474,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\3593f46b0d9340ae9f879af77d749241\\kernel.sqlite",
+        "readMethods": [
+          "Snapshot",
+          "unknown-Snapshot",
+          "Prepare-receipt",
+          "Commit-token",
+          "Replay",
+          "Explain-receipt",
+          "Explain-prepare",
+          "Explain-program",
+          "Patch-receipt"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "worker-timeout-eviction-and-epoch",
+      "acceptanceCriteria": [
+        "AC8",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 17,
+      "elapsedMilliseconds": 674.6064,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\27968fd62d614b35a63c804b40105dde\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "runtime-checks-detect-false-verification",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC4"
+      ],
+      "passed": true,
+      "assertions": 12,
+      "elapsedMilliseconds": 97.9705,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\99a053cef8ad49b2ae248c7661c64c0b\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "provenance-original-actor-survives-retry",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10"
+      ],
+      "passed": false,
+      "assertions": 4,
+      "elapsedMilliseconds": 449.1905,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\586393a729884f8b8686631fa28a56f4\\kernel.sqlite"
+      },
+      "failure": "System.Collections.Generic.KeyNotFoundException: The given key was not present in the dictionary.\r\n   at System.Text.Json.JsonElement.GetProperty(String propertyName)\r\n   at Kernel.Conformance.HostCases.Provenance(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 392\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-atomic-identity-retries",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": true,
+      "assertions": 20,
+      "elapsedMilliseconds": 791.0509,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\71f99c71c9ba40fc9f819a6f495a4552\\kernel.sqlite",
+        "noChangeReceipt": {
+          "receiptId": "1f4671e750af2674848df66e62150752c1476524fc8ccb98e67d1c4d66ca1dce",
+          "patchId": "patch-nochange",
+          "programId": "reserve",
+          "patchDigest": "5e51a9f023b1710339aa9846f4e5965b464fc5518f5a4124f42054826901ce50",
+          "previousProgramRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+          "status": "NoChange"
+        },
+        "appliedReceipt": {
+          "receiptId": "1b7f7a479d8f58d0dc1eebe5164f01380270110d66faa45b2518c756b67918c6",
+          "patchId": "patch-equivalent",
+          "programId": "reserve",
+          "patchDigest": "88e629db459266b38fc9721f08aa17715d3749fb56d0a09d0579ff50219b60c2",
+          "previousProgramRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "programRevision": "bfde0b79bf891b3a9ca78e69cbbd9b4fb6e8549c3a310e5864ea6a6cda874727",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "90667021519d991dd31b369e6e048a502446a2acd796333d5410c33fbc9d99d0",
+          "status": "Activated"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-rejection-and-tombstones",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": true,
+      "assertions": 52,
+      "elapsedMilliseconds": 1253.5275,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\77d455556d3547a0a7870e6b4de6663d\\kernel.sqlite",
+        "rejections": {
+          "stale-base": "ProgramConflict",
+          "stale-node": "NodeConflict",
+          "duplicate-operation": "DuplicatePatchTarget",
+          "remove-referenced": "DanglingReference",
+          "outside-prefix": "EditScopeDenied",
+          "foreign-node": "EditScopeDenied",
+          "unknown-opcode": "UnsupportedOpcode",
+          "changed-contract": "Counterexample",
+          "invalid-final-batch": "DanglingReference",
+          "changed-id": "StableIdRequired",
+          "stale-outputs": "OutputsConflict"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "patch-admission-trust-snapshot-races",
+      "acceptanceCriteria": [
+        "AC5",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 30,
+      "elapsedMilliseconds": 2566.7602,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\f11f7e5cbd7f423c9d8e485fbf5416eb\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-persisted-history-and-fuel",
+      "acceptanceCriteria": [
+        "AC9",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 85,
+      "elapsedMilliseconds": 337.7411,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\b7abce404890473c8347dafa298c6d7b\\kernel.sqlite",
+        "firstReceipt": {
+          "receiptId": "b5be5e1f0cecfb3a3a2374305247d4372fd84f7ce9a97300520d6169412488dd",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-1",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 3
+          },
+          "eventDigest": "e4fb5de824f6b86aedc77da8cf48fcb48c838894c4f3c6b1d275ee66e1adc82d",
+          "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+          "committedStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "inputRef": "9a9ade162f63e14e5457d518565c2d99d36ee209f63a82281d90400d86071e74",
+          "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+          "output": {
+            "accepted": true,
+            "available": 7,
+            "reserved": 3
+          }
+        },
+        "secondReceipt": {
+          "receiptId": "f398e973039b65cd72cc426a86b13c57e60260af4582a9c668ea067b7eea3879",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-2",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 2
+          },
+          "eventDigest": "e358467a69ed1fad958e50b37347f6e587242e53182d27a6e902003d3cd754f3",
+          "previousStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "committedStateRevision": "91ec7407d37fff682ee2bb76db0a2f22d1786eeb19d00583deded07eddc703c2",
+          "inputRef": "4dc7669429e5560c218ab13bcad40cdc4c63b303ec6c84295551fd2858ff12bf",
+          "outputRef": "885e4d13c9c0f7c69a803943e4764cdeac2c19bc65b8383fae676aec4e6e7742",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "033d68128e48bfc926bd210e6ad4dd41bad5291e1dc3cf3bde29a55b31089f9d",
+          "output": {
+            "accepted": true,
+            "available": 5,
+            "reserved": 2
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-missing-and-tampered-artifacts",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 64,
+      "elapsedMilliseconds": 3957.928,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\7bd2efae60c046e69cb25cc3b42f62bd\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-predecessor-and-state-chain",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 14,
+      "elapsedMilliseconds": 903.201,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\babcfe7f27a645f1938761045a4a7e9f\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "demo_and_restart_replay",
+      "acceptanceCriteria": [
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 14,
+      "elapsedMilliseconds": 1412.9186,
+      "evidence": {
+        "directory": "<original-checkout>\\artifacts\\cli-cases\\demo-7ba866745b2d4495b120a080f1e63f56",
+        "receiptId": "c54ea65f549955e202e01bd8c53094787467ed4105dcb44f3901822a7dbde550",
+        "jsonStdout": {
+          "schemaVersion": "kernel.v0",
+          "status": "Completed",
+          "eventId": "evt-001",
+          "receiptId": "c54ea65f549955e202e01bd8c53094787467ed4105dcb44f3901822a7dbde550",
+          "before": {
+            "resourceId": "item-001",
+            "available": "10",
+            "stateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+            "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+            "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+          },
+          "prepared": {
+            "status": "Prepared",
+            "prepared": {
+              "prepareId": "7e8df3ef5be5438daf2a33be002ed38c",
+              "resourceId": "item-001",
+              "eventId": "evt-001",
+              "oldAvailable": "10",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              },
+              "baseStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "fuelUsed": "6",
+              "fuelLimit": "128"
+            },
+            "receipt": null
+          },
+          "preview": {
+            "artifactId": "7e8df3ef5be5438daf2a33be002ed38c",
+            "status": "Prepared",
+            "text": "\u0420\u0435\u0441\u0443\u0440\u0441 item-001. \u0421\u043E\u0431\u044B\u0442\u0438\u0435 evt-001. \u0420\u0435\u0437\u0435\u0440\u0432: 3. \u041E\u0441\u0442\u0430\u0442\u043E\u043A: 10 \u2192 7.\n\u041A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 reserve.v0: \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u0434\u043B\u044F kernel.v0; \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0438 \u0443\u0441\u043B\u043E\u0432\u043D\u044B \u043A\u043E\u0440\u0440\u0435\u043A\u0442\u043D\u043E\u0441\u0442\u044C\u044E \u0434\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0433\u043E \u044F\u0434\u0440\u0430. \u0412\u043D\u0435\u0448\u043D\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F: 0. \u0412\u044B\u0447\u0438\u0441\u043B\u0435\u043D\u0438\u0435: 6/128.\n\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435: \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E, \u0437\u0430\u043F\u0438\u0441\u044C \u0435\u0449\u0451 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u0430.",
+            "details": {
+              "preview": {
+                "prepareId": "7e8df3ef5be5438daf2a33be002ed38c",
+                "resourceId": "item-001",
+                "eventId": "evt-001",
+                "oldAvailable": "10",
+                "output": {
+                  "accepted": true,
+                  "available": "7",
+                  "reserved": "3"
+                },
+                "baseStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+                "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+                "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+                "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+                "fuelUsed": "6",
+                "fuelLimit": "128"
+              },
+              "capability": {
+                "kind": "StateWrite",
+                "resourceId": "item-001"
+              },
+              "effects": []
+            }
+          },
+          "committed": {
+            "status": "Committed",
+            "receipt": {
+              "receiptId": "c54ea65f549955e202e01bd8c53094787467ed4105dcb44f3901822a7dbde550",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            }
+          },
+          "repeated": {
+            "status": "AlreadyCommitted",
+            "prepared": null,
+            "receipt": {
+              "receiptId": "c54ea65f549955e202e01bd8c53094787467ed4105dcb44f3901822a7dbde550",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            }
+          },
+          "after": {
+            "resourceId": "item-001",
+            "available": "7",
+            "stateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+            "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+            "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+          },
+          "replay": {
+            "status": "Replayed",
+            "receipt": {
+              "receiptId": "c54ea65f549955e202e01bd8c53094787467ed4105dcb44f3901822a7dbde550",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "ec47a01704e5e0f0e1082bf81e896fb8743521a87f7b9cbe51fe16a2b147415a",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u002290e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u00225ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            },
+            "output": {
+              "accepted": true,
+              "available": "7",
+              "reserved": "3"
+            },
+            "fuelUsed": "6",
+            "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927"
+          },
+          "program": {
+            "artifactId": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "status": "Active",
+            "text": "\u041F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u0430 reserve. \u0423\u0437\u043B\u043E\u0432: 6. \u0420\u0435\u0432\u0438\u0437\u0438\u044F b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe.\n\u041A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 reserve.v0 \u043F\u0440\u0438\u043D\u0430\u0434\u043B\u0435\u0436\u0438\u0442 host. \u0412\u043D\u0435\u0448\u043D\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F: 0.",
+            "details": {
+              "programJson": "{\u0022nodes\u0022:[{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022state.available\u0022,\u0022id\u0022:\u0022n.available\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.enough\u0022,\u0022n.quantity\u0022,\u0022n.zero\u0022],\u0022id\u0022:\u0022n.debit\u0022,\u0022op\u0022:\u0022select\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.quantity\u0022,\u0022n.available\u0022],\u0022id\u0022:\u0022n.enough\u0022,\u0022op\u0022:\u0022i64.le\u0022,\u0022type\u0022:\u0022Bool\u0022},{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022event.quantity\u0022,\u0022id\u0022:\u0022n.quantity\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.available\u0022,\u0022n.debit\u0022],\u0022id\u0022:\u0022n.remaining\u0022,\u0022op\u0022:\u0022i64.sub_checked\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[],\u0022id\u0022:\u0022n.zero\u0022,\u0022op\u0022:\u0022i64.const\u0022,\u0022type\u0022:\u0022I64\u0022,\u0022value\u0022:\u00220\u0022}],\u0022outputs\u0022:{\u0022accepted\u0022:\u0022n.enough\u0022,\u0022available\u0022:\u0022n.remaining\u0022,\u0022reserved\u0022:\u0022n.debit\u0022},\u0022profileId\u0022:\u0022reserve.v0\u0022,\u0022programId\u0022:\u0022reserve\u0022,\u0022schemaVersion\u0022:\u0022kernel.v0\u0022}",
+              "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "nodes": [
+                {
+                  "nodeId": "n.available",
+                  "nodeRevision": "dea5957ab9f0ef52e31317203856b9f543b2c30a3caf98dea3bacf4245efa145"
+                },
+                {
+                  "nodeId": "n.debit",
+                  "nodeRevision": "2102885246262c4d325758ca312fdce4abfdd04ec9ea0e5c8dc1f1778ddd609f"
+                },
+                {
+                  "nodeId": "n.enough",
+                  "nodeRevision": "ed8252ae61ee8226f5151fc630f5d26b7e54f803d401c84f44534e31cca2d142"
+                },
+                {
+                  "nodeId": "n.quantity",
+                  "nodeRevision": "0698e720a9ad931a7a261006c609bc78925354f658a9f6f54b146bf0e8a274d9"
+                },
+                {
+                  "nodeId": "n.remaining",
+                  "nodeRevision": "24050b95d397e2bd7deb0e62a2bc4a80e435b212792d32816b62f19ff5e0a16d"
+                },
+                {
+                  "nodeId": "n.zero",
+                  "nodeRevision": "8b97d2ef49d25242dfda4f57caf751a716cca130b942b77058859a261234023a"
+                }
+              ],
+              "outputsDigest": "e87e2193459ebb163f1627b080d5902c583d040e638f9f80f2bdec7d2f3b3966",
+              "editScope": {
+                "existingNodeIds": [
+                  "n.available",
+                  "n.debit",
+                  "n.enough",
+                  "n.quantity",
+                  "n.remaining",
+                  "n.zero"
+                ],
+                "addNodePrefix": "n.",
+                "allowOutputs": true
+              },
+              "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "policy": {
+                "resourceId": "item-001",
+                "grants": [
+                  {
+                    "principal": "agent",
+                    "rights": [
+                      "EditProgram",
+                      "ExecuteResource",
+                      "ReadProgram",
+                      "ReadResource",
+                      "ReplayResource",
+                      "StateWrite"
+                    ]
+                  }
+                ],
+                "editScope": {
+                  "existingNodeIds": [
+                    "n.available",
+                    "n.debit",
+                    "n.enough",
+                    "n.quantity",
+                    "n.remaining",
+                    "n.zero"
+                  ],
+                  "addNodePrefix": "n.",
+                  "allowOutputs": true
+                },
+                "stateWrite": true,
+                "limits": {
+                  "maxTransportBytes": "65536",
+                  "maxJsonDepth": "32",
+                  "maxNodes": "128",
+                  "fuel": "128",
+                  "solverTimeoutMilliseconds": "5000",
+                  "admissionTimeoutMilliseconds": "15000"
+                }
+              },
+              "manifest": {
+                "profileId": "reserve.v0",
+                "semanticsVersion": "kernel.v0",
+                "encoderVersion": "kernel.v0.encoder.1",
+                "referenceVersion": "kernel.v0.reference.1",
+                "interpreterVersion": "kernel.v0.ir-interpreter.1",
+                "loweringVersion": "kernel.v0.lowering.1",
+                "runtimeIdentityTag": "kernel.v0.host.1"
+              },
+              "effects": []
+            }
+          },
+          "externalEffects": []
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "jsonl_closed_boundary_and_commit",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC4",
+        "AC6",
+        "AC7",
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 36,
+      "elapsedMilliseconds": 1107.8362,
+      "evidence": {
+        "directory": "<original-checkout>\\artifacts\\cli-cases\\session-283c1efb31fa417eb273e03a7c335b37",
+        "receiptId": "76225f23f0c57e3fda40a0a3f580db18afe30fcbf739b26326e7f7578928d299",
+        "finalSnapshot": {
+          "resourceId": "item-001",
+          "available": "7",
+          "stateRevision": "131347916d39c4a28447d6ec1b4eab7cec258221cc12d8c45d6e1c4ba9f6c343",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "usage_errors_are_structured",
+      "acceptanceCriteria": [
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 4,
+      "elapsedMilliseconds": 178.1508,
+      "evidence": {},
+      "failure": null
+    }
+  ]
+}

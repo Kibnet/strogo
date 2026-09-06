@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "kernel.completion.v0",
+  "recordedAtUtc": "2026-09-03T23:05:40.0758856+00:00",
+  "commands": [
+    {
+      "command": "dotnet build -c Release --no-restore --nologo",
+      "exitCode": 0,
+      "warnings": 0,
+      "errors": 0,
+      "evidence": "Observed tool output from final build before full suite"
+    },
+    {
+      "command": "dotnet run --project tests/Kernel.Conformance -c Release --no-build -- --suite all --report artifacts/conformance-results.json",
+      "exitCode": 0,
+      "evidence": "artifacts/conformance-results.json"
+    },
+    {
+      "command": "dotnet run --project tests/Kernel.Conformance -c Release --no-build -- --suite core --z3 tools/does-not-exist.exe --report artifacts/conformance-negative.json",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "evidence": "artifacts/conformance-negative.json"
+    },
+    {
+      "command": "dotnet restore --locked-mode --nologo",
+      "exitCode": 0,
+      "evidence": "Observed tool output; all four projects restored"
+    },
+    {
+      "command": "dotnet run --project src/Kernel.Cli -c Release --no-build -- demo --directory artifacts/demo",
+      "exitCode": 0,
+      "evidence": "artifacts/demo/demo.json"
+    },
+    {
+      "command": "dotnet run --project src/Kernel.Cli -c Release --no-build -- replay --directory artifacts/demo --event evt-001",
+      "exitCode": 0,
+      "evidence": "Observed tool output: Replayed, available7, reserved3, no write"
+    }
+  ],
+  "conformance": {
+    "passed": true,
+    "cases": 29,
+    "assertions": 10904,
+    "failed": 0
+  },
+  "negativeRunner": {
+    "passed": false,
+    "failedCount": 1,
+    "expectedFailure": true
+  },
+  "runtimeIdentity": {
+    "coreAssemblyDigest": "90e9bfe5b0d66aecf97450d149cd11fe29ce5c3311fb8701d16f239e6fcc8650",
+    "encoderVersion": "kernel.v0.encoder.1",
+    "hostAssemblyDigest": "5ed5fda97f4939153be60fd68551d402b8d224dce96696ea79f76c36105c2473",
+    "interpreterVersion": "kernel.v0.ir-interpreter.1",
+    "loweringVersion": "kernel.v0.lowering.1",
+    "referenceVersion": "kernel.v0.reference.1",
+    "runtimeIdentityTag": "kernel.v0.host.1",
+    "semanticsVersion": "kernel.v0",
+    "solver": {
+      "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d",
+      "version": "5.1.0"
+    }
+  },
+  "runtimeIdentityMatchesFiles": true,
+  "evidenceFiles": [
+    {
+      "path": "artifacts/conformance-results.json",
+      "sha256": "17cfbfc8568b9cc578ac8a1af3e6bacf16e4a6e1f4e924e31c6b1bbf8c56faf8"
+    },
+    {
+      "path": "artifacts/conformance-negative.json",
+      "sha256": "5d6ccb79ec4748eb2caa8ed3028f87e5c8f0db7fe90ff46d7329e968baae61a5"
+    },
+    {
+      "path": "artifacts/review-regression-red.json",
+      "sha256": "1421ad08defd30e5fba4b0ae72b35445a6b6bd0450f39da925a43838d31688d1"
+    },
+    {
+      "path": "artifacts/review-regression-baseline.json",
+      "sha256": "7b09074b6dc72f11fc097d231553b6037fbae0609d0bf42c622720a1bbb34253"
+    },
+    {
+      "path": "artifacts/demo/demo.json",
+      "sha256": "0afe6561595080a582d44446bf6bdc223932e734cef14731b1c0eab8959ecac0"
+    }
+  ]
+}

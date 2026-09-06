@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "kernel.graph.v1",
+  "programId": "clone",
+  "profileId": "task-graph.clone.v1",
+  "steps": [
+    {
+      "id": "reachable",
+      "op": "task.reachable_contains",
+      "type": "ReachableTaskSet",
+      "args": [
+        "input.graph",
+        "input.sourceRootId"
+      ]
+    },
+    {
+      "id": "ids",
+      "op": "ids.require_fresh_bijection",
+      "type": "ValidatedFreshIds",
+      "args": [
+        "reachable",
+        "input.taskIdMap",
+        "input.criterionIdMap"
+      ]
+    },
+    {
+      "id": "tasks",
+      "op": "task.clone_reachable",
+      "type": "ClonedTaskSet",
+      "args": [
+        "input.graph",
+        "reachable",
+        "ids",
+        "input.dateDeltaMinutes"
+      ],
+      "policy": {
+        "copyPayload": true,
+        "copyRepeatRule": true,
+        "shiftStart": true,
+        "shiftDue": true,
+        "resetStatus": "Planned",
+        "resetHistory": true,
+        "resetCriteriaCompletion": true
+      }
+    },
+    {
+      "id": "contains",
+      "op": "edge.remap_internal",
+      "type": "ContainsEdgeSet",
+      "args": [
+        "input.graph",
+        "reachable",
+        "ids"
+      ],
+      "kind": "contains"
+    },
+    {
+      "id": "blocks",
+      "op": "edge.remap_internal",
+      "type": "BlocksEdgeSet",
+      "args": [
+        "input.graph",
+        "reachable",
+        "ids"
+      ],
+      "kind": "blocks"
+    },
+    {
+      "id": "patch",
+      "op": "graph.additions",
+      "type": "TaskGraphPatch",
+      "args": [
+        "tasks",
+        "contains",
+        "blocks"
+      ]
+    }
+  ],
+  "outputs": {
+    "result": "patch"
+  }
+}

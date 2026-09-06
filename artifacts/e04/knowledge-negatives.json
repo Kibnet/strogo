@@ -1,0 +1,23 @@
+{
+  "cases": [
+    {
+      "exitCode": 1,
+      "rejected": true,
+      "case": "wrong-claim",
+      "diagnostic": "Exception: <original-checkout>\\tools\\Check-KnowledgeSync.ps1:24\r\nLine |\r\n  24 |   if($hash -cne $e.claimSha256){throw \"Claim mismatch $($e.id)\"}\r\n     |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Claim mismatch K-E04-001"
+    },
+    {
+      "exitCode": 1,
+      "rejected": true,
+      "case": "missing-evidence",
+      "diagnostic": "fatal: path 'does-not-exist.md' does not exist in '34f9a3380e82412c1f30ba37066fb8348f5aa320'\r\nException: <original-checkout>\\tools\\Check-KnowledgeSync.ps1:33\r\nLine |\r\n  33 |     if($LASTEXITCODE -ne 0){throw \"Unresolvable evidence $ref\"}\r\n     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Unresolvable evidence does-not-exist.md"
+    },
+    {
+      "exitCode": 1,
+      "rejected": true,
+      "case": "empty-entries",
+      "diagnostic": "Exception: <original-checkout>\\tools\\Check-KnowledgeSync.ps1:5\r\nLine |\r\n   5 |  … ries -or @($m.entries).Count -eq 0){throw 'Empty knowledge manifest'}\r\n     |                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | Empty knowledge manifest"
+    }
+  ],
+  "passed": true
+}

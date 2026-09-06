@@ -1,0 +1,1572 @@
+{
+  "schemaVersion": "kernel.conformance.v0",
+  "suite": "all",
+  "runtime": ".NET 10.0.11",
+  "operatingSystem": "Microsoft Windows 10.0.22631",
+  "z3Path": null,
+  "generatedAtUtc": "2026-09-06T00:04:02.992604+00:00",
+  "passed": true,
+  "testCount": 29,
+  "assertionCount": 10904,
+  "passedCount": 29,
+  "failedCount": 0,
+  "results": [
+    {
+      "suite": "core",
+      "name": "canonical-bytes-and-identity",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 8,
+      "elapsedMilliseconds": 281.506,
+      "evidence": {
+        "canonicalProgram": "{\u0022nodes\u0022:[{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022state.available\u0022,\u0022id\u0022:\u0022n.available\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.enough\u0022,\u0022n.quantity\u0022,\u0022n.zero\u0022],\u0022id\u0022:\u0022n.debit\u0022,\u0022op\u0022:\u0022select\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.quantity\u0022,\u0022n.available\u0022],\u0022id\u0022:\u0022n.enough\u0022,\u0022op\u0022:\u0022i64.le\u0022,\u0022type\u0022:\u0022Bool\u0022},{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022event.quantity\u0022,\u0022id\u0022:\u0022n.quantity\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.available\u0022,\u0022n.debit\u0022],\u0022id\u0022:\u0022n.remaining\u0022,\u0022op\u0022:\u0022i64.sub_checked\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[],\u0022id\u0022:\u0022n.zero\u0022,\u0022op\u0022:\u0022i64.const\u0022,\u0022type\u0022:\u0022I64\u0022,\u0022value\u0022:\u00220\u0022}],\u0022outputs\u0022:{\u0022accepted\u0022:\u0022n.enough\u0022,\u0022available\u0022:\u0022n.remaining\u0022,\u0022reserved\u0022:\u0022n.debit\u0022},\u0022profileId\u0022:\u0022reserve.v0\u0022,\u0022programId\u0022:\u0022reserve\u0022,\u0022schemaVersion\u0022:\u0022kernel.v0\u0022}",
+        "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe"
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "strict-schema-and-graph-rejections",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC4",
+        "AC8"
+      ],
+      "passed": true,
+      "assertions": 55,
+      "elapsedMilliseconds": 25.7518,
+      "evidence": {
+        "rejections": {
+          "duplicate-top-key": "DuplicateField",
+          "duplicate-node-key": "DuplicateField",
+          "unknown-top-property": "SchemaInvalid",
+          "policy-in-program": "SchemaInvalid",
+          "manifest-in-program": "SchemaInvalid",
+          "unknown-node-property": "SchemaInvalid",
+          "negative-zero": "InvalidI64",
+          "numeric-i64": "SchemaInvalid",
+          "i64-leading-plus": "InvalidI64",
+          "i64-exponent": "InvalidI64",
+          "i64-leading-zero": "InvalidI64",
+          "i64-too-large": "InvalidI64",
+          "unknown-type": "UnsupportedType",
+          "non-ascii-id": "SchemaInvalid",
+          "wrong-profile": "ProfileMismatch",
+          "missing-field": "SchemaInvalid",
+          "unknown-input": "SchemaInvalid",
+          "io-opcode": "UnsupportedOpcode",
+          "dangling": "DanglingReference",
+          "cycle": "CycleDetected",
+          "dead": "UnreachableNode",
+          "duplicate-id": "DuplicateId",
+          "wrong-output-type": "TypeMismatch",
+          "wrong-operand-type": "TypeMismatch",
+          "wrong-arity": "ArityMismatch"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "checked-arithmetic-and-strict-select",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC8",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 97,
+      "elapsedMilliseconds": 56.0283,
+      "evidence": {
+        "boundaryVectors": 10
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "reserve-independent-business-grid",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 294,
+      "elapsedMilliseconds": 4.6531,
+      "evidence": {
+        "vectors": 42
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "seeded-200-dags-independent-oracle",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 9854,
+      "elapsedMilliseconds": 325.093,
+      "evidence": {
+        "seed": 20260904,
+        "graphs": 200,
+        "inputsPerGraph": 6,
+        "opcodes": [
+          "bool.and",
+          "bool.const",
+          "bool.not",
+          "bool.or",
+          "i64.add_checked",
+          "i64.const",
+          "i64.eq",
+          "i64.le",
+          "i64.sub_checked",
+          "input",
+          "select"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "ir-validation-rejects-invalid-input",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 5,
+      "elapsedMilliseconds": 2.1865,
+      "evidence": {},
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "real-z3-reserve-and-counterexample",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 18,
+      "elapsedMilliseconds": 3101.9142,
+      "evidence": {
+        "verified": {
+          "semanticsVersion": "kernel.v0",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRevision": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "encoderVersion": "kernel.v0.encoder.1",
+          "referenceVersion": "kernel.v0.reference.1",
+          "interpreterVersion": "kernel.v0.ir-interpreter.1",
+          "loweringVersion": "kernel.v0.lowering.1",
+          "solver": {
+            "version": "5.1.0",
+            "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+          },
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "e72daed9cdbf394d060e36a931b1f27b8e5996e9115cfb253858f357805c0b57",
+              "status": "sat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (- v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "counterexample",
+              "queryDigest": "5ca7e3707e1531f75403a24c49a8dc0c0c0f1f3a8dff815e8b2edce224162ca2",
+              "status": "unsat",
+              "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (- v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+              "stdout": "unsat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ]
+        },
+        "counterexample": {
+          "status": 1,
+          "ir": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "instructions": [
+              {
+                "destinationIndex": 0,
+                "originNodeId": "n.available",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "state.available",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 1,
+                "originNodeId": "n.quantity",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "event.quantity",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 2,
+                "originNodeId": "n.enough",
+                "opcode": "i64.le",
+                "operandIndices": [
+                  1,
+                  0
+                ],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 3,
+                "originNodeId": "n.zero",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 0,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 4,
+                "originNodeId": "n.debit",
+                "opcode": "select",
+                "operandIndices": [
+                  2,
+                  1,
+                  3
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 5,
+                "originNodeId": "n.remaining",
+                "opcode": "i64.add_checked",
+                "operandIndices": [
+                  0,
+                  4
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              }
+            ],
+            "outputs": {
+              "accepted": 2,
+              "available": 5,
+              "reserved": 4
+            }
+          },
+          "evidence": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "irRevision": "5c31100db236d8ef1f8716bf5dc46a08dbe9ed33372814b2984571a3e39652f4",
+            "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "encoderVersion": "kernel.v0.encoder.1",
+            "referenceVersion": "kernel.v0.reference.1",
+            "interpreterVersion": "kernel.v0.ir-interpreter.1",
+            "loweringVersion": "kernel.v0.lowering.1",
+            "solver": {
+              "version": "5.1.0",
+              "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+            },
+            "obligations": [
+              {
+                "name": "domain",
+                "queryDigest": "637adbc39f377106d955aec00c8c4d547950505f9426c959f60703b54eff75b8",
+                "status": "sat",
+                "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "counterexample",
+                "queryDigest": "09fec5433a9d4d86f8516b8cc809146f3c501d87bf515986ae1590777a3fbbd0",
+                "status": "sat",
+                "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "witness",
+                "queryDigest": "05642143048a123ace1aa35afb9cdeed51da8891cfa62dde2bec0c08303c007a",
+                "status": "sat",
+                "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Int quantity)\n(define-fun d1 () Bool true)\n(define-fun v2 () Bool (\u003C= v1 v0))\n(define-fun d2 () Bool (and d1 d0))\n(define-fun v3 () Int 0)\n(define-fun d3 () Bool true)\n(define-fun v4 () Int (ite v2 v1 v3))\n(define-fun d4 () Bool (and d2 d1 d3))\n(define-fun v5 () Int (\u002B v0 v4))\n(define-fun d5 () Bool (and d0 d4 (and (\u003C= (- 9223372036854775808) v5) (\u003C= v5 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5)) (not (and (\u003C= 0 v5) (\u003C= 0 v4) (= (\u002B v5 v4) available) (= v2 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v4 quantity) (= v5 (- available quantity))) (and (= v4 0) (= v5 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (available quantity))\n(exit)\n",
+                "stdout": "sat\r\n((available 1)\r\n (quantity 1))\r\n",
+                "stderr": "",
+                "exitCode": 0
+              }
+            ]
+          },
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": {
+              "available": 1,
+              "quantity": 1
+            },
+            "allowedRepairs": []
+          },
+          "witness": {
+            "available": 1,
+            "quantity": 1
+          },
+          "witnessReplay": {
+            "output": {
+              "accepted": true,
+              "available": 2,
+              "reserved": 1
+            },
+            "trace": [
+              {
+                "nodeId": "n.available",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.quantity",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.enough",
+                "opcode": "i64.le",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 1,
+                  "number": 0,
+                  "boolean": true
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.zero",
+                "opcode": "i64.const",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 0,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.debit",
+                "opcode": "select",
+                "operands": [
+                  {
+                    "type": 1,
+                    "number": 0,
+                    "boolean": true
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 0,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.remaining",
+                "opcode": "i64.add_checked",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": {
+                  "type": 0,
+                  "number": 2,
+                  "boolean": false
+                },
+                "errorCode": null
+              }
+            ],
+            "usedFuel": 6,
+            "error": null,
+            "success": true
+          },
+          "isVerified": false
+        },
+        "strictReserveOverflow": {
+          "status": 1,
+          "ir": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "instructions": [
+              {
+                "destinationIndex": 0,
+                "originNodeId": "n.available",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "state.available",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 1,
+                "originNodeId": "n.false",
+                "opcode": "bool.const",
+                "operandIndices": [],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": false
+              },
+              {
+                "destinationIndex": 2,
+                "originNodeId": "n.one",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 1,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 3,
+                "originNodeId": "n.overflow",
+                "opcode": "i64.add_checked",
+                "operandIndices": [
+                  0,
+                  2
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 4,
+                "originNodeId": "n.quantity",
+                "opcode": "input",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": "event.quantity",
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 5,
+                "originNodeId": "n.enough",
+                "opcode": "i64.le",
+                "operandIndices": [
+                  4,
+                  0
+                ],
+                "type": 1,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 6,
+                "originNodeId": "n.zero",
+                "opcode": "i64.const",
+                "operandIndices": [],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": 0,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 7,
+                "originNodeId": "n.safezero",
+                "opcode": "select",
+                "operandIndices": [
+                  1,
+                  3,
+                  6
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 8,
+                "originNodeId": "n.debit",
+                "opcode": "select",
+                "operandIndices": [
+                  5,
+                  4,
+                  7
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              },
+              {
+                "destinationIndex": 9,
+                "originNodeId": "n.remaining",
+                "opcode": "i64.sub_checked",
+                "operandIndices": [
+                  0,
+                  8
+                ],
+                "type": 0,
+                "fieldId": null,
+                "i64Value": null,
+                "boolValue": null
+              }
+            ],
+            "outputs": {
+              "accepted": 5,
+              "available": 9,
+              "reserved": 8
+            }
+          },
+          "evidence": {
+            "semanticsVersion": "kernel.v0",
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "irRevision": "0a219b1f281e3d5a0a1ba9a1f41c76dc96ae995bc60bd9f03dc705e9a372a579",
+            "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "manifestRevision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "encoderVersion": "kernel.v0.encoder.1",
+            "referenceVersion": "kernel.v0.reference.1",
+            "interpreterVersion": "kernel.v0.ir-interpreter.1",
+            "loweringVersion": "kernel.v0.lowering.1",
+            "solver": {
+              "version": "5.1.0",
+              "binaryDigest": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+            },
+            "obligations": [
+              {
+                "name": "domain",
+                "queryDigest": "74b3922ffd4fa8a2bc898b792c039e94fe371eed557ac2055ff6a48465aa0c5f",
+                "status": "sat",
+                "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "counterexample",
+                "queryDigest": "cdbfa859fed75f0ffb47e0dedd5cc479ad1218ad665509a1e64ec0edebd3201d",
+                "status": "sat",
+                "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+                "stdout": "sat\r\n",
+                "stderr": "",
+                "exitCode": 0
+              },
+              {
+                "name": "witness",
+                "queryDigest": "3962c15c56991e3090d1590b7e54b3e380d1c45f46c1d769d98bc26fa9703ddd",
+                "status": "sat",
+                "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const available Int)\n(declare-const quantity Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) available) (\u003C= available 9223372036854775807)) (and (\u003C= (- 9223372036854775808) quantity) (\u003C= quantity 9223372036854775807)) (\u003C= 0 available) (\u003C 0 quantity)))\n(define-fun v0 () Int available)\n(define-fun d0 () Bool true)\n(define-fun v1 () Bool false)\n(define-fun d1 () Bool true)\n(define-fun v2 () Int 1)\n(define-fun d2 () Bool true)\n(define-fun v3 () Int (\u002B v0 v2))\n(define-fun d3 () Bool (and d0 d2 (and (\u003C= (- 9223372036854775808) v3) (\u003C= v3 9223372036854775807))))\n(define-fun v4 () Int quantity)\n(define-fun d4 () Bool true)\n(define-fun v5 () Bool (\u003C= v4 v0))\n(define-fun d5 () Bool (and d4 d0))\n(define-fun v6 () Int 0)\n(define-fun d6 () Bool true)\n(define-fun v7 () Int (ite v1 v3 v6))\n(define-fun d7 () Bool (and d1 d3 d6))\n(define-fun v8 () Int (ite v5 v4 v7))\n(define-fun d8 () Bool (and d5 d4 d7))\n(define-fun v9 () Int (- v0 v8))\n(define-fun d9 () Bool (and d0 d8 (and (\u003C= (- 9223372036854775808) v9) (\u003C= v9 9223372036854775807))))\n(define-fun failure () Bool (or (not (and d0 d1 d2 d3 d4 d5 d6 d7 d8 d9)) (not (and (\u003C= 0 v9) (\u003C= 0 v8) (= (\u002B v9 v8) available) (= v5 (\u003C= quantity available)) (ite (\u003C= quantity available) (and (= v8 quantity) (= v9 (- available quantity))) (and (= v8 0) (= v9 available)))))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (available quantity))\n(exit)\n",
+                "stdout": "sat\r\n((available 9223372036854775807)\r\n (quantity 9223372036854775807))\r\n",
+                "stderr": "",
+                "exitCode": 0
+              }
+            ]
+          },
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": {
+              "available": 9223372036854775807,
+              "quantity": 9223372036854775807
+            },
+            "allowedRepairs": []
+          },
+          "witness": {
+            "available": 9223372036854775807,
+            "quantity": 9223372036854775807
+          },
+          "witnessReplay": {
+            "output": null,
+            "trace": [
+              {
+                "nodeId": "n.available",
+                "opcode": "input",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 9223372036854775807,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.false",
+                "opcode": "bool.const",
+                "operands": [],
+                "value": {
+                  "type": 1,
+                  "number": 0,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.one",
+                "opcode": "i64.const",
+                "operands": [],
+                "value": {
+                  "type": 0,
+                  "number": 1,
+                  "boolean": false
+                },
+                "errorCode": null
+              },
+              {
+                "nodeId": "n.overflow",
+                "opcode": "i64.add_checked",
+                "operands": [
+                  {
+                    "type": 0,
+                    "number": 9223372036854775807,
+                    "boolean": false
+                  },
+                  {
+                    "type": 0,
+                    "number": 1,
+                    "boolean": false
+                  }
+                ],
+                "value": null,
+                "errorCode": "ArithmeticOverflow"
+              }
+            ],
+            "usedFuel": 4,
+            "error": {
+              "schemaVersion": "kernel.v0",
+              "stage": "execution",
+              "code": "ArithmeticOverflow",
+              "entityId": "n.overflow",
+              "programRevision": "73624245b5b53f78587a81691115107db9d69144ab5e15a54deb8ae2465cd69d",
+              "stateRevision": null,
+              "policyRevision": null,
+              "details": {},
+              "witness": {
+                "available": 9223372036854775807,
+                "quantity": 9223372036854775807
+              },
+              "allowedRepairs": []
+            },
+            "success": false
+          },
+          "isVerified": false
+        },
+        "arithmeticProbe": {
+          "status": 1,
+          "witness": 9223372036854775807,
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "1735f0680a11796ac433dae9138507606426e6be2fe612abb66c995a3d787277",
+              "status": "sat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "counterexample",
+              "queryDigest": "bac76f7d2b1f26515d8de5265a1ac635cdfea1e82411e54b4287c5f072b59d13",
+              "status": "sat",
+              "query": "; obligation:counterexample\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(assert failure)\n(check-sat)\n(exit)\n",
+              "stdout": "sat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            },
+            {
+              "name": "witness",
+              "queryDigest": "6fb5bdce35a1515363948823629064166d3f4fbdade4e0757b6139840c0f071a",
+              "status": "sat",
+              "query": "; obligation:witness\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(assert failure)\n(check-sat)\n(get-value (x))\n(exit)\n",
+              "stdout": "sat\r\n((x 9223372036854775807))\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ],
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "Counterexample",
+            "entityId": null,
+            "programRevision": null,
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {
+              "x": "9223372036854775807",
+              "operation": "i64.add_checked"
+            },
+            "witness": null,
+            "allowedRepairs": []
+          }
+        },
+        "impossibleDomain": {
+          "status": 4,
+          "witness": null,
+          "obligations": [
+            {
+              "name": "domain",
+              "queryDigest": "1b534d4deef1372fa169f047a151177bf51b3c6bf159d3f325242641b3a2bb31",
+              "status": "unsat",
+              "query": "; obligation:domain\n(set-logic QF_LIA)\n(set-option :produce-models true)\n(declare-const x Int)\n(define-fun domain () Bool (and (and (\u003C= (- 9223372036854775808) x) (\u003C= x 9223372036854775807)) (\u003C 0 x) (\u003C x 0)))\n(define-fun result () Int (\u002B x 1))\n(define-fun failure () Bool (or (not (and (\u003C= (- 9223372036854775808) result) (\u003C= result 9223372036854775807))) (not (\u003E result x))))\n(assert domain)\n(check-sat)\n(exit)\n",
+              "stdout": "unsat\r\n",
+              "stderr": "",
+              "exitCode": 0
+            }
+          ],
+          "error": {
+            "schemaVersion": "kernel.v0",
+            "stage": "verification",
+            "code": "DomainUnsatisfiable",
+            "entityId": null,
+            "programRevision": null,
+            "stateRevision": null,
+            "policyRevision": null,
+            "details": {},
+            "witness": null,
+            "allowedRepairs": []
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "solver-fail-closed-statuses",
+      "acceptanceCriteria": [
+        "AC3"
+      ],
+      "passed": true,
+      "assertions": 23,
+      "elapsedMilliseconds": 33.2784,
+      "evidence": {
+        "rejections": {
+          "unknown": "SolverUnknown",
+          "missing-status": "SolverMalformedResponse",
+          "crash": "SolverFailure",
+          "timeout": "SolverTimeout",
+          "multiple-statuses": "SolverMalformedResponse",
+          "solver-error": "SolverMalformedResponse"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "business-decisions-retry-restart",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC7",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 39,
+      "elapsedMilliseconds": 2004.674,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\6e3a0e3fe37748d3b7094ebda0f78147\\kernel.sqlite",
+        "firstReceipt": {
+          "receiptId": "4e2f1b7d9956dfceead551cb25733895106e5c1adffcd3c784a07e8fe290f490",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-first",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 3
+          },
+          "eventDigest": "c124db81771b3f673cec0ced6f08f87bfc731e9bb9c38abea1f42cd287066d96",
+          "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+          "committedStateRevision": "9536ed3bc7dd654d98aa34dcaad1c25c704f7227e2c607ac0724357a4ea530f9",
+          "inputRef": "2d335ccc858d3664cc17f396208b73d73ed09939ee72035a7d335fb475545416",
+          "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+          "output": {
+            "accepted": true,
+            "available": 7,
+            "reserved": 3
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "forged-input-capability-and-token-owner",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 31,
+      "elapsedMilliseconds": 1470.1585,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\ab08e970d35645038b6b84c7a3179992\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "sqlite-write-failures-roll-back",
+      "acceptanceCriteria": [
+        "AC7"
+      ],
+      "passed": true,
+      "assertions": 18,
+      "elapsedMilliseconds": 1504.6586,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\599608fc5a6d41c8b5664f654b29ae2c\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "process-stop-before-after-commit",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 2150.8809,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\200ebe96270049c6ab686229c5732c80\\kernel.sqlite",
+        "BeforeCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<validation-checkout>\\artifacts\\conformance-data\\09c67b4b706945288446e852216fed7e\\kernel.sqlite"
+        },
+        "AfterCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<validation-checkout>\\artifacts\\conformance-data\\200ebe96270049c6ab686229c5732c80\\kernel.sqlite"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "concurrent-cas-and-same-event",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 21,
+      "elapsedMilliseconds": 1267.4602,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\bf23e0ec1d054b42b857ea7c91adb81d\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "commit-rechecks-program-policy-manifest",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 15,
+      "elapsedMilliseconds": 1086.104,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\86814d5167e64c6883a6bd37b5ba1c7d\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "snapshot-consistency-during-competing-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 664.5997,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\5b3c7e9d700b4c68bd512b1c65912eab\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "acl-update-serialized-with-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 6,
+      "elapsedMilliseconds": 278.4482,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\c8ce2e12d56349ca9901c92468d44b44\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "revoked-authorization-on-every-read",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 37,
+      "elapsedMilliseconds": 595.8804,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\ddf3fdb6808e425eaebefb1c70fd31f4\\kernel.sqlite",
+        "readMethods": [
+          "Snapshot",
+          "unknown-Snapshot",
+          "Prepare-receipt",
+          "Commit-token",
+          "Replay",
+          "Explain-receipt",
+          "Explain-prepare",
+          "Explain-program",
+          "Patch-receipt"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "worker-timeout-eviction-and-epoch",
+      "acceptanceCriteria": [
+        "AC8",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 17,
+      "elapsedMilliseconds": 1011.4964,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\df3f5563ce9b4b22bbc18ec6861549c6\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "runtime-checks-detect-false-verification",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC4"
+      ],
+      "passed": true,
+      "assertions": 12,
+      "elapsedMilliseconds": 102.4464,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\ddee7e1bf139476ebc0143e895f62e86\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "provenance-original-actor-survives-retry",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10"
+      ],
+      "passed": true,
+      "assertions": 15,
+      "elapsedMilliseconds": 594.4197,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\ccc4412bd305490aa8485cfc0d4bf7de\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-atomic-identity-retries",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": true,
+      "assertions": 20,
+      "elapsedMilliseconds": 934.3543,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\6ff95dd9b08d4e05a64aa0b2321ac2e6\\kernel.sqlite",
+        "noChangeReceipt": {
+          "receiptId": "06fcc17a99a254fe041438c975e340adda58009f4e3f6ddbcdd9053a12d0a33f",
+          "patchId": "patch-nochange",
+          "programId": "reserve",
+          "patchDigest": "5e51a9f023b1710339aa9846f4e5965b464fc5518f5a4124f42054826901ce50",
+          "previousProgramRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+          "status": "NoChange"
+        },
+        "appliedReceipt": {
+          "receiptId": "28f8f9e19db338720f38ea70f7d5e681fae9cbfa1c7ea0d928638d1c7855e431",
+          "patchId": "patch-equivalent",
+          "programId": "reserve",
+          "patchDigest": "88e629db459266b38fc9721f08aa17715d3749fb56d0a09d0579ff50219b60c2",
+          "previousProgramRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "programRevision": "bfde0b79bf891b3a9ca78e69cbbd9b4fb6e8549c3a310e5864ea6a6cda874727",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "6265e78f3f34a2fd9bbc5a797e57780d7eb87bdd9ecf6d630f153f00c70eff8c",
+          "status": "Activated"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-rejection-and-tombstones",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": true,
+      "assertions": 52,
+      "elapsedMilliseconds": 1467.0841,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\245271e8645749dba0705b5f57a296fa\\kernel.sqlite",
+        "rejections": {
+          "stale-base": "ProgramConflict",
+          "stale-node": "NodeConflict",
+          "duplicate-operation": "DuplicatePatchTarget",
+          "remove-referenced": "DanglingReference",
+          "outside-prefix": "EditScopeDenied",
+          "foreign-node": "EditScopeDenied",
+          "unknown-opcode": "UnsupportedOpcode",
+          "changed-contract": "Counterexample",
+          "invalid-final-batch": "DanglingReference",
+          "changed-id": "StableIdRequired",
+          "stale-outputs": "OutputsConflict"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "patch-admission-trust-snapshot-races",
+      "acceptanceCriteria": [
+        "AC5",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 30,
+      "elapsedMilliseconds": 3075.0925,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\25b38df785a94d3f9faa23f50c822165\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-persisted-history-and-fuel",
+      "acceptanceCriteria": [
+        "AC9",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 85,
+      "elapsedMilliseconds": 346.6123,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\932967fb70bb43ffbee7ea6ee0dea90d\\kernel.sqlite",
+        "firstReceipt": {
+          "receiptId": "43350fcf48a7661c1920ee3d321c8306c9036d7eaa8b506428dc0c4d7f481ed9",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-1",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 3
+          },
+          "eventDigest": "e4fb5de824f6b86aedc77da8cf48fcb48c838894c4f3c6b1d275ee66e1adc82d",
+          "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+          "committedStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "inputRef": "9a9ade162f63e14e5457d518565c2d99d36ee209f63a82281d90400d86071e74",
+          "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+          "output": {
+            "accepted": true,
+            "available": 7,
+            "reserved": 3
+          }
+        },
+        "secondReceipt": {
+          "receiptId": "f837a745b9dfa0c5267e9cc863aa216d42ee2dea53ef24e9a09030708e714b32",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-2",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 2
+          },
+          "eventDigest": "e358467a69ed1fad958e50b37347f6e587242e53182d27a6e902003d3cd754f3",
+          "previousStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "committedStateRevision": "91ec7407d37fff682ee2bb76db0a2f22d1786eeb19d00583deded07eddc703c2",
+          "inputRef": "4dc7669429e5560c218ab13bcad40cdc4c63b303ec6c84295551fd2858ff12bf",
+          "outputRef": "885e4d13c9c0f7c69a803943e4764cdeac2c19bc65b8383fae676aec4e6e7742",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "033d68128e48bfc926bd210e6ad4dd41bad5291e1dc3cf3bde29a55b31089f9d",
+          "output": {
+            "accepted": true,
+            "available": 5,
+            "reserved": 2
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-missing-and-tampered-artifacts",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 64,
+      "elapsedMilliseconds": 4506.3837,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\ca9ce4f7aa564a7a9cc4e204254d8d7e\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-predecessor-and-state-chain",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 14,
+      "elapsedMilliseconds": 1722.8089,
+      "evidence": {
+        "database": "<validation-checkout>\\artifacts\\conformance-data\\f22fed5148f94730a2478041126d485e\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "demo_and_restart_replay",
+      "acceptanceCriteria": [
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 14,
+      "elapsedMilliseconds": 3454.4299,
+      "evidence": {
+        "directory": "<validation-checkout>\\artifacts\\cli-cases\\demo-10d75436a83f4213afd90d6fa453748d",
+        "receiptId": "8359082a34413c5e2b4996cde6904b06b7e780999db983e800f7026691c6ea46",
+        "jsonStdout": {
+          "schemaVersion": "kernel.v0",
+          "status": "Completed",
+          "eventId": "evt-001",
+          "receiptId": "8359082a34413c5e2b4996cde6904b06b7e780999db983e800f7026691c6ea46",
+          "before": {
+            "resourceId": "item-001",
+            "available": "10",
+            "stateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+            "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+            "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+          },
+          "prepared": {
+            "status": "Prepared",
+            "prepared": {
+              "prepareId": "a3f8d0e0284f4c90906ee08446042bb4",
+              "resourceId": "item-001",
+              "eventId": "evt-001",
+              "oldAvailable": "10",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              },
+              "baseStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "fuelUsed": "6",
+              "fuelLimit": "128"
+            },
+            "receipt": null
+          },
+          "preview": {
+            "artifactId": "a3f8d0e0284f4c90906ee08446042bb4",
+            "status": "Prepared",
+            "text": "\u0420\u0435\u0441\u0443\u0440\u0441 item-001. \u0421\u043E\u0431\u044B\u0442\u0438\u0435 evt-001. \u0420\u0435\u0437\u0435\u0440\u0432: 3. \u041E\u0441\u0442\u0430\u0442\u043E\u043A: 10 \u2192 7.\n\u041A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 reserve.v0: \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D \u0434\u043B\u044F kernel.v0; \u0433\u0430\u0440\u0430\u043D\u0442\u0438\u0438 \u0443\u0441\u043B\u043E\u0432\u043D\u044B \u043A\u043E\u0440\u0440\u0435\u043A\u0442\u043D\u043E\u0441\u0442\u044C\u044E \u0434\u043E\u0432\u0435\u0440\u0435\u043D\u043D\u043E\u0433\u043E \u044F\u0434\u0440\u0430. \u0412\u043D\u0435\u0448\u043D\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F: 0. \u0412\u044B\u0447\u0438\u0441\u043B\u0435\u043D\u0438\u0435: 6/128.\n\u0421\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u0435: \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043B\u0435\u043D\u043E, \u0437\u0430\u043F\u0438\u0441\u044C \u0435\u0449\u0451 \u043D\u0435 \u0432\u044B\u043F\u043E\u043B\u043D\u0435\u043D\u0430.",
+            "details": {
+              "preview": {
+                "prepareId": "a3f8d0e0284f4c90906ee08446042bb4",
+                "resourceId": "item-001",
+                "eventId": "evt-001",
+                "oldAvailable": "10",
+                "output": {
+                  "accepted": true,
+                  "available": "7",
+                  "reserved": "3"
+                },
+                "baseStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+                "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+                "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+                "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+                "fuelUsed": "6",
+                "fuelLimit": "128"
+              },
+              "capability": {
+                "kind": "StateWrite",
+                "resourceId": "item-001"
+              },
+              "effects": []
+            }
+          },
+          "committed": {
+            "status": "Committed",
+            "receipt": {
+              "receiptId": "8359082a34413c5e2b4996cde6904b06b7e780999db983e800f7026691c6ea46",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            }
+          },
+          "repeated": {
+            "status": "AlreadyCommitted",
+            "prepared": null,
+            "receipt": {
+              "receiptId": "8359082a34413c5e2b4996cde6904b06b7e780999db983e800f7026691c6ea46",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            }
+          },
+          "after": {
+            "resourceId": "item-001",
+            "available": "7",
+            "stateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+            "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+            "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+          },
+          "replay": {
+            "status": "Replayed",
+            "receipt": {
+              "receiptId": "8359082a34413c5e2b4996cde6904b06b7e780999db983e800f7026691c6ea46",
+              "resourceId": "item-001",
+              "event": {
+                "eventId": "evt-001",
+                "resourceId": "item-001",
+                "kind": "reserve",
+                "quantity": "3"
+              },
+              "eventDigest": "3d5757ac8bc16a74913d7fb0369d0d789d3136aa1a19d1c801ee85717ab312ad",
+              "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+              "committedStateRevision": "ab869d350165f75030cdc96f1afb3430190cf168a89e6a4596ef8946fe68e898",
+              "inputRef": "0a3c3bf44500bcc533a4f45e3d6921e1ffde6fc8af3bc2f59d43fc2ada986a50",
+              "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+              "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+              "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "admissionRef": "c4b929bda819ee550b58b9dd7a8a7cad1d4fff8a3d4d6ef9b18d2e1a2ec18bf3",
+              "semanticsVersion": "kernel.v0",
+              "runtimeIdentity": "{\u0022coreAssemblyDigest\u0022:\u00224b4c9838bdf9596925bf9194ba6b88039c5d4a885577412b71dfd05674e5b0e8\u0022,\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022hostAssemblyDigest\u0022:\u0022df614bb24f86fc419a96738485e280cdf487a6898623d14e98c8a7bbadac76fc\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+              "fuelUsed": "6",
+              "fuelLimit": "128",
+              "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+              "output": {
+                "accepted": true,
+                "available": "7",
+                "reserved": "3"
+              }
+            },
+            "output": {
+              "accepted": true,
+              "available": "7",
+              "reserved": "3"
+            },
+            "fuelUsed": "6",
+            "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927"
+          },
+          "program": {
+            "artifactId": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+            "status": "Active",
+            "text": "\u041F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u0430 reserve. \u0423\u0437\u043B\u043E\u0432: 6. \u0420\u0435\u0432\u0438\u0437\u0438\u044F b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe.\n\u041A\u043E\u043D\u0442\u0440\u0430\u043A\u0442 reserve.v0 \u043F\u0440\u0438\u043D\u0430\u0434\u043B\u0435\u0436\u0438\u0442 host. \u0412\u043D\u0435\u0448\u043D\u0438\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F: 0.",
+            "details": {
+              "programJson": "{\u0022nodes\u0022:[{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022state.available\u0022,\u0022id\u0022:\u0022n.available\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.enough\u0022,\u0022n.quantity\u0022,\u0022n.zero\u0022],\u0022id\u0022:\u0022n.debit\u0022,\u0022op\u0022:\u0022select\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.quantity\u0022,\u0022n.available\u0022],\u0022id\u0022:\u0022n.enough\u0022,\u0022op\u0022:\u0022i64.le\u0022,\u0022type\u0022:\u0022Bool\u0022},{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022event.quantity\u0022,\u0022id\u0022:\u0022n.quantity\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.available\u0022,\u0022n.debit\u0022],\u0022id\u0022:\u0022n.remaining\u0022,\u0022op\u0022:\u0022i64.sub_checked\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[],\u0022id\u0022:\u0022n.zero\u0022,\u0022op\u0022:\u0022i64.const\u0022,\u0022type\u0022:\u0022I64\u0022,\u0022value\u0022:\u00220\u0022}],\u0022outputs\u0022:{\u0022accepted\u0022:\u0022n.enough\u0022,\u0022available\u0022:\u0022n.remaining\u0022,\u0022reserved\u0022:\u0022n.debit\u0022},\u0022profileId\u0022:\u0022reserve.v0\u0022,\u0022programId\u0022:\u0022reserve\u0022,\u0022schemaVersion\u0022:\u0022kernel.v0\u0022}",
+              "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+              "nodes": [
+                {
+                  "nodeId": "n.available",
+                  "nodeRevision": "dea5957ab9f0ef52e31317203856b9f543b2c30a3caf98dea3bacf4245efa145"
+                },
+                {
+                  "nodeId": "n.debit",
+                  "nodeRevision": "2102885246262c4d325758ca312fdce4abfdd04ec9ea0e5c8dc1f1778ddd609f"
+                },
+                {
+                  "nodeId": "n.enough",
+                  "nodeRevision": "ed8252ae61ee8226f5151fc630f5d26b7e54f803d401c84f44534e31cca2d142"
+                },
+                {
+                  "nodeId": "n.quantity",
+                  "nodeRevision": "0698e720a9ad931a7a261006c609bc78925354f658a9f6f54b146bf0e8a274d9"
+                },
+                {
+                  "nodeId": "n.remaining",
+                  "nodeRevision": "24050b95d397e2bd7deb0e62a2bc4a80e435b212792d32816b62f19ff5e0a16d"
+                },
+                {
+                  "nodeId": "n.zero",
+                  "nodeRevision": "8b97d2ef49d25242dfda4f57caf751a716cca130b942b77058859a261234023a"
+                }
+              ],
+              "outputsDigest": "e87e2193459ebb163f1627b080d5902c583d040e638f9f80f2bdec7d2f3b3966",
+              "editScope": {
+                "existingNodeIds": [
+                  "n.available",
+                  "n.debit",
+                  "n.enough",
+                  "n.quantity",
+                  "n.remaining",
+                  "n.zero"
+                ],
+                "addNodePrefix": "n.",
+                "allowOutputs": true
+              },
+              "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+              "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+              "policy": {
+                "resourceId": "item-001",
+                "grants": [
+                  {
+                    "principal": "agent",
+                    "rights": [
+                      "EditProgram",
+                      "ExecuteResource",
+                      "ReadProgram",
+                      "ReadResource",
+                      "ReplayResource",
+                      "StateWrite"
+                    ]
+                  }
+                ],
+                "editScope": {
+                  "existingNodeIds": [
+                    "n.available",
+                    "n.debit",
+                    "n.enough",
+                    "n.quantity",
+                    "n.remaining",
+                    "n.zero"
+                  ],
+                  "addNodePrefix": "n.",
+                  "allowOutputs": true
+                },
+                "stateWrite": true,
+                "limits": {
+                  "maxTransportBytes": "65536",
+                  "maxJsonDepth": "32",
+                  "maxNodes": "128",
+                  "fuel": "128",
+                  "solverTimeoutMilliseconds": "5000",
+                  "admissionTimeoutMilliseconds": "15000"
+                }
+              },
+              "manifest": {
+                "profileId": "reserve.v0",
+                "semanticsVersion": "kernel.v0",
+                "encoderVersion": "kernel.v0.encoder.1",
+                "referenceVersion": "kernel.v0.reference.1",
+                "interpreterVersion": "kernel.v0.ir-interpreter.1",
+                "loweringVersion": "kernel.v0.lowering.1",
+                "runtimeIdentityTag": "kernel.v0.host.1"
+              },
+              "effects": []
+            }
+          },
+          "externalEffects": []
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "jsonl_closed_boundary_and_commit",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC4",
+        "AC6",
+        "AC7",
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 36,
+      "elapsedMilliseconds": 1952.9637,
+      "evidence": {
+        "directory": "<validation-checkout>\\artifacts\\cli-cases\\session-7f67952a124342c49f12d77071c4085d",
+        "receiptId": "faa0ed5864e7e58a7f8a69fb5af86235fc5c4900977181444413c7be92b61db3",
+        "finalSnapshot": {
+          "resourceId": "item-001",
+          "available": "7",
+          "stateRevision": "131347916d39c4a28447d6ec1b4eab7cec258221cc12d8c45d6e1c4ba9f6c343",
+          "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "policyRevision": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRevision": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "cli",
+      "name": "usage_errors_are_structured",
+      "acceptanceCriteria": [
+        "AC10",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 4,
+      "elapsedMilliseconds": 408.8529,
+      "evidence": {},
+      "failure": null
+    }
+  ]
+}

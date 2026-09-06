@@ -1,0 +1,190 @@
+{
+  "schemaVersion": "kernel.source-manifest.v0",
+  "recordedAtUtc": "2026-09-03T23:33:36.2068605+00:00",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "e37578ed12b665db33740d2fce528d83e25b2e95d4c09777b831168bb28da0d7"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "e240ce993389445b4c192cd77912388e422b18669ea0fb8544d548f049936787"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "9841c222ea5ef432a9e4f968da88f369cfcf04cd26f5b0849c0c62a1bdea9a6b"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "856c0d9855d32b1933b4f8cd5429e32a894199800d98cff2a79fd0d98b2a035c"
+    },
+    {
+      "path": "fixtures/reserve.json",
+      "sha256": "5ea120443f4ace07b9d5e141ded9fd47acb79e677a1ff53f766f5472978e08f4"
+    },
+    {
+      "path": "fixtures/wrong-add.json",
+      "sha256": "2ac1bc6fe522afd4180a247d8e8530441d59dd85671f6f82631af800b4484950"
+    },
+    {
+      "path": "global.json",
+      "sha256": "fd6e906187e3c51e2d158c04ef5c9a5d1108ba1ff3c76227891f4e3e6ae4e51e"
+    },
+    {
+      "path": "Kernel.slnx",
+      "sha256": "9c38035b49720fe2f0d58c2bfcf238b6fbb588bc3fec8e5c2e36c4066a87a96f"
+    },
+    {
+      "path": "NuGet.Config",
+      "sha256": "c84f912e5c256d8a5c713f5b3d5123df5fd0b19fdc66692d2fb288ea7edca0a9"
+    },
+    {
+      "path": "README.md",
+      "sha256": "75ad5ebe323fdaa506986b8358ccb058a808a2583002cf04c978ca29b6067014"
+    },
+    {
+      "path": "REPORT.md",
+      "sha256": "f694915761b007f44b96aaa6e7aeb8015744c81c7dfcea5d8f33479fd4ea70fb"
+    },
+    {
+      "path": "specs/2026-09-04-agent-language-kernel-v0.md",
+      "sha256": "8b6a8fdc5c7e2d2e8c10aa1c56083447b064fdfbe8421877bf2d68c6914b77bd"
+    },
+    {
+      "path": "src/Kernel.Cli/Kernel.Cli.csproj",
+      "sha256": "1fa90db5e7ce7361963d86246ff7c71bd3bfddae367dbe15d72363e17ce0aa27"
+    },
+    {
+      "path": "src/Kernel.Cli/packages.lock.json",
+      "sha256": "09dc04cf7200a677bd49038032ac3b63d23268e7264a7bee2d9d2563e680b4df"
+    },
+    {
+      "path": "src/Kernel.Cli/Program.cs",
+      "sha256": "6ba0137a238e66d43af93c3f28753dd69ee71a488b29b852664da857206982ff"
+    },
+    {
+      "path": "src/Kernel.Cli/Protocol.cs",
+      "sha256": "f9a34b37542f38349c8e5a87fedd9b9f562e1c418faaebb88eed4f6178547f67"
+    },
+    {
+      "path": "src/Kernel.Cli/RuntimeSetup.cs",
+      "sha256": "1ab8ca77106f8847b15c563dc1f750f924d891b8bed965f1b207aaad86fa36cf"
+    },
+    {
+      "path": "src/Kernel.Core/Codec.cs",
+      "sha256": "521724ba8b6caebc35c1fce0dfdcfc96725e3010199da242629db28cbedad53e"
+    },
+    {
+      "path": "src/Kernel.Core/CoreApi.cs",
+      "sha256": "6e405db678c03bdbf10086459df4aa9ef898bf2e1225b0d4f15fa1472a07dade"
+    },
+    {
+      "path": "src/Kernel.Core/Evaluation.cs",
+      "sha256": "d7afaba1553f2acec93440249b076c6f52c54365f7e2ca020e1c5c2cd4a01370"
+    },
+    {
+      "path": "src/Kernel.Core/Kernel.Core.csproj",
+      "sha256": "8d654c44b7bebb6b31a9f2f606927f45b5072193adc4eef8cce3f3cf3b278df3"
+    },
+    {
+      "path": "src/Kernel.Core/packages.lock.json",
+      "sha256": "a4364d81a6de2707d66fbced18fbbc926c882ab96e1d1aebbb17e871285b9d75"
+    },
+    {
+      "path": "src/Kernel.Core/SmtEncoder.cs",
+      "sha256": "a4e2813f89b9207c22e12396f35e1797bb4e0279438bed133a07135ef066ca5b"
+    },
+    {
+      "path": "src/Kernel.Core/Validation.cs",
+      "sha256": "521fb239b94986a3289cfde67f4490fb823b938d4d1059b63f86cba32dd2f16b"
+    },
+    {
+      "path": "src/Kernel.Core/Verification.cs",
+      "sha256": "71271e834420d06e7b9404e0bf58cb19395b2895780bd53d9b413e6ac9dd10af"
+    },
+    {
+      "path": "src/Kernel.Core/Z3Solver.cs",
+      "sha256": "e6cd27f0beb3a4a9cc912f0deae3797ac93cb18a76089dd224e740892227f982"
+    },
+    {
+      "path": "src/Kernel.Host/Execution.cs",
+      "sha256": "7aed3b8ebcac01e929aa22f44b121a6f93c95087657b97084dead697241f9c6f"
+    },
+    {
+      "path": "src/Kernel.Host/HostApi.cs",
+      "sha256": "598c0ebb64fdd963461c25dc789534fcc4cd5dd68a545578fd7b6fd6722a17d4"
+    },
+    {
+      "path": "src/Kernel.Host/HostStorage.cs",
+      "sha256": "7f009b04e2ab403ea3c6c1ab42704d1f48ebe93523cb8346a5c10dd66e395013"
+    },
+    {
+      "path": "src/Kernel.Host/Kernel.Host.csproj",
+      "sha256": "740c3c5d97e7b68e4309c803ea94131073b18e6422acc4f90d4d2e6072df975c"
+    },
+    {
+      "path": "src/Kernel.Host/KernelHost.cs",
+      "sha256": "52bd23b77638765df9aaa0747ec7cfba92015d48207281224e5e17479342bb04"
+    },
+    {
+      "path": "src/Kernel.Host/packages.lock.json",
+      "sha256": "c6087e2f685b50e7ad34352e0d6e9ffa5127e5670e05e59ba0bf683332b513ec"
+    },
+    {
+      "path": "src/Kernel.Host/Patches.cs",
+      "sha256": "b6c536faa182cb2e50af06779509d6c73019e0fcbec5b07124a3cce6d2b41546"
+    },
+    {
+      "path": "src/Kernel.Host/Replay.cs",
+      "sha256": "37e9442a827ecd78cfc84c302646adac5d7e44d2e4f7fdb06993669a1e4da22f"
+    },
+    {
+      "path": "tests/Kernel.Conformance/CliCases.cs",
+      "sha256": "9f539e44b4b2d92b4ebf7ed0be07d3aef22c28f287dd0c2f5c66189c72247d95"
+    },
+    {
+      "path": "tests/Kernel.Conformance/CoreCases.cs",
+      "sha256": "36197dd486a08dd7a508d6e9249def876ddf49249797fd425163ba15080fcf82"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Fixtures.cs",
+      "sha256": "422f21413a29ee6f1f8207ec0e8cb59a3cbbed3021a74ebf3b7f8438531a6c71"
+    },
+    {
+      "path": "tests/Kernel.Conformance/HostCases.cs",
+      "sha256": "6af04c2ee7f68b2694c3a94e4b12c044cc98ea1db0084682dbfe720c3b198203"
+    },
+    {
+      "path": "tests/Kernel.Conformance/HostFixture.cs",
+      "sha256": "679a1d0e2bcca6b5a258f0421996e43d172b62280dc311db21c4ce8173508589"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Kernel.Conformance.csproj",
+      "sha256": "c6cc487294dba792935dfa4a94e3e920c32423c87bd0021fc510e702af2f4853"
+    },
+    {
+      "path": "tests/Kernel.Conformance/packages.lock.json",
+      "sha256": "09dc04cf7200a677bd49038032ac3b63d23268e7264a7bee2d9d2563e680b4df"
+    },
+    {
+      "path": "tests/Kernel.Conformance/PatchCases.cs",
+      "sha256": "94871d29bd724f9475c7f68ddd7dfe482ad2c725bfb513096437cfba2f553b46"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Program.cs",
+      "sha256": "af913f8115b10537ae8fcab1f3cef5cef8c908f56799826ee4ab63ad5875d36a"
+    },
+    {
+      "path": "tests/Kernel.Conformance/ReplayCases.cs",
+      "sha256": "979875bf171844e6bcb67dfe44f7eb041b2698d316158bd81ca9b0576f01f1a2"
+    },
+    {
+      "path": "tools/Install-Z3.ps1",
+      "sha256": "0c0f148f4b4284156e89f39800a2d43ced6f91fe561f70c82f7c1a4c158cbf52"
+    },
+    {
+      "path": "tools/z3.json",
+      "sha256": "1666bfd1d43fc47d29a4853588935fe307bb2120e68842215ccaae919362ee7c"
+    }
+  ]
+}

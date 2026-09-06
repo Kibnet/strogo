@@ -1,0 +1,14 @@
+{
+  "schemaVersion":"kernel.v0",
+  "programId":"reserve",
+  "profileId":"reserve.v0",
+  "nodes":[
+    {"id":"n.available","op":"input","type":"I64","args":[],"fieldId":"state.available"},
+    {"id":"n.quantity","op":"input","type":"I64","args":[],"fieldId":"event.quantity"},
+    {"id":"n.zero","op":"i64.const","type":"I64","args":[],"value":"0"},
+    {"id":"n.enough","op":"i64.le","type":"Bool","args":["n.quantity","n.available"]},
+    {"id":"n.debit","op":"select","type":"I64","args":["n.enough","n.quantity","n.zero"]},
+    {"id":"n.remaining","op":"i64.sub_checked","type":"I64","args":["n.available","n.debit"]}
+  ],
+  "outputs":{"accepted":"n.enough","available":"n.remaining","reserved":"n.debit"}
+}

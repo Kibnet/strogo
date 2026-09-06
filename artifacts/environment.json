@@ -1,0 +1,68 @@
+{
+  "sdk": "10.0.400",
+  "platform": "Microsoft Windows 10.0.22631",
+  "architecture": "X64",
+  "z3": {
+    "version": "5.1.0",
+    "executable": "tools/z3-5.1.0-x64-win/bin/z3.exe",
+    "sha256": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d",
+    "archiveSha256": "6ff368eaa2f9dc18acf244e736a074df877026bfc83abede6f327ebb95680535",
+    "source": "https://github.com/Z3Prover/z3/releases/download/z3-5.1.0/z3-5.1.0-x64-win.zip"
+  },
+  "z3RuntimeFiles": [
+    {
+      "name": "libz3.dll",
+      "sha256": "f4ea9e799e13b64dc748415c5f7ec34fa0d885cb32e243ec991c973329bca1fb"
+    },
+    {
+      "name": "libz3java.dll",
+      "sha256": "673d03c4884049db816f15d7a240215fcda8410e31efc6cdd98b4b53bae5fd43"
+    },
+    {
+      "name": "Microsoft.Z3.dll",
+      "sha256": "47285bcd2cf88d5741414c091003bb0727f89b8097e10a8ddd948f8d1b7a847b"
+    },
+    {
+      "name": "msvcp140_1.dll",
+      "sha256": "206c931bf90fdad8816de3b5e2ef80b2bcaa9406c89ecc05fe6fddffe251e982"
+    },
+    {
+      "name": "msvcp140_2.dll",
+      "sha256": "d50d7883f20d1dc6191768d3746f52dd9cac89c346ffaed5be1f110c2f34a838"
+    },
+    {
+      "name": "msvcp140_atomic_wait.dll",
+      "sha256": "3d0cbfaa1bf3eecf5a3f4491d2960ee803cb994f30292c6adc4a07c498f60e2b"
+    },
+    {
+      "name": "msvcp140_codecvt_ids.dll",
+      "sha256": "8a65c7596ef2e6938731f5a1058e7e40145b6d97967cc649231a076b9a608d78"
+    },
+    {
+      "name": "msvcp140.dll",
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    },
+    {
+      "name": "vcomp140.dll",
+      "sha256": "95d4ce4a6802d1e18b5e0e1722cc30ea72ca7e033f83828f05c0b7b993fe7cbf"
+    },
+    {
+      "name": "vcruntime140_1.dll",
+      "sha256": "a7146c08f89fe5b04541ab507cdb59ff7b44534d4ba3c668a426c6450a03434e"
+    },
+    {
+      "name": "vcruntime140_threads.dll",
+      "sha256": "40f39e8cee5f5a531b4010e18b807e8fe265b908dc58f959ecb7ebc6ea6cb11a"
+    },
+    {
+      "name": "vcruntime140.dll",
+      "sha256": "d1f4225df2cd877dbf130d5668a021dce3f94118455ff5ec952061c30afc9ce7"
+    },
+    {
+      "name": "z3.exe",
+      "sha256": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d"
+    }
+  ],
+  "sqlitePackage": "10.0.11",
+  "scope": "Local prototype; no external effects or model calls"
+}

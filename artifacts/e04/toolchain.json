@@ -1,0 +1,6 @@
+{
+  "version": "4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2",
+  "archiveSha256": "3653f05a111ca21e234709ea7b25ce96083fd6c6f10484256ba54110dbc0654d",
+  "executableSha256": "aebb6e5ea4aa1a8ba5432ee214c47255fd7aa5a583f5cac8e83d27d9992c4dd0",
+  "path": "<original-checkout>\\.tools\\dafny\\dafny\\dafny.exe"
+}

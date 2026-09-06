@@ -1,0 +1,15 @@
+{
+  "purpose": "New regression tests against pre-fix compiled Host; source fixes not rebuilt",
+  "assemblies": [
+    {
+      "path": "src\\Kernel.Host\\bin\\Release\\net10.0\\Kernel.Host.dll",
+      "sha256": "b2ff5ce6f0e96b9ce175780aba5c92915841538cac21a61642252d67a596752e",
+      "lastWriteUtc": "2026-09-03T22:54:07.8317141Z"
+    },
+    {
+      "path": "tests\\Kernel.Conformance\\bin\\Release\\net10.0\\Kernel.Host.dll",
+      "sha256": "b2ff5ce6f0e96b9ce175780aba5c92915841538cac21a61642252d67a596752e",
+      "lastWriteUtc": "2026-09-03T22:54:07.8317141Z"
+    }
+  ]
+}

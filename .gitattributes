@@ -1,0 +1,4 @@
+# Preserve exact source and evidence bytes used by SHA-256 manifests.
+# This disables line-ending conversion, not text diff detection.
+# Existing CRLF endings are intentional bytes, not trailing spaces.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "kernel.document-check.v0",
+  "passed": true,
+  "documents": [
+    "README.md",
+    "REPORT.md",
+    "specs/2026-09-04-agent-language-kernel-v0.md"
+  ],
+  "resolvedLocalLinks": 20,
+  "specSections": 21,
+  "passedAcceptanceCriteria": [
+    "AC1",
+    "AC10",
+    "AC11",
+    "AC12",
+    "AC2",
+    "AC3",
+    "AC4",
+    "AC5",
+    "AC6",
+    "AC7",
+    "AC8",
+    "AC9"
+  ],
+  "specCopyMatches": true
+}

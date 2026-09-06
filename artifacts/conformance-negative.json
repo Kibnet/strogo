@@ -1,0 +1,181 @@
+{
+  "schemaVersion": "kernel.conformance.v0",
+  "suite": "core",
+  "runtime": ".NET 10.0.11",
+  "operatingSystem": "Microsoft Windows 10.0.22631",
+  "z3Path": "tools/does-not-exist.exe",
+  "generatedAtUtc": "2026-09-03T23:02:17.1394928+00:00",
+  "passed": false,
+  "testCount": 8,
+  "assertionCount": 10336,
+  "passedCount": 7,
+  "failedCount": 1,
+  "results": [
+    {
+      "suite": "core",
+      "name": "canonical-bytes-and-identity",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 8,
+      "elapsedMilliseconds": 134.5456,
+      "evidence": {
+        "canonicalProgram": "{\u0022nodes\u0022:[{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022state.available\u0022,\u0022id\u0022:\u0022n.available\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.enough\u0022,\u0022n.quantity\u0022,\u0022n.zero\u0022],\u0022id\u0022:\u0022n.debit\u0022,\u0022op\u0022:\u0022select\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.quantity\u0022,\u0022n.available\u0022],\u0022id\u0022:\u0022n.enough\u0022,\u0022op\u0022:\u0022i64.le\u0022,\u0022type\u0022:\u0022Bool\u0022},{\u0022args\u0022:[],\u0022fieldId\u0022:\u0022event.quantity\u0022,\u0022id\u0022:\u0022n.quantity\u0022,\u0022op\u0022:\u0022input\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[\u0022n.available\u0022,\u0022n.debit\u0022],\u0022id\u0022:\u0022n.remaining\u0022,\u0022op\u0022:\u0022i64.sub_checked\u0022,\u0022type\u0022:\u0022I64\u0022},{\u0022args\u0022:[],\u0022id\u0022:\u0022n.zero\u0022,\u0022op\u0022:\u0022i64.const\u0022,\u0022type\u0022:\u0022I64\u0022,\u0022value\u0022:\u00220\u0022}],\u0022outputs\u0022:{\u0022accepted\u0022:\u0022n.enough\u0022,\u0022available\u0022:\u0022n.remaining\u0022,\u0022reserved\u0022:\u0022n.debit\u0022},\u0022profileId\u0022:\u0022reserve.v0\u0022,\u0022programId\u0022:\u0022reserve\u0022,\u0022schemaVersion\u0022:\u0022kernel.v0\u0022}",
+        "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe"
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "strict-schema-and-graph-rejections",
+      "acceptanceCriteria": [
+        "AC1",
+        "AC4",
+        "AC8"
+      ],
+      "passed": true,
+      "assertions": 55,
+      "elapsedMilliseconds": 14.0854,
+      "evidence": {
+        "rejections": {
+          "duplicate-top-key": "DuplicateField",
+          "duplicate-node-key": "DuplicateField",
+          "unknown-top-property": "SchemaInvalid",
+          "policy-in-program": "SchemaInvalid",
+          "manifest-in-program": "SchemaInvalid",
+          "unknown-node-property": "SchemaInvalid",
+          "negative-zero": "InvalidI64",
+          "numeric-i64": "SchemaInvalid",
+          "i64-leading-plus": "InvalidI64",
+          "i64-exponent": "InvalidI64",
+          "i64-leading-zero": "InvalidI64",
+          "i64-too-large": "InvalidI64",
+          "unknown-type": "UnsupportedType",
+          "non-ascii-id": "SchemaInvalid",
+          "wrong-profile": "ProfileMismatch",
+          "missing-field": "SchemaInvalid",
+          "unknown-input": "SchemaInvalid",
+          "io-opcode": "UnsupportedOpcode",
+          "dangling": "DanglingReference",
+          "cycle": "CycleDetected",
+          "dead": "UnreachableNode",
+          "duplicate-id": "DuplicateId",
+          "wrong-output-type": "TypeMismatch",
+          "wrong-operand-type": "TypeMismatch",
+          "wrong-arity": "ArityMismatch"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "checked-arithmetic-and-strict-select",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC8",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 97,
+      "elapsedMilliseconds": 42.3195,
+      "evidence": {
+        "boundaryVectors": 10
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "reserve-independent-business-grid",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 294,
+      "elapsedMilliseconds": 4.478,
+      "evidence": {
+        "vectors": 42
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "seeded-200-dags-independent-oracle",
+      "acceptanceCriteria": [
+        "AC2",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 9854,
+      "elapsedMilliseconds": 206.9159,
+      "evidence": {
+        "seed": 20260904,
+        "graphs": 200,
+        "inputsPerGraph": 6,
+        "opcodes": [
+          "bool.and",
+          "bool.const",
+          "bool.not",
+          "bool.or",
+          "i64.add_checked",
+          "i64.const",
+          "i64.eq",
+          "i64.le",
+          "i64.sub_checked",
+          "input",
+          "select"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "ir-validation-rejects-invalid-input",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 5,
+      "elapsedMilliseconds": 1.9161,
+      "evidence": {},
+      "failure": null
+    },
+    {
+      "suite": "core",
+      "name": "real-z3-reserve-and-counterexample",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC12"
+      ],
+      "passed": false,
+      "assertions": 0,
+      "elapsedMilliseconds": 12.4533,
+      "evidence": {},
+      "failure": "Kernel.Conformance.ConformanceException: Explicit --z3 path does not name an existing file\r\n   at Kernel.Conformance.TestContext.RequireZ3() in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 137\r\n   at Kernel.Conformance.Toolchain.SolverAsync(TestContext context) in <original-checkout>\\tests\\Kernel.Conformance\\Fixtures.cs:line 29\r\n   at Kernel.Conformance.CoreCases.RealSolver(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\CoreCases.cs:line 180\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "core",
+      "name": "solver-fail-closed-statuses",
+      "acceptanceCriteria": [
+        "AC3"
+      ],
+      "passed": true,
+      "assertions": 23,
+      "elapsedMilliseconds": 30.0952,
+      "evidence": {
+        "rejections": {
+          "unknown": "SolverUnknown",
+          "missing-status": "SolverMalformedResponse",
+          "crash": "SolverFailure",
+          "timeout": "SolverTimeout",
+          "multiple-statuses": "SolverMalformedResponse",
+          "solver-error": "SolverMalformedResponse"
+        }
+      },
+      "failure": null
+    }
+  ]
+}

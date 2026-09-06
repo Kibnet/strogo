@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "kernel.review.v1",
+  "phase": "post-EXEC",
+  "reviewer": "e04_contract_review",
+  "mode": "separate adversarial fallback",
+  "sandbox": "danger-full-access; unrestricted filesystem; read-only actions by instruction, no technical read-only isolation",
+  "codeDecision": "PASS",
+  "knowledgeDecision": "PASS; K-E04-001 through K-E04-019 reviewed; no substantive omissions",
+  "evidence": [
+    "conformance.json",
+    "proof-receipt.json",
+    "development-evidence.json"
+  ],
+  "fixed": [
+    "nonvacuous outcome and full criteria",
+    "application validity and canonical sorting proofs",
+    "public artifact-bound explain",
+    "runtime output invariants",
+    "normalized missing/malformed artifacts",
+    "public CLI and process-tree checks",
+    "knowledge enum and stable historical provenance"
+  ],
+  "residual": [
+    "TCB correctness",
+    "OS resource isolation",
+    "single platform and fixed algorithm",
+    "G05/G06 not measured",
+    "binary R2R reproducibility not established"
+  ]
+}

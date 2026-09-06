@@ -1,0 +1,7 @@
+{
+  "version": "5.1.0",
+  "executable": "tools/z3-5.1.0-x64-win/bin/z3.exe",
+  "sha256": "c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d",
+  "archiveSha256": "6ff368eaa2f9dc18acf244e736a074df877026bfc83abede6f327ebb95680535",
+  "source": "https://github.com/Z3Prover/z3/releases/download/z3-5.1.0/z3-5.1.0-x64-win.zip"
+}

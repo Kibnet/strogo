@@ -1,0 +1,304 @@
+{
+  "schemaVersion": "strogo.publication-source.v1",
+  "sourceCommit": "ea6c0b6a491745c204dcb5ee7e4df8cff0966ce6",
+  "codeChanged": false,
+  "files": [
+    {
+      "path": "Directory.Build.props",
+      "sha256": "856c0d9855d32b1933b4f8cd5429e32a894199800d98cff2a79fd0d98b2a035c"
+    },
+    {
+      "path": "Kernel.slnx",
+      "sha256": "2754046c3926168140d2998aa2ef9da07a62dddfda160b975ced41276f88cc65"
+    },
+    {
+      "path": "NuGet.Config",
+      "sha256": "c84f912e5c256d8a5c713f5b3d5123df5fd0b19fdc66692d2fb288ea7edca0a9"
+    },
+    {
+      "path": "fixtures/reserve.json",
+      "sha256": "5ea120443f4ace07b9d5e141ded9fd47acb79e677a1ff53f766f5472978e08f4"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c01.json",
+      "sha256": "4f1d37f84ca1d9a3c7765993ebbe1dde15fc8128e5ca84e1f476acfa5dada9cc"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c02.json",
+      "sha256": "f6bdbff31c845f2dda4a7fb686080230449d50550c719de36ccc7f51e6e0df23"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c03.json",
+      "sha256": "7d94a107eeb22b3e4751416f21e10d593d2901c89ea1f262ec7fb2d3de690a9c"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c04.json",
+      "sha256": "8d14b878fa667417cc5dd9ec8452b072a6372c5bae99a50b706455da34a86a94"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c05-duplicate-fresh.json",
+      "sha256": "62c7f07e6e59e3a19970df36847791cf6b99a96da118e03121e61ec1e6256516"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c05-existing.json",
+      "sha256": "5369e47d0810facb2948e06f360b9756ccfb715cf0200e670128dc274700da3f"
+    },
+    {
+      "path": "fixtures/task-graph-v1/c05-missing.json",
+      "sha256": "884743ad489d0d125de99e8185a932e195c5b4e2a13f4fcfa147947238e77898"
+    },
+    {
+      "path": "fixtures/task-graph-v1/program.accepted.json",
+      "sha256": "6616f83164ff2215d32bf51e9af720bd705c39716558a801b043851c54fc8a82"
+    },
+    {
+      "path": "fixtures/wrong-add.json",
+      "sha256": "2ac1bc6fe522afd4180a247d8e8530441d59dd85671f6f82631af800b4484950"
+    },
+    {
+      "path": "global.json",
+      "sha256": "fd6e906187e3c51e2d158c04ef5c9a5d1108ba1ff3c76227891f4e3e6ae4e51e"
+    },
+    {
+      "path": "src/Kernel.Cli/Kernel.Cli.csproj",
+      "sha256": "1fa90db5e7ce7361963d86246ff7c71bd3bfddae367dbe15d72363e17ce0aa27"
+    },
+    {
+      "path": "src/Kernel.Cli/Program.cs",
+      "sha256": "6ba0137a238e66d43af93c3f28753dd69ee71a488b29b852664da857206982ff"
+    },
+    {
+      "path": "src/Kernel.Cli/Protocol.cs",
+      "sha256": "f9a34b37542f38349c8e5a87fedd9b9f562e1c418faaebb88eed4f6178547f67"
+    },
+    {
+      "path": "src/Kernel.Cli/RuntimeSetup.cs",
+      "sha256": "1ab8ca77106f8847b15c563dc1f750f924d891b8bed965f1b207aaad86fa36cf"
+    },
+    {
+      "path": "src/Kernel.Cli/packages.lock.json",
+      "sha256": "09dc04cf7200a677bd49038032ac3b63d23268e7264a7bee2d9d2563e680b4df"
+    },
+    {
+      "path": "src/Kernel.Core/Codec.cs",
+      "sha256": "521724ba8b6caebc35c1fce0dfdcfc96725e3010199da242629db28cbedad53e"
+    },
+    {
+      "path": "src/Kernel.Core/CoreApi.cs",
+      "sha256": "6e405db678c03bdbf10086459df4aa9ef898bf2e1225b0d4f15fa1472a07dade"
+    },
+    {
+      "path": "src/Kernel.Core/Evaluation.cs",
+      "sha256": "d7afaba1553f2acec93440249b076c6f52c54365f7e2ca020e1c5c2cd4a01370"
+    },
+    {
+      "path": "src/Kernel.Core/Kernel.Core.csproj",
+      "sha256": "8d654c44b7bebb6b31a9f2f606927f45b5072193adc4eef8cce3f3cf3b278df3"
+    },
+    {
+      "path": "src/Kernel.Core/SmtEncoder.cs",
+      "sha256": "a4e2813f89b9207c22e12396f35e1797bb4e0279438bed133a07135ef066ca5b"
+    },
+    {
+      "path": "src/Kernel.Core/Validation.cs",
+      "sha256": "521fb239b94986a3289cfde67f4490fb823b938d4d1059b63f86cba32dd2f16b"
+    },
+    {
+      "path": "src/Kernel.Core/Verification.cs",
+      "sha256": "71271e834420d06e7b9404e0bf58cb19395b2895780bd53d9b413e6ac9dd10af"
+    },
+    {
+      "path": "src/Kernel.Core/Z3Solver.cs",
+      "sha256": "e6cd27f0beb3a4a9cc912f0deae3797ac93cb18a76089dd224e740892227f982"
+    },
+    {
+      "path": "src/Kernel.Core/packages.lock.json",
+      "sha256": "a4364d81a6de2707d66fbced18fbbc926c882ab96e1d1aebbb17e871285b9d75"
+    },
+    {
+      "path": "src/Kernel.Graph.Cli/Kernel.Graph.Cli.csproj",
+      "sha256": "4be7b5e76e4c828eaca1bbda7ad14679cdcf5ee78f6dca94ff020dfd06c525c0"
+    },
+    {
+      "path": "src/Kernel.Graph.Cli/Program.cs",
+      "sha256": "1c25252d3b1311f070255206570f897a90f9b014db48268b8d780a037cb03649"
+    },
+    {
+      "path": "src/Kernel.Graph.Cli/packages.lock.json",
+      "sha256": "2e3545be71cb227da4968cbc6ba84781e49d8fad7e5628b6df8c69bdb5ecc035"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/Codec.cs",
+      "sha256": "777bd2ae2835eb3a643013cd9012522bc59fd3e2ed8fb34b92cf8e487acac0c0"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/GraphProgram.cs",
+      "sha256": "6cdca631ae107d6b616634215482fe1cf64061bb219a05a568e3d01672a375a0"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/GraphReference.cs",
+      "sha256": "ed31913972f0f467de46102bff1b2ae108def906163eaad338b455156c32a718"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/GraphToolchain.cs",
+      "sha256": "50b2f780be0f068f24123a9a26f8a1214baa4114ac3c085a0892e64c73311a53"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/Kernel.Graph.Core.csproj",
+      "sha256": "8d654c44b7bebb6b31a9f2f606927f45b5072193adc4eef8cce3f3cf3b278df3"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/Model.cs",
+      "sha256": "1f68cd8c640464139c9e562844bcafb5e399a78f58b6bb6dd6c80eb81f953c4b"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/ProcessRunner.cs",
+      "sha256": "91ee81c6e8f60e0c04756b4a0b73b38e4192dd188e78c7994819464fe4f62a78"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/RuntimeValidation.cs",
+      "sha256": "c23ce50283a829d7e44d22cab848767b21351b20b70780627f8842d7823040fd"
+    },
+    {
+      "path": "src/Kernel.Graph.Core/packages.lock.json",
+      "sha256": "a4364d81a6de2707d66fbced18fbbc926c882ab96e1d1aebbb17e871285b9d75"
+    },
+    {
+      "path": "src/Kernel.Host/Execution.cs",
+      "sha256": "7aed3b8ebcac01e929aa22f44b121a6f93c95087657b97084dead697241f9c6f"
+    },
+    {
+      "path": "src/Kernel.Host/HostApi.cs",
+      "sha256": "598c0ebb64fdd963461c25dc789534fcc4cd5dd68a545578fd7b6fd6722a17d4"
+    },
+    {
+      "path": "src/Kernel.Host/HostStorage.cs",
+      "sha256": "7f009b04e2ab403ea3c6c1ab42704d1f48ebe93523cb8346a5c10dd66e395013"
+    },
+    {
+      "path": "src/Kernel.Host/Kernel.Host.csproj",
+      "sha256": "740c3c5d97e7b68e4309c803ea94131073b18e6422acc4f90d4d2e6072df975c"
+    },
+    {
+      "path": "src/Kernel.Host/KernelHost.cs",
+      "sha256": "52bd23b77638765df9aaa0747ec7cfba92015d48207281224e5e17479342bb04"
+    },
+    {
+      "path": "src/Kernel.Host/Patches.cs",
+      "sha256": "b6c536faa182cb2e50af06779509d6c73019e0fcbec5b07124a3cce6d2b41546"
+    },
+    {
+      "path": "src/Kernel.Host/Replay.cs",
+      "sha256": "37e9442a827ecd78cfc84c302646adac5d7e44d2e4f7fdb06993669a1e4da22f"
+    },
+    {
+      "path": "src/Kernel.Host/packages.lock.json",
+      "sha256": "c6087e2f685b50e7ad34352e0d6e9ffa5127e5670e05e59ba0bf683332b513ec"
+    },
+    {
+      "path": "tests/Kernel.Conformance/CliCases.cs",
+      "sha256": "9f539e44b4b2d92b4ebf7ed0be07d3aef22c28f287dd0c2f5c66189c72247d95"
+    },
+    {
+      "path": "tests/Kernel.Conformance/CoreCases.cs",
+      "sha256": "36197dd486a08dd7a508d6e9249def876ddf49249797fd425163ba15080fcf82"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Fixtures.cs",
+      "sha256": "422f21413a29ee6f1f8207ec0e8cb59a3cbbed3021a74ebf3b7f8438531a6c71"
+    },
+    {
+      "path": "tests/Kernel.Conformance/HostCases.cs",
+      "sha256": "6af04c2ee7f68b2694c3a94e4b12c044cc98ea1db0084682dbfe720c3b198203"
+    },
+    {
+      "path": "tests/Kernel.Conformance/HostFixture.cs",
+      "sha256": "679a1d0e2bcca6b5a258f0421996e43d172b62280dc311db21c4ce8173508589"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Kernel.Conformance.csproj",
+      "sha256": "c6cc487294dba792935dfa4a94e3e920c32423c87bd0021fc510e702af2f4853"
+    },
+    {
+      "path": "tests/Kernel.Conformance/PatchCases.cs",
+      "sha256": "94871d29bd724f9475c7f68ddd7dfe482ad2c725bfb513096437cfba2f553b46"
+    },
+    {
+      "path": "tests/Kernel.Conformance/Program.cs",
+      "sha256": "af913f8115b10537ae8fcab1f3cef5cef8c908f56799826ee4ab63ad5875d36a"
+    },
+    {
+      "path": "tests/Kernel.Conformance/ReplayCases.cs",
+      "sha256": "979875bf171844e6bcb67dfe44f7eb041b2698d316158bd81ca9b0576f01f1a2"
+    },
+    {
+      "path": "tests/Kernel.Conformance/packages.lock.json",
+      "sha256": "09dc04cf7200a677bd49038032ac3b63d23268e7264a7bee2d9d2563e680b4df"
+    },
+    {
+      "path": "tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj",
+      "sha256": "45cdf81622314f34305b3d0b3eb7fcc13c55b89d4dc17ebb5fee9e67a097aa30"
+    },
+    {
+      "path": "tests/Kernel.Graph.Conformance/Program.cs",
+      "sha256": "a6d224ed11a1ea66c1a3e84f67cb516b689e65fe00a6561c20abf2b2ff9082df"
+    },
+    {
+      "path": "tests/Kernel.Graph.Conformance/packages.lock.json",
+      "sha256": "2e3545be71cb227da4968cbc6ba84781e49d8fad7e5628b6df8c69bdb5ecc035"
+    },
+    {
+      "path": "tools/Check-KnowledgeSync.ps1",
+      "sha256": "a3406fade564958c4814803847471cee823b64cf09c97776e70c8d87c3a2b42a"
+    },
+    {
+      "path": "tools/Install-Dafny.ps1",
+      "sha256": "31b563f03570cff840a163e5a85170805c032ca5dba021b77e589035498fa996"
+    },
+    {
+      "path": "tools/Install-Z3.ps1",
+      "sha256": "0c0f148f4b4284156e89f39800a2d43ced6f91fe561f70c82f7c1a4c158cbf52"
+    },
+    {
+      "path": "tools/dafny-files.json",
+      "sha256": "8d95c9e008ddfa59391af5a48451a7474cd99219e6c7cc73a79f127b62bad900"
+    },
+    {
+      "path": "tools/dafny.json",
+      "sha256": "adb81b89a064cccff2784ee52ce0bcbdd52cd476afea9511f944b1d63bedd7e0"
+    },
+    {
+      "path": "tools/z3.json",
+      "sha256": "1666bfd1d43fc47d29a4853588935fe307bb2120e68842215ccaae919362ee7c"
+    },
+    {
+      "path": "verification/task-graph-v1/Contract.dfy",
+      "sha256": "729502c3bdd86b4e2a7c53a578fb5d649e3b1b3926928e5d531604c236694860"
+    },
+    {
+      "path": "verification/task-graph-v1/RuntimeAdapter/Program.cs",
+      "sha256": "92f1c9ca758cae77b5ef93b87c8cf8e76646000b6a236734bf9adb295ae064e3"
+    }
+  ],
+  "sanitizedHistoricalFiles": [
+    "artifacts/after-review-integration-results.json",
+    "artifacts/conformance-negative.json",
+    "artifacts/conformance-results.json",
+    "artifacts/first-conformance-results.json",
+    "artifacts/review-regression-red.json",
+    "artifacts/e04/conformance.json",
+    "artifacts/e04/development-evidence.json",
+    "artifacts/e04/knowledge-negatives.json",
+    "artifacts/e04/proof-receipt.json",
+    "artifacts/e04/replay-receipt.json",
+    "artifacts/e04/toolchain.json",
+    "artifacts/e04/v0-regression.json",
+    "specs/2026-09-04-agent-language-kernel-v0.md",
+    "specs/2026-09-04-controlled-language-experiment-v0.1.md",
+    "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+    "REPORT.md",
+    "docs/e04-knowledge-log.md",
+    "docs/task-graph-v1.md",
+    "docs/reserve-v0.md"
+  ]
+}

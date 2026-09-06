@@ -1,0 +1,375 @@
+{
+  "schemaVersion": "kernel.conformance.v0",
+  "suite": "host",
+  "runtime": ".NET 10.0.11",
+  "operatingSystem": "Microsoft Windows 10.0.22631",
+  "z3Path": null,
+  "generatedAtUtc": "2026-09-03T22:58:54.157084+00:00",
+  "passed": false,
+  "testCount": 18,
+  "assertionCount": 422,
+  "passedCount": 12,
+  "failedCount": 6,
+  "results": [
+    {
+      "suite": "host",
+      "name": "business-decisions-retry-restart",
+      "acceptanceCriteria": [
+        "AC6",
+        "AC7",
+        "AC12"
+      ],
+      "passed": false,
+      "assertions": 6,
+      "elapsedMilliseconds": 541.0962,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\77144210b9764bd4a20c5b065a00b272\\kernel.sqlite"
+      },
+      "failure": "Kernel.Conformance.ConformanceException: committed token cannot still project uncommitted Prepared state: did not throw KernelException\r\n   at Kernel.Conformance.TestContext.Throws[TException](Action action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 120\r\n   at Kernel.Conformance.Fixtures.Error(TestContext context, String expectedCode, Action action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Fixtures.cs:line 87\r\n   at Kernel.Conformance.HostCases.Business(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 48\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "forged-input-capability-and-token-owner",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 31,
+      "elapsedMilliseconds": 510.5402,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\2ed430447839415c85a3fb66f0bd318a\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "sqlite-write-failures-roll-back",
+      "acceptanceCriteria": [
+        "AC7"
+      ],
+      "passed": true,
+      "assertions": 18,
+      "elapsedMilliseconds": 707.4634,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\6813f5d09dc143b3adad6ebb34ce4e56\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "process-stop-before-after-commit",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 1458.0573,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\ab425038d7014abea07087def1b0f207\\kernel.sqlite",
+        "BeforeCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<original-checkout>\\artifacts\\conformance-data\\166b78d13f0143d6a5836b9e441b1aed\\kernel.sqlite"
+        },
+        "AfterCommitSql": {
+          "childExitCode": -1,
+          "stderr": "",
+          "database": "<original-checkout>\\artifacts\\conformance-data\\ab425038d7014abea07087def1b0f207\\kernel.sqlite"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "concurrent-cas-and-same-event",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10",
+        "AC11"
+      ],
+      "passed": false,
+      "assertions": 15,
+      "elapsedMilliseconds": 676.5203,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\3eedd3a13c014a45a93ccbfcf12edfeb\\kernel.sqlite"
+      },
+      "failure": "Kernel.Conformance.ConformanceException: other completed-event token is purged and cannot project Prepared: did not throw KernelException\r\n   at Kernel.Conformance.TestContext.Throws[TException](Action action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 120\r\n   at Kernel.Conformance.Fixtures.Error(TestContext context, String expectedCode, Action action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Fixtures.cs:line 87\r\n   at Kernel.Conformance.HostCases.Concurrency(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 208\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "commit-rechecks-program-policy-manifest",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 15,
+      "elapsedMilliseconds": 803.9007,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\bf14615d86a24f41a95bd74801390e12\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "snapshot-consistency-during-competing-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 10,
+      "elapsedMilliseconds": 430.7256,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\fe16bf1673e44172bbbbb3c3b2fa686d\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "acl-update-serialized-with-commit",
+      "acceptanceCriteria": [
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 6,
+      "elapsedMilliseconds": 220.1315,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\2701306079f94a4097c76e7e3124a6b1\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "revoked-authorization-on-every-read",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 37,
+      "elapsedMilliseconds": 393.9708,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\6f6d07b73152401fa377120097084d44\\kernel.sqlite",
+        "readMethods": [
+          "Snapshot",
+          "unknown-Snapshot",
+          "Prepare-receipt",
+          "Commit-token",
+          "Replay",
+          "Explain-receipt",
+          "Explain-prepare",
+          "Explain-program",
+          "Patch-receipt"
+        ]
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "worker-timeout-eviction-and-epoch",
+      "acceptanceCriteria": [
+        "AC8",
+        "AC11"
+      ],
+      "passed": false,
+      "assertions": 17,
+      "elapsedMilliseconds": 748.9152,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\ced3a01ce0c049e19c85cf50a3f44f7c\\kernel.sqlite"
+      },
+      "failure": "Kernel.Conformance.ConformanceException: completed token must not consume cache slot or evict pending token code: expected StateConflict, actual PrepareExpired\r\n   at Kernel.Conformance.TestContext.Equal[T](T expected, T actual, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 104\r\n   at Kernel.Conformance.HostCases.Error(TestContext c, String code, Func\u00601 action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 32\r\n   at Kernel.Conformance.HostCases.WorkerAndEpoch(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 344\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "runtime-checks-detect-false-verification",
+      "acceptanceCriteria": [
+        "AC3",
+        "AC4"
+      ],
+      "passed": false,
+      "assertions": 3,
+      "elapsedMilliseconds": 43.5483,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\1ba2ca6ceaba40fa958cbfc6b42c62c0\\kernel.sqlite"
+      },
+      "failure": "Kernel.Conformance.ConformanceException: wrong-output runtime disagrees with static verified code: expected VerifierMismatch, actual PostconditionFailed\r\n   at Kernel.Conformance.TestContext.Equal[T](T expected, T actual, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 104\r\n   at Kernel.Conformance.HostCases.Error(TestContext c, String code, Func\u00601 action, String message) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 32\r\n   at Kernel.Conformance.HostCases.FalseVerification(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 367\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "provenance-original-actor-survives-retry",
+      "acceptanceCriteria": [
+        "AC7",
+        "AC10"
+      ],
+      "passed": false,
+      "assertions": 4,
+      "elapsedMilliseconds": 396.583,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\6ab9f0eef1b14e1ba71308cfd945c36a\\kernel.sqlite"
+      },
+      "failure": "System.Collections.Generic.KeyNotFoundException: The given key was not present in the dictionary.\r\n   at System.Text.Json.JsonElement.GetProperty(String propertyName)\r\n   at Kernel.Conformance.HostCases.Provenance(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\HostCases.cs:line 391\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-atomic-identity-retries",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": false,
+      "assertions": 5,
+      "elapsedMilliseconds": 352.3976,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\0e459234af0f498180e0cb62ee8a9bb2\\kernel.sqlite"
+      },
+      "failure": "Kernel.Conformance.ConformanceException: NoChange projection computes empty actual node diff: expected 0, actual 1\r\n   at Kernel.Conformance.TestContext.Equal[T](T expected, T actual, String message) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 104\r\n   at Kernel.Conformance.PatchCases.IdentityAndRetries(TestContext c) in <original-checkout>\\tests\\Kernel.Conformance\\PatchCases.cs:line 29\r\n   at Kernel.Conformance.Program.Main(String[] args) in <original-checkout>\\tests\\Kernel.Conformance\\Program.cs:line 34"
+    },
+    {
+      "suite": "host",
+      "name": "typed-patch-rejection-and-tombstones",
+      "acceptanceCriteria": [
+        "AC4",
+        "AC5"
+      ],
+      "passed": true,
+      "assertions": 52,
+      "elapsedMilliseconds": 847.3475,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\8344881df486488ca99b8958395c87b6\\kernel.sqlite",
+        "rejections": {
+          "stale-base": "ProgramConflict",
+          "stale-node": "NodeConflict",
+          "duplicate-operation": "DuplicatePatchTarget",
+          "remove-referenced": "DanglingReference",
+          "outside-prefix": "EditScopeDenied",
+          "foreign-node": "EditScopeDenied",
+          "unknown-opcode": "UnsupportedOpcode",
+          "changed-contract": "Counterexample",
+          "invalid-final-batch": "DanglingReference",
+          "changed-id": "StableIdRequired",
+          "stale-outputs": "OutputsConflict"
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "patch-admission-trust-snapshot-races",
+      "acceptanceCriteria": [
+        "AC5",
+        "AC11"
+      ],
+      "passed": true,
+      "assertions": 30,
+      "elapsedMilliseconds": 2066.566,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\96d62295b2864ffeb2f0f02d4fafe19f\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-persisted-history-and-fuel",
+      "acceptanceCriteria": [
+        "AC9",
+        "AC12"
+      ],
+      "passed": true,
+      "assertions": 85,
+      "elapsedMilliseconds": 283.0135,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\1fbdf3a8ef1f44ec80c39dafdde6aad4\\kernel.sqlite",
+        "firstReceipt": {
+          "receiptId": "26221842b568d1c75f45923d424965c1ed36182af05b79e0d94e3fb36800165e",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-1",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 3
+          },
+          "eventDigest": "e4fb5de824f6b86aedc77da8cf48fcb48c838894c4f3c6b1d275ee66e1adc82d",
+          "previousStateRevision": "1b2d24bc5d27a034a34f52c83ede549075a9cd3cac9bdd86bdfb15a34be55c07",
+          "committedStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "inputRef": "9a9ade162f63e14e5457d518565c2d99d36ee209f63a82281d90400d86071e74",
+          "outputRef": "4e4c31da98b6432a2c7ef73ac103d6e32d5dfb76c1a5b87e0a40ec4816a75f38",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "a6f7325772c160e9dc07637e3e8b7f3b45fe2a4f85c1e899c6b0f1366cfac61e",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "e55d526f81ebcee74e741b100efb84a8f6daf1be49ce80c6e72b833704b0e927",
+          "output": {
+            "accepted": true,
+            "available": 7,
+            "reserved": 3
+          }
+        },
+        "secondReceipt": {
+          "receiptId": "0c8f23f2eb2930f0c315ad2f93250cf180e3f20b159b369be9a6c51c10640ef6",
+          "resourceId": "item-001",
+          "event": {
+            "eventId": "evt-history-2",
+            "resourceId": "item-001",
+            "kind": "reserve",
+            "quantity": 2
+          },
+          "eventDigest": "e358467a69ed1fad958e50b37347f6e587242e53182d27a6e902003d3cd754f3",
+          "previousStateRevision": "f90f1c50d4553a8709b422aa4be892225143f140bd7c8ecaa599737d1d3cb8b4",
+          "committedStateRevision": "91ec7407d37fff682ee2bb76db0a2f22d1786eeb19d00583deded07eddc703c2",
+          "inputRef": "4dc7669429e5560c218ab13bcad40cdc4c63b303ec6c84295551fd2858ff12bf",
+          "outputRef": "885e4d13c9c0f7c69a803943e4764cdeac2c19bc65b8383fae676aec4e6e7742",
+          "programRef": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+          "irRef": "1feeece74ac36b694107080e698dc7518d9916573c514e942703888e4d85c29a",
+          "policyRef": "53fd92bb8b5bc1fd8c0fe2ea833d35c4aef53f8573b5d34700ff35edd436f3c3",
+          "manifestRef": "8771ee77294320db1b01c8de96ba28eecca1bb37d119be7a93191bce4143df20",
+          "admissionRef": "a6f7325772c160e9dc07637e3e8b7f3b45fe2a4f85c1e899c6b0f1366cfac61e",
+          "semanticsVersion": "kernel.v0",
+          "runtimeIdentity": "{\u0022encoderVersion\u0022:\u0022kernel.v0.encoder.1\u0022,\u0022interpreterVersion\u0022:\u0022kernel.v0.ir-interpreter.1\u0022,\u0022loweringVersion\u0022:\u0022kernel.v0.lowering.1\u0022,\u0022referenceVersion\u0022:\u0022kernel.v0.reference.1\u0022,\u0022runtimeIdentityTag\u0022:\u0022kernel.v0.host.1\u0022,\u0022semanticsVersion\u0022:\u0022kernel.v0\u0022,\u0022solver\u0022:{\u0022binaryDigest\u0022:\u0022c638e6b8d066a5ad6ea2712dcd5e2eff5c57eba501b98e7fa8487f7daf0e863d\u0022,\u0022version\u0022:\u00225.1.0\u0022}}",
+          "fuelUsed": 6,
+          "fuelLimit": 128,
+          "traceRef": "033d68128e48bfc926bd210e6ad4dd41bad5291e1dc3cf3bde29a55b31089f9d",
+          "output": {
+            "accepted": true,
+            "available": 5,
+            "reserved": 2
+          }
+        }
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-missing-and-tampered-artifacts",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 64,
+      "elapsedMilliseconds": 3819.165,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\3e34ae48be154851854780415faf1f63\\kernel.sqlite"
+      },
+      "failure": null
+    },
+    {
+      "suite": "host",
+      "name": "replay-predecessor-and-state-chain",
+      "acceptanceCriteria": [
+        "AC9"
+      ],
+      "passed": true,
+      "assertions": 14,
+      "elapsedMilliseconds": 887.8836,
+      "evidence": {
+        "database": "<original-checkout>\\artifacts\\conformance-data\\e585fbd33a374d178171ac08b3753966\\kernel.sqlite"
+      },
+      "failure": null
+    }
+  ]
+}

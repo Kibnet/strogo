@@ -1,0 +1,296 @@
+{
+  "entries": [
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-001",
+      "claimSha256": "be7663a4957f30db8f12cebf0fa90569052b6caee26f2f19872aa13956c85883",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-002",
+      "claimSha256": "363ceec2737dadeefdbabc3898790e71f0508917af199eb4dc43d66ae87e7c87",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-003",
+      "claimSha256": "69185a086b2b762bf11f522eeabd7f940f5bb2aa37200741547f69600d963bc0",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-004",
+      "claimSha256": "f8249699f16ad57fd0cd441d1d3c97cfc74d44acb76ad4fa7c81c96976cf75ea",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-005",
+      "claimSha256": "04a71ae4a8bf2e2583f65d56e44d13dc85bc72a76b9a1e10c0827ead08670178",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-006",
+      "claimSha256": "a780d4535aece05b64e506b726054b5d8bea9ff5c1157c98af033e9282ae7af8",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-007",
+      "claimSha256": "a10140b5d5e8459dbed27d54d365ef4223bf24a8b85cee1ff1cb160440cf64e1",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-008",
+      "claimSha256": "db62f0351e1c6f84deafa41bb74466743fb9d554c6fb5caeee211f3da98d79ba",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-009",
+      "claimSha256": "47be55600659399c73356e5d66336eea03d706bf59bf9f104b09de7607a5a4bb",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-010",
+      "claimSha256": "e035ec37747b809dda011e39eb11fa11c16b055878deb63d3c144b4ab1e3c614",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-011",
+      "claimSha256": "e07b648204b9acf01dd395fecac0ebcb65b382bf1bf5e4a5a08655c0b2d04b71",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-012",
+      "claimSha256": "063ae0e43a186d0fe860ee8eeb7e6ac60515c49db8c7ffaf5f88b2f81bc0968c",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-013",
+      "claimSha256": "a01c6dc89abd2c9f4f6e1cc3783f421686e0af13eb8062616f1615b7c4dc8fe8",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-014",
+      "claimSha256": "d1a1149404635c60325f948e02538e6995bc9f1f57d938c476e9b5daa4eacc14",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-015",
+      "claimSha256": "f7871a0a3cfd539dde9c4766c7b1c6ad594ff16c2a236a2c994d7edf8aac01f9",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-016",
+      "claimSha256": "2f5c0a32d6761b1419168236b5f1c9297bee84ec058852dc415e6e23a91a7648",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-017",
+      "claimSha256": "fa4efe243567e593722105aa7325c05f74efab3c80770f01fc8dcdd1b6d6630f",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-018",
+      "claimSha256": "a3b618184ee34e3b37af3eac3a1422f9c220f0e970353fd402f460323147bd6d",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    },
+    {
+      "file": "10 — Журнал знаний E04.md",
+      "id": "K-E04-019",
+      "claimSha256": "62d1c98157ae157b5c798baf0357e41b440c95a079b4364b840d470f4872ef52",
+      "knowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+      "evidenceRefs": [
+        "specs/2026-09-05-bounded-task-graph-profile-v1.md",
+        "verification/task-graph-v1/Contract.dfy",
+        "artifacts/e04/conformance.json",
+        "artifacts/e04/development-evidence.json",
+        "artifacts/e04/REPORT.md",
+        "artifacts/e04/review.json"
+      ],
+      "projectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+    }
+  ],
+  "reconciliation": {
+    "checkedKnowledgeBaseCommit": "885b28e2e1d8f102adf235e19d1ca4e267121981",
+    "noNewSignificantKnowledge": true,
+    "reason": "Финальная сверка links/hashes после source и KB commits не породила нового содержательного знания; все findings и outcomes отражены K001–019, содержательный review PASS.",
+    "checkedProjectCommit": "34f9a3380e82412c1f30ba37066fb8348f5aa320"
+  },
+  "schemaVersion": "kernel.knowledge-sync.v1"
+}
