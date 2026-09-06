@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "math.mismatch",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "mismatch",
+      "parameters": [
+        { "id": "x", "type": "Bool" }
+      ],
+      "returnType": "I64",
+      "contractRef": "contractA",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "asBool", "op": "bool.not", "type": "Bool", "args": ["x"], "value": null }
+        ],
+        "result": "asBool"
+      }
+    }
+  ],
+  "exports": ["mismatch"]
+}

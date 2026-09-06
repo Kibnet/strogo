@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "math.invalid",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "badOp",
+      "parameters": [
+        { "id": "x", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "contractA",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "bad", "op": "i64.pow", "type": "I64", "args": [], "value": null }
+        ],
+        "result": "bad"
+      }
+    }
+  ],
+  "exports": ["badOp"]
+}

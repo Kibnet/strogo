@@ -41,3 +41,12 @@
 - Evidence: `specs/2026-09-06-composable-verified-modules-v0.2.md`, раздел 6.2 и 6.4.
 - Последствие: такие статусы требуют explicit repair/перезапуска и отдельной записи в журнале.
 - Supersedes / supersededBy: уточняет E05-K04 (как методика обработки неполных proof результатов).
+## K-E05-010
+
+- Дата / фаза: 2026-09-06 / EXEC (checkpoint 1-4).
+- Тип / статус: Decision-Checkpoint / Confirmed.
+- Утверждение: в `strogo` добавлены рабочие артефакты checkpoint: структура `src/Strogo.Modules` с моделью AST/типов, лексером, парсером и компилятором IR, верифицированная фикстурно-конформансная проверка и фиксация в `docs/modules-v0.2.md`.
+- Scope: E05; шаги 1–4 (структура кода, формальная нотация, лексер+парсер, compiler IR).
+- Evidence: `src/Strogo.Modules/*.cs`, `tests/Strogo.Modules.Conformance/*`, `fixtures/modules-v0.2/*.json`, `docs/fixtures/modules-v0.2/*.json`, `docs/modules-v0.2.md`, сборка `dotnet build src/Strogo.Modules/Strogo.Modules.csproj`.
+- Последствие: можно переходить к следующему checkpoint (formal semantics/validator, proof hooks) без повторной разработки формата.
+- Supersedes / supersededBy: закрывает промежуточный пробел между сырой идеей и исполняемой библиотекой, без изменений в целевых гарантиях G01–G06.

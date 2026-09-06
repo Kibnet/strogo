@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "math.add",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "addOne",
+      "parameters": [
+        { "id": "x", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "contractA",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "sum", "op": "i64.add", "type": "I64", "args": ["x", "one"], "value": null }
+        ],
+        "result": "sum"
+      }
+    }
+  ],
+  "exports": ["addOne"]
+}
