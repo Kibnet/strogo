@@ -570,3 +570,13 @@
 - Evidence: fixture `composite-lowering-safe.json`; bounded run `artifacts/local-validation/e05/composite-dafny-final-v2`; Modules conformance `220` checks / `64` fixtures; safe composite — `4 verified, 0 errors`, source SHA-256 `0d8123f3…9e9c2931`. `composite-runtime-valid.json` без caller range contract ожидаемо `Unproven` с тремя `assertion might not hold`. Summary SHA-256 `84f8b24c…6932cc3a`, module report SHA-256 `d7e16ab7…26617bc`; Reserve regression `29/29`, `10904` assertions, report SHA-256 `5ae5d697…15e4bb93`; E04 regression `PASS all: 141`, локальная копия report SHA-256 `8d35d274…cd5d4bef`.
 - Последствие: reference evaluator и Dafny backend теперь имеют сравнимую composite operation surface. Следующий proof шаг обязан добавить composite owner predicates/модель либо `fold` invariant; нельзя трактовать structural/range verification как exact-outcome proof.
 - Supersedes / supersededBy: снимает ограничение records/sequences candidate lowering из K-E05-060 и `docs/modules-v0.2.md`, сохраняя открытыми `fold`, imports, owner composite contracts и admission.
+
+## K-E05-063
+
+- Дата / фаза: 2026-09-07 / contract boundary review.
+- Тип / статус: Specification defect / Open pending owner-composite amendment approval.
+- Утверждение: разрешить именованный record/sequence в `strogo.owner-bundle.v0.2` без owner-owned type declarations небезопасно для semantic approval: bundle digest фиксирует имя типа, но форму полей и capacity продолжает задавать candidate module.
+- Scope: переход от scalar owner checkpoint к composite exact-outcome contracts; composite candidate structural/range lowering `c5ca6b4` от дефекта не зависит.
+- Evidence: текущие обязательные поля owner bundle — `schemaVersion,bundleId,entryContracts,models,limits`; parser принимает только scalar TypeRef, binder отклоняет `module.Types`. Утверждённая E05 требует equality/access records/sequences, но не задаёт отдельную owner type table. Поправка `specs/2026-09-07-e05-owner-composite-contract-v0.3.md` прошла independent fix-and-re-review на normative snapshot SHA-256 `C8CFBEBC…A12159FF`; семь wire/migration/cardinality/definedness/outcome findings исправлены, BLOCKER/HIGH/MEDIUM не осталось.
+- Последствие: до composite owner EXEC требуется отдельная подтверждённая поправка. Предложено `strogo.owner-bundle.v0.3` с полным canonical `types`, exact equality module/bundle type projection, обязательным `modelRef` вместо дублирующего manual ensures и explicit v0.2 migration без переноса approval.
+- Supersedes / supersededBy: уточняет E05 owner artifact §6.2 и ограничение K-E05-062; не изменяет admission amendment.
