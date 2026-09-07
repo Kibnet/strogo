@@ -12,13 +12,13 @@
 | --- | --- | --- |
 | **Reserve v0** | Типизированный DAG с `I64`/`Bool`, проверка фиксированного контракта через Z3, компиляция в линейный IR, локальный host с SQLite, prepare/commit/replay | 29/29 cases, 10 904 assertions |
 | **TaskGraph E04** | Ограниченный профиль `task-graph.clone.v1`: закрытый JSON AST → Dafny → C# → ReadyToRun win-x64; модуль возвращает additions либо отказ | 141 checks PASS, полный admission: 74 verified, 0 errors |
-| **Modules v0.2 / E05 (в работе)** | Строгий composable AST для records, bounded sequences, локальных вызовов и nested `if`; canonical source → typed IR → ограниченный scalar Dafny/C# backend | 158 checks; nested path-sensitive selector/local call/scalar ops verified и исполнены; owner contracts, `fold`, composites и package ещё не готовы |
+| **Modules v0.2 / E05 (в работе)** | Строгий composable AST и скалярный owner bundle; canonical source → typed IR → Dafny/C# с явными `requires` и exact-outcome `ensures` | 199 checks; две разные `addOne` реализации прошли один owner contract, слабый domain и неверный результат отклонены; `fold`, composites и package ещё не готовы |
 
 Это результаты сохранённых запусков и их отчётов: [Reserve v0](REPORT.md), [TaskGraph E04](artifacts/e04/REPORT.md) и [E05 scalar Dafny lowering checkpoint](artifacts/e05/REPORT.md). Они не являются результатом CI новой публичной копии. Происхождение публикации и границы сохранённых свидетельств описаны в [publication.md](docs/publication.md).
 
 E04 использует фиксированный pipeline из шести операций. Его успешная проверка не доказывает выразительность языка общего назначения. ReadyToRun содержит машинный код и IL и может использовать JIT; полного AOT здесь нет.
 
-Текущий E05 checkpoint и его границы описаны в [Modules v0.2](docs/modules-v0.2.md). Он проверяет composable representation, identity, scalar/`if` reference semantics и первый реальный Dafny→C#→ReadyToRun путь. Это ещё не owner proof/admission, package или общая библиотека и не выполнение целей G01–G06.
+Текущий E05 checkpoint и его границы описаны в [Modules v0.2](docs/modules-v0.2.md). Он проверяет composable representation, identity, scalar/`if` reference semantics и первый exact-outcome proof относительно отдельной owner model. Это ещё не human approval/admission, package, runtime precondition facade или общая библиотека и не выполнение целей G01–G06.
 
 ## Быстрый запуск Reserve v0
 

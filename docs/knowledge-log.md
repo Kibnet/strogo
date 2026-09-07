@@ -440,3 +440,93 @@
 - Evidence: build 0 warnings/errors; Modules 158/60; selector 2/0 + R2R outcomes MAX,3,11; call 3/0 + outcome 7; scalar 2/0 + True,False,True; unsafe arithmetic Unproven; Reserve 29/29 и 10904; E04 141.
 - Последствие: независимый read-only reviewer пересчитал 45 file hashes, ordinal snapshot, manifest/summary и три ignored report bindings; BLOCKER/HIGH/MEDIUM findings не осталось, checkpoint готов к локальному commit.
 - Supersedes / supersededBy: закрывает validation часть K-E05-045 после финального manifest review.
+
+## K-E05-050
+
+- Дата / фаза: 2026-09-07 / implementation.
+- Тип / статус: Contract representation / Confirmed for scalar subset.
+- Утверждение: owner contract можно представить отдельным strict canonical artifact, не смешивая его с agent module; точная связь задаётся через function/contract/parameter IDs, сигнатуру и единственную форму `result == model(parameters)`.
+- Scope: `strogo.owner-bundle.v0.2`, только `I64`/`Bool`, чистые expressions, пустые effects и экспортированные функции без helpers/imports/composites.
+- Evidence: `OwnerBundleParser`, `OwnerBundleCodec`, `OwnerContractBinder`; conformance проверяет canonical roundtrip, defensive copy, non-forgeable bundle, signature/contractRef/function mismatch, source-map identities и domain-separated digest `strogo.owner-bundle.v0.2/bundle`.
+- Последствие: owner смысл получает собственный digest и не может быть ослаблен полем agent module; human approval и подпись этого digest остаются отдельным следующим слоем.
+- Supersedes / supersededBy: реализует скалярную часть E05 owner representation, но не admission chain E05-K09.
+
+## K-E05-051
+
+- Дата / фаза: 2026-09-07 / implementation and validation.
+- Тип / статус: Qualification / Confirmed.
+- Утверждение: обязательный concrete witness, удовлетворяющий `requires`, доказывает непустоту формального domain и проверяет определённость модели на этом входе, но не доказывает полноту/правильность domain относительно человеческой спецификации или тотальность модели на всех допустимых входах.
+- Scope: scalar owner evaluator; witness arguments обязаны точно покрывать parameter IDs и типы.
+- Evidence: valid witness `x=0` даёт model result `1`; `x=I64.MAX` отклоняется как `RequiresWitnessRejected`; расширенный domain с тем же witness у небезопасной модели проходит локальный witness, но затем отклоняется Dafny по общим range obligations.
+- Последствие: witness остаётся ранней независимой concrete-проверкой, а proof отвечает за все входы под `requires`; соответствие человеческому заданию всё равно подтверждает человек.
+- Supersedes / supersededBy: конкретизирует риск пустого requires из утверждённой E05 SPEC.
+
+## K-E05-052
+
+- Дата / фаза: 2026-09-07 / proof validation.
+- Тип / статус: Hypothesis / Confirmed for one scalar contract.
+- Утверждение: exact owner model не фиксирует единственный алгоритм кандидата: один bundle допускает структурно разные `x + 1` и `x - (-1)`, но отклоняет `return x`.
+- Scope: одна I64-функция `addOne`, domain `x <= I64.MAX-1`; это не доказательство общей выразительности языка или AC1 целиком.
+- Evidence: pinned Dafny 4.11.0: обе корректные реализации `4 verified, 0 errors`; отдельные generated C# consumers возвращают `MIN+1,42,MAX`; неправильная реализация завершается exit 4 с `a postcondition could not be proved`.
+- Последствие: следующий benchmark может сравнивать альтернативные agent implementations при неизменном owner artifact; для AC1 ещё требуется второе семейство и helpers/composites.
+- Supersedes / supersededBy: впервые частично снимает ограничение fixed candidate из E05-K01.
+
+## K-E05-053
+
+- Дата / фаза: 2026-09-07 / proof lowering.
+- Тип / статус: Insight / Confirmed.
+- Утверждение: компиляция model AST в одно математическое Dafny-выражение недостаточна для семантики Strogo I64, потому что итог может быть в диапазоне при промежуточном выходе; каждый `i64.add/sub` модели должен материализоваться как типизированное `I64` let-значение.
+- Scope: scalar owner model lowering; сложные math/sequence expressions ещё не реализованы.
+- Evidence: `EmitOwnerExpression` создаёт generated `eNNN: I64`; safe owner model проходит, weak domain сообщает range diagnostic точно на generated model let и отдельно в candidate node.
+- Последствие: будущий lowering составных models обязан сохранять proof obligation каждого типизированного промежуточного значения, а не только конечного return type.
+- Supersedes / supersededBy: усиливает TCB-границу K-E05-042.
+
+## K-E05-054
+
+- Дата / фаза: 2026-09-07 / negative proof validation.
+- Тип / статус: Confirmation / Confirmed.
+- Утверждение: достаточность owner `requires` является проверяемым обязательством, а не доверенной аннотацией: замена `x <= I64.MAX-1` на `true` делает и owner model, и candidate недоказанными.
+- Scope: `owner-add-one-weak.json` и `math-add-valid.json`.
+- Evidence: pinned Dafny exit 4, две фактические diagnostics `result of operation might violate newtype constraint for 'I64'`, итог `2 verified, 2 errors`.
+- Последствие: agent не может получить допуск, просто сославшись на модель с неполным domain; owner также обязан сформулировать модель, тотальную на утверждённой области.
+- Supersedes / supersededBy: подтверждает ожидаемый механизм из K-E05-042 на связанном owner artifact.
+
+## K-E05-055
+
+- Дата / фаза: 2026-09-07 / runtime boundary.
+- Тип / статус: Constraint / Confirmed.
+- Утверждение: proof-carrying generated method ещё не является безопасной публичной библиотекой: Dafny-generated C# не проверяет `requires` при прямом вызове, а текущий harness исполняет только допустимые входы.
+- Scope: generated owner-contract consumers; package manifest, approved digest binding и runtime facade отсутствуют.
+- Evidence: consumers вызывают `Candidate.__default.F000` напрямую на `I64.MIN`, `41`, `I64.MAX-1`; документация и report не заявляют runtime rejection вне domain.
+- Последствие: следующий runtime API обязан валидировать approved precondition до вызова и связывать exact verified source/binary с owner approval; до этого AC4/AC6 не закрыты.
+- Supersedes / supersededBy: уточняет K-E05-048 применительно к owner proof.
+
+## K-E05-056
+
+- Дата / фаза: 2026-09-07 / language boundary.
+- Тип / статус: Constraint / Accepted for scalar checkpoint.
+- Утверждение: arithmetic внутри `requires` и любого Boolean model expression пока отклоняется, чтобы не получить расхождение definedness между strict owner evaluator и Dafny short-circuit/well-formedness rules; границы задаются сравнениями parameters/constants.
+- Scope: текущий scalar predicate AST; I64 model body поддерживает checked `i64.add/sub` с typed intermediate obligations.
+- Evidence: `OwnerContractSemantics.EnsureNoExecutableArithmetic` и `EnsureBooleanExpressionsUseTotalScalarOperands`; executable counterexample `true || eq(i64.add(x,1),0)` отклоняется как `ArithmeticInBooleanContractNotSupported`; документация перечисляет это как явное ограничение, а не постоянный non-goal языка.
+- Последствие: расширение predicate math требует отдельного ghost math layer и явных obligations определённости из E05 SPEC, а не снятия проверки.
+- Supersedes / supersededBy: временно сужает заявленный predicate subset до реализации ghost math.
+
+## K-E05-057
+
+- Дата / фаза: 2026-09-07 / independent review and hardening.
+- Тип / статус: Adversarial findings / Resolved.
+- Утверждение: детерминированный отказ требует отдельной канонизации невалидного transport, а resource limit требует атомарного process containment; канонизатор валидного артефакта и `Process.Kill(tree)` после обычного старта этих свойств не обеспечивают.
+- Scope: scalar owner parser и Windows validation harness; это границы toolchain проверки, а не runtime будущих пакетов.
+- Evidence: reviewer дал контрпримеры `id: 1` против `id: "1"`, переставленных unknown witness arguments и descendant с унаследованным pipe после выхода root. Parser теперь использует type-preserving structural key, preflight duplicate IDs и ordinal arguments; regressions сравнивают `code/entityId/details`. Runner создаёт root через `CreateProcessW(CREATE_SUSPENDED)`, назначает Windows Job Object до `ResumeThread`, отменяет bounded stream drains и self-test подтверждает `ProcessTimeout`, `ProcessOutputLimitExceeded` и `childAliveAfterGrace=false`.
+- Последствие: invalid-input ordering нельзя строить через lossy canonical artifact codec; все будущие внешние tool invocations должны сохранять атомарную containment/deadline/output-cap схему либо явно иметь более строгий runner.
+- Supersedes / supersededBy: уточняет deterministic diagnostics E05 и заменяет прежний прямой запуск tools в K-E05-045/K-E05-047.
+
+## K-E05-058
+
+- Дата / фаза: 2026-09-07 / final validation.
+- Тип / статус: Validation / Confirmed for scalar owner checkpoint.
+- Утверждение: strict scalar owner artifact, exact-outcome lowering и bounded verification harness проходят единый свежий validation run вместе с Reserve v0 и E04 regressions.
+- Scope: snapshot `f9440185…c226fcf9` поверх `ef613d96199de1b81918741f15b5616fb9ac274d`; helper/composite contracts, human approval/admission, package/facade и полный E05 остаются открыты.
+- Evidence: run `20260907-owner-contract-final-v4`; Release build 0 warnings/errors; scoped format PASS; Modules 199 checks/61 cases; owner и alternative по 4 verified/0 errors и outcomes `MIN+1,42,MAX`; wrong exact outcome и weak domain ожидаемо Unproven; process self-tests подтверждают timeout/output cap/orphan kill; Reserve 29/29 и 10904 assertions; E04 141. Manifest SHA-256 `bcbc9a9e…5afc5426`, summary SHA-256 `33457102…191a78d7`; независимый review: PASS, 0 оставшихся BLOCKER/HIGH/MEDIUM.
+- Последствие: scalar owner checkpoint готов к локальному commit; следующий архитектурный шаг должен связать owner approval, proof и неизменный build/package либо расширить contracts на helpers перед package facade.
+- Supersedes / supersededBy: завершает evidence часть K-E05-050–K-E05-057 для этого checkpoint.

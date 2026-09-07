@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using Kernel.Core;
 
@@ -28,6 +29,15 @@ public static class ModulesDafnyLowerer
     private const string I64Declaration = "  newtype {:nativeType \"long\"} I64 = x: int | -9223372036854775808 <= x <= 9223372036854775807 witness 0";
 
     public static DafnyLoweringResult Lower(ModuleIr module)
+        => LowerCore(module, null);
+
+    public static DafnyLoweringResult Lower(ModuleIr module, OwnerBundle ownerBundle)
+    {
+        ArgumentNullException.ThrowIfNull(ownerBundle);
+        return LowerCore(module, OwnerContractBinder.Bind(module, ownerBundle));
+    }
+
+    private static DafnyLoweringResult LowerCore(ModuleIr module, OwnerContractBinding? binding)
     {
         ArgumentNullException.ThrowIfNull(module);
         if (module.Imports.Length != 0)
@@ -44,10 +54,33 @@ public static class ModulesDafnyLowerer
         var functions = module.Functions.OrderBy(function => function.Id, StringComparer.Ordinal).ToArray();
         var symbols = functions.Select((function, index) => (function.Id, Name: $"F{index:D3}"))
             .ToImmutableDictionary(pair => pair.Id, pair => pair.Name, StringComparer.Ordinal);
+        var modelSymbols = binding?.Entries.Select((entry, index) => (entry.Model.Id, Name: $"M{index:D3}"))
+            .ToImmutableDictionary(pair => pair.Id, pair => pair.Name, StringComparer.Ordinal)
+            ?? ImmutableDictionary<string, string>.Empty.WithComparers(StringComparer.Ordinal);
         var writer = new SourceWriter();
         var map = ImmutableArray.CreateBuilder<DafnySourceMapEntry>();
         writer.Add("module Candidate {");
         writer.Add(I64Declaration);
+
+        if (binding is not null)
+        {
+            foreach (var entry in binding.Entries)
+            {
+                var modelName = modelSymbols[entry.Model.Id];
+                var parameters = entry.Model.Parameters.Select((parameter, index) => $"p{index:D3}: {DafnyType(parameter.Type)}");
+                var line = writer.Add($"  function {modelName}({string.Join(", ", parameters)}): {DafnyType(entry.Model.ReturnType)}");
+                map.Add(new DafnySourceMapEntry($"owner/model/{entry.Model.Id}", modelName, line));
+                for (var parameterIndex = 0; parameterIndex < entry.Model.Parameters.Length; parameterIndex++)
+                    map.Add(new DafnySourceMapEntry(
+                        $"owner/model/{entry.Model.Id}/parameter/{entry.Model.Parameters[parameterIndex].Id}",
+                        $"p{parameterIndex:D3}",
+                        line));
+                writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Model.Parameters, modelSymbols)}");
+                writer.Add("  {");
+                writer.Add($"    {EmitOwnerExpression(entry.Model.Body, entry.Model.Parameters, modelSymbols)}");
+                writer.Add("  }");
+            }
+        }
 
         foreach (var function in functions)
         {
@@ -64,6 +97,19 @@ public static class ModulesDafnyLowerer
                     $"function/{function.Id}/parameter/{function.Parameters[parameterIndex].Id}",
                     $"p{parameterIndex:D3}",
                     line));
+            if (binding is not null)
+            {
+                var entry = binding.Entries.Single(bound => bound.Function.Id == function.Id);
+                for (var parameterIndex = 0; parameterIndex < entry.Contract.Parameters.Length; parameterIndex++)
+                    map.Add(new DafnySourceMapEntry(
+                        $"owner/contract/{entry.Contract.Id}/parameter/{entry.Contract.Parameters[parameterIndex].Id}",
+                        $"p{parameterIndex:D3}",
+                        line));
+                var requiresLine = writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Contract.Parameters, modelSymbols)}");
+                map.Add(new DafnySourceMapEntry($"owner/contract/{entry.Contract.Id}/requires", functionName, requiresLine));
+                var ensuresLine = writer.Add($"    ensures result == {modelSymbols[entry.Model.Id]}({string.Join(", ", function.Parameters.Select((_, index) => $"p{index:D3}"))})");
+                map.Add(new DafnySourceMapEntry($"owner/contract/{entry.Contract.Id}/ensures", functionName, ensuresLine));
+            }
             writer.Add("  {");
             var variableCounter = 0;
             var parameterExpressions = function.Parameters.Select((_, index) => $"p{index:D3}").ToArray();
@@ -82,6 +128,42 @@ public static class ModulesDafnyLowerer
 
         writer.Add("}");
         return new DafnyLoweringResult(Encoding.UTF8.GetBytes(writer.Text), map.ToImmutable());
+    }
+
+    private static string EmitOwnerExpression(
+        OwnerExpression expression,
+        ImmutableArray<FunctionParameter> parameters,
+        IReadOnlyDictionary<string, string> modelSymbols)
+    {
+        var parameterSymbols = parameters.Select((parameter, index) => (parameter.Id, Symbol: $"p{index:D3}"))
+            .ToImmutableDictionary(pair => pair.Id, pair => pair.Symbol, StringComparer.Ordinal);
+        var temporaryCounter = 0;
+        return Emit(expression);
+
+        string Emit(OwnerExpression current) => current.Op switch
+        {
+            "param" when current.ReferenceId is { } parameterId && parameterSymbols.TryGetValue(parameterId, out var parameter) => parameter,
+            "i64.const" => current.I64Value!.Value.ToString(CultureInfo.InvariantCulture),
+            "bool.const" => current.BoolValue!.Value ? "true" : "false",
+            "i64.add" => EmitCheckedI64(current, "+"),
+            "i64.sub" => EmitCheckedI64(current, "-"),
+            "i64.le" => $"({Emit(current.Args[0])} <= {Emit(current.Args[1])})",
+            "eq" => $"({Emit(current.Args[0])} == {Emit(current.Args[1])})",
+            "bool.not" => $"(!{Emit(current.Args[0])})",
+            "bool.and" => $"({Emit(current.Args[0])} && {Emit(current.Args[1])})",
+            "bool.or" => $"({Emit(current.Args[0])} || {Emit(current.Args[1])})",
+            "if" => $"(if {Emit(current.Args[0])} then {Emit(current.Args[1])} else {Emit(current.Args[2])})",
+            "model.call" when current.ReferenceId is { } modelId && modelSymbols.TryGetValue(modelId, out var model) => $"{model}({string.Join(", ", current.Args.Select(Emit))})",
+            _ => throw ModulesExceptionFactory.Error("lowering", "InternalInvariantViolation", details: new { reason = "OwnerExpression", current.Op })
+        };
+
+        string EmitCheckedI64(OwnerExpression current, string operation)
+        {
+            var left = Emit(current.Args[0]);
+            var right = Emit(current.Args[1]);
+            var temporary = $"e{temporaryCounter++:D3}";
+            return $"(var {temporary}: I64 := ({left} {operation} {right}); {temporary})";
+        }
     }
 
     private static string EmitRegion(

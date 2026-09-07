@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "math.add.wrong-v1",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "addOne",
+      "parameters": [
+        { "id": "x", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "contractA",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [],
+        "result": "x"
+      }
+    }
+  ],
+  "exports": ["addOne"]
+}

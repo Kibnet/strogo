@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Strogo.Modules;
 
 var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
@@ -19,6 +20,18 @@ if (dafnyUnsafeOutOption >= 0 && dafnyUnsafeOutOption + 1 >= args.Length)
 var dafnyScalarOutOption = Array.IndexOf(args, "--dafny-scalar-out");
 if (dafnyScalarOutOption >= 0 && dafnyScalarOutOption + 1 >= args.Length)
     throw new ArgumentException("--dafny-scalar-out requires a path");
+var dafnyOwnerOutOption = Array.IndexOf(args, "--dafny-owner-out");
+if (dafnyOwnerOutOption >= 0 && dafnyOwnerOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-out requires a path");
+var dafnyOwnerWeakOutOption = Array.IndexOf(args, "--dafny-owner-weak-out");
+if (dafnyOwnerWeakOutOption >= 0 && dafnyOwnerWeakOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-weak-out requires a path");
+var dafnyOwnerAlternativeOutOption = Array.IndexOf(args, "--dafny-owner-alternative-out");
+if (dafnyOwnerAlternativeOutOption >= 0 && dafnyOwnerAlternativeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-alternative-out requires a path");
+var dafnyOwnerWrongOutOption = Array.IndexOf(args, "--dafny-owner-wrong-out");
+if (dafnyOwnerWrongOutOption >= 0 && dafnyOwnerWrongOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-wrong-out requires a path");
 
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
@@ -27,6 +40,10 @@ var dafnyOutPath = dafnyOutOption >= 0 ? Path.GetFullPath(args[dafnyOutOption + 
 var dafnyCallOutPath = dafnyCallOutOption >= 0 ? Path.GetFullPath(args[dafnyCallOutOption + 1], root) : null;
 var dafnyUnsafeOutPath = dafnyUnsafeOutOption >= 0 ? Path.GetFullPath(args[dafnyUnsafeOutOption + 1], root) : null;
 var dafnyScalarOutPath = dafnyScalarOutOption >= 0 ? Path.GetFullPath(args[dafnyScalarOutOption + 1], root) : null;
+var dafnyOwnerOutPath = dafnyOwnerOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerOutOption + 1], root) : null;
+var dafnyOwnerWeakOutPath = dafnyOwnerWeakOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerWeakOutOption + 1], root) : null;
+var dafnyOwnerAlternativeOutPath = dafnyOwnerAlternativeOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerAlternativeOutOption + 1], root) : null;
+var dafnyOwnerWrongOutPath = dafnyOwnerWrongOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerWrongOutOption + 1], root) : null;
 var reportDir = Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("Report path has no directory");
 Directory.CreateDirectory(reportDir);
 var reports = new List<object>();
@@ -101,6 +118,19 @@ ModuleException CaptureLoweringReject(Func<DafnyLoweringResult> lower)
     }
 }
 
+ModuleException CaptureOwnerReject(Action action)
+{
+    try
+    {
+        action();
+        throw new Exception("Expected owner contract rejection");
+    }
+    catch (ModuleException exception)
+    {
+        return exception;
+    }
+}
+
 void ExpectParserRejectWithLimits(string file, StrogoLimits limits, params string[] expectedCodes)
 {
     var bytes = File.ReadAllBytes(Path.Combine(fixtureDir, file));
@@ -144,6 +174,215 @@ try
 
     var ir = ModulesCompiler.Compile(valid);
     Check(ir.Functions.Length == 1, "ir function count");
+
+    var ownerBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-add-one-valid.json"));
+    var owner = OwnerBundleParser.Parse(ownerBytes);
+    Check(owner.SchemaVersion == "strogo.owner-bundle.v0.2", "owner bundle schemaVersion");
+    Check(owner.EntryContracts.Length == 1 && owner.Models.Length == 1, "owner bundle entries and models parsed");
+    Check(owner.BundleDigest.Length == 64, "owner bundle has canonical digest");
+    Check(owner.BundleDigest == OwnerBundleCodec.BundleDigest(owner.CanonicalBytes), "owner bundle digest uses the versioned artifact domain");
+    Check(owner.BundleDigest != Kernel.Core.CanonicalJson.RawDigest(owner.CanonicalBytes), "owner bundle digest cannot be confused with raw content SHA-256");
+    var ownerRoundtrip = OwnerBundleParser.Parse(owner.CanonicalBytes);
+    Check(ownerRoundtrip.BundleDigest == owner.BundleDigest, "owner bundle canonical roundtrip digest");
+    var ownerBytesCopy = owner.CanonicalBytes;
+    ownerBytesCopy[0] ^= 0x01;
+    Check(OwnerBundleParser.Parse(owner.CanonicalBytes).BundleDigest == owner.BundleDigest, "owner canonical bytes are defensively copied");
+    Check(typeof(OwnerBundle).GetConstructors().Length == 0, "validated owner bundle cannot be publicly forged");
+    var ownerBinding = OwnerContractBinder.Bind(ir, owner);
+    Check(ownerBinding.Entries.Length == 1 && ownerBinding.Entries[0].Function.Id == "addOne", "owner contract binds exact module entry");
+    Check(ownerBinding.Entries[0].Witnesses[0].ModelResult.I64 == 1, "owner witness is independently evaluated through the model");
+    var contractedLowering = ModulesDafnyLowerer.Lower(ir, owner);
+    Check(contractedLowering.Source.Contains("requires (p000 <= 9223372036854775806)", StringComparison.Ordinal), "owner requires is emitted into Dafny");
+    Check(contractedLowering.Source.Contains("ensures result == M000(p000)", StringComparison.Ordinal), "exact owner outcome is emitted into Dafny");
+    Check(contractedLowering.Source.Contains("function M000", StringComparison.Ordinal), "owner model is emitted separately from candidate body");
+    Check(!contractedLowering.Source.Contains("addOne.model-v1", StringComparison.Ordinal) && !contractedLowering.Source.Contains("contractA", StringComparison.Ordinal), "owner IDs cannot become generated Dafny syntax");
+    Check(contractedLowering.SourceMap.Any(entry => entry.EntityId == "owner/model/addOne.model-v1") && contractedLowering.SourceMap.Any(entry => entry.EntityId == "owner/contract/contractA/ensures"), "owner model and obligations retain stable source-map identities");
+    Check(contractedLowering.SourceMap.Any(entry => entry.EntityId == "owner/model/addOne.model-v1/parameter/x" && entry.GeneratedName == "p000") && contractedLowering.SourceMap.Any(entry => entry.EntityId == "owner/contract/contractA/parameter/x" && entry.GeneratedName == "p000"), "owner parameter identities map to generated symbols");
+    if (dafnyOwnerOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerOutPath) ?? throw new InvalidOperationException("Dafny owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerOutPath, contractedLowering.SourceBytes);
+    }
+    var weakOwner = OwnerBundleParser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-add-one-weak.json")));
+    var weakOwnerLowering = ModulesDafnyLowerer.Lower(ir, weakOwner);
+    if (dafnyOwnerWeakOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerWeakOutPath) ?? throw new InvalidOperationException("Dafny weak owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerWeakOutPath, weakOwnerLowering.SourceBytes);
+    }
+    var alternativeIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "math-add-alternative.json"))));
+    var alternativeOwnerLowering = ModulesDafnyLowerer.Lower(alternativeIr, owner);
+    Check(alternativeIr.SourceDigest != ir.SourceDigest && alternativeOwnerLowering.SourceDigest != contractedLowering.SourceDigest, "structurally different implementations retain distinct identities");
+    if (dafnyOwnerAlternativeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerAlternativeOutPath) ?? throw new InvalidOperationException("Dafny alternative owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerAlternativeOutPath, alternativeOwnerLowering.SourceBytes);
+    }
+    var wrongIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "math-add-wrong.json"))));
+    var wrongOwnerLowering = ModulesDafnyLowerer.Lower(wrongIr, owner);
+    if (dafnyOwnerWrongOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerWrongOutPath) ?? throw new InvalidOperationException("Dafny wrong owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerWrongOutPath, wrongOwnerLowering.SourceBytes);
+    }
+
+    var ownerText = Encoding.UTF8.GetString(ownerBytes);
+    string DuplicateModelOwner(bool malformedFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        var validModel = rootNode["models"]![0]!.DeepClone();
+        var malformedModel = validModel.DeepClone();
+        malformedModel["body"]!["unexpected"] = true;
+        rootNode["models"] = malformedFirst
+            ? new JsonArray(malformedModel, validModel)
+            : new JsonArray(validModel, malformedModel);
+        return rootNode.ToJsonString();
+    }
+
+    string DuplicateEntryOwner(bool malformedFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        var validEntry = rootNode["entryContracts"]![0]!.DeepClone();
+        var malformedEntry = validEntry.DeepClone();
+        malformedEntry["requires"]!["unexpected"] = true;
+        rootNode["entryContracts"] = malformedFirst
+            ? new JsonArray(malformedEntry, validEntry)
+            : new JsonArray(validEntry, malformedEntry);
+        return rootNode.ToJsonString();
+    }
+
+    string DuplicateWitnessOwner(bool malformedFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        var entry = rootNode["entryContracts"]![0]!;
+        var validWitness = entry["witnesses"]![0]!.DeepClone();
+        var malformedWitness = validWitness.DeepClone();
+        malformedWitness["arguments"] = "malformed";
+        entry["witnesses"] = malformedFirst
+            ? new JsonArray(malformedWitness, validWitness)
+            : new JsonArray(validWitness, malformedWitness);
+        return rootNode.ToJsonString();
+    }
+
+    var duplicateModelFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateModelOwner(malformedFirst: true)));
+    var duplicateModelLast = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateModelOwner(malformedFirst: false)));
+    Check(duplicateModelFirst.Code == "DuplicateModelId" && duplicateModelFirst.EntityId == "addOne.model-v1", "owner parser preflights duplicate model IDs before model bodies");
+    Check(duplicateModelFirst.Code == duplicateModelLast.Code && duplicateModelFirst.EntityId == duplicateModelLast.EntityId && duplicateModelFirst.DetailsJson == duplicateModelLast.DetailsJson, "reordered duplicate owner models return identical diagnostics");
+    var duplicateEntryFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateEntryOwner(malformedFirst: true)));
+    var duplicateEntryLast = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateEntryOwner(malformedFirst: false)));
+    Check(duplicateEntryFirst.Code == "DuplicateEntryContractId" && duplicateEntryFirst.EntityId == "contractA", "owner parser preflights duplicate entry IDs before entry bodies");
+    Check(duplicateEntryFirst.Code == duplicateEntryLast.Code && duplicateEntryFirst.EntityId == duplicateEntryLast.EntityId && duplicateEntryFirst.DetailsJson == duplicateEntryLast.DetailsJson, "reordered duplicate owner entries return identical diagnostics");
+    var duplicateWitnessFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateWitnessOwner(malformedFirst: true)));
+    var duplicateWitnessLast = CaptureOwnerReject(() => OwnerBundleParser.Parse(DuplicateWitnessOwner(malformedFirst: false)));
+    Check(duplicateWitnessFirst.Code == "DuplicateWitnessId" && duplicateWitnessFirst.EntityId == "contract/contractA/witness/zero-v1", "owner parser preflights duplicate witness IDs before witness bodies");
+    Check(duplicateWitnessFirst.Code == duplicateWitnessLast.Code && duplicateWitnessFirst.EntityId == duplicateWitnessLast.EntityId && duplicateWitnessFirst.DetailsJson == duplicateWitnessLast.DetailsJson, "reordered duplicate owner witnesses return identical diagnostics");
+    string InvalidModelIdKindOwner(bool numberFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        var numericIdModel = rootNode["models"]![0]!.DeepClone();
+        numericIdModel["id"] = 1;
+        var stringIdModel = rootNode["models"]![0]!.DeepClone();
+        stringIdModel["id"] = "1";
+        rootNode["models"] = numberFirst
+            ? new JsonArray(numericIdModel, stringIdModel)
+            : new JsonArray(stringIdModel, numericIdModel);
+        return rootNode.ToJsonString();
+    }
+
+    var invalidModelIdKindFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(InvalidModelIdKindOwner(numberFirst: true)));
+    var invalidModelIdKindLast = CaptureOwnerReject(() => OwnerBundleParser.Parse(InvalidModelIdKindOwner(numberFirst: false)));
+    Check(invalidModelIdKindFirst.Code == "SchemaInvalid", "invalid-input structural ordering distinguishes a JSON number from a string");
+    Check(invalidModelIdKindFirst.Code == invalidModelIdKindLast.Code && invalidModelIdKindFirst.EntityId == invalidModelIdKindLast.EntityId && invalidModelIdKindFirst.DetailsJson == invalidModelIdKindLast.DetailsJson, "colliding artifact encodings return identical diagnostics after model reordering");
+    string UnknownWitnessArgumentsOwner(bool zFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        var arguments = rootNode["entryContracts"]![0]!["witnesses"]![0]!["arguments"]!.AsArray();
+        var yArgument = arguments[0]!.DeepClone();
+        yArgument["parameterId"] = "y";
+        var zArgument = arguments[0]!.DeepClone();
+        zArgument["parameterId"] = "z";
+        arguments.Clear();
+        if (zFirst)
+        {
+            arguments.Add(zArgument);
+            arguments.Add(yArgument);
+        }
+        else
+        {
+            arguments.Add(yArgument);
+            arguments.Add(zArgument);
+        }
+        return rootNode.ToJsonString();
+    }
+
+    var unknownArgumentZFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(UnknownWitnessArgumentsOwner(zFirst: true)));
+    var unknownArgumentYFirst = CaptureOwnerReject(() => OwnerBundleParser.Parse(UnknownWitnessArgumentsOwner(zFirst: false)));
+    Check(unknownArgumentZFirst.Code == "UnknownWitnessParameter" && unknownArgumentZFirst.EntityId == "y", "owner parser chooses the lowest stable unknown witness parameter ID");
+    Check(unknownArgumentZFirst.Code == unknownArgumentYFirst.Code && unknownArgumentZFirst.EntityId == unknownArgumentYFirst.EntityId && unknownArgumentZFirst.DetailsJson == unknownArgumentYFirst.DetailsJson, "reordered unknown witness arguments return identical diagnostics");
+    var invalidWitness = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"value\": \"0\"", "\"value\": \"9223372036854775807\"", StringComparison.Ordinal))));
+    Check(invalidWitness.Code == "RequiresWitnessRejected", "owner requires needs a concrete satisfying witness");
+    var missingWitnesses = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"witnesses\": [", "\"witnessesRemoved\": [", StringComparison.Ordinal))));
+    Check(missingWitnesses.Code == "SchemaInvalid", "owner witness field is mandatory");
+    var emptyWitnessNode = JsonNode.Parse(ownerText)!.AsObject();
+    emptyWitnessNode["entryContracts"]![0]!["witnesses"] = new JsonArray();
+    var emptyWitnessArray = CaptureOwnerReject(() => OwnerBundleParser.Parse(emptyWitnessNode.ToJsonString()));
+    Check(emptyWitnessArray.Code == "RequiresWitnessRequired", "owner bundle rejects an empty witness array");
+    var nonExactEnsures = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"op\": \"model.call\"", "\"op\": \"param\"", StringComparison.Ordinal))));
+    Check(nonExactEnsures.Code is "SchemaInvalid" or "ExactOutcomeRequired", "owner ensures cannot omit exact model call");
+    var reversedEnsuresNode = JsonNode.Parse(ownerText)!.AsObject();
+    var reversedEnsuresArgs = reversedEnsuresNode["entryContracts"]![0]!["ensures"]!["args"]!.AsArray();
+    var originalResult = reversedEnsuresArgs[0]!.DeepClone();
+    var originalModelCall = reversedEnsuresArgs[1]!.DeepClone();
+    reversedEnsuresArgs[0] = originalModelCall;
+    reversedEnsuresArgs[1] = originalResult;
+    var reversedEnsures = CaptureOwnerReject(() => OwnerBundleParser.Parse(reversedEnsuresNode.ToJsonString()));
+    Check(reversedEnsures.Code == "ExactOutcomeRequired", "owner exact outcome has one canonical operand order");
+    var effectfulOwner = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"effects\": []", "\"effects\": [\"network\"]", StringComparison.Ordinal))));
+    Check(effectfulOwner.Code == "EffectsNotSupported", "scalar owner bundle rejects effects");
+    string EffectfulOwner(bool networkFirst)
+    {
+        var rootNode = JsonNode.Parse(ownerText)!.AsObject();
+        rootNode["entryContracts"]![0]!["effects"] = networkFirst
+            ? new JsonArray("network", "filesystem")
+            : new JsonArray("filesystem", "network");
+        return rootNode.ToJsonString();
+    }
+
+    var effectOrderOne = CaptureOwnerReject(() => OwnerBundleParser.Parse(EffectfulOwner(networkFirst: true)));
+    var effectOrderTwo = CaptureOwnerReject(() => OwnerBundleParser.Parse(EffectfulOwner(networkFirst: false)));
+    Check(effectOrderOne.Code == effectOrderTwo.Code && effectOrderOne.EntityId == effectOrderTwo.EntityId && effectOrderOne.DetailsJson == effectOrderTwo.DetailsJson, "unsupported owner effects return transport-order-independent diagnostics");
+    var arithmeticRequiresNode = JsonNode.Parse(ownerText)!.AsObject();
+    arithmeticRequiresNode["entryContracts"]![0]!["requires"] = JsonNode.Parse("{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"i64.add\",\"type\":\"I64\",\"args\":[{\"op\":\"param\",\"type\":\"I64\",\"id\":\"x\"},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]}");
+    var arithmeticRequires = CaptureOwnerReject(() => OwnerBundleParser.Parse(arithmeticRequiresNode.ToJsonString()));
+    Check(arithmeticRequires.Code == "ArithmeticInRequiresNotSupported", "scalar owner requires fails closed outside its total predicate subset");
+    var booleanArithmeticModelNode = JsonNode.Parse(ownerText)!.AsObject();
+    booleanArithmeticModelNode["entryContracts"]![0]!["returnType"] = "Bool";
+    booleanArithmeticModelNode["entryContracts"]![0]!["ensures"]!["args"]![0]!["type"] = "Bool";
+    booleanArithmeticModelNode["entryContracts"]![0]!["ensures"]!["args"]![1]!["type"] = "Bool";
+    booleanArithmeticModelNode["models"]![0]!["returnType"] = "Bool";
+    booleanArithmeticModelNode["models"]![0]!["body"] = JsonNode.Parse("{\"op\":\"bool.or\",\"type\":\"Bool\",\"args\":[{\"op\":\"bool.const\",\"type\":\"Bool\",\"value\":true},{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"i64.add\",\"type\":\"I64\",\"args\":[{\"op\":\"param\",\"type\":\"I64\",\"id\":\"x\"},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"0\"}]}]}");
+    var booleanArithmeticModel = CaptureOwnerReject(() => OwnerBundleParser.Parse(booleanArithmeticModelNode.ToJsonString()));
+    Check(booleanArithmeticModel.Code == "ArithmeticInBooleanContractNotSupported", "Boolean models cannot hide undefined I64 arithmetic behind backend short-circuit evaluation");
+    var undefinedModelText = ownerText.Replace("9223372036854775806", "9223372036854775807", StringComparison.Ordinal)
+        .Replace("\"value\": \"0\"", "\"value\": \"9223372036854775807\"", StringComparison.Ordinal);
+    var undefinedModel = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(undefinedModelText)));
+    Check(undefinedModel.Code == "ModelUndefinedAtWitness", "owner model must be defined for its accepted witness");
+    var mismatchedOwner = OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"functionRef\": \"addOne\"", "\"functionRef\": \"other\"", StringComparison.Ordinal)));
+    var mismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(ir, mismatchedOwner));
+    Check(mismatch.Code == "OwnerEntryMismatch", "owner contract cannot bind a different function");
+    var contractRefMismatchIr = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(validBytes).Replace("\"contractRef\": \"contractA\"", "\"contractRef\": \"otherContract\"", StringComparison.Ordinal))));
+    var contractRefMismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(contractRefMismatchIr, owner));
+    Check(contractRefMismatch.Code == "OwnerContractRefMismatch", "agent module cannot substitute an owner contract reference");
+    var renamedParameterText = Encoding.UTF8.GetString(validBytes)
+        .Replace("\"id\": \"x\", \"type\": \"I64\"", "\"id\": \"y\", \"type\": \"I64\"", StringComparison.Ordinal)
+        .Replace("\"parameters\": [\"x\"]", "\"parameters\": [\"y\"]", StringComparison.Ordinal)
+        .Replace("[\"x\", \"one\"]", "[\"y\", \"one\"]", StringComparison.Ordinal);
+    var renamedParameterIr = ModulesCompiler.Compile(ModulesParser.ParseModule(renamedParameterText));
+    var signatureMismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(renamedParameterIr, owner));
+    Check(signatureMismatch.Code == "OwnerSignatureMismatch", "owner binding includes stable parameter identities, not only parameter types");
+    var helperMismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "call-safe.json")))), owner));
+    Check(helperMismatch.Code == "UnsupportedOwnerHelpers", "scalar owner checkpoint fails closed for helper contracts");
+    reports.Add(new { kind = "owner-contract", fixture = "owner-add-one-valid.json", owner.BundleDigest, contractedLowering.SourceDigest, alternativeSourceDigest = alternativeOwnerLowering.SourceDigest, wrongSourceDigest = wrongOwnerLowering.SourceDigest, witnesses = ownerBinding.Entries[0].Witnesses.Length });
 
     var first = ir.Functions[0];
     Check(first.Instructions.Length == valid.Source.Functions[0].Body.Nodes.Length, "ir instruction count");
@@ -216,11 +455,11 @@ try
     Check(!EvalBool("negate", new ModuleBool(true)), "bool.not maps true to false");
     Check(EvalBool("negate", new ModuleBool(false)), "bool.not maps false to true");
     foreach (var left in new[] { false, true })
-    foreach (var right in new[] { false, true })
-    {
-        Check(EvalBool("conjunction", new ModuleBool(left), new ModuleBool(right)) == (left && right), $"bool.and truth table {left}/{right}");
-        Check(EvalBool("disjunction", new ModuleBool(left), new ModuleBool(right)) == (left || right), $"bool.or truth table {left}/{right}");
-    }
+        foreach (var right in new[] { false, true })
+        {
+            Check(EvalBool("conjunction", new ModuleBool(left), new ModuleBool(right)) == (left && right), $"bool.and truth table {left}/{right}");
+            Check(EvalBool("disjunction", new ModuleBool(left), new ModuleBool(right)) == (left || right), $"bool.or truth table {left}/{right}");
+        }
     reports.Add(new { kind = "runtime", fixture = "scalar-reference-valid.json", semanticChecks = 16 });
 
     var lazyModule = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "if-lazy-overflow.json"))));

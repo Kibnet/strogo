@@ -1,6 +1,6 @@
-# Strogo Modules v0.2: структура, составные значения, regions и IR
+# Strogo Modules v0.2: структура, owner contracts, regions и IR
 
-Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar reference semantics и первый ограниченный lowering в Dafny/C#.
+Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar reference semantics, скалярный owner bundle и ограниченный lowering в Dafny/C# с exact-outcome proof.
 
 ## 1) Структура исходного модуля
 
@@ -145,30 +145,55 @@ Evaluator намеренно отделён от будущей generated librar
 
 `I64` задаётся как native newtype с точным диапазоном `Int64`. Поэтому безопасный selector и безопасный local call проверяются и переводятся в C# методы с параметрами/результатами `long`. Арифметика без достаточного owner `requires` не получает скрытого предусловия: Dafny отклоняет `addOne(x)` на полном диапазоне как `Unproven`, потому что результат может выйти за границу newtype.
 
+Перегрузка `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundle)` сначала выполняет строгую привязку bundle, затем добавляет owner model как Dafny `function`, переносит утверждённый `requires` и создаёт единственное допустимое postcondition `ensures result == M(parameters)`. Внутренние результаты `i64.add`/`i64.sub` модели материализуются типизированными `I64` let-выражениями: backend обязан доказать диапазон каждого шага, а не только итогового математического выражения.
+
 Первый end-to-end smoke запускается командой:
 
 ```powershell
 pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/modules-dafny-lowering
 ```
 
-Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call и остальные scalar operators закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers selector/call/scalar. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
+Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call и остальные scalar operators закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, проверяет две структурно разные реализации одного owner contract и обязательный отказ неверной реализации/слабого domain. Он публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers. Каждый внешний процесс имеет общий deadline 180 секунд и общий лимит stdout/stderr 1 MiB. Windows Job Object связывается с root, созданным в suspended-состоянии, до его запуска; timeout/output overflow завершают всё дерево и возвращают типизированный отказ. Harness сам проверяет timeout, переполнение вывода и завершение дочернего процесса, пережившего root. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
 
-Текущий lowering fail closed для records, sequences и непустых imports. Он ещё не соединён с owner bundle, exact-outcome model, proof receipt, package manifest, canonical ABI и публичным runtime facade. Поэтому успешная Dafny verification здесь доказывает только выполнимость и range/type obligations самого ограниченного кандидата, а не соответствие человеческой спецификации.
+Текущий lowering fail closed для records, sequences, непустых imports и helper contracts. Owner proof пока поддерживает только `I64`/`Bool`; arithmetic в `requires` и внутри Boolean model expressions отклоняется, чтобы strict contract evaluator не расходился с short-circuit definedness backend. Модель обязана быть отдельным чистым выражением. Нет proof receipt, human approval artifact, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification устанавливает соответствие скалярного кандидата конкретному parsed owner bundle и его формальной модели, но не соответствие bundle человеческой спецификации и не неизменность будущего исполняемого пакета.
 
-## 10) Artefact и проверяемые границы checkpoint
+## 10) Скалярный owner bundle
+
+Owner artifact имеет отдельную версию `strogo.owner-bundle.v0.2` и обязательные поля `schemaVersion`, `bundleId`, `entryContracts`, `models`, `limits`. Неизвестные, пропущенные и повторные поля запрещены; canonical bytes строятся после сортировки именованных множеств по ID. Bundle digest отделён от raw hashes и других артефактов: `SHA256(UTF8("strogo.owner-bundle.v0.2/bundle\n") || canonicalBytes)`.
+
+Каждый entry contract фиксирует:
+
+- `id` и `functionRef`;
+- точную сигнатуру с устойчивыми ID параметров;
+- Boolean `requires`;
+- `ensures` ровно в канонической форме `eq(result, model.call(parameters))`;
+- пустой `effects`;
+- хотя бы один конкретный witness допустимого входа.
+
+Model имеет собственный ID, ту же сигнатуру и чистое типизированное expression tree. Поддержанный скалярный фрагмент: `param`, `result`, `i64.const`, `bool.const`, `i64.add/sub/le`, `eq`, `bool.not/and/or`, `if`, `model.call` только в exact `ensures`. Limits bundle ограничивают общее число/глубину expression nodes и число witnesses и сами не могут превысить hard maxima реализации.
+
+Parser проверяет типы и форму независимо от candidate module. До разбора тел он канонически упорядочивает невалидные элементы по инъективному структурному ключу, который сохраняет `JsonValueKind`, и заранее проверяет повторные IDs. Поэтому перестановка malformed models/contracts/witnesses и неизвестных witness arguments не меняет `code`, `entityId` и `details`. Witness затем вычисляется отдельным checked evaluator: `requires` обязан вернуть `true`, а model — определённое значение. Конкретный допустимый witness доказывает непустоту формального `requires` и сразу обнаруживает часть ошибок модели. Он не доказывает полноту или правильность domain относительно человеческой спецификации и не доказывает тотальность модели на всех допустимых входах; общая тотальность модели и соответствие кандидата проверяются Dafny под `requires`.
+
+Binder требует точного совпадения exports, `contractRef`, function/parameter IDs, порядка и типов. Текущий срез отклоняет helpers, imports, records и sequences, потому что правила их контрактов ещё не реализованы. Один owner bundle `owner-add-one-valid.json` успешно связан с двумя различными кандидатами: `x + 1` и `x - (-1)`. Оба проходят `4 verified, 0 errors` и возвращают одинаковые граничные outcomes; `return x` не проходит exact postcondition. Bundle с `requires true` не проходит две range obligations — отдельно для модели и кандидата.
+
+## 11) Artefact и проверяемые границы checkpoint
 
 - `ModulesCodec.Canonicalize(ModuleSource)` выдает каноническое представление.
 - `ModulesCodec.SourceDigest` — `RawDigest` от canonical source.
 - `ModulesCodec.Canonicalize(ModuleIr)` и `ModulesCodec.IrDigest` подготовлены для следующего шага.
 - `ModulesDafnyLowerer.Lower(ModuleIr)` создаёт deterministic Dafny source, digest и source map для scalar profile.
+- `OwnerBundleParser.Parse` создаёт неподлежащее публичной подделке canonical owner representation и digest.
+- `OwnerContractBinder.Bind` связывает bundle с экспортами/сигнатурами module и независимо вычисляет witnesses.
+- `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundle)` создаёт owner model, `requires` и exact-outcome `ensures`.
 - На этом checkpoint покрыто:
   - формальная структура формата и синтаксическая строгость;
   - парсер + типовые валидации v0.2;
   - компиляция в детерминированный IR-слой;
   - ограниченная исполняемая reference-семантика scalar/`if`/local call;
-  - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector.
+  - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector;
+  - первый exact-outcome proof: две разные реализации одного owner contract приняты, неправильная реализация и слабое предусловие отклонены.
 
-## 11) Проверяемые фикстуры
+## 12) Проверяемые фикстуры
 
 Для conformance сейчас доступны:
 - `fixtures/modules-v0.2/math-add-valid.json`;
@@ -184,10 +209,12 @@ pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-v
 - `call-scalar-valid.json`, проверяющий локальные вызовы и общий step budget;
 - `if-nested-safe.json` и `call-safe.json`, проверяющие recursive scalar lowering, три различимых исхода, generated symbol isolation и source map;
 - `scalar-lowering-safe.json`, проверяющий Dafny translation и generated C# execution `i64.sub/le/eq` и `bool.const/not/and/or`;
+- `owner-add-one-valid.json` и `owner-add-one-weak.json`, различающие достаточный и недостаточный owner domain;
+- `math-add-valid.json`, `math-add-alternative.json` и `math-add-wrong.json`, различающие две корректные реализации и неверный outcome при одном contract/model;
 - негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
-## 12) Текущая граница
+## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` semantics в reference evaluator и scalar/`if` lowering до реально исполненной ReadyToRun сборки на `win-x64`. Он ещё не реализует records/sequences lowering, `fold`, разрешение import closure, owner contracts, exact-outcome proof/admission, package/facade или два требуемых E05 семейства. Поэтому результат не является готовой исполняемой библиотекой Strogo и пока не закрывает AC1–AC7 или цели G01–G06.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` semantics в reference evaluator и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует records/sequences lowering, `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.
