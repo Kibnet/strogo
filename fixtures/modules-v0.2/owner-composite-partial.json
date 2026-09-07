@@ -1,0 +1,220 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.3",
+  "bundleId": "summary.owner-partial-v1",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        {
+          "id": "count",
+          "type": "I64"
+        },
+        {
+          "id": "values",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "4"
+          }
+        }
+      ]
+    }
+  ],
+  "entryContracts": [
+    {
+      "id": "makeSummaryContract",
+      "functionRef": "makeSummary",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "Summary",
+      "requires": {
+        "op": "i64.le",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "x"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "9223372036854775806"
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty-shape-v1",
+          "arguments": [
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "makeSummary.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "makeSummary.model-v1",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "Summary",
+      "body": {
+        "op": "if",
+        "type": "Summary",
+        "args": [
+          {
+            "op": "i64.le",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "param",
+                "type": "I64",
+                "id": "x"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              }
+            ]
+          },
+          {
+            "op": "record.make",
+            "type": "Summary",
+            "recordType": "Summary",
+            "fieldIds": [
+              "count",
+              "values"
+            ],
+            "args": [
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "2"
+              },
+              {
+                "op": "seq.append",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "4"
+                },
+                "args": [
+                  {
+                    "op": "seq.append",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "4"
+                    },
+                    "args": [
+                      {
+                        "op": "seq.empty",
+                        "type": {
+                          "kind": "Seq",
+                          "elementType": "I64",
+                          "capacity": "4"
+                        },
+                        "elementType": "I64",
+                        "capacity": "4",
+                        "args": []
+                      },
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "i64.add",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "x"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "record.make",
+            "type": "Summary",
+            "recordType": "Summary",
+            "fieldIds": [
+              "count",
+              "values"
+            ],
+            "args": [
+              {
+                "op": "seq.get",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "seq.empty",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "4"
+                    },
+                    "elementType": "I64",
+                    "capacity": "4",
+                    "args": []
+                  },
+                  {
+                    "op": "i64.const",
+                    "type": "I64",
+                    "value": "0"
+                  }
+                ]
+              },
+              {
+                "op": "seq.empty",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "4"
+                },
+                "elementType": "I64",
+                "capacity": "4",
+                "args": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "128",
+    "maxExpressionDepth": "16",
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "64"
+  }
+}

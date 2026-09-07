@@ -429,17 +429,23 @@ $ownerSource = Join-Path $runPath 'OwnerCandidate.dfy'
 $weakOwnerSource = Join-Path $runPath 'WeakOwnerCandidate.dfy'
 $alternativeOwnerSource = Join-Path $runPath 'AlternativeOwnerCandidate.dfy'
 $wrongOwnerSource = Join-Path $runPath 'WrongOwnerCandidate.dfy'
+$compositeOwnerSource = Join-Path $runPath 'CompositeOwnerCandidate.dfy'
+$alternativeCompositeOwnerSource = Join-Path $runPath 'AlternativeCompositeOwnerCandidate.dfy'
+$wrongCompositeOwnerSource = Join-Path $runPath 'WrongCompositeOwnerCandidate.dfy'
+$partialCompositeOwnerSource = Join-Path $runPath 'PartialCompositeOwnerCandidate.dfy'
 $safeGenerated = Join-Path $runPath 'Generated.cs'
 $callGenerated = Join-Path $runPath 'CallGenerated.cs'
 $scalarGenerated = Join-Path $runPath 'ScalarGenerated.cs'
 $ownerGenerated = Join-Path $runPath 'OwnerGenerated.cs'
 $alternativeOwnerGenerated = Join-Path $runPath 'AlternativeOwnerGenerated.cs'
+$compositeOwnerGenerated = Join-Path $runPath 'CompositeOwnerGenerated.cs'
+$alternativeCompositeOwnerGenerated = Join-Path $runPath 'AlternativeCompositeOwnerGenerated.cs'
 $summaryPath = Join-Path $runPath 'dafny-lowering.json'
 Remove-Item -LiteralPath $summaryPath -ErrorAction SilentlyContinue
 
 Push-Location $repoRoot
 try {
-    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-composite-out', $compositeSource, '--dafny-composite-unsafe-out', $unsafeCompositeSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource)
+    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-composite-out', $compositeSource, '--dafny-composite-unsafe-out', $unsafeCompositeSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource, '--dafny-owner-composite-out', $compositeOwnerSource, '--dafny-owner-composite-alternative-out', $alternativeCompositeOwnerSource, '--dafny-owner-composite-wrong-out', $wrongCompositeOwnerSource, '--dafny-owner-composite-partial-out', $partialCompositeOwnerSource)
     if ($conformanceRun.ExitCode -ne 0) { throw "Modules conformance failed:`n$($conformanceRun.Output)" }
 
     $safeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('translate', 'cs', $safeSource, '--include-runtime', '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15', '--output', $safeGenerated)
@@ -481,6 +487,26 @@ try {
     $ownerVerification = $ownerRun.Output.Trim()
     $ownerExitCode = $ownerRun.ExitCode
     if ($ownerExitCode -ne 0 -or $ownerVerification -notmatch '(?m)^Dafny program verifier finished with 4 verified, 0 errors\r?$') { throw "Owner contract verification failed:`n$ownerVerification" }
+
+    $compositeOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('translate', 'cs', $compositeOwnerSource, '--include-runtime', '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15', '--output', $compositeOwnerGenerated)
+    $compositeOwnerVerification = $compositeOwnerRun.Output.Trim()
+    $compositeOwnerExitCode = $compositeOwnerRun.ExitCode
+    if ($compositeOwnerExitCode -ne 0 -or $compositeOwnerVerification -notmatch '(?m)^Dafny program verifier finished with 5 verified, 0 errors\r?$') { throw "Composite owner contract verification failed:`n$compositeOwnerVerification" }
+
+    $alternativeCompositeOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('translate', 'cs', $alternativeCompositeOwnerSource, '--include-runtime', '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15', '--output', $alternativeCompositeOwnerGenerated)
+    $alternativeCompositeOwnerVerification = $alternativeCompositeOwnerRun.Output.Trim()
+    $alternativeCompositeOwnerExitCode = $alternativeCompositeOwnerRun.ExitCode
+    if ($alternativeCompositeOwnerExitCode -ne 0 -or $alternativeCompositeOwnerVerification -notmatch '(?m)^Dafny program verifier finished with 5 verified, 0 errors\r?$') { throw "Alternative composite owner verification failed:`n$alternativeCompositeOwnerVerification" }
+
+    $wrongCompositeOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $wrongCompositeOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $wrongCompositeOwnerVerification = $wrongCompositeOwnerRun.Output.Trim()
+    $wrongCompositeOwnerExitCode = $wrongCompositeOwnerRun.ExitCode
+    if ($wrongCompositeOwnerExitCode -eq 0 -or $wrongCompositeOwnerVerification -notmatch 'a postcondition could not be proved') { throw "Wrong composite owner implementation did not fail exact outcome:`n$wrongCompositeOwnerVerification" }
+
+    $partialCompositeOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $partialCompositeOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $partialCompositeOwnerVerification = $partialCompositeOwnerRun.Output.Trim()
+    $partialCompositeOwnerExitCode = $partialCompositeOwnerRun.ExitCode
+    if ($partialCompositeOwnerExitCode -eq 0 -or $partialCompositeOwnerVerification -notmatch 'index out of range') { throw "Partial composite owner model did not fail its range obligation:`n$partialCompositeOwnerVerification" }
 
     $weakOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $weakOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
     $weakOwnerVerification = $weakOwnerRun.Output.Trim()
@@ -584,6 +610,25 @@ return minimum == long.MinValue + 1L && ordinary == 42L && maximum == long.MaxVa
     [IO.File]::WriteAllText((Join-Path $runPath 'OwnerConsumer.csproj'), $ownerConsumerProject, $utf8)
     [IO.File]::WriteAllText((Join-Path $runPath 'OwnerProgram.cs'), $ownerConsumerProgram, $utf8)
 
+    $compositeOwnerGeneratedProject = $generatedProject.Replace('Strogo.Generated.SafeSelect', 'Strogo.Generated.CompositeOwnerContract').Replace('Generated.cs', 'CompositeOwnerGenerated.cs')
+    $compositeOwnerConsumerProject = $consumerProject.Replace('Program.cs', 'CompositeOwnerProgram.cs').Replace('Generated.csproj', 'CompositeOwnerGenerated.csproj')
+    $compositeOwnerConsumerProgram = @'
+var zero = Candidate.__default.F000(0L);
+var fortyOne = Candidate.__default.F000(41L);
+Console.WriteLine($"compositeOwnerOutcomes={zero};{fortyOne}");
+return zero.dtor_R000F000 == 2L && zero.dtor_R000F001.LongCount == 2L
+    && fortyOne.dtor_R000F000 == 2L && fortyOne.dtor_R000F001.LongCount == 2L ? 0 : 1;
+'@
+    [IO.File]::WriteAllText((Join-Path $runPath 'CompositeOwnerGenerated.csproj'), $compositeOwnerGeneratedProject, $utf8)
+    [IO.File]::WriteAllText((Join-Path $runPath 'CompositeOwnerConsumer.csproj'), $compositeOwnerConsumerProject, $utf8)
+    [IO.File]::WriteAllText((Join-Path $runPath 'CompositeOwnerProgram.cs'), $compositeOwnerConsumerProgram, $utf8)
+
+    $alternativeCompositeOwnerGeneratedProject = $generatedProject.Replace('Strogo.Generated.SafeSelect', 'Strogo.Generated.AlternativeCompositeOwnerContract').Replace('Generated.cs', 'AlternativeCompositeOwnerGenerated.cs')
+    $alternativeCompositeOwnerConsumerProject = $consumerProject.Replace('Program.cs', 'AlternativeCompositeOwnerProgram.cs').Replace('Generated.csproj', 'AlternativeCompositeOwnerGenerated.csproj')
+    [IO.File]::WriteAllText((Join-Path $runPath 'AlternativeCompositeOwnerGenerated.csproj'), $alternativeCompositeOwnerGeneratedProject, $utf8)
+    [IO.File]::WriteAllText((Join-Path $runPath 'AlternativeCompositeOwnerConsumer.csproj'), $alternativeCompositeOwnerConsumerProject, $utf8)
+    [IO.File]::WriteAllText((Join-Path $runPath 'AlternativeCompositeOwnerProgram.cs'), $compositeOwnerConsumerProgram, $utf8)
+
     $alternativeOwnerGeneratedProject = $generatedProject.Replace('Strogo.Generated.SafeSelect', 'Strogo.Generated.AlternativeOwnerContract').Replace('Generated.cs', 'AlternativeOwnerGenerated.cs')
     $alternativeOwnerConsumerProject = $consumerProject.Replace('Program.cs', 'AlternativeOwnerProgram.cs').Replace('Generated.csproj', 'AlternativeOwnerGenerated.csproj')
     [IO.File]::WriteAllText((Join-Path $runPath 'AlternativeOwnerGenerated.csproj'), $alternativeOwnerGeneratedProject, $utf8)
@@ -612,6 +657,16 @@ return minimum == long.MinValue + 1L && ordinary == 42L && maximum == long.MaxVa
     $ownerConsumerOutput = $ownerConsumerRun.Output.Trim()
     if ($ownerConsumerRun.ExitCode -ne 0 -or $ownerConsumerOutput -notmatch '(?m)^ownerOutcomes=-9223372036854775807,42,9223372036854775807\r?$') { throw "Generated owner-contract consumer failed:`n$ownerConsumerOutput" }
     $ownerOutcomeLine = $Matches[0].Trim()
+
+    $compositeOwnerConsumerRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', (Join-Path $runPath 'CompositeOwnerConsumer.csproj'), '-c', 'Release')
+    $compositeOwnerConsumerOutput = $compositeOwnerConsumerRun.Output.Trim()
+    if ($compositeOwnerConsumerRun.ExitCode -ne 0 -or $compositeOwnerConsumerOutput -notmatch '(?m)^compositeOwnerOutcomes=Candidate\.R000\.C000\(2, \[0, 1\]\);Candidate\.R000\.C000\(2, \[41, 42\]\)\r?$') { throw "Generated composite owner consumer failed:`n$compositeOwnerConsumerOutput" }
+    $compositeOwnerOutcomeLine = $Matches[0].Trim()
+
+    $alternativeCompositeOwnerConsumerRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', (Join-Path $runPath 'AlternativeCompositeOwnerConsumer.csproj'), '-c', 'Release')
+    $alternativeCompositeOwnerConsumerOutput = $alternativeCompositeOwnerConsumerRun.Output.Trim()
+    if ($alternativeCompositeOwnerConsumerRun.ExitCode -ne 0 -or $alternativeCompositeOwnerConsumerOutput -notmatch '(?m)^compositeOwnerOutcomes=Candidate\.R000\.C000\(2, \[0, 1\]\);Candidate\.R000\.C000\(2, \[41, 42\]\)\r?$') { throw "Generated alternative composite owner consumer failed:`n$alternativeCompositeOwnerConsumerOutput" }
+    $alternativeCompositeOwnerOutcomeLine = $Matches[0].Trim()
 
     $alternativeOwnerConsumerRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', (Join-Path $runPath 'AlternativeOwnerConsumer.csproj'), '-c', 'Release')
     $alternativeOwnerConsumerOutput = $alternativeOwnerConsumerRun.Output.Trim()
@@ -690,6 +745,33 @@ return minimum == long.MinValue + 1L && ordinary == 42L && maximum == long.MaxVa
             verification = $ownerVerification
             generatedMethod = 'Candidate.__default.F000(long):long'
             consumer = $ownerOutcomeLine
+        }
+        compositeOwnerContract = [ordered]@{
+            status = 'Verified'
+            exitCode = $compositeOwnerExitCode
+            verification = $compositeOwnerVerification
+            generatedMethod = 'Candidate.__default.F000(long):Candidate._IR000'
+            consumer = $compositeOwnerOutcomeLine
+        }
+        alternativeCompositeOwnerImplementation = [ordered]@{
+            status = 'Verified'
+            exitCode = $alternativeCompositeOwnerExitCode
+            verification = $alternativeCompositeOwnerVerification
+            generatedMethod = 'Candidate.__default.F000(long):Candidate._IR000'
+            consumer = $alternativeCompositeOwnerOutcomeLine
+        }
+        wrongCompositeOwnerImplementation = [ordered]@{
+            status = 'Counterexample'
+            replayedWitness = 'empty-shape-v1'
+            exitCode = $wrongCompositeOwnerExitCode
+            expectedDiagnostic = 'a postcondition could not be proved'
+            verification = $wrongCompositeOwnerVerification
+        }
+        partialCompositeOwnerModel = [ordered]@{
+            status = 'Unproven'
+            exitCode = $partialCompositeOwnerExitCode
+            expectedDiagnostic = 'index out of range'
+            verification = $partialCompositeOwnerVerification
         }
         weakOwnerContract = [ordered]@{
             status = 'Unproven'

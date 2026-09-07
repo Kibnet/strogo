@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "summary.candidate-alternative",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        { "id": "count", "type": "I64" },
+        { "id": "values", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "makeSummary",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "Summary",
+      "contractRef": "makeSummaryContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "zero", "op": "i64.const", "type": "I64", "args": [], "value": "0" },
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "sameOne", "op": "i64.add", "type": "I64", "args": ["zero", "one"] },
+          { "id": "next", "op": "i64.add", "type": "I64", "args": ["x", "sameOne"] },
+          { "id": "empty", "op": "seq.empty", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": [], "elementType": "I64", "capacity": "4" },
+          { "id": "first", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": ["empty", "x"] },
+          { "id": "values", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": ["first", "next"] },
+          { "id": "count", "op": "i64.add", "type": "I64", "args": ["one", "one"] },
+          { "id": "summary", "op": "record.make", "type": "Summary", "recordType": "Summary", "fieldIds": ["count", "values"], "args": ["count", "values"] }
+        ],
+        "result": "summary"
+      }
+    }
+  ],
+  "exports": ["makeSummary"]
+}

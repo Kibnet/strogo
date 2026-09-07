@@ -60,6 +60,8 @@ public static class ModulesDafnyLowerer
 
         if (binding is not null)
         {
+            writer.Add("  function StrictAnd(left: bool, right: bool): bool { left && right }");
+            writer.Add("  function StrictOr(left: bool, right: bool): bool { left || right }");
             foreach (var entry in binding.Entries)
             {
                 var modelName = modelSymbols[entry.Model.Id];
@@ -71,9 +73,9 @@ public static class ModulesDafnyLowerer
                         $"owner/model/{entry.Model.Id}/parameter/{entry.Model.Parameters[parameterIndex].Id}",
                         $"p{parameterIndex:D3}",
                         line));
-                writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Model.Parameters, modelSymbols)}");
+                writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Model.Parameters, typeSymbols)}");
                 writer.Add("  {");
-                writer.Add($"    {EmitOwnerExpression(entry.Model.Body, entry.Model.Parameters, modelSymbols)}");
+                writer.Add($"    {EmitOwnerExpression(entry.Model.Body, entry.Model.Parameters, typeSymbols)}");
                 writer.Add("  }");
             }
         }
@@ -101,7 +103,7 @@ public static class ModulesDafnyLowerer
                         $"owner/contract/{entry.Contract.Id}/parameter/{entry.Contract.Parameters[parameterIndex].Id}",
                         $"p{parameterIndex:D3}",
                         line));
-                var requiresLine = writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Contract.Parameters, modelSymbols)}");
+                var requiresLine = writer.Add($"    requires {EmitOwnerExpression(entry.Contract.Requires, entry.Contract.Parameters, typeSymbols)}");
                 map.Add(new DafnySourceMapEntry($"owner/contract/{entry.Contract.Id}/requires", functionName, requiresLine));
                 var ensuresLine = writer.Add($"    ensures result == {modelSymbols[entry.Model.Id]}({string.Join(", ", function.Parameters.Select((_, index) => $"p{index:D3}"))})");
                 map.Add(new DafnySourceMapEntry($"owner/contract/{entry.Contract.Id}/ensures", functionName, ensuresLine));
@@ -130,7 +132,7 @@ public static class ModulesDafnyLowerer
     private static string EmitOwnerExpression(
         OwnerExpression expression,
         ImmutableArray<FunctionParameter> parameters,
-        IReadOnlyDictionary<string, string> modelSymbols)
+        TypeLoweringSymbols typeSymbols)
     {
         var parameterSymbols = parameters.Select((parameter, index) => (parameter.Id, Symbol: $"p{index:D3}"))
             .ToImmutableDictionary(pair => pair.Id, pair => pair.Symbol, StringComparer.Ordinal);
@@ -147,10 +149,18 @@ public static class ModulesDafnyLowerer
             "i64.le" => $"({Emit(current.Args[0])} <= {Emit(current.Args[1])})",
             "eq" => $"({Emit(current.Args[0])} == {Emit(current.Args[1])})",
             "bool.not" => $"(!{Emit(current.Args[0])})",
-            "bool.and" => $"({Emit(current.Args[0])} && {Emit(current.Args[1])})",
-            "bool.or" => $"({Emit(current.Args[0])} || {Emit(current.Args[1])})",
+            "bool.and" => $"StrictAnd({Emit(current.Args[0])}, {Emit(current.Args[1])})",
+            "bool.or" => $"StrictOr({Emit(current.Args[0])}, {Emit(current.Args[1])})",
             "if" => $"(if {Emit(current.Args[0])} then {Emit(current.Args[1])} else {Emit(current.Args[2])})",
-            "model.call" when current.ReferenceId is { } modelId && modelSymbols.TryGetValue(modelId, out var model) => $"{model}({string.Join(", ", current.Args.Select(Emit))})",
+            "record.make" when current.RecordType is { } recordType =>
+                typeSymbols.ConstructRecord(recordType, current.FieldIds.Select((fieldId, index) => (fieldId, value: Emit(current.Args[index])))
+                    .OrderBy(pair => pair.fieldId, StringComparer.Ordinal).Select(pair => pair.value).ToArray()),
+            "record.get" when current.ReferenceId is { } fieldId && current.Args[0].Type.Name is { } recordType =>
+                $"{Emit(current.Args[0])}.{typeSymbols.RecordField(recordType, fieldId)}",
+            "seq.empty" => "[]",
+            "seq.length" => $"(|{Emit(current.Args[0])}| as I64)",
+            "seq.get" => $"{Emit(current.Args[0])}[{Emit(current.Args[1])} as int]",
+            "seq.append" => $"({Emit(current.Args[0])} + [{Emit(current.Args[1])}])",
             _ => throw ModulesExceptionFactory.Error("lowering", "InternalInvariantViolation", details: new { reason = "OwnerExpression", current.Op })
         };
 

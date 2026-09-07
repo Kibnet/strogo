@@ -102,3 +102,15 @@ public sealed record OwnerContractBinding(
     ModuleIr Module,
     OwnerBundle Bundle,
     ImmutableArray<BoundOwnerEntry> Entries);
+
+public sealed record OwnerWitnessCounterexample(
+    string ContractId,
+    string WitnessId,
+    ModuleValue Expected,
+    ModuleValue? Actual,
+    string? CandidateErrorCode);
+
+public sealed record OwnerWitnessReplayResult(
+    string Status,
+    int CheckedWitnesses,
+    OwnerWitnessCounterexample? Counterexample);

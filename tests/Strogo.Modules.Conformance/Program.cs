@@ -39,6 +39,18 @@ if (dafnyOwnerAlternativeOutOption >= 0 && dafnyOwnerAlternativeOutOption + 1 >=
 var dafnyOwnerWrongOutOption = Array.IndexOf(args, "--dafny-owner-wrong-out");
 if (dafnyOwnerWrongOutOption >= 0 && dafnyOwnerWrongOutOption + 1 >= args.Length)
     throw new ArgumentException("--dafny-owner-wrong-out requires a path");
+var dafnyOwnerCompositeOutOption = Array.IndexOf(args, "--dafny-owner-composite-out");
+if (dafnyOwnerCompositeOutOption >= 0 && dafnyOwnerCompositeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-composite-out requires a path");
+var dafnyOwnerCompositeAlternativeOutOption = Array.IndexOf(args, "--dafny-owner-composite-alternative-out");
+if (dafnyOwnerCompositeAlternativeOutOption >= 0 && dafnyOwnerCompositeAlternativeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-composite-alternative-out requires a path");
+var dafnyOwnerCompositeWrongOutOption = Array.IndexOf(args, "--dafny-owner-composite-wrong-out");
+if (dafnyOwnerCompositeWrongOutOption >= 0 && dafnyOwnerCompositeWrongOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-composite-wrong-out requires a path");
+var dafnyOwnerCompositePartialOutOption = Array.IndexOf(args, "--dafny-owner-composite-partial-out");
+if (dafnyOwnerCompositePartialOutOption >= 0 && dafnyOwnerCompositePartialOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-owner-composite-partial-out requires a path");
 
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
@@ -53,6 +65,10 @@ var dafnyOwnerOutPath = dafnyOwnerOutOption >= 0 ? Path.GetFullPath(args[dafnyOw
 var dafnyOwnerWeakOutPath = dafnyOwnerWeakOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerWeakOutOption + 1], root) : null;
 var dafnyOwnerAlternativeOutPath = dafnyOwnerAlternativeOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerAlternativeOutOption + 1], root) : null;
 var dafnyOwnerWrongOutPath = dafnyOwnerWrongOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerWrongOutOption + 1], root) : null;
+var dafnyOwnerCompositeOutPath = dafnyOwnerCompositeOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerCompositeOutOption + 1], root) : null;
+var dafnyOwnerCompositeAlternativeOutPath = dafnyOwnerCompositeAlternativeOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerCompositeAlternativeOutOption + 1], root) : null;
+var dafnyOwnerCompositeWrongOutPath = dafnyOwnerCompositeWrongOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerCompositeWrongOutOption + 1], root) : null;
+var dafnyOwnerCompositePartialOutPath = dafnyOwnerCompositePartialOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerCompositePartialOutOption + 1], root) : null;
 var reportDir = Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("Report path has no directory");
 Directory.CreateDirectory(reportDir);
 var reports = new List<object>();
@@ -404,6 +420,46 @@ try
     var compositeModelResult = compositeBinding.Entries[0].Witnesses[0].ModelResult;
     var compositeCandidateResult = ModulesReferenceEvaluator.Invoke(compositeCandidateIr, "makeSummary", [new ModuleI64(0)]).Value;
     Check(compositeModelResult is ModuleRecord && OwnerContractEvaluator.StructuralEquals(compositeModelResult, compositeCandidateResult), "composite owner model and candidate agree structurally on the owner witness");
+    var compositeReplay = OwnerContractReplay.Replay(compositeBinding);
+    Check(compositeReplay.Status == "Pass" && compositeReplay.CheckedWitnesses == 1 && compositeReplay.Counterexample is null, "matching composite candidate passes independent owner-witness replay");
+    var compositeOwnerLowering = ModulesDafnyLowerer.Lower(compositeCandidateIr, compositeOwner);
+    Check(compositeOwnerLowering.Source.Contains("function M000", StringComparison.Ordinal)
+        && compositeOwnerLowering.Source.Contains("C000(2", StringComparison.Ordinal)
+        && compositeOwnerLowering.Source.Contains("[] + [p000]", StringComparison.Ordinal)
+        && compositeOwnerLowering.Source.Contains("var e000: I64 := (p000 + 1)", StringComparison.Ordinal),
+        "owner composite model lowers through the module type-symbol table");
+    Check(compositeOwnerLowering.Source.Contains("ensures result == M000(p000)", StringComparison.Ordinal), "composite candidate receives the automatic exact model postcondition");
+    if (dafnyOwnerCompositeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerCompositeOutPath) ?? throw new InvalidOperationException("Dafny composite owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerCompositeOutPath, compositeOwnerLowering.SourceBytes);
+    }
+    var alternativeCompositeIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-composite-alternative.json"))));
+    var alternativeCompositeBinding = OwnerContractBinder.Bind(alternativeCompositeIr, compositeOwner);
+    Check(OwnerContractReplay.Replay(alternativeCompositeBinding).Status == "Pass", "structurally different composite candidate passes the same owner witness replay");
+    var alternativeCompositeLowering = ModulesDafnyLowerer.Lower(alternativeCompositeIr, compositeOwner);
+    if (dafnyOwnerCompositeAlternativeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerCompositeAlternativeOutPath) ?? throw new InvalidOperationException("Dafny alternative composite owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerCompositeAlternativeOutPath, alternativeCompositeLowering.SourceBytes);
+    }
+    var wrongCompositeIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-composite-wrong.json"))));
+    var wrongCompositeBinding = OwnerContractBinder.Bind(wrongCompositeIr, compositeOwner);
+    var wrongCompositeReplay = OwnerContractReplay.Replay(wrongCompositeBinding);
+    Check(wrongCompositeReplay.Status == "Counterexample" && wrongCompositeReplay.Counterexample is { WitnessId: "empty-shape-v1", CandidateErrorCode: null }, "wrong composite candidate produces a replayed owner-witness counterexample");
+    var wrongCompositeLowering = ModulesDafnyLowerer.Lower(wrongCompositeIr, compositeOwner);
+    if (dafnyOwnerCompositeWrongOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerCompositeWrongOutPath) ?? throw new InvalidOperationException("Dafny wrong composite owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerCompositeWrongOutPath, wrongCompositeLowering.SourceBytes);
+    }
+    var partialCompositeOwner = OwnerBundleParser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-composite-partial.json")));
+    var partialCompositeLowering = ModulesDafnyLowerer.Lower(compositeCandidateIr, partialCompositeOwner);
+    if (dafnyOwnerCompositePartialOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOwnerCompositePartialOutPath) ?? throw new InvalidOperationException("Dafny partial composite owner output path has no directory"));
+        File.WriteAllBytes(dafnyOwnerCompositePartialOutPath, partialCompositeLowering.SourceBytes);
+    }
 
     var capacityFiveOwner = OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(compositeOwnerBytes).Replace("\"capacity\": \"4\"", "\"capacity\": \"5\"", StringComparison.Ordinal)));
     Check(capacityFiveOwner.BundleDigest != compositeOwner.BundleDigest, "reachable sequence capacity changes owner digest");

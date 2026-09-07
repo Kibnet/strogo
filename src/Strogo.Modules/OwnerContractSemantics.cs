@@ -444,3 +444,34 @@ public static class OwnerContractBinder
                 .Zip(right.Fields.OrderBy(field => field.Id, StringComparer.Ordinal))
                 .All(pair => pair.First.Id == pair.Second.Id && ModulesParser.TypesEquivalent(pair.First.Type, pair.Second.Type));
 }
+
+public static class OwnerContractReplay
+{
+    public static OwnerWitnessReplayResult Replay(OwnerContractBinding binding, ModuleEvaluationLimits? limits = null)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        var checkedWitnesses = 0;
+        foreach (var entry in binding.Entries.OrderBy(entry => entry.Contract.Id, StringComparer.Ordinal))
+        {
+            foreach (var witness in entry.Witnesses.OrderBy(witness => witness.Id, StringComparer.Ordinal))
+            {
+                checkedWitnesses++;
+                var byId = witness.Arguments.ToImmutableDictionary(argument => argument.ParameterId, argument => argument.Value, StringComparer.Ordinal);
+                var arguments = entry.Function.Parameters.Select(parameter => byId[parameter.Id]).ToArray();
+                try
+                {
+                    var actual = ModulesReferenceEvaluator.Invoke(binding.Module, entry.Function.Id, arguments, limits).Value;
+                    if (!OwnerContractEvaluator.StructuralEquals(witness.ModelResult, actual))
+                        return new OwnerWitnessReplayResult("Counterexample", checkedWitnesses,
+                            new OwnerWitnessCounterexample(entry.Contract.Id, witness.Id, witness.ModelResult, actual, null));
+                }
+                catch (ModuleException exception)
+                {
+                    return new OwnerWitnessReplayResult("Counterexample", checkedWitnesses,
+                        new OwnerWitnessCounterexample(entry.Contract.Id, witness.Id, witness.ModelResult, null, exception.Code));
+                }
+            }
+        }
+        return new OwnerWitnessReplayResult("Pass", checkedWitnesses, null);
+    }
+}
