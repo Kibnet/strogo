@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.invalid.sequence",
+  "types": [],
+  "imports": [],
+  "functions": [{
+    "id": "badAppend",
+    "parameters": [{ "id": "flag", "type": "Bool" }],
+    "returnType": { "kind": "Seq", "elementType": "I64", "capacity": "2" },
+    "contractRef": "contractA",
+    "body": {
+      "parameters": ["flag"],
+      "nodes": [
+        { "id": "empty", "op": "seq.empty", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": [], "elementType": "I64", "capacity": "2" },
+        { "id": "bad", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": ["empty", "flag"] }
+      ],
+      "result": "bad"
+    }
+  }],
+  "exports": ["badAppend"]
+}

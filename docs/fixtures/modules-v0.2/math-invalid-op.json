@@ -14,7 +14,7 @@
       "body": {
         "parameters": ["x"],
         "nodes": [
-          { "id": "bad", "op": "i64.pow", "type": "I64", "args": [], "value": null }
+          { "id": "bad", "op": "i64.pow", "type": "I64", "args": [] }
         ],
         "result": "bad"
       }

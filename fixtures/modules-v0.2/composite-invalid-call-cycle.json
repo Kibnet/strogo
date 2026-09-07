@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.invalid.cycle",
+  "types": [],
+  "imports": [],
+  "functions": [
+    { "id": "a", "parameters": [{ "id": "x", "type": "I64" }], "returnType": "I64", "contractRef": "aContract", "body": { "parameters": ["x"], "nodes": [{ "id": "r", "op": "call", "type": "I64", "args": ["x"], "functionRef": "b" }], "result": "r" } },
+    { "id": "b", "parameters": [{ "id": "x", "type": "I64" }], "returnType": "I64", "contractRef": "bContract", "body": { "parameters": ["x"], "nodes": [{ "id": "r", "op": "call", "type": "I64", "args": ["x"], "functionRef": "a" }], "result": "r" } }
+  ],
+  "exports": ["a"]
+}

@@ -3,7 +3,7 @@ using Kernel.Core;
 
 namespace Strogo.Modules;
 
-public sealed class ModuleException(string stage, string code, string message, string? entityId = null, object? details = null) : Exception(message)
+public class ModuleException(string stage, string code, string message, string? entityId = null, object? details = null, Exception? innerException = null) : Exception(message, innerException)
 {
     public string Stage { get; } = stage;
     public string Code { get; } = code;

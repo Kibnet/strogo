@@ -1,17 +1,29 @@
 using System.Collections.Immutable;
+using System.Globalization;
+using System.Text;
 using Kernel.Core;
 
 namespace Strogo.Modules;
 
 public sealed record StrogoLimits
 {
-    public int MaxTransportBytes { get; init; } = 1_048_576;
-    public int MaxJsonDepth { get; init; } = 64;
-    public int MaxTypes { get; init; } = 256;
-    public int MaxFunctions { get; init; } = 128;
-    public int MaxNodesPerFunction { get; init; } = 512;
-    public int MaxTypeDepth { get; init; } = 16;
-    public int MaxIdLength { get; init; } = 64;
+    public const int TransportBytesHardMaximum = 1_048_576;
+    public const int JsonDepthHardMaximum = 64;
+    public const int TypesHardMaximum = 256;
+    public const int ImportsHardMaximum = 31;
+    public const int FunctionsHardMaximum = 128;
+    public const int NodesPerFunctionHardMaximum = 512;
+    public const int TotalNodesHardMaximum = 4096;
+    public const int TypeDepthHardMaximum = 16;
+
+    public int MaxTransportBytes { get; init; } = TransportBytesHardMaximum;
+    public int MaxJsonDepth { get; init; } = JsonDepthHardMaximum;
+    public int MaxTypes { get; init; } = TypesHardMaximum;
+    public int MaxImports { get; init; } = ImportsHardMaximum;
+    public int MaxFunctions { get; init; } = FunctionsHardMaximum;
+    public int MaxNodesPerFunction { get; init; } = NodesPerFunctionHardMaximum;
+    public int MaxTotalNodes { get; init; } = TotalNodesHardMaximum;
+    public int MaxTypeDepth { get; init; } = TypeDepthHardMaximum;
 }
 
 public static class StrogoVersions
@@ -80,17 +92,72 @@ public sealed record FunctionNode(
     string Op,
     TypeRef Type,
     ImmutableArray<string> Args,
-    string? Value);
+    NodeMetadata Metadata);
 
-public sealed record ModuleIr(string SourceSchema, string ModuleId, string SourceDigest, ImmutableArray<FunctionIr> Functions, byte[] CanonicalBytes)
+public sealed record NodeMetadata(
+    string? Value,
+    string? RecordType,
+    ImmutableArray<string> FieldIds,
+    string? FieldId,
+    TypeRef? ElementType,
+    int? Capacity,
+    string? FunctionRef)
 {
-    public string FunctionCountDigest => CanonicalJson.Hash("module-ir-function-count", Functions.Length.ToString());
+    public static NodeMetadata Empty { get; } = new(
+        null,
+        null,
+        ImmutableArray<string>.Empty,
+        null,
+        null,
+        null,
+        null);
+}
+
+public sealed class ModuleIr
+{
+    private readonly byte[] canonicalBytes;
+
+    internal ModuleIr(
+        string sourceSchema,
+        string moduleId,
+        string sourceDigest,
+        ImmutableArray<TypeDecl> types,
+        ImmutableArray<ImportDecl> imports,
+        ImmutableArray<FunctionIr> functions,
+        ImmutableArray<string> exports,
+        byte[] canonicalBytes)
+    {
+        SourceSchema = sourceSchema;
+        ModuleId = moduleId;
+        SourceDigest = sourceDigest;
+        Types = types;
+        Imports = imports;
+        Functions = functions;
+        Exports = exports;
+        this.canonicalBytes = canonicalBytes.ToArray();
+    }
+
+    public string SourceSchema { get; }
+    public string ModuleId { get; }
+    public string SourceDigest { get; }
+    public ImmutableArray<TypeDecl> Types { get; }
+    public ImmutableArray<ImportDecl> Imports { get; }
+    public ImmutableArray<FunctionIr> Functions { get; }
+    public ImmutableArray<string> Exports { get; }
+    public byte[] CanonicalBytes => canonicalBytes.ToArray();
+    internal ReadOnlySpan<byte> CanonicalBytesSpan => canonicalBytes;
+    public string FunctionCountDigest => CanonicalJson.RawDigest(
+        Encoding.UTF8.GetBytes($"{StrogoVersions.IrVersion}/function-count\n{Functions.Length.ToString(CultureInfo.InvariantCulture)}"));
+
+    internal ModuleIr WithCanonicalBytes(byte[] bytes) => new(
+        SourceSchema, ModuleId, SourceDigest, Types, Imports, Functions, Exports, bytes);
 }
 
 public sealed record FunctionIr(
     string Id,
-    ImmutableArray<string> Parameters,
+    ImmutableArray<FunctionParameter> Parameters,
     TypeRef ReturnType,
+    string ContractRef,
     ImmutableArray<IrInstruction> Instructions,
     int ResultIndex);
 
@@ -100,14 +167,33 @@ public sealed record IrInstruction(
     string Op,
     ImmutableArray<int> OperandIndices,
     TypeRef Type,
-    string? Value);
+    NodeMetadata Metadata);
 
-public sealed record ModuleParseResult(
-    ModuleSource Source,
-    ImmutableArray<ModuleToken> Tokens,
-    byte[] CanonicalSource,
-    string SourceDigest,
-    string Stage);
+public sealed class ModuleParseResult
+{
+    private readonly byte[] canonicalSource;
+
+    internal ModuleParseResult(
+        ModuleSource source,
+        ImmutableArray<ModuleToken> tokens,
+        byte[] canonicalSource,
+        string sourceDigest,
+        string stage)
+    {
+        Source = source;
+        Tokens = tokens;
+        this.canonicalSource = canonicalSource.ToArray();
+        SourceDigest = sourceDigest;
+        Stage = stage;
+    }
+
+    public ModuleSource Source { get; }
+    public ImmutableArray<ModuleToken> Tokens { get; }
+    public byte[] CanonicalSource => canonicalSource.ToArray();
+    internal ReadOnlySpan<byte> CanonicalSourceBytes => canonicalSource;
+    public string SourceDigest { get; }
+    public string Stage { get; }
+}
 
 public sealed record ModuleCompileResult(
     ModuleIr Ir,

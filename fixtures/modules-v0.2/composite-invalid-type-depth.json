@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.invalid.depth",
+  "types": [
+    { "id": "Inner", "fields": [{ "id": "value", "type": "I64" }] },
+    { "id": "Outer", "fields": [{ "id": "inner", "type": "Inner" }] }
+  ],
+  "imports": [],
+  "functions": [],
+  "exports": []
+}

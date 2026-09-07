@@ -1,11 +1,11 @@
 {
   "schemaVersion": "strogo.module.v0.2",
-  "moduleId": "math.invalid",
+  "moduleId": "math.add",
   "types": [],
   "imports": [],
   "functions": [
     {
-      "id": "badOp",
+      "id": "addOne",
       "parameters": [
         { "id": "x", "type": "I64" }
       ],
@@ -14,11 +14,12 @@
       "body": {
         "parameters": ["x"],
         "nodes": [
-          { "id": "bad", "op": "i64.pow", "type": "I64", "args": [] }
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "01" },
+          { "id": "sum", "op": "i64.add", "type": "I64", "args": ["x", "one"] }
         ],
-        "result": "bad"
+        "result": "sum"
       }
     }
   ],
-  "exports": ["badOp"]
+  "exports": ["addOne"]
 }

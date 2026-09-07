@@ -8,14 +8,17 @@
 
 ## Что находится в репозитории
 
-| Этап | Реализованный механизм | Исторический результат до публикации |
+| Этап | Реализованный механизм | Проверенный локальный результат |
 | --- | --- | --- |
 | **Reserve v0** | Типизированный DAG с `I64`/`Bool`, проверка фиксированного контракта через Z3, компиляция в линейный IR, локальный host с SQLite, prepare/commit/replay | 29/29 cases, 10 904 assertions |
 | **TaskGraph E04** | Ограниченный профиль `task-graph.clone.v1`: закрытый JSON AST → Dafny → C# → ReadyToRun win-x64; модуль возвращает additions либо отказ | 141 checks PASS, полный admission: 74 verified, 0 errors |
+| **Modules v0.2 / E05 (в работе)** | Строгий composable AST для records, bounded sequences и локальных вызовов; canonical source → typed deterministic IR | 80 parser/type/identity checks; `if`/`fold`, proof и исполняемая библиотека ещё не готовы |
 
-Это результаты сохранённых запусков и их отчётов: [Reserve v0](REPORT.md) и [TaskGraph E04](artifacts/e04/REPORT.md). Они не являются результатом CI новой публичной копии. Происхождение публикации и границы сохранённых свидетельств описаны в [publication.md](docs/publication.md).
+Это результаты сохранённых запусков и их отчётов: [Reserve v0](REPORT.md), [TaskGraph E04](artifacts/e04/REPORT.md) и [E05 composite checkpoint](artifacts/e05/REPORT.md). Они не являются результатом CI новой публичной копии. Происхождение публикации и границы сохранённых свидетельств описаны в [publication.md](docs/publication.md).
 
 E04 использует фиксированный pipeline из шести операций. Его успешная проверка не доказывает выразительность языка общего назначения. ReadyToRun содержит машинный код и IL и может использовать JIT; полного AOT здесь нет.
+
+Текущий E05 checkpoint и его границы описаны в [Modules v0.2](docs/modules-v0.2.md). Он проверяет composable representation и identity, но ещё не выдаёт proof/admission и не считается выполнением целей G01–G06.
 
 ## Быстрый запуск Reserve v0
 

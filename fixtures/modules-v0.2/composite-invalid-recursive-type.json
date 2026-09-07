@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.invalid.recursive",
+  "types": [{ "id": "Recursive", "fields": [{ "id": "next", "type": "Recursive" }] }],
+  "imports": [],
+  "functions": [],
+  "exports": []
+}

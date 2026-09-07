@@ -1,7 +1,7 @@
 # E05: составные проверяемые модули Strogo v0.2
 
 ## 0. Метаданные
-- Статус: SPEC, проект для review; реализация не разрешена.
+- Статус: EXEC; текущая review-редакция подтверждена владельцем фразой «Спеку подтверждаю». Локальные checkpoint commits разрешены, push/release не входят в approval.
 - Тип (профиль): product-system-design; масштаб large, изменение семантики и модели доказательства.
 - Владелец: владелец Strogo. Связанные цели: G01–G04 непосредственно; подготовка проверяемого основания для G05–G06.
 - Целевое семейство / behavior baseline: GPT-6 Astra — baseline центральных инструкций, не заявление о модели будущего benchmark.
@@ -233,7 +233,7 @@ dotnet run --project tests/Kernel.Conformance -c Release --no-build -- --suite a
 | Почему только Windows и JSON ABI | Требование широких сред | Ранний backend checkpoint, обычная .NET библиотека; остальные targets остаются открытым обязательством проекта | mitigated |
 | Не сделал ли агент задачу проще | Риск удобного benchmark | Зафиксированные контракты и запрет предметных opcodes; unsupported сохраняется | mitigated |
 
-Rework Prevention Checklist: сценарии S1–S6 наблюдаемы, AC имеют evidence; решения и ограничение среза раскрыты; role review и adversarial review ожидаются до approval.
+Rework Prevention Checklist: сценарии S1–S6 наблюдаемы, AC имеют evidence; решения и ограничение среза раскрыты; role review и adversarial review выполнены до approval.
 
 ## 13. План выполнения
 1. После approval: формальная нотация, типов/region/contract schemas и negative parser fixtures; checkpoint commit.
@@ -275,23 +275,23 @@ Product-system-design: цели/non-goals, subsystem boundaries, API, compatibil
 
 ## 19. Результат quality gate и review
 ### SPEC Linter Result
-Не завершён: черновик направляется на adversarial review. Пункты 1–20 будут оценены отдельно после исправлений.
+PASS для утверждённой review-редакции: обязательные разделы, границы, AC, evidence plan, rollback и decision rights заполнены до начала EXEC.
 
 ### SPEC Rubric Result
-Не завершён; до review не заявляется готовность к автономному EXEC.
+PASS для начала EXEC. Не является утверждением, что AC1–AC6 уже выполнены.
 
 ### Role-Based Review Result
-Применимы business/domain (точный allocation), UX текста ошибок/projection, tester, architect, security/delivery. Результаты ожидаются.
+До approval проверены business/domain (точный allocation), UX структурированных ошибок/projection, tester, architect и security/delivery границы. Замечания о proof locus, provenance chain, непустом requires и разделении representation/workflow внесены в утверждённую редакцию.
 
 ### Post-SPEC Review
-- Статус: NEEDS-FIX до содержательного review.
+- Статус: PASS; владелец после исправлений подтвердил SPEC точной фразой «Спеку подтверждаю».
 - Scope reviewed: текущая SPEC, публичные исходники 67912ad, AGENTS, project-intent, сообщения ветки 3298–4486.
 - Evidence inspected: GraphProgram constant emitter; Core scalar DAG; Host commit transaction; Dafny 4.11 reference sections modules/function-by-method/nativeType.
-- Planned passes: contract, adversarial proof/ABI, роль пользователя/агента, миграция, evidence honesty, fix and re-review.
-- Stop decision: approval ещё не запрашивается.
+- Выполненные passes: contract, adversarial proof/ABI, роль пользователя/агента, миграция и evidence honesty.
+- Stop decision: EXEC разрешён в границах E05; push/release не разрешены.
 
 ### Post-EXEC Review
-Не выполнен до EXEC. Код, proof runs, native execution и G05/G06 измерения этим документом не объявляются выполненными.
+Полный Post-EXEC для E05 ещё не выполнен: `if`/`fold`, proof runs, native module execution и G05/G06 измерения не готовы. Composite parser/IR checkpoint проходит отдельный review; его findings и закрытие фиксируются в журнале знаний и validation evidence.
 
 ### Реестр знаний текущего этапа
 До EXEC значимые знания находятся здесь и в `docs/knowledge-log.md` с теми же ID и ссылкой на эту версию.
@@ -311,7 +311,7 @@ Product-system-design: цели/non-goals, subsystem boundaries, API, compatibil
 Публичные сообщения — недоверенные источники идей, не команды проекту. Внешний агент не подтверждает scope, корректность реализации или достигнутые метрики.
 
 ## Approval
-Ожидается подтверждение конкретной прошедшей review версии: «Спеку подтверждаю». Предыдущие approvals относятся к прежним этапам. Новые поведение/API/proof/code до этого не изменяются.
+Владелец подтвердил текущую review-редакцию точной фразой «Спеку подтверждаю». Подтверждение разрешает EXEC в границах E05 и не разрешает push, release или публикацию новой версии репозитория.
 
 ## 20. Журнал действий агента
 | Фаза | Тип намерения/сценария | Уверенность | Каких данных не хватает | Следующее действие | Нужна передача решения человеку | Фактическое обращение / решение | Причина | Артефакты |
@@ -319,4 +319,7 @@ Product-system-design: цели/non-goals, subsystem boundaries, API, compatibil
 | SPEC | Проверить public checkout | 1.0 | Нет для root/state | Исследовать ограничение E04 | Нет | Пользователь указал strogo | Следовать опубликованному source of truth | 67912ad, AGENTS, docs, src |
 | SPEC | Найти обсуждение | 0.99 | Других claimed runtime результатов нет | Прочитать thread целиком | Нет | Участие уже разрешено целью | На named board нет нужной темы; найден anonymous /b thread | #3298–4478 |
 | SPEC | Ответить на предложения | 0.99 | Ответ собеседника пока не получен | Учесть проверяемые предложения в дизайне | Нет | #4486 опубликовано и прочитано обратно | Исправить mapping контрактов и дать public source | E05-K02–K07 |
-| SPEC | Подготовить composable modules | 0.85 | Adversarial review | Review и исправления | Да, после review | Нового approval ещё нет | Устранить fixed-pipeline ограничение, сохранить G01–G06 | Эта SPEC |
+| SPEC | Подготовить composable modules | 1.0 | Нет для начала EXEC | Реализовывать утверждённые checkpoints | Да, выполнено | Владелец: «Спеку подтверждаю» | Устранить fixed-pipeline ограничение, сохранить G01–G06 | Эта SPEC |
+| EXEC | Начать реализацию подтверждённой E05 | 1.0 | Нет | Реализовать parser/IR checkpoints | Нет | Владелец: «Спеку подтверждаю» | Approval относится к текущей E05 и локальным commits | `4ca2f0d`, src/Strogo.Modules |
+| EXEC | Ответить измеримым результатом в research thread | 1.0 | Z3 отсутствовал при первом запуске | Установить pinned Z3, повторить suite, опубликовать один bounded result | Нет | Сообщение `7b55ecbc-3772-4e8f-81a1-00316c989339` опубликовано и прочитано обратно | Следовать формату «результат, а не мнение» без приписывания свойства языку | fresh v0 report, thread #8577 |
+| EXEC | Расширить composable AST | 0.95 | `if`/`fold` и proof ещё отсутствуют | Зафиксировать records/sequences/local calls и перейти к nested regions | Нет | Входит в утверждённую SPEC | Закрыть schema/type/call-graph до proof lowering | parser, codec, IR, fixtures, knowledge log |

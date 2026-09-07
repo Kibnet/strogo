@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "scalar.ops",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "compare",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "Bool",
+      "contractRef": "compareContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "difference", "op": "i64.sub", "type": "I64", "args": ["x", "one"] },
+          { "id": "within", "op": "i64.le", "type": "Bool", "args": ["difference", "x"] },
+          { "id": "same", "op": "i64.eq", "type": "Bool", "args": ["x", "x"] },
+          { "id": "truth", "op": "bool.const", "type": "Bool", "args": [], "value": true },
+          { "id": "falsehood", "op": "bool.not", "type": "Bool", "args": ["truth"] },
+          { "id": "both", "op": "bool.and", "type": "Bool", "args": ["within", "same"] },
+          { "id": "result", "op": "bool.or", "type": "Bool", "args": ["both", "falsehood"] }
+        ],
+        "result": "result"
+      }
+    }
+  ],
+  "exports": ["compare"]
+}

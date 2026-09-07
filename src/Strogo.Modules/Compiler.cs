@@ -6,17 +6,30 @@ public static class ModulesCompiler
 {
     public static ModuleIr Compile(ModuleParseResult parseResult)
     {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        var canonicalSource = ModulesCodec.Canonicalize(parseResult.Source);
+        var sourceDigest = ModulesCodec.SourceDigest(canonicalSource);
+        if (!canonicalSource.AsSpan().SequenceEqual(parseResult.CanonicalSourceBytes) || sourceDigest != parseResult.SourceDigest)
+            throw ModulesExceptionFactory.Error("compile", "ValidatedSourceMismatch");
+
         var source = parseResult.Source;
         var functionIr = new List<FunctionIr>(source.Functions.Length);
-        foreach (var function in source.Functions)
+        foreach (var function in source.Functions.OrderBy(function => function.Id, StringComparer.Ordinal))
         {
             functionIr.Add(CompileFunction(function));
         }
 
-        var ir = new ModuleIr(source.SchemaVersion, source.ModuleId, parseResult.SourceDigest,
-            functionIr.ToImmutableArray(), CanonicalBytes: Array.Empty<byte>());
+        var ir = new ModuleIr(
+            source.SchemaVersion,
+            source.ModuleId,
+            parseResult.SourceDigest,
+            source.Types.OrderBy(type => type.Id, StringComparer.Ordinal).ToImmutableArray(),
+            source.Imports.OrderBy(importValue => importValue.ModuleId, StringComparer.Ordinal).ToImmutableArray(),
+            functionIr.ToImmutableArray(),
+            source.Exports.OrderBy(id => id, StringComparer.Ordinal).ToImmutableArray(),
+            canonicalBytes: Array.Empty<byte>());
         var canonicalIr = ModulesCodec.Canonicalize(ir);
-        return ir with { CanonicalBytes = canonicalIr };
+        return ir.WithCanonicalBytes(canonicalIr);
     }
 
     private static FunctionIr CompileFunction(FunctionDecl function)
@@ -28,17 +41,27 @@ public static class ModulesCompiler
 
         foreach (var node in orderedNodes)
         {
-            var operands = node.Args.Select(arg => parameterIndices.TryGetValue(arg, out var paramIndex)
+            var orderedArgs = node.Op == "record.make"
+                ? node.Metadata.FieldIds
+                    .Select((fieldId, index) => (fieldId, arg: node.Args[index]))
+                    .OrderBy(pair => pair.fieldId, StringComparer.Ordinal)
+                    .Select(pair => pair.arg)
+                : node.Args;
+            var operands = orderedArgs.Select(arg => parameterIndices.TryGetValue(arg, out var paramIndex)
                 ? paramIndex
                 : nodeIndices[arg]).ToImmutableArray();
-            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, node.Value);
+            var metadata = node.Op == "record.make"
+                ? node.Metadata with { FieldIds = node.Metadata.FieldIds.OrderBy(id => id, StringComparer.Ordinal).ToImmutableArray() }
+                : node.Metadata;
+            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, metadata);
             instructions.Add(instruction);
             nodeIndices[node.Id] = instruction.DestinationIndex;
         }
 
-        var resultIndex = nodeIndices[function.Body.Result];
-        return new FunctionIr(function.Id, function.Parameters.Select(p => p.Id).ToImmutableArray(), function.ReturnType,
-            instructions.ToImmutable(), resultIndex);
+        var resultIndex = parameterIndices.TryGetValue(function.Body.Result, out var parameterIndex)
+            ? parameterIndex
+            : nodeIndices[function.Body.Result];
+        return new FunctionIr(function.Id, function.Parameters, function.ReturnType, function.ContractRef, instructions.ToImmutable(), resultIndex);
     }
 
     private static ImmutableArray<FunctionNode> TopologicallySort(ImmutableArray<string> parameters, ImmutableArray<FunctionNode> nodes)

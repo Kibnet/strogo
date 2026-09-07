@@ -14,7 +14,7 @@
       "body": {
         "parameters": ["x"],
         "nodes": [
-          { "id": "asBool", "op": "bool.not", "type": "Bool", "args": ["x"], "value": null }
+          { "id": "asBool", "op": "bool.not", "type": "Bool", "args": ["x"] }
         ],
         "result": "asBool"
       }

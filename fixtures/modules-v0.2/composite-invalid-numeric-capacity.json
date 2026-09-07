@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.invalid.numeric.capacity",
+  "types": [],
+  "imports": [],
+  "functions": [{
+    "id": "badCapacity",
+    "parameters": [],
+    "returnType": { "kind": "Seq", "elementType": "I64", "capacity": 4 },
+    "contractRef": "contractA",
+    "body": { "parameters": [], "nodes": [], "result": "missing" }
+  }],
+  "exports": ["badCapacity"]
+}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.sample",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        { "id": "count", "type": "I64" },
+        { "id": "values", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "addOne",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "addOneContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "sum", "op": "i64.add", "type": "I64", "args": ["x", "one"] }
+        ],
+        "result": "sum"
+      }
+    },
+    {
+      "id": "makeSummary",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "Summary",
+      "contractRef": "makeSummaryContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "inc", "op": "call", "type": "I64", "args": ["x"], "functionRef": "addOne" },
+          { "id": "empty", "op": "seq.empty", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": [], "elementType": "I64", "capacity": "4" },
+          { "id": "first", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": ["empty", "x"] },
+          { "id": "second", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "args": ["first", "inc"] },
+          { "id": "length", "op": "seq.length", "type": "I64", "args": ["second"] },
+          { "id": "zero", "op": "i64.const", "type": "I64", "args": [], "value": "0" },
+          { "id": "selected", "op": "seq.get", "type": "I64", "args": ["second", "zero"] },
+          { "id": "total", "op": "i64.add", "type": "I64", "args": ["length", "selected"] },
+          { "id": "summary", "op": "record.make", "type": "Summary", "args": ["total", "second"], "recordType": "Summary", "fieldIds": ["count", "values"] }
+        ],
+        "result": "summary"
+      }
+    },
+    {
+      "id": "countValues",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "countValuesContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "summary", "op": "call", "type": "Summary", "args": ["x"], "functionRef": "makeSummary" },
+          { "id": "count", "op": "record.get", "type": "I64", "args": ["summary"], "fieldId": "count" }
+        ],
+        "result": "count"
+      }
+    }
+  ],
+  "exports": ["countValues"]
+}

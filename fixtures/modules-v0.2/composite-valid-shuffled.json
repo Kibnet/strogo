@@ -1,0 +1,66 @@
+{
+  "exports": ["countValues"],
+  "functions": [
+    {
+      "body": {
+        "result": "count",
+        "nodes": [
+          { "fieldId": "count", "args": ["summary"], "type": "I64", "op": "record.get", "id": "count" },
+          { "functionRef": "makeSummary", "args": ["x"], "type": "Summary", "op": "call", "id": "summary" }
+        ],
+        "parameters": ["x"]
+      },
+      "contractRef": "countValuesContract",
+      "returnType": "I64",
+      "parameters": [{ "type": "I64", "id": "x" }],
+      "id": "countValues"
+    },
+    {
+      "id": "makeSummary",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "Summary",
+      "contractRef": "makeSummaryContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "fieldIds": ["values", "count"], "recordType": "Summary", "args": ["second", "total"], "type": "Summary", "op": "record.make", "id": "summary" },
+          { "args": ["length", "selected"], "type": "I64", "op": "i64.add", "id": "total" },
+          { "args": ["second", "zero"], "type": "I64", "op": "seq.get", "id": "selected" },
+          { "value": "0", "args": [], "type": "I64", "op": "i64.const", "id": "zero" },
+          { "args": ["second"], "type": "I64", "op": "seq.length", "id": "length" },
+          { "args": ["first", "inc"], "type": { "capacity": "4", "elementType": "I64", "kind": "Seq" }, "op": "seq.append", "id": "second" },
+          { "args": ["empty", "x"], "type": { "kind": "Seq", "capacity": "4", "elementType": "I64" }, "op": "seq.append", "id": "first" },
+          { "capacity": "4", "elementType": "I64", "args": [], "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "op": "seq.empty", "id": "empty" },
+          { "functionRef": "addOne", "args": ["x"], "type": "I64", "op": "call", "id": "inc" }
+        ],
+        "result": "summary"
+      }
+    },
+    {
+      "id": "addOne",
+      "parameters": [{ "id": "x", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "addOneContract",
+      "body": {
+        "parameters": ["x"],
+        "nodes": [
+          { "id": "sum", "op": "i64.add", "type": "I64", "args": ["x", "one"] },
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" }
+        ],
+        "result": "sum"
+      }
+    }
+  ],
+  "imports": [],
+  "types": [
+    {
+      "fields": [
+        { "type": { "capacity": "4", "elementType": "I64", "kind": "Seq" }, "id": "values" },
+        { "type": "I64", "id": "count" }
+      ],
+      "id": "Summary"
+    }
+  ],
+  "moduleId": "composite.sample",
+  "schemaVersion": "strogo.module.v0.2"
+}
