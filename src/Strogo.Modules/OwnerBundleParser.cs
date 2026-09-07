@@ -487,6 +487,22 @@ public static class OwnerBundleMigrator
 {
     public static byte[] MigrateV02ToV03(ReadOnlySpan<byte> source)
     {
+        try
+        {
+            return MigrateV02ToV03Core(source);
+        }
+        catch (ModuleException)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or KeyNotFoundException or ArgumentException)
+        {
+            throw ModulesExceptionFactory.Error("owner-migrate", "SchemaInvalid", details: new { reason = exception.GetType().Name });
+        }
+    }
+
+    private static byte[] MigrateV02ToV03Core(ReadOnlySpan<byte> source)
+    {
         var bytes = source.ToArray();
         using var document = OwnerBundleParser.ParseDocument(bytes, "owner-migrate");
         var rootElement = document.RootElement;
@@ -495,11 +511,21 @@ public static class OwnerBundleMigrator
         if (schema != OwnerBundleVersions.PreviousSchemaVersion)
             throw ModulesExceptionFactory.Error("owner-migrate", "SchemaVersionMismatch", details: new { expected = OwnerBundleVersions.PreviousSchemaVersion, actual = schema });
 
+        ValidateLegacyExpressions(rootElement);
         var valueNodes = 0;
         foreach (var entry in rootElement.GetProperty("entryContracts").EnumerateArray())
+        {
+            OwnerBundleParser.CheckObject(entry, "legacy/entryContract", ["id", "functionRef", "parameters", "returnType", "requires", "ensures", "effects", "witnesses"]);
             foreach (var witness in entry.GetProperty("witnesses").EnumerateArray())
+            {
+                OwnerBundleParser.CheckObject(witness, "legacy/witness", ["id", "arguments"]);
                 foreach (var argument in witness.GetProperty("arguments").EnumerateArray())
+                {
+                    OwnerBundleParser.CheckObject(argument, "legacy/witnessArgument", ["parameterId", "value"]);
                     valueNodes += CountLegacyScalarValue(argument.GetProperty("value"));
+                }
+            }
+        }
         if (valueNodes > OwnerBundleLimits.WitnessValueNodesHardMaximum)
             throw ModulesExceptionFactory.Error("owner-migrate", "MigrationWitnessValueLimitExceeded", details: new { actual = valueNodes, max = OwnerBundleLimits.WitnessValueNodesHardMaximum });
 
@@ -514,6 +540,98 @@ public static class OwnerBundleMigrator
         }
         root["limits"]!.AsObject()["maxWitnessValueNodes"] = OwnerBundleLimits.WitnessValueNodesHardMaximum.ToString(CultureInfo.InvariantCulture);
         return OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(root.ToJsonString())).CanonicalBytes;
+    }
+
+    private static void ValidateLegacyExpressions(JsonElement root)
+    {
+        var limits = root.GetProperty("limits");
+        OwnerBundleParser.CheckObject(limits, "legacy/limits", ["maxExpressionNodes", "maxExpressionDepth", "maxWitnessesPerEntry"]);
+        var maxNodes = ParseLegacyLimit(limits.GetProperty("maxExpressionNodes"), "maxExpressionNodes", OwnerBundleLimits.ExpressionNodesHardMaximum);
+        var maxDepth = ParseLegacyLimit(limits.GetProperty("maxExpressionDepth"), "maxExpressionDepth", OwnerBundleLimits.ExpressionDepthHardMaximum);
+        _ = ParseLegacyLimit(limits.GetProperty("maxWitnessesPerEntry"), "maxWitnessesPerEntry", OwnerBundleLimits.WitnessesPerEntryHardMaximum);
+
+        var nodes = 0;
+        foreach (var model in root.GetProperty("models").EnumerateArray())
+        {
+            OwnerBundleParser.CheckObject(model, "legacy/model", ["id", "parameters", "returnType", "body"]);
+            var body = model.GetProperty("body");
+            ValidateLegacyExpression(body, "legacy/model/body", 1, maxDepth, maxNodes, ref nodes);
+            EnsureLegacyBooleanExpressionsUseTotalOperands(body, "legacy/model/body");
+        }
+        foreach (var entry in root.GetProperty("entryContracts").EnumerateArray())
+        {
+            OwnerBundleParser.CheckObject(entry, "legacy/entryContract", ["id", "functionRef", "parameters", "returnType", "requires", "ensures", "effects", "witnesses"]);
+            var requires = entry.GetProperty("requires");
+            ValidateLegacyExpression(requires, "legacy/entryContract/requires", 1, maxDepth, maxNodes, ref nodes);
+            if (ContainsLegacyArithmetic(requires))
+                throw ModulesExceptionFactory.Error("owner-migrate", "ArithmeticInRequiresNotSupported", "legacy/entryContract/requires");
+            ValidateLegacyExpression(entry.GetProperty("ensures"), "legacy/entryContract/ensures", 1, maxDepth, maxNodes, ref nodes);
+        }
+    }
+
+    private static void ValidateLegacyExpression(JsonElement expression, string locus, int depth, int maxDepth, int maxNodes, ref int nodes)
+    {
+        if (depth > maxDepth)
+            throw ModulesExceptionFactory.Error("owner-migrate", "ExpressionDepthExceeded", locus, new { depth, max = maxDepth });
+        nodes++;
+        if (nodes > maxNodes)
+            throw ModulesExceptionFactory.Error("owner-migrate", "ExpressionNodeLimitExceeded", locus, new { actual = nodes, max = maxNodes });
+        if (expression.ValueKind != JsonValueKind.Object || !expression.TryGetProperty("op", out var opNode) || opNode.ValueKind != JsonValueKind.String)
+            throw ModulesExceptionFactory.Error("owner-migrate", "SchemaInvalid", locus, new { expected = "expression object with op" });
+        var op = opNode.GetString()!;
+        var fields = op switch
+        {
+            "param" => new[] { "op", "type", "id" },
+            "result" => ["op", "type"],
+            "i64.const" or "bool.const" => ["op", "type", "value"],
+            "model.call" => ["op", "type", "modelRef", "args"],
+            "i64.add" or "i64.sub" or "i64.le" or "eq" or "bool.not" or "bool.and" or "bool.or" or "if" => ["op", "type", "args"],
+            _ => throw ModulesExceptionFactory.Error("owner-migrate", "UnsupportedContractOpcode", locus, new { op })
+        };
+        OwnerBundleParser.CheckObject(expression, locus, fields);
+        var type = expression.GetProperty("type");
+        if (type.ValueKind != JsonValueKind.String || type.GetString() is not ("I64" or "Bool"))
+            throw ModulesExceptionFactory.Error("owner-migrate", "UnsupportedOwnerType", locus);
+        if (op is "param" or "result" or "i64.const" or "bool.const")
+            return;
+        var args = expression.GetProperty("args");
+        if (args.ValueKind != JsonValueKind.Array)
+            throw ModulesExceptionFactory.Error("owner-migrate", "SchemaInvalid", locus, new { expected = "array args" });
+        var index = 0;
+        foreach (var argument in args.EnumerateArray())
+            ValidateLegacyExpression(argument, $"{locus}/arg/{index++}", depth + 1, maxDepth, maxNodes, ref nodes);
+    }
+
+    private static void EnsureLegacyBooleanExpressionsUseTotalOperands(JsonElement expression, string locus)
+    {
+        if (expression.GetProperty("type").GetString() == "Bool" && ContainsLegacyArithmetic(expression))
+            throw ModulesExceptionFactory.Error("owner-migrate", "ArithmeticInBooleanContractNotSupported", locus);
+        if (!expression.TryGetProperty("args", out var args) || args.ValueKind != JsonValueKind.Array)
+            return;
+        var index = 0;
+        foreach (var argument in args.EnumerateArray())
+            EnsureLegacyBooleanExpressionsUseTotalOperands(argument, $"{locus}/arg/{index++}");
+    }
+
+    private static bool ContainsLegacyArithmetic(JsonElement expression)
+    {
+        var op = expression.GetProperty("op").GetString();
+        if (op is "i64.add" or "i64.sub")
+            return true;
+        return expression.TryGetProperty("args", out var args)
+            && args.ValueKind == JsonValueKind.Array
+            && args.EnumerateArray().Any(ContainsLegacyArithmetic);
+    }
+
+    private static int ParseLegacyLimit(JsonElement value, string field, int maximum)
+    {
+        if (value.ValueKind != JsonValueKind.String)
+            throw ModulesExceptionFactory.Error("owner-migrate", "InvalidOwnerLimit", field);
+        var text = value.GetString()!;
+        if (!int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed)
+            || parsed < 1 || parsed > maximum || parsed.ToString(CultureInfo.InvariantCulture) != text)
+            throw ModulesExceptionFactory.Error("owner-migrate", "InvalidOwnerLimit", field, new { value = text, minimum = 1, maximum });
+        return parsed;
     }
 
     private static int CountLegacyScalarValue(JsonElement value)

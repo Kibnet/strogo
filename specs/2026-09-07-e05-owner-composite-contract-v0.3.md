@@ -381,18 +381,34 @@ Commands фиксируются в EXEC report. Bounded harness сохраняе
 | MEDIUM | Proof outcome | Разрешать `Counterexample` только после independent replay | fixed, re-reviewed |
 | MEDIUM | Owner references | Запретить `result`, `model.call`, candidate/helper calls в v0.3 AST | fixed, re-reviewed |
 | HIGH | Migration capacity | Отказать без output при >4096 migrated witness value nodes | fixed, re-reviewed |
-| MEDIUM | Approval scope | Full module type universe включал private/unreachable implementation types в human approval. | Заменить его exact owner-semantic closure, закрыть roots/edges/unresolved rules и добавить reachable/private identity controls. | fixed, re-reviewed |
-| — | Targeted closure review | Нет находок в снимке `8B01B567…E2D71F`. | Дополнительные изменения контракта не требуются. | PASS |
+| MEDIUM | Approval scope | Full module type universe включал private/unreachable implementation types в human approval; заменить его exact owner-semantic closure и добавить reachable/private identity controls | fixed, re-reviewed |
+| — | Targeted closure review | Нет находок в снимке `8B01B567…E2D71F`; дополнительные изменения контракта не требуются | PASS |
 
 - Fix and re-review: ранние findings прошли re-review; exact closure snapshot отдельно проверен после fixture #9545. Reviewer подтвердил declared-TypeRef traversal, закрытые record/sequence edges, missing/extraneous refusals, private module identity boundary и scalar migration. No-findings justification: каждый current v0.3 semantic edge либо является root, либо достигается через declared record/sequence shape; candidate-only state не входит в owner meaning, но остаётся в proof identity.
 - Depth checklist: scope drift/unrelated changes отсутствуют; AC/evidence mapping заполнен; claims ограничены будущим EXEC; regressions включают Modules/Reserve/E04; docs/knowledge impact указан; hidden API/schema change требует нового approval; UI/video неприменимы.
 - Manual-review challenge / residual risks: человеку нужно подтвердить выбор exact owner-semantic type closure, удаления arbitrary ensures и re-approval при миграции. Неполный future semantic edge опасен, поэтому расширение type system требует новой schema. Эквивалентность evaluator/Dafny остаётся TCB, а proof cost strict helpers и golden reproducibility проверяются только EXEC.
 
 ### Post-EXEC Review
-- Статус: Не выполнен до EXEC.
+- Статус: **PASS**. Финальный procedural read-only fix-and-re-review не нашёл оставшихся BLOCKER/HIGH/MEDIUM findings; effective sandbox был writable, reviewer не изменял файлы.
+
+| Criterion | Result | Evidence / boundary |
+| --- | --- | --- |
+| C-AC1 | PASS | Exact owner-semantic closure, canonical ordering, empty-sequence/transitive/private mutations |
+| C-AC2 | PASS | Два разных composite DAG: по `5 verified, 0 errors`, одинаковые generated .NET outcomes |
+| C-AC3 | PASS | Reachable drift/missing/extra и wrong order rejected; mismatch получает concrete witness только после replay |
+| C-AC4 | PASS | Strict `false and`/`true or` partial — `Unproven`; lazy guarded `if` — `Verified`; nested bounded append — `Unproven` |
+| C-AC5 | PASS | Composite witness mutation matrix; forbidden `result`/`model.call`/`call` в root, nested model и `requires` |
+| C-AC6 | PASS | Explicit v0.2 migration, golden bytes/digest, legacy restrictions, 4096/4097 boundary, malformed typed refusal |
+| C-AC7 | PASS | Release build 0 warnings/errors; Modules 276/65; Reserve 29/29 и 10 904; E04 141 |
+| C-AC8 | PASS | Clean lowering byte equality; source IDs absent; private type сохраняет owner digest и меняет module/proof identity |
+
+- Fresh evidence: `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`; Modules report SHA-256 `b690a5e9…0b0a367`, Dafny summary SHA-256 `87c807db…a1d3bb`, Reserve report SHA-256 `773a7b50…c2876`, E04 report SHA-256 `3913b159…e2489`.
+- Operational boundary: один предшествующий E04 verifier timeout и один перегруженный Reserve run с `SolverTimeout` сохранены как typed environment failures; отдельные clean serial runs прошли. Причина contention не доказана.
+- Scope boundary: owner-composite amendment закрыт; admission, fold, imports/helpers, runtime facade, release и G05/G06 остаются вне этого EXEC.
+- Residual LOW: evaluator↔Dafny equivalence остаётся частью TCB; replay result ещё не является подписанным admission receipt.
 
 ## Approval
-Ожидается фраза: **«Спеку подтверждаю»**.
+Получена фраза **«Спеку подтверждаю»** 2026-09-07; 2026-09-08 владелец повторно подтвердил продолжение и периодический push checkpoint commits.
 
 Подтверждение распространяется только на эту owner-composite поправку и checkpoint commits. Admission EXEC, fold, merge и release не разрешаются. Периодический push сделанных commits и участие в Posting Board отдельно разрешены владельцем ранее.
 
@@ -407,3 +423,6 @@ Commands фиксируются в EXEC report. Bounded harness сохраняе
 | EXEC | Human approval | 1.00 | Нет | Реализовать owner-composite v0.3 по утверждённому контракту | Нет | Пользователь сообщил точную фразу «Спеку подтверждаю» 2026-09-07; периодический push commits также подтверждён | Approval относится к последней явно запрошенной owner-composite SPEC; fold v0.1 остаётся отдельным неподтверждённым изменением | Эта SPEC §Approval; сообщение пользователя |
 | EXEC | Owner v0.3 data/semantic boundary | 0.97 | Dafny composite lowering и полная mutation matrix ещё не выполнены | Зафиксировать первый checkpoint, затем расширить proof lowering | Нет | `dotnet build tests/Strogo.Modules.Conformance -c Release --no-restore` и conformance PASS, 231 checks | Реализованы strict v0.3 parser/codec, explicit v0.2 migration, shared immutable composite values, exact closure, evaluator и binder; fixtures различают empty declared sequence, missing/extraneous/reachable/private type cases | owner source files; owner scalar/composite/empty-sequence fixtures; conformance harness |
 | EXEC | Composite exact proof и replay | 0.98 | Полные regressions, docs и independent post-EXEC review ещё не выполнены | Зафиксировать proof checkpoint, затем закрыть AC/knowledge/review | Нет | Bounded Dafny harness PASS; два composite candidates `5 verified, 0 errors` и generated .NET consumers совпали; wrong candidate дал replayed witness + failed postcondition; partial model дал `index out of range`/Unproven | Owner expressions lowerятся через общий type-symbol table; strict bool helpers исключают подмену definedness short-circuit синтаксисом; concrete mismatch называется Counterexample только после evaluator replay | `DafnyLowering.cs`; owner composite safe/alternative/wrong/partial fixtures; `artifacts/local-validation/e05/owner-v03-20260907-2/dafny-lowering.json` |
+| EXEC | Adversarial post-EXEC review | 0.99 | Две replay-находки после первого fix pass | Rebind trusted inputs, ввести allow-list failure classes и повторить review | Нет | Первые четыре findings закрыты; затем выявлены forged empty binding и broad candidate blame | Replay не может доверять публично создаваемому derived binding и не должен приписывать tool defects candidate | procedural read-only reviewer; K-E05-070 |
+| EXEC | Final validation | 0.99 | Финальный reviewer verdict | Выполнить fix-and-re-review, обновить tracked evidence и checkpoint commit | Нет | Build 0 warnings/errors; Modules/Dafny 276/65; Reserve 29/29 и 10 904; E04 141 | Все C-AC1–C-AC8 имеют executable либо mutation evidence; runtime/admission/fold boundaries сохранены | `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`; Post-EXEC Review |
+| EXEC | Final fix-and-re-review | 0.99 | Нет в owner-composite scope | Обновить tracked evidence, commit и push | Нет | PASS; 0 remaining BLOCKER/HIGH/MEDIUM; residual LOW про TCB/admission сохранён | Reviewer подтвердил trusted rebinding, failure allow-list, bounded append, strict/guarded proof pairs и forbidden-op matrix | Post-EXEC Review; K-E05-070 |

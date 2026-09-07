@@ -46,7 +46,7 @@ public static class ModulesDafnyLowerer
                 imports = module.Imports.Select(importValue => importValue.ModuleId).Order(StringComparer.Ordinal).ToArray()
             });
         var functions = module.Functions.OrderBy(function => function.Id, StringComparer.Ordinal).ToArray();
-        var typeSymbols = new TypeLoweringSymbols(module);
+        var typeSymbols = new TypeLoweringSymbols(module, binding);
         var symbols = functions.Select((function, index) => (function.Id, Name: $"F{index:D3}"))
             .ToImmutableDictionary(pair => pair.Id, pair => pair.Name, StringComparer.Ordinal);
         var modelSymbols = binding?.Entries.Select((entry, index) => (entry.Model.Id, Name: $"M{index:D3}"))
@@ -160,7 +160,7 @@ public static class ModulesDafnyLowerer
             "seq.empty" => "[]",
             "seq.length" => $"(|{Emit(current.Args[0])}| as I64)",
             "seq.get" => $"{Emit(current.Args[0])}[{Emit(current.Args[1])} as int]",
-            "seq.append" => $"({Emit(current.Args[0])} + [{Emit(current.Args[1])}])",
+            "seq.append" => EmitCheckedSequenceAppend(current),
             _ => throw ModulesExceptionFactory.Error("lowering", "InternalInvariantViolation", details: new { reason = "OwnerExpression", current.Op })
         };
 
@@ -170,6 +170,14 @@ public static class ModulesDafnyLowerer
             var right = Emit(current.Args[1]);
             var temporary = $"e{temporaryCounter++:D3}";
             return $"(var {temporary}: I64 := ({left} {operation} {right}); {temporary})";
+        }
+
+        string EmitCheckedSequenceAppend(OwnerExpression current)
+        {
+            var source = Emit(current.Args[0]);
+            var item = Emit(current.Args[1]);
+            var temporary = $"e{temporaryCounter++:D3}";
+            return $"(var {temporary}: {typeSymbols.DafnyType(current.Type)} := ({source} + [{item}]); {temporary})";
         }
     }
 
@@ -300,7 +308,7 @@ public static class ModulesDafnyLowerer
         private readonly ImmutableArray<(TypeRef Type, string Key, string Symbol)> sequences;
         private readonly ImmutableDictionary<string, string> sequenceSymbols;
 
-        public TypeLoweringSymbols(ModuleIr module)
+        public TypeLoweringSymbols(ModuleIr module, OwnerContractBinding? binding)
         {
             records = module.Types.OrderBy(type => type.Id, StringComparer.Ordinal).ToImmutableArray();
             recordSymbols = records.Select((type, index) => (type.Id, Symbol: $"R{index:D3}"))
@@ -312,7 +320,7 @@ public static class ModulesDafnyLowerer
                     .Select((field, fieldIndex) => (Key: FieldKey(type.Id, field.Id), Symbol: $"R{typeIndex:D3}F{fieldIndex:D3}")))
                 .ToImmutableDictionary(pair => pair.Key, pair => pair.Symbol, StringComparer.Ordinal);
 
-            sequences = EnumerateModuleTypes(module)
+            sequences = EnumerateModuleTypes(module).Concat(EnumerateOwnerTypes(binding))
                 .Where(type => type.Kind == "Seq")
                 .GroupBy(TypeKey, StringComparer.Ordinal)
                 .OrderBy(group => group.Key, StringComparer.Ordinal)
@@ -422,6 +430,31 @@ public static class ModulesDafnyLowerer
                     foreach (var item in EnumerateRegionTypes(instruction.ElseRegion))
                         yield return item;
             }
+        }
+
+        private static IEnumerable<TypeRef> EnumerateOwnerTypes(OwnerContractBinding? binding)
+        {
+            if (binding is null) yield break;
+            foreach (var entry in binding.Entries)
+            {
+                foreach (var parameter in entry.Contract.Parameters)
+                    foreach (var item in Expand(parameter.Type)) yield return item;
+                foreach (var item in Expand(entry.Contract.ReturnType)) yield return item;
+                foreach (var item in EnumerateOwnerExpressionTypes(entry.Contract.Requires)) yield return item;
+                foreach (var parameter in entry.Model.Parameters)
+                    foreach (var item in Expand(parameter.Type)) yield return item;
+                foreach (var item in Expand(entry.Model.ReturnType)) yield return item;
+                foreach (var item in EnumerateOwnerExpressionTypes(entry.Model.Body)) yield return item;
+            }
+        }
+
+        private static IEnumerable<TypeRef> EnumerateOwnerExpressionTypes(OwnerExpression expression)
+        {
+            foreach (var item in Expand(expression.Type)) yield return item;
+            if (expression.ElementType is not null)
+                foreach (var item in Expand(expression.ElementType)) yield return item;
+            foreach (var argument in expression.Args)
+                foreach (var item in EnumerateOwnerExpressionTypes(argument)) yield return item;
         }
 
         private static IEnumerable<TypeRef> Expand(TypeRef type)

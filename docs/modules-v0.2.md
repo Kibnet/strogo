@@ -1,6 +1,6 @@
 # Strogo Modules v0.2: структура, owner contracts, regions и IR
 
-Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar/composite reference semantics, скалярный owner bundle и lowering scalar/composite candidate в Dafny с ограниченным exact-outcome proof.
+Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar/composite reference semantics, owner bundle v0.3 и lowering scalar/composite candidate в Dafny с exact-outcome proof на ограниченном семействе.
 
 ## 1) Структура исходного модуля
 
@@ -139,18 +139,18 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 
 Runtime composite values представлены `ModuleRecord` с точным type ID и полным набором полей и `ModuleSequence` с element type, capacity и immutable items. Перед исполнением входы проверяются рекурсивно: другая capacity, пропущенное/лишнее поле или неверный вложенный item дают `RuntimeTypeMismatch` с точным locus. `seq.get` использует zero-based index и возвращает `SequenceIndexOutOfRange`; `seq.append` не изменяет исходное значение и возвращает `SequenceCapacityExceeded` при заполненной sequence.
 
-Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, `fold`, canonical JSON ABI, owner composite contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
+Evaluator намеренно отделён от generated library: он нужен как executable reference oracle для differential checks lowering и owner-witness replay. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, `fold`, canonical JSON ABI, admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
 
 ## 9) Lowering в Dafny/C#
 
 `ModulesDafnyLowerer.Lower` принимает только провалидированный `ModuleIr` и детерминированно создаёт Dafny source для `I64`, `Bool`, records, bounded sequences, scalar/composite operations, local calls и nested `if`. Functions, parameters, records, fields, sequence shapes и local values получают generated symbols; пользовательские ID не вставляются в синтаксис и сохраняются отдельно в source map `entityId → generatedName + line`.
 
-Record понижается в immutable Dafny `datatype`, а каждый структурно уникальный `Seq<T,N>` — в subset type над `seq<T>` с ограничением `|s| <= N`. `seq.get` создаёт явное obligation `0 <= index < length`; `seq.append` — `length < capacity`. `seq.length` и index используют явные conversions между mathematical `int` Dafny и native `I64`, поэтому backend не получает неявного преобразования.
+Record понижается в immutable Dafny `datatype`, а каждый структурно уникальный `Seq<T,N>` — в subset type над `seq<T>` с ограничением `|s| <= N`. `seq.get` создаёт явное obligation `0 <= index < length`; каждый candidate и owner `seq.append`, включая вложенный, материализуется как временное значение точного bounded subset type и тем самым создаёт obligation `length < capacity`. `seq.length` и index используют явные conversions между mathematical `int` Dafny и native `I64`, поэтому backend не получает неявного преобразования.
 Safe fixture доказывает эти obligations на последовательности, построенной внутри candidate. Функции, принимающие произвольную sequence/index без owner range contract, остаются `Unproven`: harness требует три фактических `assertion might not hold` вместо добавления скрытого предусловия.
 
 `I64` задаётся как native newtype с точным диапазоном `Int64`. Поэтому безопасный selector и безопасный local call проверяются и переводятся в C# методы с параметрами/результатами `long`. Арифметика без достаточного owner `requires` не получает скрытого предусловия: Dafny отклоняет `addOne(x)` на полном диапазоне как `Unproven`, потому что результат может выйти за границу newtype.
 
-Перегрузка `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundle)` сначала выполняет строгую привязку bundle, затем добавляет owner model как Dafny `function`, переносит утверждённый `requires` и создаёт единственное допустимое postcondition `ensures result == M(parameters)`. Внутренние результаты `i64.add`/`i64.sub` модели материализуются типизированными `I64` let-выражениями: backend обязан доказать диапазон каждого шага, а не только итогового математического выражения.
+Перегрузка `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundle)` сначала выполняет строгую привязку bundle, затем добавляет owner model как Dafny `function`, переносит утверждённый `requires` и создаёт единственное допустимое postcondition `ensures result == M(parameters)`. Owner и candidate используют одну таблицу generated symbols для records, fields и bounded sequences. Внутренние результаты `i64.add`/`i64.sub` модели материализуются типизированными `I64` let-выражениями: backend обязан доказать диапазон каждого шага, а не только итогового математического выражения. `bool.and/or` проходят через generated `StrictAnd`/`StrictOr`, чтобы definedness обоих аргументов не зависела от short-circuit синтаксиса backend; `if` остаётся lazy guard.
 
 Первый end-to-end smoke запускается командой:
 
@@ -158,28 +158,30 @@ Safe fixture доказывает эти obligations на последовате
 pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/modules-dafny-lowering
 ```
 
-Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call, scalar operators и composite record/sequence candidate закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, проверяет две структурно разные реализации одного owner contract и обязательный отказ неверной реализации/слабого domain. Он публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers. Каждый внешний процесс имеет общий deadline 180 секунд и общий лимит stdout/stderr 1 MiB. Windows Job Object связывается с root, созданным в suspended-состоянии, до его запуска; timeout/output overflow завершают всё дерево и возвращают типизированный отказ. Harness сам проверяет timeout, переполнение вывода и завершение дочернего процесса, пережившего root. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
+Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call, scalar operators и composite record/sequence candidate закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, проверяет по две структурно разные реализации scalar и composite owner contracts и обязательные отказы неверной реализации, слабого domain и partial composite model. Для composite owner два correct candidates дают `5 verified, 0 errors`, wrong order сначала воспроизводится на owner witness и затем не доказывает exact postcondition, а partial `seq.get` остаётся `Unproven` с range diagnostic. Отдельные парные proof cases требуют `Unproven` для `false and <partial>`/`true or <partial>`, `Verified` для эквивалентных lazy guarded `if` и `Unproven` для вложенного owner `seq.append` при полном входном `Seq<T,N>`. Скрипт запускает отдельные generated .NET consumers для обеих correct composite реализаций. Каждый внешний процесс имеет общий deadline 180 секунд и общий лимит stdout/stderr 1 MiB. Windows Job Object связывается с root, созданным в suspended-состоянии, до его запуска; timeout/output overflow завершают всё дерево и возвращают типизированный отказ. Harness сам проверяет timeout, переполнение вывода и завершение дочернего процесса, пережившего root. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
 
-Текущий lowering fail closed для `fold`, непустых imports и composite owner/helper contracts. Owner proof пока поддерживает только `I64`/`Bool`; arithmetic в `requires` и внутри Boolean model expressions отклоняется, чтобы strict contract evaluator не расходился с short-circuit definedness backend. Composite candidate проходит structural/range proof без owner exact-outcome contract; отдельный generated composite consumer ещё не выполнен. Нет proof receipt, human approval artifact, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification composite fixture подтверждает только типы и явные sequence obligations этого candidate, а скалярная owner verification — соответствие конкретному parsed bundle/model; ни одна из них не подтверждает соответствие bundle человеческой спецификации или неизменность будущего пакета.
+Текущий lowering fail closed для `fold`, непустых imports и helper contracts. Owner proof поддерживает `I64`, `Bool`, records, bounded sequences и полный closed expression set v0.3; partial arithmetic/index/capacity операции требуют доказательства под owner `requires`. Нет proof receipt, release admission, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification подтверждает exact outcome только относительно конкретного parsed owner bundle и pinned toolchain; она не подтверждает соответствие bundle человеческой спецификации и не разрешает прямой вызов generated метода вне approved domain.
 
-## 10) Скалярный owner bundle
+## 10) Owner bundle v0.3
 
-Owner artifact имеет отдельную версию `strogo.owner-bundle.v0.2` и обязательные поля `schemaVersion`, `bundleId`, `entryContracts`, `models`, `limits`. Неизвестные, пропущенные и повторные поля запрещены; canonical bytes строятся после сортировки именованных множеств по ID. Bundle digest отделён от raw hashes и других артефактов: `SHA256(UTF8("strogo.owner-bundle.v0.2/bundle\n") || canonicalBytes)`.
+Owner artifact имеет отдельную версию `strogo.owner-bundle.v0.3` и обязательные поля `schemaVersion`, `bundleId`, `types`, `entryContracts`, `models`, `limits`. Неизвестные, пропущенные и повторные поля запрещены; canonical bytes строятся после сортировки именованных множеств по ID. Bundle digest отделён от raw hashes и других артефактов: `SHA256(UTF8("strogo.owner-bundle.v0.3/bundle\n") || canonicalBytes)`.
 
 Каждый entry contract фиксирует:
 
 - `id` и `functionRef`;
-- точную сигнатуру с устойчивыми ID параметров;
+- точную сигнатуру с устойчивыми ID параметров и recursive `TypeRef`;
 - Boolean `requires`;
-- `ensures` ровно в канонической форме `eq(result, model.call(parameters))`;
 - пустой `effects`;
-- хотя бы один конкретный witness допустимого входа.
+- хотя бы один конкретный composite-capable witness допустимого входа;
+- единственный `modelRef`; lowerer автоматически строит единственное exact postcondition `result == model(parameters)`, ручного `ensures` в schema больше нет.
 
-Model имеет собственный ID, ту же сигнатуру и чистое типизированное expression tree. Поддержанный скалярный фрагмент: `param`, `result`, `i64.const`, `bool.const`, `i64.add/sub/le`, `eq`, `bool.not/and/or`, `if`, `model.call` только в exact `ensures`. Limits bundle ограничивают общее число/глубину expression nodes и число witnesses и сами не могут превысить hard maxima реализации.
+Model имеет собственный ID, ту же сигнатуру и чистое типизированное expression tree. Closed expression set: `param`, constants, `i64.add/sub/le`, structural `eq`, `bool.not/and/or`, lazy `if`, `record.make/get`, `seq.empty/length/get/append`. `result`, `model.call`, helpers и imports отсутствуют. Limits bundle ограничивают общее число/глубину expression nodes, число witnesses и recursive witness value nodes; hard maximum последнего равен `4096`.
 
-Parser проверяет типы и форму независимо от candidate module. До разбора тел он канонически упорядочивает невалидные элементы по инъективному структурному ключу, который сохраняет `JsonValueKind`, и заранее проверяет повторные IDs. Поэтому перестановка malformed models/contracts/witnesses и неизвестных witness arguments не меняет `code`, `entityId` и `details`. Witness затем вычисляется отдельным checked evaluator: `requires` обязан вернуть `true`, а model — определённое значение. Конкретный допустимый witness доказывает непустоту формального `requires` и сразу обнаруживает часть ошибок модели. Он не доказывает полноту или правильность domain относительно человеческой спецификации и не доказывает тотальность модели на всех допустимых входах; общая тотальность модели и соответствие кандидата проверяются Dafny под `requires`.
+Parser проверяет типы и форму независимо от candidate module. `types` содержит ровно минимальное owner-semantic closure: корни берутся из entry/model signatures, полного expression AST и witness types, рёбра — из record fields и sequence element type. Даже пустой witness `Seq<Item,4>` требует declaration `Item`; missing, extraneous и recursive declarations отклоняются до binder/prover. До разбора тел parser канонически упорядочивает невалидные элементы по структурному ключу, который сохраняет `JsonValueKind`, и заранее проверяет повторные IDs. Witness затем вычисляется отдельным checked evaluator: `requires` обязан вернуть `true`, а model — определённое immutable `ModuleValue`. Конкретный witness доказывает непустоту формального domain и даёт replay oracle, но не доказывает totality; universal obligations остаются у Dafny.
 
-Binder требует точного совпадения exports, `contractRef`, function/parameter IDs, порядка и типов. Текущий срез отклоняет helpers, imports, records и sequences, потому что правила их контрактов ещё не реализованы. Один owner bundle `owner-add-one-valid.json` успешно связан с двумя различными кандидатами: `x + 1` и `x - (-1)`. Оба проходят `4 verified, 0 errors` и возвращают одинаковые граничные outcomes; `return x` не проходит exact postcondition. Bundle с `requires true` не проходит две range obligations — отдельно для модели и кандидата.
+Binder требует точного совпадения exports, `contractRef`, function/parameter IDs, порядка и типов, а для каждого owner-reachable named type — byte-equivalent canonical declaration в module. Дополнительный private module type разрешён: owner digest остаётся прежним, но module и generated proof identity меняются. Helpers и imports пока отклоняются. Scalar owner bundle по-прежнему принимает две различные реализации `x + 1` и `x - (-1)`. Composite `Summary` bundle принимает две разные DAG-реализации `[x,x+1]`; wrong order даёт replayed `Counterexample`, а partial model без range proof остаётся `Unproven`. Replay использует `Counterexample` только для успешно вычисленных, структурно различных owner/candidate значений. Исчерпание fuel возвращает `Timeout`, невалидные лимиты — `ToolError`, ошибка candidate evaluation — `CandidateError`; во всех трёх случаях отдельный `FailureCode` сохраняет причину, а counterexample отсутствует.
+
+`OwnerBundleMigrator.MigrateV02ToV03` принимает только strict exact-outcome v0.2 artifact, до преобразования проверяет legacy schema/limits/expression budgets и прежние запреты partial arithmetic в `requires`/Boolean model expressions, считает также удаляемый `ensures`, удаляет единственную допустимую форму ручного `ensures`, добавляет `types: []`, `modelRef` и `maxWitnessValueNodes: "4096"`, затем выдаёт новые canonical bytes/digest. Публичная граница переводит malformed legacy structure в typed `owner-migrate:SchemaInvalid`, а не выпускает host exception. Прямой parse v0.2 возвращает `OwnerBundleMigrationRequired`; semantic approval не переносится. Boundary `4096` migrated witness value nodes принимается, следующий узел даёт `MigrationWitnessValueLimitExceeded` без output.
 
 ## 11) Artefact и проверяемые границы checkpoint
 
@@ -192,12 +194,14 @@ Binder требует точного совпадения exports, `contractRef`
 - `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundle)` создаёт owner model, `requires` и exact-outcome `ensures`.
 - На этом checkpoint покрыто:
   - формальная структура формата и синтаксическая строгость;
-  - парсер + типовые валидации v0.2;
+  - parser/typechecker и детерминированный IR module v0.2;
   - компиляция в детерминированный IR-слой;
   - ограниченная исполняемая reference-семантика scalar/`if`/local call;
   - исполняемая reference-семантика records и bounded sequences с рекурсивной проверкой внешних значений, index/capacity failures и stable loci;
   - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector;
-  - первый exact-outcome proof: две разные реализации одного owner contract приняты, неправильная реализация и слабое предусловие отклонены.
+  - owner bundle v0.3 с exact owner-semantic type closure, composite witnesses и explicit v0.2 migration;
+  - scalar и composite exact-outcome proofs: по две разные реализации приняты, wrong outcome и слабый/partial owner domain отклонены;
+  - deterministic witness replay: конкретное расхождение маркируется `Counterexample` только после независимого вычисления candidate и owner model.
 
 ## 12) Проверяемые фикстуры
 
@@ -218,11 +222,14 @@ Binder требует точного совпадения exports, `contractRef`
 - `if-nested-safe.json` и `call-safe.json`, проверяющие recursive scalar lowering, три различимых исхода, generated symbol isolation и source map;
 - `scalar-lowering-safe.json`, проверяющий Dafny translation и generated C# execution `i64.sub/le/eq` и `bool.const/not/and/or`;
 - `owner-add-one-valid.json` и `owner-add-one-weak.json`, различающие достаточный и недостаточный owner domain;
+- `owner-add-one-valid-v0.2.json` и `owner-add-one-weak-v0.2.json` как явные legacy inputs для миграции;
 - `math-add-valid.json`, `math-add-alternative.json` и `math-add-wrong.json`, различающие две корректные реализации и неверный outcome при одном contract/model;
+- `owner-composite-valid.json`, `owner-composite-module.json`, `owner-composite-alternative.json`, `owner-composite-wrong.json` и `owner-composite-partial.json`, различающие два correct DAG, replayed wrong outcome и partial model;
+- `owner-empty-sequence-closure.json` и `owner-empty-sequence-module.json`, доказывающие, что declared element type входит в owner closure даже при пустом witness;
 - негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
 ## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics в reference evaluator, composite structural/range lowering и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует `fold`, composite owner model, разрешение import closure, helper contracts, generated composite consumer, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics в reference evaluator, composite structural/range lowering и scalar/composite exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.

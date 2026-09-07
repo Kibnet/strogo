@@ -600,3 +600,63 @@
 - Evidence: post-SPEC normative snapshot SHA-256 `F099F214B6B090F79CDCFC7F5825CEA6A2692A1A2996DD44138A5A5EF0D1FDE3`; separate procedural read-only reviewer закрыл migration allow-list, `ProofTypeRef`, owner-domain `OwnerPrefix`, per-argument equality, strict definedness и generated .NET evidence findings. Resource counterexample с arbitrary I64 range устранён заменой на non-nested sequence-index quantifier, signed `maxProofEvaluationSteps<=262144`, static worst-case cost и per-expression runtime counter.
 - Последствие: после approval реализация не должна синтезировать скрытые semantic assumptions, принимать invariant без проверки или оценивать unbounded quantifier. Любое расширение на relational invariant, произвольный range либо nested fold требует новой SPEC/version; same `strogo.module.v0.2` support различается только через pinned toolchain identity до завершения всей обещанной v0.2 surface.
 - Supersedes / supersededBy: конкретизирует invariant questions исходного замысла, E05 §6.2 и ограничения K-E05-063/K-E05-064; до approval не supersede утверждённые semantics.
+
+## K-E05-066
+
+- Дата / фаза: 2026-09-08 / implementation and semantic-boundary validation.
+- Тип / статус: Owner representation / Confirmed for v0.3 checkpoint.
+- Утверждение: exact minimal owner-semantic type closure достаточно для текущего closed type/expression surface: roots из entry/model signatures, expression metadata и witness values плюс record/sequence edges фиксируют весь approved composite смысл; private module types не входят в owner digest, но остаются в module/proof identity.
+- Scope: `strogo.owner-bundle.v0.3`, local modules без imports/helpers/fold/refinements/aliases/constants. Future semantic edge требует новой schema и отдельной SPEC.
+- Evidence: commits `f9d74c7` и `64954f3`; empty `Seq<Item,4>` сохраняет `Item` в closure; missing/extraneous/recursive/transitive declarations и reachable module drift отклоняются; shuffled fields дают те же canonical bytes; private module type успешно bindится, не меняет owner digest и меняет lowering digest. Публичные контрпримеры/уточнения #9543/#9545 стали executable regressions. Отдельный свежий checkout публичного commit `64954f339cd3f5f573572a5bb4e753197d88d602` на Windows/.NET SDK 10.0.400 независимо прошёл Modules conformance: exit 0, 236 checks / 65 fixtures; этот run не проверял Dafny/consumer и потому подтверждает только parser/closure/conformance границу того checkpoint.
+- Последствие: human approval не зависит от private implementation types, но candidate не может подменить форму owner-reachable record/sequence. Closure нельзя автоматически расширять при появлении новых видов ссылок.
+- Supersedes / supersededBy: закрывает implementation gap K-E05-063 для текущего surface; не закрывает admission gap K-E05-061.
+
+## K-E05-067
+
+- Дата / фаза: 2026-09-08 / proof, replay and migration validation.
+- Тип / статус: Composite exact outcome / Confirmed for bounded checkpoint.
+- Утверждение: одна owner-owned composite model может детерминированно принять две разные DAG-реализации и отклонить observable wrong order; concrete `Counterexample` допустим только после независимого witness replay, а partial model остаётся `Unproven`. Strict Boolean definedness требует вычисления обеих сторон `and/or`, тогда как `if` сохраняет lazy branch.
+- Scope: `I64`, `Bool`, records и bounded sequences в owner bundle v0.3; Dafny 4.11.0 и generated C# на Windows x64. Это proof относительно approved bundle bytes, а не human approval, package admission или гарантия всей TCB.
+- Evidence: final fresh run `artifacts/local-validation/e05/owner-v03-final-20260908-v2`; Modules 276 checks / 65 reported cases; обе composite candidates — `5 verified, 0 errors` и одинаковые generated consumer outcomes; wrong candidate — replay `empty-shape-v1` плюс failed postcondition; partial model и bounded nested `seq.append` — range/subset diagnostic и `Unproven`; strict `false and`/`true or` partial — `Unproven`, guarded `if` — `Verified`. v0.2 migration byte-for-byte совпадает с golden v0.3 digest `b0153dbe…fbe6`, считает удаляемый `ensures`, принимает 4096 scalar witness value nodes и отклоняет 4097 без output.
+- Последствие: composite owner contract можно использовать как следующий dependency для fold design. Approval v0.2 не переносится, а migrator обязан сохранить все прежние semantic restrictions, даже если v0.3 стал выразительнее.
+- Supersedes / supersededBy: расширяет K-E05-058 на composite exact outcome и снимает временное ограничение K-E05-056 только для native v0.3 strict-definedness semantics; legacy migration сохраняет v0.2 restriction.
+
+## K-E05-068
+
+- Дата / фаза: 2026-09-08 / regression environment.
+- Тип / статус: Operational instability / Observed and bounded.
+- Утверждение: E04 verifier process с фиксированным 60-секундным deadline может fail closed под фоновой нагрузкой без proof counterexample; такой `ProofNotEstablished` нельзя считать semantic regression либо PASS без отдельной диагностики.
+- Scope: unchanged TaskGraph E04 regression gate на текущей Windows машине; не Modules performance и не G06 benchmark.
+- Evidence: первый fresh E04 run остановился после 61 477 ms с `timedOut=true`, exit `-1` и публичным `ProofNotEstablished`; direct diagnostic тех же `Contract.dfy`/`Candidate.dfy` дал `74 verified, 0 errors` за 48 172 ms; один clean retry завершился `PASS all: 141`. Машиночитаемая сводка: `artifacts/local-validation/e05/owner-v03-final-20260908/e04-timeout-diagnostic.json`.
+- Последствие: final evidence хранит и PASS clean retry, и предшествовавший timeout. Future CI должен либо обеспечить resource isolation, либо выделить отдельный wall-clock budget, не ослабляя verifier time limits.
+- Supersedes / supersededBy: уточняет environment boundary K-E05-045/K-E05-057; semantic evidence E04 не изменяет.
+
+## K-E05-069
+
+- Дата / фаза: 2026-09-08 / public fold experiment design.
+- Тип / статус: Hypothesis discriminator / Proposed; not executed.
+- Утверждение: обязательность agent-authored invariant следует проверять различающим fixture, а не принимать как аксиому. Для checked-I64 left fold sum при `xs[i]>=0`, mathematical `total(xs)<=I64_MAX` и `acc=0` нужно сравнить одинаковые generated obligations при invariant `true` и `0<=acc<=total(xs)`; false invariant при satisfiable owner `requires` является обязательным negative control против vacuous proof.
+- Scope: будущая fold SPEC, не owner-composite EXEC и не evidence необходимости обязательного синтаксиса invariant. Invariant-only named type также пока не показан как soundness counterexample, если он erased, conservatively defined и полностью проверяется.
+- Evidence: вопрос #9554, message `12917211-862e-4c43-b261-98b3b47bb3d6`; ответ Помощника Архитектора #9556, message `5d3d37d4-7636-4490-af20-e38486e68291`. Автор ответа явно не запускал prover.
+- Последствие: fold implementation не должна заранее заявлять обязательный semantic invariant доказанной необходимостью. Результат A/B fixture должен попасть в журнал независимо от того, различит ли он варианты.
+- Supersedes / supersededBy: дополняет K-E05-065 конкретным falsifiable experiment; до выполнения не меняет утверждённые semantics.
+
+## K-E05-070
+
+- Дата / фаза: 2026-09-08 / post-EXEC adversarial review and fixes.
+- Тип / статус: Proof/replay integrity / Confirmed for owner v0.3 checkpoint.
+- Утверждение: typed result taxonomy недостаточна без trusted replay input и явного allow-list candidate failures. Публично создаваемый `OwnerContractBinding` нельзя считать доказательством полноты: replay обязан заново bind-ить `Module`+`Bundle`; `Counterexample` допустим только для двух успешно вычисленных разных значений, `CandidateError` — только для `ArithmeticOverflow`, `SequenceIndexOutOfRange` и `SequenceCapacityExceeded`, а неизвестная/internal ошибка evaluator является `ToolError`.
+- Scope: concrete owner-witness replay текущего local module surface; это не proof receipt, admission либо диагностика arbitrary future runtime effects.
+- Evidence: procedural read-only review нашёл forged empty `Entries` → zero-witness `Pass` и overly broad candidate blame. Regression с `OwnerContractBinding(..., Entries=[])` после исправления перестраивает binding и проверяет один witness; reflection-injected unsupported IR opcode даёт `ToolError/UnsupportedRuntimeOpcode`; fuel, invalid limits, overflow и value mismatch различаются. Final fix-and-re-review: PASS, 0 remaining BLOCKER/HIGH/MEDIUM; residual LOW — evaluator↔Dafny TCB и отсутствие admission receipt. Final Modules/Dafny run: 276 checks / 65 cases, report SHA-256 `b690a5e9…0b0a367`, harness SHA-256 `87c807db…a1d3bb`.
+- Последствие: consumer может доверять replay status только после внутреннего rebinding; новые candidate-runtime failure codes нельзя автоматически относить к candidate без отдельной SPEC и distinguishing regression.
+- Supersedes / supersededBy: уточняет K-E05-067 и закрывает post-EXEC replay findings; admission gap K-E05-061 остаётся.
+
+## K-E05-071
+
+- Дата / фаза: 2026-09-08 / regression environment.
+- Тип / статус: Operational instability / Observed; cause not established.
+- Утверждение: Reserve regression после серии proof/build процессов в этой сессии получил множественные `SolverTimeout`, тогда как следующий сериализованный clean run без изменений исходников прошёл 29/29 и 10 904 assertions. Наблюдение совместимо с contention/background-load гипотезой, но не доказывает её.
+- Scope: локальная Windows validation environment; не semantic result owner-composite, Reserve либо Z3.
+- Evidence: первый run был остановлен после нескольких typed timeout failures; повторный report `artifacts/local-validation/e05/owner-v03-final-20260908-v2/v0-regression.json` passed. E04 затем отдельно прошёл `PASS all: 141`.
+- Последствие: финальный evidence использует чистые сериализованные PASS runs, а timeout не переименовывается в regression/counterexample. Для CI нужен контроль параллелизма либо отдельная диагностика resource contention.
+- Supersedes / supersededBy: дополняет K-E05-068 аналогичным наблюдением для Reserve; причина остаётся открытой.

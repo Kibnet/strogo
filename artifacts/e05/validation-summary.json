@@ -1,26 +1,25 @@
 {
   "schemaVersion": "strogo.e05.validation-summary.v1",
-  "runId": "20260907-owner-contract-final-v4",
-  "generatedAtUtc": "2026-09-07T15:04:50.5303527Z",
+  "runId": "owner-v03-final-20260908-v2",
+  "generatedAtUtc": "2026-09-07T22:37:52.2934369Z",
   "environment": {
-    "os": "Microsoft Windows 10.0.22631",
+    "os": "Microsoft Windows NT 10.0.22631.0",
     "dotnetSdk": "10.0.400",
     "z3": "5.1.0",
     "dafny": "4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2"
   },
   "commands": [
-    "dotnet restore Kernel.slnx --locked-mode",
     "dotnet build Kernel.slnx -c Release --no-restore",
-    "dotnet format whitespace src/Strogo.Modules/Strogo.Modules.csproj --verify-no-changes --no-restore --include src/Strogo.Modules/DafnyLowering.cs src/Strogo.Modules/OwnerBundleCodec.cs src/Strogo.Modules/OwnerBundleParser.cs src/Strogo.Modules/OwnerContractSemantics.cs src/Strogo.Modules/OwnerContracts.cs",
-    "pwsh -NoProfile -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/20260907-owner-contract-final-v4",
+    "dotnet format whitespace src/Strogo.Modules/Strogo.Modules.csproj --verify-no-changes --no-restore --include src/Strogo.Modules/DafnyLowering.cs src/Strogo.Modules/OwnerBundleParser.cs src/Strogo.Modules/OwnerContractSemantics.cs src/Strogo.Modules/OwnerContracts.cs",
+    "pwsh -NoProfile -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/owner-v03-final-20260908-v2",
     "dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite all --report <run>/v0-regression.json",
     "dotnet run --project tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj -c Release --no-build"
   ],
   "sourceSnapshot": {
-    "baseCommit": "ef613d96199de1b81918741f15b5616fb9ac274d",
+    "baseCommit": "706404359e8375af1231fbd00b1e03874835069d",
     "manifest": "source-manifest.json",
-    "manifestSha256": "bcbc9a9ee7f1283521e1eea60fef9837c08de0cbca7e3a4bda2d4a8c5afc5426",
-    "snapshotDigest": "f94401859c41d01105724f4183a440745200d72c22e1c2e5304ed25ac226fcf9"
+    "manifestSha256": "14d6624aebbc021dfdd44a93c59d09461106dc3a987091c6fe9f95a5333700c8",
+    "snapshotDigest": "ac43046dc9804645844b0b5122068938c52c545fb0ea46355777097aab6bf0ae"
   },
   "toolProvenance": {
     "dafnyArchiveSha256": "3653f05a111ca21e234709ea7b25ce96083fd6c6f10484256ba54110dbc0654d",
@@ -35,87 +34,56 @@
     },
     "format": {
       "passed": true,
-      "scope": "five changed production C# files"
+      "scope": "four changed production C# files"
     },
     "modulesV02": {
       "passed": true,
-      "checks": 199,
-      "reportedCases": 61
+      "checks": 276,
+      "reportedCases": 65
     },
-    "processBoundary": {
-      "timeoutMilliseconds": 180000,
-      "outputByteLimit": 1048576,
-      "killTree": true,
-      "timeoutSelfTest": "ProcessTimeout",
-      "outputLimitSelfTest": "ProcessOutputLimitExceeded",
-      "orphanedChildSelfTest": {
-        "failure": "ProcessTimeout",
-        "childPid": 127848,
-        "childAliveAfterGrace": false
-      }
-    },
-    "dafnyNestedSelector": {
-      "passed": true,
-      "exitCode": 0,
-      "verified": 2,
-      "errors": 0,
-      "consumer": "outcomes=9223372036854775807,3,11;nativeHeader=196"
-    },
-    "dafnySafeLocalCall": {
-      "passed": true,
-      "exitCode": 0,
-      "verified": 3,
-      "errors": 0,
-      "consumer": "callOutcome=7"
-    },
-    "dafnySafeScalarOperators": {
-      "passed": true,
-      "exitCode": 0,
-      "verified": 2,
-      "errors": 0,
-      "consumer": "scalarOutcomes=True,False,True"
-    },
-    "missingOwnerPrecondition": {
-      "passed": true,
-      "status": "Unproven",
-      "exitCode": 4,
-      "expectedDiagnostic": "result of operation might violate newtype constraint for 'I64'"
-    },
-    "ownerContract": {
+    "compositeOwnerContract": {
       "passed": true,
       "status": "Verified",
-      "exitCode": 0,
-      "verified": 4,
-      "errors": 0,
-      "consumer": "ownerOutcomes=-9223372036854775807,42,9223372036854775807"
+      "verification": "Dafny program verifier finished with 5 verified, 0 errors",
+      "consumer": "compositeOwnerOutcomes=Candidate.R000.C000(2, [0, 1]);Candidate.R000.C000(2, [41, 42])"
     },
-    "alternativeOwnerImplementation": {
+    "alternativeCompositeOwnerImplementation": {
       "passed": true,
       "status": "Verified",
-      "exitCode": 0,
-      "verified": 4,
-      "errors": 0,
-      "consumer": "ownerOutcomes=-9223372036854775807,42,9223372036854775807"
+      "verification": "Dafny program verifier finished with 5 verified, 0 errors",
+      "consumer": "compositeOwnerOutcomes=Candidate.R000.C000(2, [0, 1]);Candidate.R000.C000(2, [41, 42])"
     },
-    "wrongOwnerImplementation": {
+    "wrongCompositeOwnerImplementation": {
       "passed": true,
-      "status": "Unproven",
-      "exitCode": 4,
+      "status": "Counterexample",
       "expectedDiagnostic": "a postcondition could not be proved"
     },
-    "weakOwnerContract": {
+    "partialityMatrix": {
+      "strictFalseAnd": "Unproven",
+      "strictTrueOr": "Unproven",
+      "guardedFalseIf": "Verified",
+      "guardedTrueIf": "Verified",
+      "nestedAppendCapacity": "Unproven"
+    },
+    "replayTaxonomy": {
+      "valueMismatch": "Counterexample",
+      "fuel": "Timeout",
+      "invalidLimits": "ToolError",
+      "candidateArithmetic": "CandidateError",
+      "unknownEvaluatorFailure": "ToolError",
+      "forgedEmptyBindingCheckedWitnesses": 1
+    },
+    "migration": {
       "passed": true,
-      "status": "Unproven",
-      "exitCode": 4,
-      "expectedRangeDiagnostics": 2,
-      "actualRangeDiagnostics": 2
+      "goldenDigest": "b0153dbe71b173c266d4786de5d8e60cc1d913b838f2f94f0191129681a5fbe6",
+      "acceptedWitnessValueNodes": 4096,
+      "rejectedWitnessValueNodes": 4097
     },
     "readyToRun": {
       "passed": true,
       "runtimeIdentifier": "win-x64",
-      "consumerOutcomes": "9223372036854775807,3,11",
       "nativeHeaderSize": 196,
-      "assemblySha256": "b7c0610eea6fc538cb0cd40729dc2edf97f868d1a8d842595b3390404578736d",
+      "assemblySha256": "37d0f25af64e7101b1bc35234f24aef5666c82e81f97abcc81cd0d66288716ea",
       "assemblyBytes": 368640
     },
     "reserveV0": {
@@ -126,41 +94,57 @@
     },
     "taskGraphE04": {
       "passed": true,
-      "checks": 141,
-      "evidence": "fresh command exit 0 and PASS all: 141; tracked historical report restored after inspection"
+      "checks": 141
     },
     "independentReview": {
       "passed": true,
       "result": "PASS",
-      "remainingBlockerHighMedium": 0
+      "remainingBlockerHighMedium": 0,
+      "effectiveSandbox": "writable; review procedural read-only",
+      "residualLow": [
+        "evaluator-Dafny equivalence remains TCB",
+        "replay is not an admission receipt"
+      ]
     }
   },
   "sourceReports": [
     {
       "name": "modules-v0.2.json",
-      "sha256": "65d4d8f345dc6d664e3ac33e051b181cbd58936f867789ae7aa2bd3b0340b7bf",
-      "bytes": 11900
+      "sha256": "b690a5e9d3a668dc6f5dad210c15382369b245f52c2dd805efa51b33f0b0a367",
+      "bytes": 12700
     },
     {
       "name": "dafny-lowering.json",
-      "sha256": "8d385928ac077cd5891656bd698e926227152910b7899986a1352fbf69bb30d5",
-      "bytes": 5100
+      "sha256": "87c807dbf8c9ed91c7dd399ea4b05299a0895aa894915bb2be742e7985a1d3bb",
+      "bytes": 12319
     },
     {
       "name": "v0-regression.json",
-      "sha256": "54ad6af0dbf721b3e2db6cdcd4c269debaec01fb82170b760804a2a52dacf2aa",
-      "bytes": 79445
+      "sha256": "773a7b50758023e6548f28051e40a8235fc1a2a5e77bdec3735a87de1cec2876",
+      "bytes": 79447
+    },
+    {
+      "name": "e04.json",
+      "sha256": "3913b1595a2c205cc98ca1c23619f13f4f8703d23876b8fb54bbcd53fd7e2489",
+      "bytes": 84581
     },
     {
       "name": "e04-console.log",
       "sha256": "46143ebac28c77f6ee4a1012837ef069643d604d86c3c7b46a03c2da44429db8",
       "bytes": 1278
+    },
+    {
+      "name": "e04-timeout-diagnostic.json",
+      "sha256": "9a4baa883310301bb91682387b25f0661c921c98e64dc40428c0667832be3b8c",
+      "bytes": 302
+    },
+    {
+      "name": "reserve-timeout-diagnostic.json",
+      "sha256": "10820544d8079b086ce2d3e1412e9de0a5ab466ea22fe4f65a23cc0f4613ea54",
+      "bytes": 955
     }
   ],
-  "generatedCodeBoundary": "Dafny runtime emits CS8981 for its nat helper under .NET 10; isolated generated projects permit this warning. Main solution and strict consumers remain warning-free.",
-  "formatBoundary": "Solution-wide whitespace backlog is outside this checkpoint. All five changed production C# files passed scoped dotnet format whitespace verify.",
-  "e04EvidenceBoundary": "The E04 executable writes the tracked historical report; this checkpoint inspected fresh passed=true/checks=141 and restored the tracked file.",
-  "proofBoundary": "The scalar owner bundle supplies exact model, requires and empty effects. Two candidate implementations prove the same exact outcome; wrong output and weak domain remain Unproven. Human approval artifact, admission receipt, package binding, runtime precondition facade, helper/composite contracts and whole E05 remain absent.",
-  "resourceBoundary": "Every external process invoked by the Dafny lowering harness, including Dafny version preflight, starts suspended inside a Windows Job Object before resume, with 180 s deadline and 1 MiB combined output cap. Self-tests cover timeout, output overflow and an orphaned child holding inherited pipes.",
-  "evidencePolicy": "Detailed local reports can contain machine-specific paths and remain gitignored. This tracked manifest preserves hashes, selected results, pinned tool digests and exact reproducible commands."
+  "proofBoundary": "Exact outcome is verified only against the parsed owner bundle and pinned toolchain. Human semantic approval, admission receipt, runtime facade, imports/helpers, fold, release, G05 and G06 remain outside this checkpoint.",
+  "operationalBoundary": "A prior E04 verifier timeout and an interrupted Reserve run with SolverTimeout are retained as typed diagnostics. Separate serial runs passed; contention is a hypothesis, not an established cause.",
+  "evidencePolicy": "Detailed local reports remain gitignored. This tracked manifest and summary preserve hashes, selected results, pinned tool digests and reproducible commands."
 }

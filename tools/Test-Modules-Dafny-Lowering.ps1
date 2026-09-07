@@ -433,6 +433,11 @@ $compositeOwnerSource = Join-Path $runPath 'CompositeOwnerCandidate.dfy'
 $alternativeCompositeOwnerSource = Join-Path $runPath 'AlternativeCompositeOwnerCandidate.dfy'
 $wrongCompositeOwnerSource = Join-Path $runPath 'WrongCompositeOwnerCandidate.dfy'
 $partialCompositeOwnerSource = Join-Path $runPath 'PartialCompositeOwnerCandidate.dfy'
+$strictAndOwnerSource = Join-Path $runPath 'StrictAndOwnerCandidate.dfy'
+$strictOrOwnerSource = Join-Path $runPath 'StrictOrOwnerCandidate.dfy'
+$guardedFalseOwnerSource = Join-Path $runPath 'GuardedFalseOwnerCandidate.dfy'
+$guardedTrueOwnerSource = Join-Path $runPath 'GuardedTrueOwnerCandidate.dfy'
+$appendPartialOwnerSource = Join-Path $runPath 'AppendPartialOwnerCandidate.dfy'
 $safeGenerated = Join-Path $runPath 'Generated.cs'
 $callGenerated = Join-Path $runPath 'CallGenerated.cs'
 $scalarGenerated = Join-Path $runPath 'ScalarGenerated.cs'
@@ -445,7 +450,7 @@ Remove-Item -LiteralPath $summaryPath -ErrorAction SilentlyContinue
 
 Push-Location $repoRoot
 try {
-    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-composite-out', $compositeSource, '--dafny-composite-unsafe-out', $unsafeCompositeSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource, '--dafny-owner-composite-out', $compositeOwnerSource, '--dafny-owner-composite-alternative-out', $alternativeCompositeOwnerSource, '--dafny-owner-composite-wrong-out', $wrongCompositeOwnerSource, '--dafny-owner-composite-partial-out', $partialCompositeOwnerSource)
+    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-composite-out', $compositeSource, '--dafny-composite-unsafe-out', $unsafeCompositeSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource, '--dafny-owner-composite-out', $compositeOwnerSource, '--dafny-owner-composite-alternative-out', $alternativeCompositeOwnerSource, '--dafny-owner-composite-wrong-out', $wrongCompositeOwnerSource, '--dafny-owner-composite-partial-out', $partialCompositeOwnerSource, '--dafny-owner-strict-and-out', $strictAndOwnerSource, '--dafny-owner-strict-or-out', $strictOrOwnerSource, '--dafny-owner-guarded-false-out', $guardedFalseOwnerSource, '--dafny-owner-guarded-true-out', $guardedTrueOwnerSource, '--dafny-owner-append-partial-out', $appendPartialOwnerSource)
     if ($conformanceRun.ExitCode -ne 0) { throw "Modules conformance failed:`n$($conformanceRun.Output)" }
 
     $safeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('translate', 'cs', $safeSource, '--include-runtime', '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15', '--output', $safeGenerated)
@@ -507,6 +512,31 @@ try {
     $partialCompositeOwnerVerification = $partialCompositeOwnerRun.Output.Trim()
     $partialCompositeOwnerExitCode = $partialCompositeOwnerRun.ExitCode
     if ($partialCompositeOwnerExitCode -eq 0 -or $partialCompositeOwnerVerification -notmatch 'index out of range') { throw "Partial composite owner model did not fail its range obligation:`n$partialCompositeOwnerVerification" }
+
+    $strictAndOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $strictAndOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $strictAndOwnerVerification = $strictAndOwnerRun.Output.Trim()
+    $strictAndOwnerExitCode = $strictAndOwnerRun.ExitCode
+    if ($strictAndOwnerExitCode -eq 0 -or $strictAndOwnerVerification -notmatch "might violate newtype constraint for 'I64'") { throw "Strict false-and model incorrectly masked its partial operand:`n$strictAndOwnerVerification" }
+
+    $strictOrOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $strictOrOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $strictOrOwnerVerification = $strictOrOwnerRun.Output.Trim()
+    $strictOrOwnerExitCode = $strictOrOwnerRun.ExitCode
+    if ($strictOrOwnerExitCode -eq 0 -or $strictOrOwnerVerification -notmatch "might violate newtype constraint for 'I64'") { throw "Strict true-or model incorrectly masked its partial operand:`n$strictOrOwnerVerification" }
+
+    $guardedFalseOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $guardedFalseOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $guardedFalseOwnerVerification = $guardedFalseOwnerRun.Output.Trim()
+    $guardedFalseOwnerExitCode = $guardedFalseOwnerRun.ExitCode
+    if ($guardedFalseOwnerExitCode -ne 0 -or $guardedFalseOwnerVerification -notmatch '(?m)^Dafny program verifier finished with [1-9][0-9]* verified, 0 errors\r?$') { throw "Guarded false branch did not verify:`n$guardedFalseOwnerVerification" }
+
+    $guardedTrueOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $guardedTrueOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $guardedTrueOwnerVerification = $guardedTrueOwnerRun.Output.Trim()
+    $guardedTrueOwnerExitCode = $guardedTrueOwnerRun.ExitCode
+    if ($guardedTrueOwnerExitCode -ne 0 -or $guardedTrueOwnerVerification -notmatch '(?m)^Dafny program verifier finished with [1-9][0-9]* verified, 0 errors\r?$') { throw "Guarded true branch did not verify:`n$guardedTrueOwnerVerification" }
+
+    $appendPartialOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $appendPartialOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $appendPartialOwnerVerification = $appendPartialOwnerRun.Output.Trim()
+    $appendPartialOwnerExitCode = $appendPartialOwnerRun.ExitCode
+    if ($appendPartialOwnerExitCode -eq 0 -or $appendPartialOwnerVerification -notmatch 'subset constraints') { throw "Nested owner append did not preserve its capacity obligation:`n$appendPartialOwnerVerification" }
 
     $weakOwnerRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $weakOwnerSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
     $weakOwnerVerification = $weakOwnerRun.Output.Trim()
@@ -772,6 +802,34 @@ return zero.dtor_R000F000 == 2L && zero.dtor_R000F001.LongCount == 2L
             exitCode = $partialCompositeOwnerExitCode
             expectedDiagnostic = 'index out of range'
             verification = $partialCompositeOwnerVerification
+        }
+        strictFalseAndPartialOperand = [ordered]@{
+            status = 'Unproven'
+            exitCode = $strictAndOwnerExitCode
+            expectedDiagnostic = "result of operation might violate newtype constraint for 'I64'"
+            verification = $strictAndOwnerVerification
+        }
+        strictTrueOrPartialOperand = [ordered]@{
+            status = 'Unproven'
+            exitCode = $strictOrOwnerExitCode
+            expectedDiagnostic = "result of operation might violate newtype constraint for 'I64'"
+            verification = $strictOrOwnerVerification
+        }
+        guardedFalseBranch = [ordered]@{
+            status = 'Verified'
+            exitCode = $guardedFalseOwnerExitCode
+            verification = $guardedFalseOwnerVerification
+        }
+        guardedTrueBranch = [ordered]@{
+            status = 'Verified'
+            exitCode = $guardedTrueOwnerExitCode
+            verification = $guardedTrueOwnerVerification
+        }
+        nestedAppendCapacity = [ordered]@{
+            status = 'Unproven'
+            exitCode = $appendPartialOwnerExitCode
+            expectedDiagnostic = 'value does not satisfy the subset constraints'
+            verification = $appendPartialOwnerVerification
         }
         weakOwnerContract = [ordered]@{
             status = 'Unproven'

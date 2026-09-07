@@ -450,8 +450,22 @@ public static class OwnerContractReplay
     public static OwnerWitnessReplayResult Replay(OwnerContractBinding binding, ModuleEvaluationLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(binding);
+        OwnerContractBinding trustedBinding;
+        try
+        {
+            trustedBinding = OwnerContractBinder.Bind(binding.Module, binding.Bundle);
+        }
+        catch (ModuleException exception)
+        {
+            return new OwnerWitnessReplayResult("ToolError", 0, null, exception.Code);
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or KeyNotFoundException or NullReferenceException)
+        {
+            return new OwnerWitnessReplayResult("ToolError", 0, null, "InvalidOwnerContractBinding");
+        }
+
         var checkedWitnesses = 0;
-        foreach (var entry in binding.Entries.OrderBy(entry => entry.Contract.Id, StringComparer.Ordinal))
+        foreach (var entry in trustedBinding.Entries.OrderBy(entry => entry.Contract.Id, StringComparer.Ordinal))
         {
             foreach (var witness in entry.Witnesses.OrderBy(witness => witness.Id, StringComparer.Ordinal))
             {
@@ -460,15 +474,20 @@ public static class OwnerContractReplay
                 var arguments = entry.Function.Parameters.Select(parameter => byId[parameter.Id]).ToArray();
                 try
                 {
-                    var actual = ModulesReferenceEvaluator.Invoke(binding.Module, entry.Function.Id, arguments, limits).Value;
+                    var actual = ModulesReferenceEvaluator.Invoke(trustedBinding.Module, entry.Function.Id, arguments, limits).Value;
                     if (!OwnerContractEvaluator.StructuralEquals(witness.ModelResult, actual))
                         return new OwnerWitnessReplayResult("Counterexample", checkedWitnesses,
-                            new OwnerWitnessCounterexample(entry.Contract.Id, witness.Id, witness.ModelResult, actual, null));
+                            new OwnerWitnessCounterexample(entry.Contract.Id, witness.Id, witness.ModelResult, actual));
                 }
                 catch (ModuleException exception)
                 {
-                    return new OwnerWitnessReplayResult("Counterexample", checkedWitnesses,
-                        new OwnerWitnessCounterexample(entry.Contract.Id, witness.Id, witness.ModelResult, null, exception.Code));
+                    var status = exception.Code switch
+                    {
+                        "EvaluationStepLimitExceeded" => "Timeout",
+                        "ArithmeticOverflow" or "SequenceIndexOutOfRange" or "SequenceCapacityExceeded" => "CandidateError",
+                        _ => "ToolError"
+                    };
+                    return new OwnerWitnessReplayResult(status, checkedWitnesses, null, exception.Code);
                 }
             }
         }

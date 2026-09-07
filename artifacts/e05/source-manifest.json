@@ -1,273 +1,113 @@
 {
   "schemaVersion": "strogo.e05.source-manifest.v1",
-  "baseCommit": "ef613d96199de1b81918741f15b5616fb9ac274d",
+  "baseCommit": "706404359e8375af1231fbd00b1e03874835069d",
   "digestAlgorithm": "sha256 of UTF-8 path<TAB>sha256<LF>, paths sorted ordinal",
-  "snapshotDigest": "f94401859c41d01105724f4183a440745200d72c22e1c2e5304ed25ac226fcf9",
+  "snapshotDigest": "ac43046dc9804645844b0b5122068938c52c545fb0ea46355777097aab6bf0ae",
   "files": [
     {
+      "path": "docs/knowledge-log.md",
+      "sha256": "b8133efbfe99ddbfa7944a2fb274ce62f0f1259982d3f2b99c20ef49f1145c91",
+      "bytes": 87560
+    },
+    {
       "path": "docs/modules-v0.2.md",
-      "sha256": "921f81102c551c54d2790c70ccfddd97cb8257b9a6c332b9d39efd2e0921f5c5",
-      "bytes": 26679
+      "sha256": "d572cbabdb815a0610ba402ac9f6b0265a9539ef21695a86790ea22cde4536a8",
+      "bytes": 32577
     },
     {
-      "path": "fixtures/modules-v0.2/call-safe.json",
-      "sha256": "77a86030641515692a48eb57cf60c44c69fbd75e14b8f7e7268785a9e7870ec3",
-      "bytes": 979
-    },
-    {
-      "path": "fixtures/modules-v0.2/call-scalar-valid.json",
-      "sha256": "a80724733739ed0474087c90e0007018f2c1e8f45498491710add3857d4fef21",
-      "bytes": 1062
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-call-cycle.json",
-      "sha256": "5f6c77fff0db0909e629f8e6fffec6ae4e28a9615980e938952e3aeedd040b05",
-      "bytes": 662
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-numeric-capacity.json",
-      "sha256": "adfee176461d2dd0dbb014244392cfc6bf3793c27ab9ffa9c9a11ea14a45b67d",
-      "bytes": 402
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-record.json",
-      "sha256": "3c96488d0c6bebaa3e746a761b7e102580a7a40cb675f4073acb98aaaf40913a",
-      "bytes": 597
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-recursive-type.json",
-      "sha256": "bbb50e2d355a6d61fddf891c5355196a0ecca135176cee578e57dac31334237f",
-      "bytes": 229
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-seq-element.json",
-      "sha256": "d3d8482da11cbc20b7370b82b7ebb113581db0c8f3548b3926911d406a52489b",
-      "bytes": 755
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-invalid-type-depth.json",
-      "sha256": "2695feed51be5108214dad42ae50717f522255428dab1efa6f4f318e9b8c8249",
-      "bytes": 295
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-valid-shuffled.json",
-      "sha256": "5f138190ba3b9ed03599f312048bf09888ac7d1a66f84244ba4e2da116514676",
-      "bytes": 2607
-    },
-    {
-      "path": "fixtures/modules-v0.2/composite-valid.json",
-      "sha256": "63942162bc0bf233bc18d7987e55e4153a5fc6724ce96bfb860c56d9ce4ea42d",
-      "bytes": 2607
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-invalid-branch-type.json",
-      "sha256": "8799891cf3f836978fd883a84aa5ef248a7ed92043eae8538ed458cd403d03cf",
-      "bytes": 763
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-invalid-hidden-capture.json",
-      "sha256": "50ce831f97619ecccd9af6ebceab208667490701233ae3fb9ea16234aad7c49f",
-      "bytes": 760
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-invalid-nested-call-cycle.json",
-      "sha256": "470d2b8d1517a04b9cf6cdb7a526c830ec7e7de62de36cc9634172d40db7ee50",
-      "bytes": 1744
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-lazy-overflow.json",
-      "sha256": "8cec85afde73e39c18b7bf769d04a57c4066590ccd3cc7ec72d50e7e380eb749",
-      "bytes": 1169
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-nested-safe.json",
-      "sha256": "c76fc3b15491d6bba374b94cb0730539bcfd53476d7b120033d9604a7ddfe3ad",
-      "bytes": 2805
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-valid-shuffled.json",
-      "sha256": "35602519382eab93b866a48d85b24a7adf9a79a2a1b7a2b58b8739b3ef508d4b",
-      "bytes": 1469
-    },
-    {
-      "path": "fixtures/modules-v0.2/if-valid.json",
-      "sha256": "8f9d5c1daddd4aee7fd69e024fba809d424f220f46be504fde3acbb696d1f112",
-      "bytes": 1469
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-add-alternative.json",
-      "sha256": "abe9124508a7e753bbd1728fb57694a48113eaca9bba5268f6861a77256cdb6f",
-      "bytes": 618
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-add-valid.json",
-      "sha256": "ebd5837d37ce9296fdb8da92a2226509daa6330a0e1cb11f33ebc064022d387e",
-      "bytes": 587
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-add-wrong.json",
-      "sha256": "4707ceea85e1f4d3cd2e0854a64100cb894286862739f388d0128e77e25a1a4d",
-      "bytes": 417
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-extra-value.json",
-      "sha256": "96370f7d05a076183981c7b39699f0f4102e6eb0ca9f3aff5360e7096bdea11d",
-      "bytes": 467
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-i64-leading-zero.json",
-      "sha256": "eca511bdefb29ab759b8f18363b7c93db4d48e3b2af1915df261fe65913918cf",
-      "bytes": 588
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-i64-negative-zero.json",
-      "sha256": "4fe5c61c8baf2e7dcaeb522bb7bfa78abd58268ba36632a2953c8aa2300aaf75",
-      "bytes": 588
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-i64-plus.json",
-      "sha256": "fd4ee63a2293869e32d6a4e95116992a890af07f452fc13dc035aac575429aa9",
-      "bytes": 588
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-op.json",
-      "sha256": "8935b02edd5d093fe4a3b0d50159da52c8e4b18071d4773898058584cedc0130",
-      "bytes": 492
-    },
-    {
-      "path": "fixtures/modules-v0.2/math-invalid-return-mismatch.json",
-      "sha256": "b626116d335b677fbb471eef094a8d00e41a82989916df0865a199e99e4af135",
-      "bytes": 511
-    },
-    {
-      "path": "fixtures/modules-v0.2/owner-add-one-valid.json",
+      "path": "fixtures/modules-v0.2/owner-add-one-valid-v0.2.json",
       "sha256": "1245bd136e91179ae891e9bdbe1b1c69cb739ecaa66333cd753063f19f3998bf",
       "bytes": 1579
     },
     {
-      "path": "fixtures/modules-v0.2/owner-add-one-weak.json",
+      "path": "fixtures/modules-v0.2/owner-add-one-valid.json",
+      "sha256": "80bfea37f6fbccbe5f53b65bafb0850748f5a1a188e43a2cf65fac572c9c79f6",
+      "bytes": 1712
+    },
+    {
+      "path": "fixtures/modules-v0.2/owner-add-one-weak-v0.2.json",
       "sha256": "7ce2d9f51e78af55f2fef762cbbdc2faeb883875a7279ddeb4af283e218644ee",
       "bytes": 1418
     },
     {
-      "path": "fixtures/modules-v0.2/scalar-lowering-safe.json",
-      "sha256": "650733d691da5e3f6e2befa19a1d22821b19f4529295b9034459454c28c28dd7",
-      "bytes": 1789
+      "path": "fixtures/modules-v0.2/owner-add-one-weak.json",
+      "sha256": "7977f8abc73541390ec4ca0bcb1b3b9a95de7415005a28786f4af9117b951b9f",
+      "bytes": 1478
     },
     {
-      "path": "fixtures/modules-v0.2/scalar-ops-valid.json",
-      "sha256": "5fc3d7c247450f9e2a3dffe96962ec0ea05bb8452b92a5bd91cc6f4546222095",
-      "bytes": 1124
+      "path": "fixtures/modules-v0.2/owner-composite-alternative.json",
+      "sha256": "5335c162befeea7f32e5b49ba3d7fca3ca9441e26e2a3545a2b408eb80bca1e2",
+      "bytes": 1689
     },
     {
-      "path": "fixtures/modules-v0.2/scalar-reference-valid.json",
-      "sha256": "0012c7613553796bf7d49132665f979dc311cd1195fa15b87b98d3c81f6123ee",
-      "bytes": 2500
+      "path": "fixtures/modules-v0.2/owner-composite-module.json",
+      "sha256": "323d225a45d89d97de32e5742ec9dcb59cd933f43a09381dd29809c819385746",
+      "bytes": 1496
     },
     {
-      "path": "specs/2026-09-06-composable-verified-modules-v0.2.md",
-      "sha256": "afa7f6f1be17975e531577fbd7ab8f0427438030e1150401d1d6a5956e3e745a",
-      "bytes": 55746
+      "path": "fixtures/modules-v0.2/owner-composite-partial.json",
+      "sha256": "bf3fa2fb0d0ddf9c6e14e09b54e669bde346ee44e50392a9305fe6091d74e06f",
+      "bytes": 5569
     },
     {
-      "path": "src/Strogo.Modules/Codec.cs",
-      "sha256": "c281a24171fb4267e03227c3c975e6868a4133e10b0e5e4fbb106a7264f25a93",
-      "bytes": 7528
+      "path": "fixtures/modules-v0.2/owner-composite-valid.json",
+      "sha256": "cc7fc0a94270f325ec8110b27fae956d7d653b463ac1d03340b062e647954198",
+      "bytes": 2541
     },
     {
-      "path": "src/Strogo.Modules/Compiler.cs",
-      "sha256": "378d0549426dde5b9017a00d8e3ebe8b1820266be286a8d4416839b4e11a6e33",
-      "bytes": 6441
+      "path": "fixtures/modules-v0.2/owner-composite-wrong.json",
+      "sha256": "29a35deb06bb6b8583ba7b037f17389146d1ca76bdb2d4e8b82d78273484fa74",
+      "bytes": 1502
+    },
+    {
+      "path": "fixtures/modules-v0.2/owner-empty-sequence-closure.json",
+      "sha256": "cb7a054291b4ed5f9d5dbd4db404faa24f1b0f2a8f29e09b722a27718db22f1d",
+      "bytes": 1515
+    },
+    {
+      "path": "fixtures/modules-v0.2/owner-empty-sequence-module.json",
+      "sha256": "10036b079743e63040765a4f605db02182009175dda47aa658ab86fd5301f5a0",
+      "bytes": 634
+    },
+    {
+      "path": "specs/2026-09-07-e05-owner-composite-contract-v0.3.md",
+      "sha256": "ab9b58f34f0eeb0634406bcff57cc5aa813b7ec811303b7b47361810803720ee",
+      "bytes": 57342
     },
     {
       "path": "src/Strogo.Modules/DafnyLowering.cs",
-      "sha256": "c10ddc36df32a873dc98e9010b40e99a88de83bf642738957ea2690178c9807a",
-      "bytes": 14648
-    },
-    {
-      "path": "src/Strogo.Modules/Errors.cs",
-      "sha256": "1a34dc55464a2c216d3880a1533ad07b9b0283bf050ec6048d682758787148d3",
-      "bytes": 900
-    },
-    {
-      "path": "src/Strogo.Modules/Lexer.cs",
-      "sha256": "04b9e53b4f0822d9a36cb9d0effe96b14bd180d375786cf2b4c4f62f2c840ef3",
-      "bytes": 4400
-    },
-    {
-      "path": "src/Strogo.Modules/Models.cs",
-      "sha256": "58e68f88ec595662a74b522a18eeece9344f4b511346d55cbd6e9c4c5dd48e9e",
-      "bytes": 6608
+      "sha256": "07750c1a5fa8a4b0807a923bde46bf97a745ca8931591b04a9405229e63e4b7f",
+      "bytes": 26293
     },
     {
       "path": "src/Strogo.Modules/OwnerBundleCodec.cs",
-      "sha256": "78357ee6b64690cf54c29eac9686297de4fffae007c916c92bb076c6f1af1c20",
-      "bytes": 4111
+      "sha256": "ee88d120f80fcc732d85f524ec0e95fe4584898c9e0cca0dc25ff32e6a31e591",
+      "bytes": 7982
     },
     {
       "path": "src/Strogo.Modules/OwnerBundleParser.cs",
-      "sha256": "d3f017c67ba9cabc3a383335afbb8028aa753e0c938010fd3bc43d35066b8575",
-      "bytes": 20993
+      "sha256": "aaf6f45ce0c6756986c0514dfe3997894ff7b17b22169ebc1cc7333aec9bc6cc",
+      "bytes": 39935
     },
     {
       "path": "src/Strogo.Modules/OwnerContractSemantics.cs",
-      "sha256": "678495c7a941a9b0c700553276078a12af1bcc0bd9dd0d8b29c8a13c448b32e4",
-      "bytes": 19863
+      "sha256": "4b52a6329a2cae59ae2db7c8a17d579ad8e386afc1cb52598730bc2c735e8c12",
+      "bytes": 32252
     },
     {
       "path": "src/Strogo.Modules/OwnerContracts.cs",
-      "sha256": "c77fb30326cfb70d6b26deaa12b9f6af0c68fc3ddabb35b38da5afb5213a14b8",
-      "bytes": 3021
-    },
-    {
-      "path": "src/Strogo.Modules/Parser.cs",
-      "sha256": "60348d3e933477c8b33eccc966b41caa0bac9af9a6e0016bb6fe86b03bb187b1",
-      "bytes": 42093
-    },
-    {
-      "path": "src/Strogo.Modules/ReferenceEvaluator.cs",
-      "sha256": "fd7446e2816117e84ab0aa4782ebeb9cfd1a8b3a0b6f0a1ecf4526382138f823",
-      "bytes": 10297
-    },
-    {
-      "path": "src/Strogo.Modules/Strogo.Modules.csproj",
-      "sha256": "e94f516a37262c3338e0d85c6fe2897be131e180cddf318d1e22531cf64021fb",
-      "bytes": 293
-    },
-    {
-      "path": "src/Strogo.Modules/packages.lock.json",
-      "sha256": "f7e2e7ff34060f4e1720a8a64a32a666bacb3c66be2a80f4876d228bc16ee547",
-      "bytes": 132
+      "sha256": "781e02698cef8471d1bfa32917bcdbd88636c28a5204ce151e1cf82837353524",
+      "bytes": 3465
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Program.cs",
-      "sha256": "7b6ba21cfd9c33064020d66bc4b2260f5b0881fb6cdc9bf817f0f6e8606cced9",
-      "bytes": 64060
-    },
-    {
-      "path": "tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj",
-      "sha256": "71fe2a40cdd11bb4fd1a718bc26a372806d1aa293b079b21115db16d38f7f9f1",
-      "bytes": 228
-    },
-    {
-      "path": "tests/Strogo.Modules.Conformance/packages.lock.json",
-      "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a",
-      "bytes": 273
-    },
-    {
-      "path": "tools/Install-Dafny.ps1",
-      "sha256": "31b563f03570cff840a163e5a85170805c032ca5dba021b77e589035498fa996",
-      "bytes": 1228
+      "sha256": "805d6daeb56da16cee1fe935e316163e98e86caf786a457220e5637ef8b2a09f",
+      "bytes": 109457
     },
     {
       "path": "tools/Test-Modules-Dafny-Lowering.ps1",
-      "sha256": "e02953979fa04fd186cce5c33ab6ab2e73047653f0ebab6977274cc822cb99ee",
-      "bytes": 37874
-    },
-    {
-      "path": "tools/dafny.json",
-      "sha256": "adb81b89a064cccff2784ee52ce0bcbdd52cd476afea9511f944b1d63bedd7e0",
-      "bytes": 304
+      "sha256": "e5c4d5fe837de7548921f99dc6aa942f6f144b64059fd83e16a9ef5383744f93",
+      "bytes": 52910
     }
   ]
 }

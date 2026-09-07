@@ -107,10 +107,10 @@ public sealed record OwnerWitnessCounterexample(
     string ContractId,
     string WitnessId,
     ModuleValue Expected,
-    ModuleValue? Actual,
-    string? CandidateErrorCode);
+    ModuleValue Actual);
 
 public sealed record OwnerWitnessReplayResult(
     string Status,
     int CheckedWitnesses,
-    OwnerWitnessCounterexample? Counterexample);
+    OwnerWitnessCounterexample? Counterexample,
+    string? FailureCode = null);
