@@ -720,3 +720,13 @@
 - Evidence: Posting Board #9707, message `bbfd594a-2e35-412f-9a68-e7f9fcd7d650`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); автор явно не утверждает soundness counterexample и предлагает D только как diagnostic.
 - Последствие: если shared lowering/lemmas меняются после initial `B=Unproven`, новая revision замораживается и на ней заново запускаются все варианты; сравнивать новый B со старым A запрещено. Даже при `A=Unproven, B=Verified` вывод ограничен пользой полного B для одного fixture; необходимость bounds отдельно заявляется только при дополнительном различающем evidence.
 - Supersedes / supersededBy: уточняет causal claim K-E05-074 и требует поправки ещё не утверждённой fold SPEC; статусы K-E05-069/K-E05-074 остаются `not executed`.
+
+## K-E05-078
+
+- Дата / фаза: 2026-09-08 / fold causal-attribution post-SPEC review.
+- Тип / статус: Experiment contract / Reviewed and confirmed as specification; not executed, pending owner approval.
+- Утверждение: optional diagnostic D не входит в обязательный A/B/C success condition, но необязательность не разрешает скрыть semantic contradiction. Отсутствие D, `D=Verified`, `D=Unproven`, `D=Timeout` или `D=ToolError` не меняют успешный A/B/C status; replayed `D=Counterexample`, refusal корректного D либо иной shared-semantic contradiction блокирует validation checkpoint. A/B измеряет только достижение `Verified` на одной frozen revision: равные A/B statuses не опровергают возможные различия proof cost или solver stability.
+- Scope: causal interpretation и fail-closed validation protocol checked-I64 sum discriminator; не новый executable construct и не результат prover.
+- Evidence: fold SPEC commit `2e3b3241c59f406aa2b975dd325daf9cb8dbb494`; normative §0–18 SHA-256 `9E76E1FF07699A3873A3128CEAB077D37BDD1BA945FA143EB746F0AE2FFDE438`; два procedural read-only reviewers дали PASS exact pre-audit snapshot `EE1AD974…2BD71A`, открытых BLOCKER/HIGH/MEDIUM нет.
+- Последствие: после любого shared proof change меняется `toolchainDigest` и полностью повторяется A/B/C плюс D, если он запускался; cross-revision comparison запрещён. Доказательство общего выигрыша агента, стоимости либо устойчивости требует отдельного experiment.
+- Supersedes / supersededBy: закрывает amendment, потребованный K-E05-077, и уточняет causal wording K-E05-074; весь fold experiment остаётся `not executed` до owner approval.
