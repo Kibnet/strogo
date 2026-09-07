@@ -68,6 +68,7 @@ public static class ModulesCodec
             case "record.get": payload["fieldId"] = node.Metadata.FieldId; break;
             case "seq.empty": payload["elementType"] = PayloadType(node.Metadata.ElementType!); payload["capacity"] = node.Metadata.Capacity; break;
             case "call": payload["functionRef"] = node.Metadata.FunctionRef; break;
+            case "if": payload["thenRegion"] = PayloadBody(node.ThenRegion!); payload["elseRegion"] = PayloadBody(node.ElseRegion!); break;
         }
 
         return payload;
@@ -108,10 +109,18 @@ public static class ModulesCodec
             case "record.get": payload["fieldId"] = instruction.Metadata.FieldId; break;
             case "seq.empty": payload["elementType"] = PayloadType(instruction.Metadata.ElementType!); payload["capacity"] = instruction.Metadata.Capacity; break;
             case "call": payload["functionRef"] = instruction.Metadata.FunctionRef; break;
+            case "if": payload["thenRegion"] = PayloadRegionIr(instruction.ThenRegion!); payload["elseRegion"] = PayloadRegionIr(instruction.ElseRegion!); break;
         }
 
         return payload;
     }
+
+    private static object PayloadRegionIr(RegionIr region) => new
+    {
+        parameters = region.Parameters.Select(PayloadParameter).ToArray(),
+        instructions = region.Instructions.Select(PayloadInstruction).ToArray(),
+        resultIndex = region.ResultIndex
+    };
 
     private static object PayloadFunctionIr(FunctionIr function) => new
     {

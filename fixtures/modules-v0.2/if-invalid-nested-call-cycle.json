@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "branch.call-cycle",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "f",
+      "parameters": [{ "id": "condition", "type": "Bool" }, { "id": "value", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "fContract",
+      "body": {
+        "parameters": ["condition", "value"],
+        "nodes": [{
+          "id": "branch", "op": "if", "type": "I64", "args": ["condition", "condition", "value"],
+          "thenRegion": {
+            "parameters": ["nestedCondition", "nestedValue"],
+            "nodes": [{ "id": "invoke", "op": "call", "type": "I64", "args": ["nestedCondition", "nestedValue"], "functionRef": "g" }],
+            "result": "invoke"
+          },
+          "elseRegion": { "parameters": ["nestedCondition", "nestedValue"], "nodes": [], "result": "nestedValue" }
+        }],
+        "result": "branch"
+      }
+    },
+    {
+      "id": "g",
+      "parameters": [{ "id": "condition", "type": "Bool" }, { "id": "value", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "gContract",
+      "body": {
+        "parameters": ["condition", "value"],
+        "nodes": [{
+          "id": "branch", "op": "if", "type": "I64", "args": ["condition", "condition", "value"],
+          "thenRegion": {
+            "parameters": ["nestedCondition", "nestedValue"],
+            "nodes": [{ "id": "invoke", "op": "call", "type": "I64", "args": ["nestedCondition", "nestedValue"], "functionRef": "f" }],
+            "result": "invoke"
+          },
+          "elseRegion": { "parameters": ["nestedCondition", "nestedValue"], "nodes": [], "result": "nestedValue" }
+        }],
+        "result": "branch"
+      }
+    }
+  ],
+  "exports": ["f"]
+}

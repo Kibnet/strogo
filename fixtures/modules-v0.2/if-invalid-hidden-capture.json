@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "branch.capture",
+  "types": [],
+  "imports": [],
+  "functions": [{
+    "id": "choose",
+    "parameters": [{ "id": "condition", "type": "Bool" }, { "id": "x", "type": "I64" }],
+    "returnType": "I64",
+    "contractRef": "chooseContract",
+    "body": {
+      "parameters": ["condition", "x"],
+      "nodes": [{
+        "id": "chosen", "op": "if", "type": "I64", "args": ["condition", "x"],
+        "thenRegion": { "parameters": ["value"], "nodes": [{ "id": "copied", "op": "i64.add", "type": "I64", "args": ["x", "value"] }], "result": "copied" },
+        "elseRegion": { "parameters": ["value"], "nodes": [], "result": "value" }
+      }],
+      "result": "chosen"
+    }
+  }],
+  "exports": ["choose"]
+}

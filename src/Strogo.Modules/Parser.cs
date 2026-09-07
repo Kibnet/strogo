@@ -16,7 +16,7 @@ public static class ModulesParser
     private static readonly Regex CanonicalI64Pattern = new("^(0|-?[1-9][0-9]*)$", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking);
     private static readonly ImmutableHashSet<string> SupportedOpcodes = ImmutableHashSet.Create(StringComparer.Ordinal,
         "i64.const", "bool.const", "i64.add", "i64.sub", "i64.le", "i64.eq", "bool.not", "bool.and", "bool.or",
-        "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append", "call");
+        "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append", "if", "call");
 
     public static ModuleParseResult ParseModule(string source, StrogoLimits? limits = null)
         => ParseModule(Encoding.UTF8.GetBytes(source), limits);
@@ -193,7 +193,7 @@ public static class ModulesParser
         foreach (var header in headers.OrderBy(header => header.Id, StringComparer.Ordinal))
         {
             var body = ParseFunctionBody(header, headerById, typeById, typeIds, limits);
-            totalNodes = checked(totalNodes + body.Nodes.Length);
+            totalNodes = checked(totalNodes + CountNodes(body));
             if (totalNodes > limits.MaxTotalNodes)
                 throw ModulesExceptionFactory.Error("parse", "ModuleNodeLimitExceeded", details: new { actual = totalNodes, max = limits.MaxTotalNodes });
             result.Add(new FunctionDecl(header.Id, header.Parameters, header.ReturnType, header.ContractRef, body));
@@ -233,13 +233,35 @@ public static class ModulesParser
         ImmutableHashSet<string> typeIds,
         StrogoLimits limits)
     {
-        var bodyParameters = ParseIdArray(function.Body.GetProperty("parameters"), "function.body.parameters", "DuplicateParameterId");
+        var bodyLocus = $"function/{function.Id}/body";
+        var body = ParseRegionSyntax(function.Body, bodyLocus, 0, typeIds, limits);
+        var functionNodeCount = CountNodes(body);
+        if (functionNodeCount > limits.MaxNodesPerFunction)
+            throw ModulesExceptionFactory.Error("parse", "FunctionNodeLimitExceeded", function.Id,
+                new { actual = functionNodeCount, max = limits.MaxNodesPerFunction });
+        var bodyParameters = body.Parameters;
         var functionParameters = function.Parameters.Select(parameter => parameter.Id).ToImmutableArray();
         if (!bodyParameters.SequenceEqual(functionParameters))
             throw ModulesExceptionFactory.Error("parse", "BodyParametersMismatch", details: new { declared = functionParameters, body = bodyParameters });
 
-        var nodesElement = function.Body.GetProperty("nodes");
-        RequireArray(nodesElement, "function.body.nodes");
+        ValidateRegion(body, function.Parameters, function.ReturnType, "ReturnTypeMismatch", bodyLocus, functions, typeById);
+        return body;
+    }
+
+    private static FunctionBody ParseRegionSyntax(
+        JsonElement region,
+        string path,
+        int depth,
+        ImmutableHashSet<string> typeIds,
+        StrogoLimits limits)
+    {
+        if (depth > limits.MaxRegionDepth)
+            throw ModulesExceptionFactory.Error("parse", "RegionDepthExceeded", details: new { depth, max = limits.MaxRegionDepth });
+        CheckObject(region, path, ["parameters", "nodes", "result"]);
+        var regionParameters = ParseIdArray(region.GetProperty("parameters"), $"{path}.parameters", "DuplicateParameterId");
+
+        var nodesElement = region.GetProperty("nodes");
+        RequireArray(nodesElement, $"{path}.nodes");
         var nodeValues = nodesElement.EnumerateArray().ToArray();
         if (nodeValues.Length > limits.MaxNodesPerFunction)
             throw ModulesExceptionFactory.Error("parse", "FunctionNodeLimitExceeded", details: new { actual = nodeValues.Length, max = limits.MaxNodesPerFunction });
@@ -249,35 +271,78 @@ public static class ModulesParser
         foreach (var nodeValue in OrderByEntityId(nodeValues))
         {
             if (nodeValue.ValueKind != JsonValueKind.Object)
-                throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", details: new { path = "function.body.nodes[]", expected = "object" });
-            var op = RequireString(RequireProperty(nodeValue, "op", "function.body.nodes[]"));
+                throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", details: new { path = $"{path}.nodes[]", expected = "object" });
+            var op = RequireString(RequireProperty(nodeValue, "op", $"{path}.nodes[]"));
             if (!SupportedOpcodes.Contains(op))
                 throw ModulesExceptionFactory.Error("parse", "UnsupportedOpcode", new { opcode = op });
-            CheckObject(nodeValue, "function.body.nodes[]", ExpectedNodeFields(op));
+            CheckObject(nodeValue, $"{path}.nodes[]", ExpectedNodeFields(op));
             var nodeId = RequireId(nodeValue.GetProperty("id"));
-            if (functionParameters.Contains(nodeId) || !nodeIds.Add(nodeId))
-                throw ModulesExceptionFactory.Error("parse", "DuplicateValueId", nodeId);
+            var nodeEntityId = $"{path}/node/{nodeId}";
+            if (regionParameters.Contains(nodeId) || !nodeIds.Add(nodeId))
+                throw ModulesExceptionFactory.Error("parse", "DuplicateValueId", nodeEntityId);
             var nodeType = ParseType(nodeValue.GetProperty("type"), 0, limits);
-            EnsureTypeRef(nodeType, typeIds, $"node.{nodeId}.type");
-            nodes.Add(new FunctionNode(nodeId, op, nodeType, ParseIdArray(nodeValue.GetProperty("args"), "function.node.args", null), ParseNodeMetadata(nodeValue, nodeId, op, limits)));
+            EnsureTypeRef(nodeType, typeIds, $"{nodeEntityId}/type");
+            var thenRegion = op == "if" ? ParseRegionSyntax(nodeValue.GetProperty("thenRegion"), $"{nodeEntityId}/then", depth + 1, typeIds, limits) : null;
+            var elseRegion = op == "if" ? ParseRegionSyntax(nodeValue.GetProperty("elseRegion"), $"{nodeEntityId}/else", depth + 1, typeIds, limits) : null;
+            nodes.Add(new FunctionNode(nodeId, op, nodeType, ParseIdArray(nodeValue.GetProperty("args"), $"{nodeEntityId}/args", null), ParseNodeMetadata(nodeValue, nodeId, nodeEntityId, op, limits), thenRegion, elseRegion));
         }
 
         var nodeArray = nodes.ToImmutable();
-        var parameterTypes = function.Parameters.ToDictionary(parameter => parameter.Id, parameter => parameter.Type, StringComparer.Ordinal);
-        var nodeTypes = nodeArray.ToDictionary(node => node.Id, node => node.Type, StringComparer.Ordinal);
-        foreach (var node in nodeArray.OrderBy(node => node.Id, StringComparer.Ordinal))
-            EnsureTypeRules(node, parameterTypes, nodeTypes, functions, typeById);
-
-        var resultId = RequireId(function.Body.GetProperty("result"));
-        if (!parameterTypes.ContainsKey(resultId) && !nodeTypes.ContainsKey(resultId))
-            throw ModulesExceptionFactory.Error("parse", "UnknownResultValue", resultId);
-        EnsureDAG(nodeArray, functionParameters);
-        EnsureReachable(nodeArray, functionParameters, resultId);
-        var resultType = parameterTypes.TryGetValue(resultId, out var parameterType) ? parameterType : nodeTypes[resultId];
-        if (!TypesEquivalent(resultType, function.ReturnType))
-            throw ModulesExceptionFactory.Error("parse", "ReturnTypeMismatch", details: new { functionReturnType = function.ReturnType, bodyResultType = resultType, resultId });
-        return new FunctionBody(functionParameters, nodeArray, resultId);
+        var resultId = RequireId(region.GetProperty("result"));
+        return new FunctionBody(regionParameters, nodeArray, resultId);
     }
+
+    private static void ValidateRegion(
+        FunctionBody region,
+        ImmutableArray<FunctionParameter> parameters,
+        TypeRef expectedResultType,
+        string resultMismatchCode,
+        string regionLocus,
+        IReadOnlyDictionary<string, FunctionHeader> functions,
+        IReadOnlyDictionary<string, TypeDecl> typeById)
+    {
+        var parameterTypes = parameters.ToDictionary(parameter => parameter.Id, parameter => parameter.Type, StringComparer.Ordinal);
+        var nodeTypes = region.Nodes.ToDictionary(node => node.Id, node => node.Type, StringComparer.Ordinal);
+        foreach (var node in region.Nodes.OrderBy(node => node.Id, StringComparer.Ordinal))
+        {
+            EnsureTypeRules(node, regionLocus, parameterTypes, nodeTypes, functions, typeById);
+            if (node.Op == "if")
+            {
+                var nodeLocus = $"{regionLocus}/node/{node.Id}";
+                var environmentTypes = node.Args.Skip(1).Select(id => ResolveValueType(id, parameterTypes, nodeTypes, nodeLocus)).ToImmutableArray();
+                ValidateBranch(node, node.ThenRegion!, "then", environmentTypes);
+                ValidateBranch(node, node.ElseRegion!, "else", environmentTypes);
+            }
+        }
+
+        var resultId = region.Result;
+        if (!parameterTypes.ContainsKey(resultId) && !nodeTypes.ContainsKey(resultId))
+            throw ModulesExceptionFactory.Error("parse", "UnknownResultValue", regionLocus, new { resultId });
+        EnsureDAG(region.Nodes, region.Parameters, regionLocus);
+        EnsureReachable(region.Nodes, region.Parameters, resultId, regionLocus);
+        var resultType = parameterTypes.TryGetValue(resultId, out var parameterType) ? parameterType : nodeTypes[resultId];
+        if (!TypesEquivalent(resultType, expectedResultType))
+            throw ModulesExceptionFactory.Error("parse", resultMismatchCode, regionLocus, new { expected = expectedResultType.ToString(), actual = resultType.ToString(), resultId });
+
+        void ValidateBranch(FunctionNode owner, FunctionBody branch, string role, ImmutableArray<TypeRef> environmentTypes)
+        {
+            if (branch.Parameters.Length != environmentTypes.Length)
+                throw ModulesExceptionFactory.Error("parse", "RegionParametersMismatch", $"{regionLocus}/node/{owner.Id}/{role}",
+                    new { branch = role, expected = environmentTypes.Length, actual = branch.Parameters.Length });
+            var branchParameters = branch.Parameters.Select((id, index) => new FunctionParameter(id, environmentTypes[index])).ToImmutableArray();
+            ValidateRegion(branch, branchParameters, owner.Type, "RegionResultTypeMismatch", $"{regionLocus}/node/{owner.Id}/{role}", functions, typeById);
+        }
+    }
+
+    private static TypeRef ResolveValueType(string id, IReadOnlyDictionary<string, TypeRef> parameterTypes, IReadOnlyDictionary<string, TypeRef> nodeTypes, string ownerId)
+        => parameterTypes.TryGetValue(id, out var parameterType) ? parameterType
+            : nodeTypes.TryGetValue(id, out var nodeType) ? nodeType
+            : throw ModulesExceptionFactory.Error("parse", "DanglingNodeArg", ownerId, new { reference = id });
+
+    private static int CountNodes(FunctionBody region)
+        => checked(region.Nodes.Length + region.Nodes.Sum(node =>
+            (node.ThenRegion is null ? 0 : CountNodes(node.ThenRegion))
+            + (node.ElseRegion is null ? 0 : CountNodes(node.ElseRegion))));
 
     private static IReadOnlyCollection<string> ExpectedNodeFields(string op) => op switch
     {
@@ -285,11 +350,12 @@ public static class ModulesParser
         "record.make" => ["id", "op", "type", "args", "recordType", "fieldIds"],
         "record.get" => ["id", "op", "type", "args", "fieldId"],
         "seq.empty" => ["id", "op", "type", "args", "elementType", "capacity"],
+        "if" => ["id", "op", "type", "args", "thenRegion", "elseRegion"],
         "call" => ["id", "op", "type", "args", "functionRef"],
         _ => ["id", "op", "type", "args"]
     };
 
-    private static NodeMetadata ParseNodeMetadata(JsonElement node, string nodeId, string op, StrogoLimits limits)
+    private static NodeMetadata ParseNodeMetadata(JsonElement node, string nodeId, string nodeEntityId, string op, StrogoLimits limits)
     {
         if (op == "i64.const")
         {
@@ -298,7 +364,7 @@ public static class ModulesParser
                 ? literal.GetString()!
                 : throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", new { node = nodeId, property = "value", reason = "ExpectedString" });
             if (!CanonicalI64Pattern.IsMatch(text) || !long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _))
-                throw ModulesExceptionFactory.Error("parse", "InvalidI64", nodeId, new { value = text });
+                throw ModulesExceptionFactory.Error("parse", "InvalidI64", nodeEntityId, new { value = text });
             return NodeMetadata.Empty with { Value = text };
         }
 
@@ -311,11 +377,11 @@ public static class ModulesParser
         }
 
         if (op == "record.make")
-            return NodeMetadata.Empty with { RecordType = RequireId(node.GetProperty("recordType")), FieldIds = ParseIdArray(node.GetProperty("fieldIds"), $"node.{nodeId}.fieldIds", "DuplicateFieldId") };
+            return NodeMetadata.Empty with { RecordType = RequireId(node.GetProperty("recordType")), FieldIds = ParseIdArray(node.GetProperty("fieldIds"), $"{nodeEntityId}.fieldIds", "DuplicateFieldId") };
         if (op == "record.get")
             return NodeMetadata.Empty with { FieldId = RequireId(node.GetProperty("fieldId")) };
         if (op == "seq.empty")
-            return NodeMetadata.Empty with { ElementType = ParseType(node.GetProperty("elementType"), 1, limits), Capacity = RequireInt32(node.GetProperty("capacity"), $"node.{nodeId}.capacity") };
+            return NodeMetadata.Empty with { ElementType = ParseType(node.GetProperty("elementType"), 1, limits), Capacity = RequireInt32(node.GetProperty("capacity"), $"{nodeEntityId}.capacity") };
         if (op == "call")
             return NodeMetadata.Empty with { FunctionRef = RequireId(node.GetProperty("functionRef")) };
         return NodeMetadata.Empty;
@@ -338,27 +404,29 @@ public static class ModulesParser
 
     private static void EnsureTypeRules(
         FunctionNode node,
+        string regionLocus,
         IReadOnlyDictionary<string, TypeRef> parameterTypes,
         IReadOnlyDictionary<string, TypeRef> nodeTypes,
         IReadOnlyDictionary<string, FunctionHeader> functions,
         IReadOnlyDictionary<string, TypeDecl> typeById)
     {
+        var entityId = $"{regionLocus}/node/{node.Id}";
         TypeRef ArgType(int index)
         {
             var id = node.Args[index];
             if (parameterTypes.TryGetValue(id, out var parameterType)) return parameterType;
             if (nodeTypes.TryGetValue(id, out var nodeType)) return nodeType;
-            throw ModulesExceptionFactory.Error("parse", "DanglingNodeArg", node.Id, new { reference = id });
+            throw ModulesExceptionFactory.Error("parse", "DanglingNodeArg", entityId, new { reference = id });
         }
         void Arity(int expected)
         {
             if (node.Args.Length != expected)
-                throw ModulesExceptionFactory.Error("parse", "ArityMismatch", node.Id, new { op = node.Op, expected, actual = node.Args.Length });
+                throw ModulesExceptionFactory.Error("parse", "ArityMismatch", entityId, new { op = node.Op, expected, actual = node.Args.Length });
         }
         void TypeIs(TypeRef actual, TypeRef expected, string role)
         {
             if (!TypesEquivalent(actual, expected))
-                throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, role, expected = expected.ToString(), actual = actual.ToString() });
+                throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, role, expected = expected.ToString(), actual = actual.ToString() });
         }
 
         switch (node.Op)
@@ -372,35 +440,42 @@ public static class ModulesParser
             case "bool.not": Arity(1); TypeIs(ArgType(0), new TypeRef("Bool"), "arg0"); TypeIs(node.Type, new TypeRef("Bool"), "result"); return;
             case "bool.and":
             case "bool.or": Arity(2); TypeIs(ArgType(0), new TypeRef("Bool"), "arg0"); TypeIs(ArgType(1), new TypeRef("Bool"), "arg1"); TypeIs(node.Type, new TypeRef("Bool"), "result"); return;
-            case "record.make": ValidateRecordMake(node, ArgType, TypeIs, typeById); return;
+            case "record.make": ValidateRecordMake(node, entityId, ArgType, TypeIs, typeById); return;
             case "record.get":
                 Arity(1);
                 var record = ArgType(0);
                 if (record.Kind != "Record" || record.Name is null || !typeById.TryGetValue(record.Name, out var declaration))
-                    throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, expected = "Record", actual = record.ToString() });
+                    throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, expected = "Record", actual = record.ToString() });
                 var field = declaration.Fields.SingleOrDefault(candidate => candidate.Id == node.Metadata.FieldId);
                 if (field is null)
-                    throw ModulesExceptionFactory.Error("parse", "UnknownRecordField", node.Id, new { recordType = record.Name, fieldId = node.Metadata.FieldId });
+                    throw ModulesExceptionFactory.Error("parse", "UnknownRecordField", entityId, new { recordType = record.Name, fieldId = node.Metadata.FieldId });
                 TypeIs(node.Type, field.Type, "result"); return;
             case "seq.empty":
                 Arity(0); TypeIs(node.Type, new TypeRef("Seq", Element: node.Metadata.ElementType, Capacity: node.Metadata.Capacity), "result"); return;
             case "seq.length":
                 Arity(1);
-                if (ArgType(0).Kind != "Seq") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, expected = "Seq", actual = ArgType(0).ToString() });
+                if (ArgType(0).Kind != "Seq") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, expected = "Seq", actual = ArgType(0).ToString() });
                 TypeIs(node.Type, new TypeRef("I64"), "result"); return;
             case "seq.get":
                 Arity(2);
                 var sequence = ArgType(0);
-                if (sequence.Kind != "Seq" || sequence.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, expected = "Seq", actual = sequence.ToString() });
+                if (sequence.Kind != "Seq" || sequence.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, expected = "Seq", actual = sequence.ToString() });
                 TypeIs(ArgType(1), new TypeRef("I64"), "index"); TypeIs(node.Type, sequence.Element, "result"); return;
             case "seq.append":
                 Arity(2);
                 var source = ArgType(0);
-                if (source.Kind != "Seq" || source.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, expected = "Seq", actual = source.ToString() });
+                if (source.Kind != "Seq" || source.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, expected = "Seq", actual = source.ToString() });
                 TypeIs(ArgType(1), source.Element, "element"); TypeIs(node.Type, source, "result"); return;
+            case "if":
+                if (node.Args.Length < 1)
+                    throw ModulesExceptionFactory.Error("parse", "ArityMismatch", entityId, new { op = node.Op, expectedAtLeast = 1, actual = node.Args.Length });
+                TypeIs(ArgType(0), new TypeRef("Bool"), "condition");
+                if (node.ThenRegion is null || node.ElseRegion is null)
+                    throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", entityId, new { reason = "MissingBranchRegion" });
+                return;
             case "call":
                 if (node.Metadata.FunctionRef is null || !functions.TryGetValue(node.Metadata.FunctionRef, out var callee))
-                    throw ModulesExceptionFactory.Error("parse", "UnknownFunction", node.Id, new { functionRef = node.Metadata.FunctionRef });
+                    throw ModulesExceptionFactory.Error("parse", "UnknownFunction", entityId, new { functionRef = node.Metadata.FunctionRef });
                 Arity(callee.Parameters.Length);
                 for (var index = 0; index < callee.Parameters.Length; index++) TypeIs(ArgType(index), callee.Parameters[index].Type, $"arg{index}");
                 TypeIs(node.Type, callee.ReturnType, "result"); return;
@@ -408,14 +483,14 @@ public static class ModulesParser
         }
     }
 
-    private static void ValidateRecordMake(FunctionNode node, Func<int, TypeRef> argType, Action<TypeRef, TypeRef, string> typeIs, IReadOnlyDictionary<string, TypeDecl> typeById)
+    private static void ValidateRecordMake(FunctionNode node, string entityId, Func<int, TypeRef> argType, Action<TypeRef, TypeRef, string> typeIs, IReadOnlyDictionary<string, TypeDecl> typeById)
     {
         if (node.Type.Kind != "Record" || node.Type.Name is null || node.Metadata.RecordType != node.Type.Name || !typeById.TryGetValue(node.Type.Name, out var declaration))
-            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", node.Id, new { op = node.Op, expected = node.Metadata.RecordType, actual = node.Type.ToString() });
+            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", entityId, new { op = node.Op, expected = node.Metadata.RecordType, actual = node.Type.ToString() });
         var expectedIds = declaration.Fields.Select(field => field.Id).OrderBy(id => id, StringComparer.Ordinal).ToArray();
         var actualIds = node.Metadata.FieldIds.OrderBy(id => id, StringComparer.Ordinal).ToArray();
         if (node.Args.Length != node.Metadata.FieldIds.Length || !actualIds.SequenceEqual(expectedIds, StringComparer.Ordinal))
-            throw ModulesExceptionFactory.Error("parse", "RecordFieldMismatch", node.Id, new { recordType = declaration.Id, expected = expectedIds, actual = actualIds });
+            throw ModulesExceptionFactory.Error("parse", "RecordFieldMismatch", entityId, new { recordType = declaration.Id, expected = expectedIds, actual = actualIds });
         var pairs = node.Metadata.FieldIds
             .Select((fieldId, index) => (FieldId: fieldId, ArgumentIndex: index))
             .OrderBy(pair => pair.FieldId, StringComparer.Ordinal);
@@ -428,7 +503,7 @@ public static class ModulesParser
 
     private static void ValidateCallGraph(ImmutableArray<FunctionDecl> functions)
     {
-        var calls = functions.ToDictionary(function => function.Id, function => function.Body.Nodes.Where(node => node.Op == "call")
+        var calls = functions.ToDictionary(function => function.Id, function => EnumerateNodes(function.Body).Where(node => node.Op == "call")
             .Select(node => node.Metadata.FunctionRef!).Distinct(StringComparer.Ordinal).OrderBy(id => id, StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
         var states = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (var function in functions.OrderBy(function => function.Id, StringComparer.Ordinal)) Visit(function.Id);
@@ -442,6 +517,18 @@ public static class ModulesParser
             states[id] = 1;
             foreach (var callee in calls[id]) Visit(callee);
             states[id] = 2;
+        }
+    }
+
+    private static IEnumerable<FunctionNode> EnumerateNodes(FunctionBody region)
+    {
+        foreach (var node in region.Nodes)
+        {
+            yield return node;
+            if (node.ThenRegion is not null)
+                foreach (var nested in EnumerateNodes(node.ThenRegion)) yield return nested;
+            if (node.ElseRegion is not null)
+                foreach (var nested in EnumerateNodes(node.ElseRegion)) yield return nested;
         }
     }
 
@@ -473,7 +560,7 @@ public static class ModulesParser
         EnsureTypeRef(type.Element, typeIds, path);
     }
 
-    private static void EnsureDAG(ImmutableArray<FunctionNode> nodes, ImmutableArray<string> parameters)
+    private static void EnsureDAG(ImmutableArray<FunctionNode> nodes, ImmutableArray<string> parameters, string regionLocus)
     {
         var nodeIds = nodes.Select(node => node.Id).ToHashSet(StringComparer.Ordinal);
         var inDegree = nodes.ToDictionary(node => node.Id, _ => 0, StringComparer.Ordinal);
@@ -481,7 +568,7 @@ public static class ModulesParser
         foreach (var node in nodes)
             foreach (var arg in node.Args.Distinct(StringComparer.Ordinal))
             {
-                if (!parameters.Contains(arg) && !nodeIds.Contains(arg)) throw ModulesExceptionFactory.Error("parse", "DanglingNodeArg", node.Id, new { reference = arg });
+                if (!parameters.Contains(arg) && !nodeIds.Contains(arg)) throw ModulesExceptionFactory.Error("parse", "DanglingNodeArg", $"{regionLocus}/node/{node.Id}", new { reference = arg });
                 if (!nodeIds.Contains(arg)) continue;
                 inDegree[node.Id]++;
                 users[arg].Add(node.Id);
@@ -495,10 +582,10 @@ public static class ModulesParser
             count++;
             foreach (var user in users[current]) if (--inDegree[user] == 0) ready.Add(user);
         }
-        if (count != nodes.Length) throw ModulesExceptionFactory.Error("parse", "CycleDetected");
+        if (count != nodes.Length) throw ModulesExceptionFactory.Error("parse", "CycleDetected", regionLocus);
     }
 
-    private static void EnsureReachable(ImmutableArray<FunctionNode> nodes, ImmutableArray<string> parameters, string resultId)
+    private static void EnsureReachable(ImmutableArray<FunctionNode> nodes, ImmutableArray<string> parameters, string resultId, string regionLocus)
     {
         var byId = nodes.ToDictionary(node => node.Id, node => node, StringComparer.Ordinal);
         var pending = new Stack<string>([resultId]);
@@ -506,11 +593,11 @@ public static class ModulesParser
         while (pending.TryPop(out var id))
         {
             if (parameters.Contains(id) || !reachable.Add(id)) continue;
-            if (!byId.TryGetValue(id, out var node)) throw ModulesExceptionFactory.Error("parse", "UnknownResultValue", resultId);
+            if (!byId.TryGetValue(id, out var node)) throw ModulesExceptionFactory.Error("parse", "UnknownResultValue", regionLocus, new { resultId });
             foreach (var arg in node.Args) pending.Push(arg);
         }
         var unreachable = byId.Keys.Where(id => !reachable.Contains(id)).OrderBy(id => id, StringComparer.Ordinal).ToArray();
-        if (unreachable.Length > 0) throw ModulesExceptionFactory.Error("parse", "UnreachableNode", new { result = resultId, unreachable });
+        if (unreachable.Length > 0) throw ModulesExceptionFactory.Error("parse", "UnreachableNode", regionLocus, new { result = resultId, unreachable });
     }
 
     private static TypeRef ParseType(JsonElement value, int depth, StrogoLimits limits)
@@ -611,7 +698,8 @@ public static class ModulesParser
             || limits.MaxFunctions is <= 0 or > StrogoLimits.FunctionsHardMaximum
             || limits.MaxNodesPerFunction is <= 0 or > StrogoLimits.NodesPerFunctionHardMaximum
             || limits.MaxTotalNodes is <= 0 or > StrogoLimits.TotalNodesHardMaximum
-            || limits.MaxTypeDepth is <= 0 or > StrogoLimits.TypeDepthHardMaximum)
+            || limits.MaxTypeDepth is <= 0 or > StrogoLimits.TypeDepthHardMaximum
+            || limits.MaxRegionDepth is <= 0 or > StrogoLimits.RegionDepthHardMaximum)
             throw ModulesExceptionFactory.Error("parse", "InvalidLimits");
     }
 }

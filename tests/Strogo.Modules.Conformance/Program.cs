@@ -79,6 +79,14 @@ void ExpectParserRejectWithLimitsBytes(byte[] bytes, string caseName, StrogoLimi
     }
 }
 
+string NestedIfRegion(int nestedIfCount)
+{
+    const string leaf = "{\"parameters\":[\"c\",\"x\"],\"nodes\":[],\"result\":\"x\"}";
+    if (nestedIfCount == 0) return leaf;
+    var child = NestedIfRegion(nestedIfCount - 1);
+    return "{\"parameters\":[\"c\",\"x\"],\"nodes\":[{\"id\":\"branch\",\"op\":\"if\",\"type\":\"I64\",\"args\":[\"c\",\"c\",\"x\"],\"thenRegion\":" + child + ",\"elseRegion\":" + leaf + "}],\"result\":\"branch\"}";
+}
+
 try
 {
     var validBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "math-add-valid.json"));
@@ -131,6 +139,22 @@ try
     Check(makeSummary.Instructions.Any(instruction => instruction.Op == "seq.get"), "seq.get lowered");
     Check(makeSummary.Instructions.Any(instruction => instruction.Op == "call"), "call lowered");
 
+    var branching = ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")));
+    var branchingShuffled = ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid-shuffled.json")));
+    Check(branching.SourceDigest == branchingShuffled.SourceDigest, "nested region node order does not change canonical source digest");
+    Check(branching.Source.Functions.Single().Body.Nodes.Single().ThenRegion is not null, "if branch regions are present in validated source AST");
+    var branchingRoundtrip = ModulesParser.ParseModule(branching.CanonicalSource);
+    Check(branching.SourceDigest == branchingRoundtrip.SourceDigest, "nested region canonical source roundtrip digest");
+    var branchingIr = ModulesCompiler.Compile(branching);
+    var branchingShuffledIr = ModulesCompiler.Compile(branchingShuffled);
+    Check(ModulesCodec.IrDigest(branchingIr.CanonicalBytes) == ModulesCodec.IrDigest(branchingShuffledIr.CanonicalBytes), "nested regions compile to the same canonical IR digest");
+    var branchInstruction = branchingIr.Functions.Single().Instructions.Single(instruction => instruction.Op == "if");
+    Check(branchInstruction.ThenRegion is not null && branchInstruction.ElseRegion is not null, "if preserves both regions in typed IR");
+    var thenRegion = branchInstruction.ThenRegion ?? throw new Exception("Missing then region");
+    var elseRegion = branchInstruction.ElseRegion ?? throw new Exception("Missing else region");
+    Check(thenRegion.Parameters.Select(parameter => parameter.Type.Kind).SequenceEqual(["I64", "I64"]), "if environment types are explicit in typed IR");
+    Check(thenRegion.Instructions.Length == 2 && elseRegion.Instructions.Length == 2, "if branches are lowered as nested regions instead of eager outer instructions");
+
     Check(typeof(ModuleParseResult).GetConstructors().Length == 0, "validated parse result cannot be publicly forged");
     Check(typeof(ModuleIr).GetConstructors().Length == 0, "canonical IR cannot be publicly forged");
     var sourceCopy = composite.CanonicalSource;
@@ -153,6 +177,33 @@ try
     ExpectParserReject("composite-invalid-seq-element.json", "TypeMismatch");
     ExpectParserReject("composite-invalid-recursive-type.json", "RecursiveType");
     ExpectParserReject("composite-invalid-numeric-capacity.json", "SchemaInvalid");
+    ExpectParserReject("if-invalid-hidden-capture.json", "DanglingNodeArg");
+    ExpectParserReject("if-invalid-branch-type.json", "RegionResultTypeMismatch");
+    ExpectParserReject("if-invalid-nested-call-cycle.json", "CallCycleDetected");
+    var branchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")));
+    var branchTypeError = CaptureParserReject(File.ReadAllText(Path.Combine(fixtureDir, "if-invalid-branch-type.json")));
+    Check(branchTypeError.EntityId == "function/choose/body/node/chosen/else", "branch result diagnostic identifies the exact region locus");
+    var collidingBranchIds = branchingText.Replace("thenSum", "sum", StringComparison.Ordinal).Replace("elseSum", "sum", StringComparison.Ordinal);
+    var invalidThen = CaptureParserReject(collidingBranchIds.Replace("\"args\": [\"thenLeft\", \"thenOne\"]", "\"args\": [\"missing\", \"thenOne\"]", StringComparison.Ordinal));
+    var invalidElse = CaptureParserReject(collidingBranchIds.Replace("\"args\": [\"elseRight\", \"elseOne\"]", "\"args\": [\"missing\", \"elseOne\"]", StringComparison.Ordinal));
+    Check(invalidThen.EntityId == "function/choosePlusOne/body/node/chosen/then/node/sum", "same local node ID is qualified to then region");
+    Check(invalidElse.EntityId == "function/choosePlusOne/body/node/chosen/else/node/sum", "same local node ID is qualified to else region");
+    Check(invalidThen.EntityId != invalidElse.EntityId, "colliding local node IDs have distinct repair loci");
+    var siblingCollision = branchingText.Replace("\"id\": \"chosen\"", "\"id\": \"chosen.thenRegion\"", StringComparison.Ordinal)
+        .Replace("\"result\": \"chosen\"", "\"result\": \"chosen.thenRegion\"", StringComparison.Ordinal)
+        .Replace("\"args\": [\"condition\", \"left\", \"right\"]", "\"args\": [\"left\", \"left\", \"right\"]", StringComparison.Ordinal);
+    var siblingCollisionError = CaptureParserReject(siblingCollision);
+    var branchLocusError = CaptureParserReject(branchingText.Replace("\"parameters\": [\"thenLeft\", \"thenRight\"]", "\"parameters\": [\"thenLeft\"]", StringComparison.Ordinal));
+    Check(siblingCollisionError.EntityId == "function/choosePlusOne/body/node/chosen.thenRegion", "node IDs containing dots remain one unambiguous path segment");
+    Check(branchLocusError.EntityId == "function/choosePlusOne/body/node/chosen/then", "branch region uses a slash-delimited path segment");
+    Check(siblingCollisionError.EntityId != branchLocusError.EntityId, "sibling node ID cannot collide with a branch region locus");
+    ExpectParserRejectBytes(Encoding.UTF8.GetBytes(branchingText.Replace("\"args\": [\"condition\", \"left\", \"right\"]", "\"args\": [\"left\", \"left\", \"right\"]", StringComparison.Ordinal)), "if-condition-type", "TypeMismatch");
+    ExpectParserRejectBytes(Encoding.UTF8.GetBytes(branchingText.Replace("\"parameters\": [\"thenLeft\", \"thenRight\"]", "\"parameters\": [\"thenLeft\"]", StringComparison.Ordinal)), "if-environment-arity", "RegionParametersMismatch");
+    ExpectParserRejectBytes(Encoding.UTF8.GetBytes(branchingText.Replace("\"thenRegion\":", "\"unexpectedRegion\":", StringComparison.Ordinal)), "if-missing-region", "SchemaInvalid");
+    ExpectParserRejectWithLimitsBytes(Encoding.UTF8.GetBytes(branchingText), "if-nested-node-function-limit", new StrogoLimits { MaxNodesPerFunction = 4 }, "FunctionNodeLimitExceeded");
+    ExpectParserRejectWithLimitsBytes(Encoding.UTF8.GetBytes(branchingText), "if-nested-node-module-limit", new StrogoLimits { MaxTotalNodes = 4 }, "ModuleNodeLimitExceeded");
+    var nestedIfModule = "{\"schemaVersion\":\"strogo.module.v0.2\",\"moduleId\":\"branch.depth\",\"types\":[],\"imports\":[],\"functions\":[{\"id\":\"choose\",\"parameters\":[{\"id\":\"c\",\"type\":\"Bool\"},{\"id\":\"x\",\"type\":\"I64\"}],\"returnType\":\"I64\",\"contractRef\":\"chooseContract\",\"body\":" + NestedIfRegion(2) + "}],\"exports\":[\"choose\"]}";
+    ExpectParserRejectWithLimitsBytes(Encoding.UTF8.GetBytes(nestedIfModule), "if-region-depth", new StrogoLimits { MaxRegionDepth = 1 }, "RegionDepthExceeded");
     ExpectParserRejectWithLimits("composite-invalid-type-depth.json", new StrogoLimits { MaxTypeDepth = 1 }, "TypeDepthExceeded");
 
     var mathText = Encoding.UTF8.GetString(validBytes);
@@ -186,7 +237,7 @@ try
     string InvalidOrder(string first, string second) => "{\"schemaVersion\":\"strogo.module.v0.2\",\"moduleId\":\"order.sample\",\"types\":[],\"imports\":[],\"functions\":[{\"id\":\"f\",\"parameters\":[],\"returnType\":\"I64\",\"contractRef\":\"c\",\"body\":{\"parameters\":[],\"nodes\":[" + first + "," + second + "],\"result\":\"a\"}}],\"exports\":[\"f\"]}";
     var orderOne = CaptureParserReject(InvalidOrder(invalidNodeZ, invalidNodeA));
     var orderTwo = CaptureParserReject(InvalidOrder(invalidNodeA, invalidNodeZ));
-    Check(orderOne.Code == "ArityMismatch" && orderOne.EntityId == "a", "diagnostic chooses lowest stable node id");
+    Check(orderOne.Code == "ArityMismatch" && orderOne.EntityId == "function/f/body/node/a", "diagnostic chooses lowest stable qualified node id");
     Check(orderOne.Code == orderTwo.Code && orderOne.EntityId == orderTwo.EntityId && orderOne.DetailsJson == orderTwo.DetailsJson, "reordered invalid nodes return identical diagnostics");
 
     string InvalidExports(string exports) => "{\"schemaVersion\":\"strogo.module.v0.2\",\"moduleId\":\"exports.sample\",\"types\":[],\"imports\":[],\"functions\":[],\"exports\":" + exports + "}";
@@ -197,11 +248,11 @@ try
     const string validRecordMake = "{ \"id\": \"summary\", \"op\": \"record.make\", \"type\": \"Summary\", \"args\": [\"total\", \"second\"], \"recordType\": \"Summary\", \"fieldIds\": [\"count\", \"values\"] }";
     var recordOrderOne = CaptureParserReject(compositeText.Replace(validRecordMake, "{ \"id\": \"summary\", \"op\": \"record.make\", \"type\": \"Summary\", \"args\": [\"total\", \"second\"], \"recordType\": \"Summary\", \"fieldIds\": [\"z\", \"a\"] }", StringComparison.Ordinal));
     var recordOrderTwo = CaptureParserReject(compositeText.Replace(validRecordMake, "{ \"id\": \"summary\", \"op\": \"record.make\", \"type\": \"Summary\", \"args\": [\"second\", \"total\"], \"recordType\": \"Summary\", \"fieldIds\": [\"a\", \"z\"] }", StringComparison.Ordinal));
-    Check(recordOrderOne.Code == "RecordFieldMismatch" && recordOrderOne.EntityId == "summary" && recordOrderOne.DetailsJson == recordOrderTwo.DetailsJson, "reordered invalid record pairs return identical diagnostics");
+    Check(recordOrderOne.Code == "RecordFieldMismatch" && recordOrderOne.EntityId == "function/makeSummary/body/node/summary" && recordOrderOne.DetailsJson == recordOrderTwo.DetailsJson, "reordered invalid record pairs return identical diagnostics");
 
     var recordTypesOne = CaptureParserReject(compositeText.Replace(validRecordMake, "{ \"id\": \"summary\", \"op\": \"record.make\", \"type\": \"Summary\", \"args\": [\"second\", \"total\"], \"recordType\": \"Summary\", \"fieldIds\": [\"count\", \"values\"] }", StringComparison.Ordinal));
     var recordTypesTwo = CaptureParserReject(compositeText.Replace(validRecordMake, "{ \"id\": \"summary\", \"op\": \"record.make\", \"type\": \"Summary\", \"args\": [\"total\", \"second\"], \"recordType\": \"Summary\", \"fieldIds\": [\"values\", \"count\"] }", StringComparison.Ordinal));
-    Check(recordTypesOne.Code == "TypeMismatch" && recordTypesOne.EntityId == "summary" && recordTypesOne.DetailsJson == recordTypesTwo.DetailsJson, "reordered invalid record types return identical diagnostics");
+    Check(recordTypesOne.Code == "TypeMismatch" && recordTypesOne.EntityId == "function/makeSummary/body/node/summary" && recordTypesOne.DetailsJson == recordTypesTwo.DetailsJson, "reordered invalid record types return identical diagnostics");
 
     var raisedHardLimits = new StrogoLimits[]
     {
@@ -212,7 +263,8 @@ try
         new() { MaxFunctions = StrogoLimits.FunctionsHardMaximum + 1 },
         new() { MaxNodesPerFunction = StrogoLimits.NodesPerFunctionHardMaximum + 1 },
         new() { MaxTotalNodes = StrogoLimits.TotalNodesHardMaximum + 1 },
-        new() { MaxTypeDepth = StrogoLimits.TypeDepthHardMaximum + 1 }
+        new() { MaxTypeDepth = StrogoLimits.TypeDepthHardMaximum + 1 },
+        new() { MaxRegionDepth = StrogoLimits.RegionDepthHardMaximum + 1 }
     };
     foreach (var raisedLimits in raisedHardLimits)
         ExpectParserRejectWithLimits("math-add-valid.json", raisedLimits, "InvalidLimits");

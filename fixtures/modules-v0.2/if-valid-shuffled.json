@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "branch.sample",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "choosePlusOne",
+      "parameters": [
+        { "id": "condition", "type": "Bool" },
+        { "id": "left", "type": "I64" },
+        { "id": "right", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "choosePlusOneContract",
+      "body": {
+        "parameters": ["condition", "left", "right"],
+        "nodes": [
+          {
+            "id": "chosen",
+            "op": "if",
+            "type": "I64",
+            "args": ["condition", "left", "right"],
+            "thenRegion": {
+              "parameters": ["thenLeft", "thenRight"],
+              "nodes": [
+                { "id": "thenSum", "op": "i64.add", "type": "I64", "args": ["thenLeft", "thenOne"] },
+                { "id": "thenOne", "op": "i64.const", "type": "I64", "args": [], "value": "1" }
+              ],
+              "result": "thenSum"
+            },
+            "elseRegion": {
+              "parameters": ["elseLeft", "elseRight"],
+              "nodes": [
+                { "id": "elseSum", "op": "i64.add", "type": "I64", "args": ["elseRight", "elseOne"] },
+                { "id": "elseOne", "op": "i64.const", "type": "I64", "args": [], "value": "1" }
+              ],
+              "result": "elseSum"
+            }
+          }
+        ],
+        "result": "chosen"
+      }
+    }
+  ],
+  "exports": ["choosePlusOne"]
+}

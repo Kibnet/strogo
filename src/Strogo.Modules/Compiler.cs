@@ -34,10 +34,18 @@ public static class ModulesCompiler
 
     private static FunctionIr CompileFunction(FunctionDecl function)
     {
-        var parameterIndices = function.Parameters.Select((parameter, index) => (parameter.Id, -1 - index)).ToImmutableDictionary(v => v.Id, v => v.Item2, StringComparer.Ordinal);
+        var region = CompileRegion(function.Body, function.Parameters);
+        return new FunctionIr(function.Id, function.Parameters, function.ReturnType, function.ContractRef, region.Instructions, region.ResultIndex);
+    }
+
+    private static RegionIr CompileRegion(FunctionBody body, ImmutableArray<FunctionParameter> parameters)
+    {
+        var parameterIndices = parameters.Select((parameter, index) => (parameter.Id, -1 - index)).ToImmutableDictionary(v => v.Id, v => v.Item2, StringComparer.Ordinal);
         var nodeIndices = new Dictionary<string, int>(StringComparer.Ordinal);
-        var instructions = ImmutableArray.CreateBuilder<IrInstruction>(function.Body.Nodes.Length);
-        var orderedNodes = TopologicallySort(function.Body.Parameters, function.Body.Nodes);
+        var nodeTypes = body.Nodes.ToDictionary(node => node.Id, node => node.Type, StringComparer.Ordinal);
+        var parameterTypes = parameters.ToDictionary(parameter => parameter.Id, parameter => parameter.Type, StringComparer.Ordinal);
+        var instructions = ImmutableArray.CreateBuilder<IrInstruction>(body.Nodes.Length);
+        var orderedNodes = TopologicallySort(body.Parameters, body.Nodes);
 
         foreach (var node in orderedNodes)
         {
@@ -53,15 +61,27 @@ public static class ModulesCompiler
             var metadata = node.Op == "record.make"
                 ? node.Metadata with { FieldIds = node.Metadata.FieldIds.OrderBy(id => id, StringComparer.Ordinal).ToImmutableArray() }
                 : node.Metadata;
-            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, metadata);
+            RegionIr? thenRegion = null;
+            RegionIr? elseRegion = null;
+            if (node.Op == "if")
+            {
+                var environmentTypes = node.Args.Skip(1).Select(ValueType).ToImmutableArray();
+                thenRegion = CompileRegion(node.ThenRegion!, BindParameters(node.ThenRegion!, environmentTypes));
+                elseRegion = CompileRegion(node.ElseRegion!, BindParameters(node.ElseRegion!, environmentTypes));
+            }
+            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, metadata, thenRegion, elseRegion);
             instructions.Add(instruction);
             nodeIndices[node.Id] = instruction.DestinationIndex;
         }
 
-        var resultIndex = parameterIndices.TryGetValue(function.Body.Result, out var parameterIndex)
+        var resultIndex = parameterIndices.TryGetValue(body.Result, out var parameterIndex)
             ? parameterIndex
-            : nodeIndices[function.Body.Result];
-        return new FunctionIr(function.Id, function.Parameters, function.ReturnType, function.ContractRef, instructions.ToImmutable(), resultIndex);
+            : nodeIndices[body.Result];
+        return new RegionIr(parameters, instructions.ToImmutable(), resultIndex);
+
+        TypeRef ValueType(string id) => parameterTypes.TryGetValue(id, out var parameterType) ? parameterType : nodeTypes[id];
+        static ImmutableArray<FunctionParameter> BindParameters(FunctionBody region, ImmutableArray<TypeRef> types)
+            => region.Parameters.Select((id, index) => new FunctionParameter(id, types[index])).ToImmutableArray();
     }
 
     private static ImmutableArray<FunctionNode> TopologicallySort(ImmutableArray<string> parameters, ImmutableArray<FunctionNode> nodes)

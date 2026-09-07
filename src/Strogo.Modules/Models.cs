@@ -15,6 +15,7 @@ public sealed record StrogoLimits
     public const int NodesPerFunctionHardMaximum = 512;
     public const int TotalNodesHardMaximum = 4096;
     public const int TypeDepthHardMaximum = 16;
+    public const int RegionDepthHardMaximum = 16;
 
     public int MaxTransportBytes { get; init; } = TransportBytesHardMaximum;
     public int MaxJsonDepth { get; init; } = JsonDepthHardMaximum;
@@ -24,6 +25,7 @@ public sealed record StrogoLimits
     public int MaxNodesPerFunction { get; init; } = NodesPerFunctionHardMaximum;
     public int MaxTotalNodes { get; init; } = TotalNodesHardMaximum;
     public int MaxTypeDepth { get; init; } = TypeDepthHardMaximum;
+    public int MaxRegionDepth { get; init; } = RegionDepthHardMaximum;
 }
 
 public static class StrogoVersions
@@ -92,7 +94,9 @@ public sealed record FunctionNode(
     string Op,
     TypeRef Type,
     ImmutableArray<string> Args,
-    NodeMetadata Metadata);
+    NodeMetadata Metadata,
+    FunctionBody? ThenRegion = null,
+    FunctionBody? ElseRegion = null);
 
 public sealed record NodeMetadata(
     string? Value,
@@ -167,7 +171,14 @@ public sealed record IrInstruction(
     string Op,
     ImmutableArray<int> OperandIndices,
     TypeRef Type,
-    NodeMetadata Metadata);
+    NodeMetadata Metadata,
+    RegionIr? ThenRegion = null,
+    RegionIr? ElseRegion = null);
+
+public sealed record RegionIr(
+    ImmutableArray<FunctionParameter> Parameters,
+    ImmutableArray<IrInstruction> Instructions,
+    int ResultIndex);
 
 public sealed class ModuleParseResult
 {

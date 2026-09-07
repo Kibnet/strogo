@@ -180,3 +180,113 @@
 - Evidence: tracked `artifacts/e05/source-manifest.json` связывает snapshot digest `5445e7b3…158d9` с исходниками; `validation-summary.json` хранит hashes ignored reports из `artifacts/local-validation/e05/20260907-final3-1788776679/`: Modules 80 checks/44 reported cases, Reserve 29/29 cases и 10904 assertions, E04 141 checks; isolated solution build 0 warnings/errors; Z3 5.1.0 и Dafny 4.11.0.
 - Последствие: изменения parser/IR не дали наблюдаемой регрессии существующих профилей; следующий gate — независимый re-review и checkpoint commit.
 - Supersedes / supersededBy: обновляет validation часть K-E05-021.
+
+## K-E05-024
+
+- Дата / фаза: 2026-09-07 / external review.
+- Тип / статус: Process decision / Accepted.
+- Утверждение: публичный результат Strogo считается воспроизводимым только при связи с public full commit SHA, точной командой, путём теста и сохранённым отчётом; локальный непубличный commit не используется как public evidence.
+- Scope: Posting Board discussion и будущие внешние результаты E05.
+- Evidence: запрос «Помощника Архитектора» в сообщении `f64919dc-1710-4414-a4eb-6637d0781468` (#8906); ответ и readback `ed38f91c-d20f-4588-82c2-8ad356692c48` (#8911) со snapshot `67912ad98db4bc68a3a11cd8460496ff4ed39f03`.
+- Последствие: board-отчёты без одного из четырёх bindings маркируются как утверждение автора, а не повторяемый результат.
+- Supersedes / supersededBy: уточняет evidence policy K-E05-011 и K-E05-023.
+
+## K-E05-025
+
+- Дата / фаза: 2026-09-07 / experiment design.
+- Тип / статус: Design proposal / Accepted with qualification.
+- Утверждение: oracle benchmark-задачи выводится из смысла задания и фиксируется до реализации; он полезен, если различает правильное решение и заранее названную правдоподобную ошибку. Задача, опубликованная до заморозки языка и использованная для его адаптации, становится development fixture, а не held-out evidence широты.
+- Scope: будущая проверка G05/G06; не текущий parser/IR conformance.
+- Evidence: сообщения «Помощника Архитектора» `b43d35c0-f9a7-4109-86ff-ead80d2684a4` (#8571) и `f64919dc-1710-4414-a4eb-6637d0781468` (#8906).
+- Последствие: held-out задачи, commit, бюджеты и scoring замораживаются после завершения языка/экспериментального протокола; до этого примеры служат разработке и регрессии. Metamorphic checks должны включать сохраняющее смысл преобразование и mutation, которая меняет ожидаемый результат.
+- Supersedes / supersededBy: развивает experiment A/B из сообщения #4478 и критерии G05/G06.
+
+## K-E05-026
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Design decision / Confirmed for representation.
+- Утверждение: `if` представлен двумя вложенными regions с локальными параметрами, позиционно связанными с явно переданным environment; typed IR сохраняет тип каждого параметра и не поднимает branch instructions во внешний DAG.
+- Scope: source AST, parser, codec и typed IR; не runtime execution или proof.
+- Evidence: `if-valid.json`, `if-valid-shuffled.json`; canonical source/IR equality и проверки `RegionIr` в Modules conformance.
+- Последствие: скрытый capture отклоняется как `DanglingNodeArg`, обе ветви проверяются независимо, а последующий lowering может реализовать вычисление только выбранной ветви без восстановления утраченной структуры.
+- Supersedes / supersededBy: частично закрывает limitation K-E05-014 только для schema/type/IR `if`.
+
+## K-E05-027
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Constraint / Confirmed.
+- Утверждение: лимиты узлов, глубины regions и локальный call graph обязаны учитывать вложенные ветви; проверка только верхнего body позволяет спрятать избыточный граф или цикл внутри `if`.
+- Scope: admission guards Modules v0.2.
+- Evidence: conformance cases `if-nested-node-function-limit`, `if-nested-node-module-limit`, `if-region-depth`, `if-invalid-nested-call-cycle.json`.
+- Последствие: `CountNodes` и call enumeration рекурсивны; `MaxRegionDepth` имеет hard maximum 16 и может только ужесточаться вызывающей стороной.
+- Supersedes / supersededBy: уточняет K-E05-020 для regions.
+
+## K-E05-028
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Limitation / Open.
+- Утверждение: наличие отдельных `thenRegion`/`elseRegion` в IR сохраняет возможность ленивого lowering, но само по себе не доказывает, что runtime вычисляет только выбранную ветвь, что I64 операции не переполняются или что результат совпадает с owner model.
+- Scope: текущий `if` representation checkpoint.
+- Evidence: отсутствуют Modules runtime adapter, generated Dafny candidate и proof receipts; docs/modules-v0.2.md ограничивает заявляемый результат.
+- Последствие: следующий proof/runtime checkpoint должен дать executable counterexample-sensitive evidence, например не вычислять ошибочную невыбранную ветвь и отклонять недоказанный overflow на достижимом пути.
+- Supersedes / supersededBy: уточняет открытую часть K-E05-014.
+
+## K-E05-029
+
+- Дата / фаза: 2026-09-07 / validation.
+- Тип / статус: Validation / Confirmed.
+- Утверждение: nested `if` checkpoint собирается без предупреждений и проходит расширенный Modules conformance без регрессии Reserve v0 и TaskGraph E04.
+- Scope: source snapshot `2720b2de…826f` поверх base commit `c6f2c205ab25842bcb1b296beff63d70160645b8`; не полный E05.
+- Evidence: `artifacts/e05/source-manifest.json`, `artifacts/e05/validation-summary.json`; build 0 warnings/errors, Modules 104 checks/54 reported cases, Reserve 29/29 и 10904 assertions, E04 141 checks.
+- Последствие: checkpoint готов к независимому adversarial review; результат не повышает статус K-E05-028 и не считается proof/runtime evidence.
+- Supersedes / supersededBy: обновляет validation baseline K-E05-023 для следующего source snapshot.
+
+## K-E05-030
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Evidence defect / Resolved.
+- Утверждение: первая генерация nested-`if` manifest использовала PowerShell `Sort-Object`, зависящий от текущей culture, хотя алгоритм объявлял ordinal path sorting; individual file hashes были верны, но aggregate digest нельзя было воспроизвести по контракту.
+- Scope: `artifacts/e05/source-manifest.json` и `validation-summary.json`; исходный код языка не затронут.
+- Evidence: независимый пересчёт дал `7f37cf75…2459` вместо записанного `b0d11af5…0e41`; генерация исправлена через `[Array]::Sort(..., [StringComparer]::Ordinal)`. После следующего source-fix digest закономерно изменился на текущий `025cc320…28eb` и снова воспроизводится тем же алгоритмом.
+- Последствие: aggregate evidence digest снова соответствует объявленному алгоритму; будущая генерация manifests не должна использовать culture-sensitive сортировку.
+- Supersedes / supersededBy: исправляет первоначальную evidence-часть K-E05-029.
+
+## K-E05-031
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Diagnostic counterexample / Resolved.
+- Утверждение: локальный node ID уникален только внутри одной region, поэтому ошибка с одним `entityId=node.Id` не различала одноимённые узлы в `thenRegion` и `elseRegion` и не задавала однозначную цель ремонта.
+- Scope: parser diagnostics nested regions.
+- Evidence: independent-reviewer finding; executable counterexample создаёт `node.sum` в обеих ветвях и отдельно ломает каждую из них.
+- Последствие: node и region errors возвращают qualified locus от `function/<id>/body`; контрпример подтверждает разные targets `.../then/node/sum` и `.../else/node/sum`.
+- Supersedes / supersededBy: уточняет structured repair requirement E05 и K-E05-026.
+
+## K-E05-032
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Diagnostic counterexample / Resolved.
+- Утверждение: qualified locus неоднозначен, если структурные границы кодируются точкой, разрешённой внутри ID: node `chosen.thenRegion` совпадал с прежним locus ветви `thenRegion` узла `chosen`.
+- Scope: parser diagnostics nested regions и их машинно адресуемые repair targets.
+- Evidence: независимый finding после первой квалификации locus; conformance создаёт обе допустимые структуры и проверяет разные адреса `function/choosePlusOne/body/node/chosen.thenRegion` и `function/choosePlusOne/body/node/chosen/then`.
+- Последствие: структурные сегменты diagnostic locus разделяются `/`, запрещённым грамматикой ID; node ID сохраняется без двусмысленного escaping, а ветви обозначаются отдельными сегментами `then`/`else`.
+- Supersedes / supersededBy: усиливает K-E05-031.
+
+## K-E05-033
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Evidence defect / Resolved.
+- Утверждение: один `runId` не должен неявно объединять свежий Modules report и Reserve report из предыдущего каталога, даже если shared runtime code после регрессии не менялся.
+- Scope: evidence provenance текущего E05 checkpoint.
+- Evidence: независимый review обнаружил отсутствие `v0-regression.json` в каталоге `20260907-if-locus-final`; Reserve suite повторно выполнен в этом каталоге и дал 29/29 cases, 10904 assertions, SHA-256 `85606da9…5bc4`.
+- Последствие: tracked summary теперь ссылается на два реально присутствующих отчёта одного run; будущий summary либо хранит каждый report в указанном run, либо явно указывает отдельный source path/runId для повторно используемого evidence.
+- Supersedes / supersededBy: уточняет evidence policy K-E05-024 и K-E05-030.
+
+## K-E05-034
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Validation / Confirmed.
+- Утверждение: nested `if` representation checkpoint после исправления diagnostic loci и evidence provenance не имеет оставшихся HIGH/MEDIUM findings независимого adversarial review.
+- Scope: snapshot `2720b2de…826f`, tracked E05 manifests/summary и два локальных отчёта run `20260907-if-locus-final`; не runtime/proof часть E05.
+- Evidence: финальный read-only re-review сверил slash-delimited counterexample, оба report hashes/sizes, Reserve 29/29 и 10904 assertions, manifest SHA; итог `PASS`.
+- Последствие: checkpoint можно фиксировать коммитом; K-E05-028 остаётся открытой границей следующего эксперимента.
+- Supersedes / supersededBy: завершает review готовности K-E05-029.

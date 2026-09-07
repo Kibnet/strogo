@@ -1,4 +1,4 @@
-# Strogo Modules v0.2: структура, составные значения, вызовы и IR
+# Strogo Modules v0.2: структура, составные значения, regions и IR
 
 Этот документ закрепляет checkpoint для шага 1–4: входная структура, строгость формы, лексер, парсер и компиляция в промежуточный код.
 
@@ -58,6 +58,8 @@
   - `nodes` — список инструкций с общими полями `id`, `op`, `type`, `args` и только с дополнительными полями конкретного `op`;
   - `result` — `id` значения результата: параметра функции или узла body.
 
+Body и каждая ветвь `if` имеют одну форму region. Параметры вложенной region — локальные ID, которые позиционно связываются с явными environment-аргументами родительского узла. Их типы выводятся из этих аргументов и сохраняются явно в typed IR. Вложенная region не видит значения родителя под исходными ID: чтобы использовать значение, агент обязан передать его в `args` и объявить соответствующий локальный параметр.
+
 Проверки body:
 - граф зависимостей узлов должен быть DAG;
 - все узлы в графе достижимы из `result`;
@@ -73,8 +75,11 @@
 - `record.get` с `fieldId`;
 - `seq.empty` с `elementType`/`capacity`, `seq.length`, `seq.get`, `seq.append`;
 - локальный `call` с `functionRef`.
+- `if` с `condition`, явными environment-аргументами, `thenRegion` и `elseRegion`.
 
-`value` обязателен только у констант. Лишнее `value: null` у другой операции является ошибкой schema, а не допустимым default. `call` проверяет сигнатуру и общий локальный call graph; рекурсия и взаимная рекурсия запрещены. Разрешение вызовов через import closure относится к следующему checkpoint.
+У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Runtime/lowering выбранной ветви ещё не реализован и не считается проверенным этим свойством представления.
+
+`value` обязателен только у констант. Лишнее `value: null` у другой операции является ошибкой schema, а не допустимым default. `call` проверяет сигнатуру и общий локальный call graph, включая вызовы внутри ветвей; рекурсия и взаимная рекурсия запрещены. Разрешение вызовов через import closure относится к следующему checkpoint.
 
 Тип ноды должен соответствовать операции:
 - арифметика — `I64`,
@@ -97,6 +102,7 @@
 - `ParseStrict` через `CanonicalJson` с лимитами из `StrogoLimits`;
 - единое правило `CheckObject`: только ожидаемые имена полей;
 - единые ошибки через `ModuleException` (`stage`, `code`, `entityId`, `details`); ошибки strict JSON из `Kernel.Core` не выходят через публичную границу модулей;
+- node/region diagnostics используют qualified locus вида `function/<id>/body/node/<id>/then/node/<id>`; `/` запрещён грамматикой ID и потому отделяет сегменты без коллизий даже для ID с точками;
 - неупорядоченные декларации и nodes валидируются по ordinal ID, поэтому первая статическая ошибка не зависит от их transport order;
 - canonical-байты создаются отдельной стадией кодека.
 
@@ -104,6 +110,7 @@
 - `SchemaVersionMismatch`, `TypeLimitExceeded`, `FunctionLimitExceeded`,
 - `Duplicate*`, `UnsupportedOpcode`, `TypeMismatch`, `ReturnTypeMismatch`,
 - `CycleDetected`, `UnreachableNode`, `ExportedFunctionMissing`,
+- `RegionParametersMismatch`, `RegionResultTypeMismatch`, `RegionDepthExceeded`,
 - `SchemaInvalid`, `TransportLimitExceeded` и др.
 
 ## 7) Compiler (IR)
@@ -117,6 +124,8 @@
   - `DestinationIndex` — порядковый индекс инструкции,
   - `OperandIndices` — индексы параметров/предков,
   - тип и opcode-specific metadata для констант, records, sequences и вызовов.
+
+Для `if` инструкция дополнительно содержит две `RegionIr`. Каждая хранит типизированные локальные параметры, собственные инструкции и индекс результата. Инструкции ветвей не добавляются во внешний список, что сохраняет границу условного вычисления для последующего lowering.
 
 Порядок деклараций types/functions/imports/exports и порядок узлов не участвуют в identity: codec сортирует их по стабильным ID. Порядок parameters и обычных `args` сохраняется. Для `record.make` codec и compiler сортируют пары `fieldId→arg` вместе, чтобы перестановка полей не меняла смысл или digest.
 
@@ -142,9 +151,11 @@
 - `fixtures/modules-v0.2/math-invalid-i64-plus.json`, `math-invalid-i64-leading-zero.json`, `math-invalid-i64-negative-zero.json`;
 - `fixtures/modules-v0.2/composite-valid.json` и эквивалентный `composite-valid-shuffled.json`;
 - негативные `composite-invalid-record.json`, `composite-invalid-call-cycle.json`, `composite-invalid-seq-element.json`, `composite-invalid-recursive-type.json`, `composite-invalid-type-depth.json`, `composite-invalid-numeric-capacity.json` и `math-invalid-extra-value.json`.
+- `if-valid.json` и эквивалентный `if-valid-shuffled.json`;
+- негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
 ## 10) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph и deterministic IR. Он ещё не реализует `if`, `fold`, вложенные regions, разрешение import closure, contracts или proof lowering. Поэтому он не доказывает exact outcome и пока не может выразить обязательные ClampSeries/OrderedExactAllocation из E05.
+Этот checkpoint проверяет schema/type/call-graph и deterministic typed IR, включая рекурсивное представление `if`. Он ещё не реализует исполнение/lowering условной ветви, `fold`, разрешение import closure, contracts или proof lowering. Поэтому он не доказывает lazy runtime semantics, безопасность арифметики, exact outcome и пока не может выразить обязательные ClampSeries/OrderedExactAllocation из E05 целиком.

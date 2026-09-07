@@ -1,9 +1,9 @@
 {
   "schemaVersion": "strogo.e05.validation-summary.v1",
-  "runId": "20260907-final3-1788776679",
-  "generatedAtUtc": "2026-09-07T10:27:59Z",
+  "runId": "20260907-if-locus-final",
+  "generatedAtUtc": "2026-09-07T12:10:56Z",
   "environment": {
-    "os": "Microsoft Windows 10.0.22631",
+    "os": "Microsoft Windows NT 10.0.22631.0",
     "dotnetSdk": "10.0.400",
     "z3": "5.1.0",
     "dafny": "4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2"
@@ -15,20 +15,46 @@
     "dotnet run --project tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj -c Release --no-build"
   ],
   "sourceSnapshot": {
+    "baseCommit": "c6f2c205ab25842bcb1b296beff63d70160645b8",
     "manifest": "source-manifest.json",
-    "manifestSha256": "1b448f8bb6e3ed00c6731234ba20deb2bbfbb788bcff5c9504337dd9d56d8074",
-    "snapshotDigest": "5445e7b3abe78f43fd43e1190a038ed1bfe747b971e945596cd3ddbded4158d9"
+    "manifestSha256": "16cb3d9df8d6918ec27e7a6c802c3d25a77207ae63e81e681e17eb3bdfa54600",
+    "snapshotDigest": "2720b2de589d207e2b95140e92785dd0dd1d81bba75adbfea9916e856974826f"
   },
   "results": {
-    "build": { "passed": true, "warnings": 0, "errors": 0 },
-    "modulesV02": { "passed": true, "checks": 80, "reportedCases": 44 },
-    "reserveV0": { "passed": true, "cases": 29, "passedCases": 29, "assertions": 10904 },
-    "taskGraphE04": { "passed": true, "checks": 141, "elapsedMs": 146320 }
+    "build": {
+      "passed": true,
+      "warnings": 0,
+      "errors": 0
+    },
+    "modulesV02": {
+      "passed": true,
+      "checks": 104,
+      "reportedCases": 54
+    },
+    "reserveV0": {
+      "passed": true,
+      "cases": 29,
+      "passedCases": 29,
+      "assertions": 10904
+    },
+    "taskGraphE04": {
+      "passed": true,
+      "checks": 141,
+      "evidence": "fresh command exit 0 and PASS all: 141 console outcome"
+    }
   },
   "sourceReports": [
-    { "name": "modules-v0.2.json", "sha256": "98b98c32030062dbc46ac2de6bfc6bc3a994e32171a0d8e4a88da309e195b0cd", "bytes": 8825 },
-    { "name": "v0-regression.json", "sha256": "20980c3bf9bc4e33d99f2469fc5d2646355c3c4808b9eb959c8ad088cf0656c0", "bytes": 79861 },
-    { "name": "e04-conformance.json", "sha256": "d80c6a8226d461cbfbc71c597178c96e90081caa99298c727c6476d0b269fc46", "bytes": 84656 }
+    {
+      "name": "modules-v0.2.json",
+      "sha256": "b0dac013f68e44d99d1537502ed9b8916780e2547569efeeba401a2943b52cb4",
+      "bytes": 10521
+    },
+    {
+      "name": "v0-regression.json",
+      "sha256": "85606da913a3e0b762d72cd70cb2838a5b3c7fbac6ad10b7943c946c48e05bc4",
+      "bytes": 79437
+    }
   ],
-  "evidencePolicy": "The detailed local reports can contain machine-specific paths and remain gitignored. This tracked manifest preserves their hashes, selected results, tool versions, and exact reproducible commands."
+  "e04EvidenceBoundary": "The E04 executable prints its full case stream but has no report option; this checkpoint records the fresh exit-0 summary without inventing a report hash.",
+  "evidencePolicy": "Detailed local reports can contain machine-specific paths and remain gitignored. This tracked manifest preserves their hashes, selected results, tool versions and exact reproducible commands."
 }

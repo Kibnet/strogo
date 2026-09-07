@@ -1,13 +1,13 @@
 {
   "schemaVersion": "strogo.e05.source-manifest.v1",
-  "baseCommit": "4ca2f0d111e07e17c728c941532bf512c70e72e0",
+  "baseCommit": "c6f2c205ab25842bcb1b296beff63d70160645b8",
   "digestAlgorithm": "sha256 of UTF-8 path<TAB>sha256<LF>, paths sorted ordinal",
-  "snapshotDigest": "5445e7b3abe78f43fd43e1190a038ed1bfe747b971e945596cd3ddbded4158d9",
+  "snapshotDigest": "2720b2de589d207e2b95140e92785dd0dd1d81bba75adbfea9916e856974826f",
   "files": [
     {
       "path": "docs/modules-v0.2.md",
-      "sha256": "fa791b86cc48de99379127a47b9ee89403c706989648a1d7221318b538d2cf0a",
-      "bytes": 11466
+      "sha256": "70a38f840d0a7b7372b4bbf86b2371d56b7dda7e49bf24dc86d75133a03fc381",
+      "bytes": 14324
     },
     {
       "path": "fixtures/modules-v0.2/composite-invalid-call-cycle.json",
@@ -48,6 +48,31 @@
       "path": "fixtures/modules-v0.2/composite-valid.json",
       "sha256": "63942162bc0bf233bc18d7987e55e4153a5fc6724ce96bfb860c56d9ce4ea42d",
       "bytes": 2607
+    },
+    {
+      "path": "fixtures/modules-v0.2/if-invalid-branch-type.json",
+      "sha256": "8799891cf3f836978fd883a84aa5ef248a7ed92043eae8538ed458cd403d03cf",
+      "bytes": 763
+    },
+    {
+      "path": "fixtures/modules-v0.2/if-invalid-hidden-capture.json",
+      "sha256": "50ce831f97619ecccd9af6ebceab208667490701233ae3fb9ea16234aad7c49f",
+      "bytes": 760
+    },
+    {
+      "path": "fixtures/modules-v0.2/if-invalid-nested-call-cycle.json",
+      "sha256": "470d2b8d1517a04b9cf6cdb7a526c830ec7e7de62de36cc9634172d40db7ee50",
+      "bytes": 1744
+    },
+    {
+      "path": "fixtures/modules-v0.2/if-valid-shuffled.json",
+      "sha256": "35602519382eab93b866a48d85b24a7adf9a79a2a1b7a2b58b8739b3ef508d4b",
+      "bytes": 1469
+    },
+    {
+      "path": "fixtures/modules-v0.2/if-valid.json",
+      "sha256": "8f9d5c1daddd4aee7fd69e024fba809d424f220f46be504fde3acbb696d1f112",
+      "bytes": 1469
     },
     {
       "path": "fixtures/modules-v0.2/math-add-valid.json",
@@ -96,13 +121,13 @@
     },
     {
       "path": "src/Strogo.Modules/Codec.cs",
-      "sha256": "ffd00853b9cb035fa4ea3d7c3dc4e1fd553c5b713c549356fa4cdf1dd6dd123a",
-      "bytes": 6949
+      "sha256": "c281a24171fb4267e03227c3c975e6868a4133e10b0e5e4fbb106a7264f25a93",
+      "bytes": 7528
     },
     {
       "path": "src/Strogo.Modules/Compiler.cs",
-      "sha256": "7b0ec167d396faea9e4719abcb3433eb3e100c16fc26ed5dd15d9a26824a5fef",
-      "bytes": 5135
+      "sha256": "378d0549426dde5b9017a00d8e3ebe8b1820266be286a8d4416839b4e11a6e33",
+      "bytes": 6441
     },
     {
       "path": "src/Strogo.Modules/Errors.cs",
@@ -116,13 +141,13 @@
     },
     {
       "path": "src/Strogo.Modules/Models.cs",
-      "sha256": "cd75808a55108461fe5d545952d2c1a17cdadb6c8c8de40c6ddb918573530ab3",
-      "bytes": 6195
+      "sha256": "58e68f88ec595662a74b522a18eeece9344f4b511346d55cbd6e9c4c5dd48e9e",
+      "bytes": 6608
     },
     {
       "path": "src/Strogo.Modules/Parser.cs",
-      "sha256": "d316dc3cedbf9be3ff270e4524666f280d6fd7a4f923b4432ed0440596a08e02",
-      "bytes": 36837
+      "sha256": "60348d3e933477c8b33eccc966b41caa0bac9af9a6e0016bb6fe86b03bb187b1",
+      "bytes": 42093
     },
     {
       "path": "src/Strogo.Modules/Strogo.Modules.csproj",
@@ -130,14 +155,24 @@
       "bytes": 293
     },
     {
+      "path": "src/Strogo.Modules/packages.lock.json",
+      "sha256": "f7e2e7ff34060f4e1720a8a64a32a666bacb3c66be2a80f4876d228bc16ee547",
+      "bytes": 132
+    },
+    {
       "path": "tests/Strogo.Modules.Conformance/Program.cs",
-      "sha256": "14cebb68d0775e9259a034fd431128deb441f6e86cef398e25c700e7eb8aa0e9",
-      "bytes": 18921
+      "sha256": "5cf6f91ddcd66962209514d37f3f340f78f0fed5a0abac895811c7135665599b",
+      "bytes": 25467
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj",
       "sha256": "71fe2a40cdd11bb4fd1a718bc26a372806d1aa293b079b21115db16d38f7f9f1",
       "bytes": 228
+    },
+    {
+      "path": "tests/Strogo.Modules.Conformance/packages.lock.json",
+      "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a",
+      "bytes": 273
     }
   ]
 }

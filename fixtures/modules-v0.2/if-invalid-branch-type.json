@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "branch.type",
+  "types": [],
+  "imports": [],
+  "functions": [{
+    "id": "choose",
+    "parameters": [{ "id": "condition", "type": "Bool" }, { "id": "x", "type": "I64" }],
+    "returnType": "I64",
+    "contractRef": "chooseContract",
+    "body": {
+      "parameters": ["condition", "x"],
+      "nodes": [{
+        "id": "chosen", "op": "if", "type": "I64", "args": ["condition", "x"],
+        "thenRegion": { "parameters": ["value"], "nodes": [], "result": "value" },
+        "elseRegion": { "parameters": ["value"], "nodes": [{ "id": "wrong", "op": "bool.const", "type": "Bool", "args": [], "value": false }], "result": "wrong" }
+      }],
+      "result": "chosen"
+    }
+  }],
+  "exports": ["choose"]
+}
