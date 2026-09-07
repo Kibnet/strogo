@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.runtime",
+  "types": [
+    {
+      "id": "Pair",
+      "fields": [
+        { "id": "first", "type": "I64" },
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" } }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "append",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" } },
+        { "id": "value", "type": "I64" }
+      ],
+      "returnType": { "kind": "Seq", "elementType": "I64", "capacity": "2" },
+      "contractRef": "appendContract",
+      "body": {
+        "parameters": ["items", "value"],
+        "nodes": [
+          { "id": "result", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": ["items", "value"] }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "getAt",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" } },
+        { "id": "index", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "getAtContract",
+      "body": {
+        "parameters": ["items", "index"],
+        "nodes": [
+          { "id": "result", "op": "seq.get", "type": "I64", "args": ["items", "index"] }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "makePair",
+      "parameters": [{ "id": "value", "type": "I64" }],
+      "returnType": "Pair",
+      "contractRef": "makePairContract",
+      "body": {
+        "parameters": ["value"],
+        "nodes": [
+          { "id": "empty", "op": "seq.empty", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": [], "elementType": "I64", "capacity": "2" },
+          { "id": "items", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": ["empty", "value"] },
+          { "id": "pair", "op": "record.make", "type": "Pair", "args": ["value", "items"], "recordType": "Pair", "fieldIds": ["first", "items"] }
+        ],
+        "result": "pair"
+      }
+    },
+    {
+      "id": "readFirst",
+      "parameters": [{ "id": "pair", "type": "Pair" }],
+      "returnType": "I64",
+      "contractRef": "readFirstContract",
+      "body": {
+        "parameters": ["pair"],
+        "nodes": [
+          { "id": "result", "op": "record.get", "type": "I64", "args": ["pair"], "fieldId": "first" }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "size",
+      "parameters": [{ "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" } }],
+      "returnType": "I64",
+      "contractRef": "sizeContract",
+      "body": {
+        "parameters": ["items"],
+        "nodes": [
+          { "id": "result", "op": "seq.length", "type": "I64", "args": ["items"] }
+        ],
+        "result": "result"
+      }
+    }
+  ],
+  "exports": ["append", "getAt", "makePair", "readFirst", "size"]
+}

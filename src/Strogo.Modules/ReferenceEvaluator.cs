@@ -20,6 +20,31 @@ public sealed record ModuleBool(bool Value) : ModuleValue
     internal override string TypeKind => "Bool";
 }
 
+public sealed record ModuleSequence(
+    TypeRef ElementType,
+    int Capacity,
+    ImmutableArray<ModuleValue> Items) : ModuleValue
+{
+    public ModuleSequence(TypeRef elementType, int capacity, IEnumerable<ModuleValue> items)
+        : this(elementType, capacity, items.ToImmutableArray())
+    {
+    }
+
+    internal override string TypeKind => "Seq";
+}
+
+public sealed record ModuleRecord(
+    string RecordTypeId,
+    ImmutableSortedDictionary<string, ModuleValue> Fields) : ModuleValue
+{
+    public ModuleRecord(string recordTypeId, IEnumerable<KeyValuePair<string, ModuleValue>> fields)
+        : this(recordTypeId, fields.ToImmutableSortedDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal))
+    {
+    }
+
+    internal override string TypeKind => "Record";
+}
+
 public sealed record ModuleEvaluationResult(ModuleValue Value, int Steps);
 
 public sealed record ModuleEvaluationLimits
@@ -59,13 +84,15 @@ public static class ModulesReferenceEvaluator
         if (!module.Exports.Contains(functionId, StringComparer.Ordinal))
             throw ModulesExceptionFactory.Error("evaluation", "FunctionNotExported", functionId);
 
-        var state = new EvaluationState(functions, limits.MaxSteps);
+        var types = module.Types.ToImmutableDictionary(type => type.Id, StringComparer.Ordinal);
+        var state = new EvaluationState(functions, types, limits.MaxSteps);
         var value = state.EvaluateFunction(function, arguments, 0);
         return new ModuleEvaluationResult(value, state.Steps);
     }
 
     private sealed class EvaluationState(
         ImmutableDictionary<string, FunctionIr> functions,
+        ImmutableDictionary<string, TypeDecl> types,
         int maxSteps)
     {
         public int Steps { get; private set; }
@@ -118,6 +145,12 @@ public static class ModulesReferenceEvaluator
                         "bool.not" => new ModuleBool(!Bool(operands[0], nodeLocus)),
                         "bool.and" => new ModuleBool(Bool(operands[0], nodeLocus) && Bool(operands[1], nodeLocus)),
                         "bool.or" => new ModuleBool(Bool(operands[0], nodeLocus) || Bool(operands[1], nodeLocus)),
+                        "record.make" => MakeRecord(instruction, operands, nodeLocus),
+                        "record.get" => GetRecordField(instruction, operands, nodeLocus),
+                        "seq.empty" => MakeEmptySequence(instruction, nodeLocus),
+                        "seq.length" => new ModuleI64(Sequence(operands[0], nodeLocus).Items.Length),
+                        "seq.get" => GetSequenceItem(operands, nodeLocus),
+                        "seq.append" => AppendSequence(operands, nodeLocus),
                         "if" => EvaluateIf(instruction, operands, nodeLocus, callDepth),
                         "call" => EvaluateCall(instruction, operands, nodeLocus, callDepth),
                         _ => throw ModulesExceptionFactory.Error("evaluation", "UnsupportedRuntimeOpcode", nodeLocus, new { instruction.Op })
@@ -154,6 +187,52 @@ public static class ModulesReferenceEvaluator
             return EvaluateFunction(callee, operands, callDepth + 1);
         }
 
+        private ModuleValue MakeRecord(IrInstruction instruction, ModuleValue[] operands, string nodeLocus)
+        {
+            if (instruction.Type.Kind != "Record"
+                || instruction.Type.Name is null
+                || instruction.Metadata.RecordType != instruction.Type.Name
+                || instruction.Metadata.FieldIds.Length != operands.Length)
+                throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "InvalidRecordMake" });
+
+            return new ModuleRecord(
+                instruction.Type.Name,
+                instruction.Metadata.FieldIds.Select((fieldId, index) => new KeyValuePair<string, ModuleValue>(fieldId, operands[index])));
+        }
+
+        private static ModuleValue GetRecordField(IrInstruction instruction, ModuleValue[] operands, string nodeLocus)
+        {
+            if (instruction.Metadata.FieldId is null || operands.Length != 1 || operands[0] is not ModuleRecord record)
+                throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "InvalidRecordGet" });
+            if (!record.Fields.TryGetValue(instruction.Metadata.FieldId, out var value))
+                throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "MissingRecordField", fieldId = instruction.Metadata.FieldId });
+            return value;
+        }
+
+        private static ModuleValue MakeEmptySequence(IrInstruction instruction, string nodeLocus)
+        {
+            if (instruction.Metadata.ElementType is null || instruction.Metadata.Capacity is null)
+                throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "InvalidSequenceMetadata" });
+            return new ModuleSequence(instruction.Metadata.ElementType, instruction.Metadata.Capacity.Value, ImmutableArray<ModuleValue>.Empty);
+        }
+
+        private static ModuleValue GetSequenceItem(ModuleValue[] operands, string nodeLocus)
+        {
+            var sequence = Sequence(operands[0], nodeLocus);
+            var index = I64(operands[1], nodeLocus);
+            if (index < 0 || index >= sequence.Items.Length)
+                throw ModulesExceptionFactory.Error("evaluation", "SequenceIndexOutOfRange", nodeLocus, new { index, length = sequence.Items.Length });
+            return sequence.Items[(int)index];
+        }
+
+        private static ModuleValue AppendSequence(ModuleValue[] operands, string nodeLocus)
+        {
+            var sequence = Sequence(operands[0], nodeLocus);
+            if (sequence.Items.Length >= sequence.Capacity)
+                throw ModulesExceptionFactory.Error("evaluation", "SequenceCapacityExceeded", nodeLocus, new { length = sequence.Items.Length, capacity = sequence.Capacity });
+            return sequence with { Items = sequence.Items.Add(operands[1]) };
+        }
+
         private void ConsumeStep(string nodeLocus)
         {
             if (Steps >= maxSteps)
@@ -185,16 +264,58 @@ public static class ModulesReferenceEvaluator
                 ? boolean.Value
                 : throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", locus, new { reason = "ExpectedBool" });
 
-        private static void EnsureValueType(ModuleValue? value, TypeRef expected, string locus)
+        private static ModuleSequence Sequence(ModuleValue value, string locus)
+            => value as ModuleSequence
+                ?? throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", locus, new { reason = "ExpectedSequence" });
+
+        private void EnsureValueType(ModuleValue? value, TypeRef expected, string locus)
         {
-            if (expected.Kind is not ("I64" or "Bool"))
-                throw ModulesExceptionFactory.Error("evaluation", "UnsupportedRuntimeType", locus, new { expected = expected.ToString() });
             if (value is null || value.TypeKind != expected.Kind)
                 throw ModulesExceptionFactory.Error("evaluation", "RuntimeTypeMismatch", locus, new
                 {
                     expected = expected.ToString(),
                     actual = value?.TypeKind ?? "null"
                 });
+
+            switch (expected.Kind)
+            {
+                case "I64":
+                case "Bool":
+                    return;
+                case "Seq" when expected.Element is not null && expected.Capacity is not null && value is ModuleSequence sequence:
+                    if (sequence.ElementType is null
+                        || sequence.Items.IsDefault
+                        || sequence.Capacity < 0
+                        || !TypesEquivalent(sequence.ElementType, expected.Element)
+                        || sequence.Capacity != expected.Capacity.Value
+                        || sequence.Items.Length > sequence.Capacity)
+                        throw ModulesExceptionFactory.Error("evaluation", "RuntimeTypeMismatch", locus, new
+                        {
+                            expected = expected.ToString(),
+                            actual = $"Seq<{sequence.ElementType},{sequence.Capacity}>[{sequence.Items.Length}]"
+                        });
+                    for (var index = 0; index < sequence.Items.Length; index++)
+                        EnsureValueType(sequence.Items[index], expected.Element, $"{locus}/item/{index.ToString(CultureInfo.InvariantCulture)}");
+                    return;
+                case "Record" when expected.Name is not null && value is ModuleRecord record:
+                    if (record.RecordTypeId != expected.Name || record.Fields is null || !types.TryGetValue(expected.Name, out var declaration))
+                        throw ModulesExceptionFactory.Error("evaluation", "RuntimeTypeMismatch", locus, new { expected = expected.ToString(), actual = record.RecordTypeId });
+                    var expectedFields = declaration.Fields.Select(field => field.Id).Order(StringComparer.Ordinal).ToArray();
+                    var actualFields = record.Fields.Keys.Order(StringComparer.Ordinal).ToArray();
+                    if (!actualFields.SequenceEqual(expectedFields, StringComparer.Ordinal))
+                        throw ModulesExceptionFactory.Error("evaluation", "RuntimeTypeMismatch", locus, new { expected = expectedFields, actual = actualFields });
+                    foreach (var field in declaration.Fields)
+                        EnsureValueType(record.Fields[field.Id], field.Type, $"{locus}/field/{field.Id}");
+                    return;
+                default:
+                    throw ModulesExceptionFactory.Error("evaluation", "UnsupportedRuntimeType", locus, new { expected = expected.ToString() });
+            }
         }
+
+        private static bool TypesEquivalent(TypeRef left, TypeRef right)
+            => left.Kind == right.Kind
+                && left.Name == right.Name
+                && left.Capacity == right.Capacity
+                && (left.Element is null ? right.Element is null : right.Element is not null && TypesEquivalent(left.Element, right.Element));
     }
 }

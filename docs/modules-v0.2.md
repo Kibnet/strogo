@@ -133,11 +133,13 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 
 ## 8) Reference evaluator
 
-`ModulesReferenceEvaluator.Invoke` исполняет провалидированный `ModuleIr` как ограниченную эталонную семантику. Текущий профиль поддерживает `I64`, `Bool`, все scalar opcodes, локальный `call` и `if`. Публичный вызов разрешён только для функции из `exports`; внутренние функции доступны только через `call`.
+`ModulesReferenceEvaluator.Invoke` исполняет провалидированный `ModuleIr` как ограниченную эталонную семантику. Текущий профиль поддерживает `I64`, `Bool`, records, bounded sequences, все реализованные scalar/composite opcodes, локальный `call` и `if`. Публичный вызов разрешён только для функции из `exports`; внутренние функции доступны только через `call`.
 
 Арифметика `I64` проверяемая: переполнение даёт `evaluation:ArithmeticOverflow` с устойчивым locus узла. У `if` вычисляется только выбранная `RegionIr`; environment передаётся её локальным параметрам. Один `MaxSteps` действует на весь вызов вместе с вложенными regions и локальными calls и ограничен hard maximum `1_000_000`. Нулевой, отрицательный или превышающий hard maximum бюджет отклоняется до исполнения.
 
-Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны records, sequences, imports, `fold`, canonical JSON ABI, owner contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
+Runtime composite values представлены `ModuleRecord` с точным type ID и полным набором полей и `ModuleSequence` с element type, capacity и immutable items. Перед исполнением входы проверяются рекурсивно: другая capacity, пропущенное/лишнее поле или неверный вложенный item дают `RuntimeTypeMismatch` с точным locus. `seq.get` использует zero-based index и возвращает `SequenceIndexOutOfRange`; `seq.append` не изменяет исходное значение и возвращает `SequenceCapacityExceeded` при заполненной sequence.
+
+Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, `fold`, canonical JSON ABI, owner composite contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
 
 ## 9) Scalar lowering в Dafny/C#
 
@@ -190,6 +192,7 @@ Binder требует точного совпадения exports, `contractRef`
   - парсер + типовые валидации v0.2;
   - компиляция в детерминированный IR-слой;
   - ограниченная исполняемая reference-семантика scalar/`if`/local call;
+  - исполняемая reference-семантика records и bounded sequences с рекурсивной проверкой внешних значений, index/capacity failures и stable loci;
   - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector;
   - первый exact-outcome proof: две разные реализации одного owner contract приняты, неправильная реализация и слабое предусловие отклонены.
 
@@ -203,6 +206,7 @@ Binder требует точного совпадения exports, `contractRef`
 - `fixtures/modules-v0.2/math-invalid-return-mismatch.json`.
 - `fixtures/modules-v0.2/math-invalid-i64-plus.json`, `math-invalid-i64-leading-zero.json`, `math-invalid-i64-negative-zero.json`;
 - `fixtures/modules-v0.2/composite-valid.json` и эквивалентный `composite-valid-shuffled.json`;
+- `fixtures/modules-v0.2/composite-runtime-valid.json`, различающий порядок bounded sequence, record field access, capacity/index failures и рекурсивную проверку runtime input;
 - негативные `composite-invalid-record.json`, `composite-invalid-call-cycle.json`, `composite-invalid-seq-element.json`, `composite-invalid-recursive-type.json`, `composite-invalid-type-depth.json`, `composite-invalid-numeric-capacity.json` и `math-invalid-extra-value.json`.
 - `if-valid.json` и эквивалентный `if-valid-shuffled.json`;
 - `if-lazy-overflow.json`, различающий lazy branch semantics и ошибочный eager evaluator;
@@ -217,4 +221,4 @@ Binder требует точного совпадения exports, `contractRef`
 
 ## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` semantics в reference evaluator и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует records/sequences lowering, `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` и record/sequence semantics в reference evaluator и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует records/sequences proof lowering, `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.

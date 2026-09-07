@@ -18,7 +18,7 @@
 
 E04 использует фиксированный pipeline из шести операций. Его успешная проверка не доказывает выразительность языка общего назначения. ReadyToRun содержит машинный код и IL и может использовать JIT; полного AOT здесь нет.
 
-Текущий E05 checkpoint и его границы описаны в [Modules v0.2](docs/modules-v0.2.md). Он проверяет composable representation, identity, scalar/`if` reference semantics и первый exact-outcome proof относительно отдельной owner model. Это ещё не human approval/admission, package, runtime precondition facade или общая библиотека и не выполнение целей G01–G06.
+Текущий E05 checkpoint и его границы описаны в [Modules v0.2](docs/modules-v0.2.md). Он проверяет composable representation, identity, scalar/`if`/record/bounded-sequence reference semantics и первый exact-outcome proof относительно отдельной owner model. Это ещё не human approval/admission, package, runtime precondition facade или общая библиотека и не выполнение целей G01–G06.
 
 ## Быстрый запуск Reserve v0
 

@@ -530,3 +530,33 @@
 - Evidence: run `20260907-owner-contract-final-v4`; Release build 0 warnings/errors; scoped format PASS; Modules 199 checks/61 cases; owner и alternative по 4 verified/0 errors и outcomes `MIN+1,42,MAX`; wrong exact outcome и weak domain ожидаемо Unproven; process self-tests подтверждают timeout/output cap/orphan kill; Reserve 29/29 и 10904 assertions; E04 141. Manifest SHA-256 `bcbc9a9e…5afc5426`, summary SHA-256 `33457102…191a78d7`; независимый review: PASS, 0 оставшихся BLOCKER/HIGH/MEDIUM.
 - Последствие: scalar owner checkpoint готов к локальному commit; следующий архитектурный шаг должен связать owner approval, proof и неизменный build/package либо расширить contracts на helpers перед package facade.
 - Supersedes / supersededBy: завершает evidence часть K-E05-050–K-E05-057 для этого checkpoint.
+
+## K-E05-059
+
+- Дата / фаза: 2026-09-07 / public design discussion review.
+- Тип / статус: Experiment design / Confirmed and adopted.
+- Утверждение: тест полезен, когда заранее выведенный из смысла задачи oracle отличает корректную реализацию от правдоподобной ошибки; широту языка можно проверять только задачами, выбранными после заморозки schema/opcode hash. Уже опубликованная Noita scanner task является development fixture, а не held-out benchmark.
+- Scope: Posting Board thread #3298, сообщения #8571 и #8906 от «Помощник Архитектора»; это вход для дизайна эксперимента, не owner contract и не evidence корректности Strogo.
+- Evidence: oracle #8571 вручную подтверждён для `k=3`: signature `010` возникает в `(M1,0)`, `(M1,1)`, `(M2,0)`; mutation `M2[2]=6` удаляет `(M2,0)`, а `k=4` не даёт повторной группы. При этом fixture не различает ошибку маркировки exact-value duplicates и не проверяет deterministic order нескольких групп; эти случаи нужны до использования как regression.
+- Последствие: Noita oracle можно расширять как раскрытый development corpus. Для AC8 сначала фиксируются операции, формат, ordering и budget, затем отдельный reviewer выбирает новую задачу; неуспех остаётся результатом, а изменение языка переводит задачу в development.
+- Supersedes / supersededBy: конкретизирует AC8 и публичные выводы E05-K06/E05-K08 из утверждённой SPEC.
+
+## K-E05-060
+
+- Дата / фаза: 2026-09-07 / implementation and validation.
+- Тип / статус: Reference semantics / Confirmed for records and bounded sequences.
+- Утверждение: существующий typed IR для `record.make/get` и `seq.empty/length/get/append` можно исполнить без предметных операций; внешний composite input допускается только после рекурсивного совпадения record fields, element type и capacity.
+- Scope: локальные modules без imports и без `fold`; это reference oracle, не generated library и не proof composite owner model.
+- Evidence: fixture `composite-runtime-valid.json`; Modules conformance 211 checks после Release build. Положительные случаи различают order/get/length/nested record и независимость от comparer внешнего словаря; отрицательные дают stable `SequenceCapacityExceeded`, `SequenceIndexOutOfRange` и вложенный `RuntimeTypeMismatch`. Существующий `composite-valid.json` теперь фактически исполняет цепочку local calls → sequences → record → field и возвращает `4` за 13 steps.
+- Последствие: следующий lowering может сравниваться с эталонной composite semantics; `fold` остаётся отдельной новой region semantics и не должен маскироваться host helper.
+- Supersedes / supersededBy: расширяет runtime часть E05-K02 и снимает ограничение records/sequences reference evaluator из K-E05-043.
+
+## K-E05-061
+
+- Дата / фаза: 2026-09-07 / workflow review.
+- Тип / статус: Specification defect / Open.
+- Утверждение: текущая E05 формулировка admission содержит цикл: `check` требует `approval`, но обязательный `approval.json` уже ссылается на `proofDigest` и `buildManifestDigest`, которые появляются только в результате последующих proof/build стадий.
+- Scope: разделы 6.2 и 6.4 утверждённой E05 SPEC; composite reference evaluator от этого не зависит.
+- Evidence: целевой порядок `check --approval` → `build --check` и одновременно обязательные поля `proofDigest`/`buildManifestDigest` в approval невозможно выполнить без placeholder, мутации подписанного артефакта или скрытого второго approval.
+- Последствие: до реализации admission нужна отдельная утверждаемая поправка с двумя явными решениями человека: semantic approval owner bundle до proof и release admission exact proof/toolchain/build manifest после build; runtime принимает только второй артефакт. Нельзя молча ослабить binding или объявить один из шагов автоматическим.
+- Supersedes / supersededBy: выявляет противоречие в E05-K09; требует SPEC amendment перед checkpoint 3.

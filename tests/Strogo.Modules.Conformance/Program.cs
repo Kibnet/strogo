@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -485,8 +486,48 @@ try
     Check(internalCall.Code == "FunctionNotExported", "public reference invocation cannot bypass module exports");
     var wrongArity = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(scalarCalls, "twice", Array.Empty<ModuleValue>()));
     Check(wrongArity.Code == "ArgumentCountMismatch", "runtime arity is checked before evaluation");
-    var unsupportedComposite = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeIr, "countValues", [new ModuleI64(2)]));
-    Check(unsupportedComposite.Code == "UnsupportedRuntimeOpcode", "reference evaluator fails closed outside its scalar checkpoint");
+    var compositeResult = ModulesReferenceEvaluator.Invoke(compositeIr, "countValues", [new ModuleI64(2)]);
+    Check(compositeResult.Value is ModuleI64 { Value: 4 } && compositeResult.Steps == 13, "reference evaluator executes record and sequence composition through local calls");
+
+    var compositeRuntime = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "composite-runtime-valid.json"))));
+    var oneItem = new ModuleSequence(new TypeRef("I64"), 2, [new ModuleI64(7)]);
+    var twoItems = new ModuleSequence(new TypeRef("I64"), 2, [new ModuleI64(7), new ModuleI64(9)]);
+    var appended = ModulesReferenceEvaluator.Invoke(compositeRuntime, "append", [oneItem, new ModuleI64(9)]);
+    Check(appended.Value is ModuleSequence { Items: var appendedItems } && appendedItems.Select(item => ((ModuleI64)item).Value).SequenceEqual([7L, 9L]), "seq.append preserves order and returns a new bounded sequence");
+    Check(ModulesReferenceEvaluator.Invoke(compositeRuntime, "size", [twoItems]).Value is ModuleI64 { Value: 2 }, "seq.length returns the exact bounded length");
+    Check(ModulesReferenceEvaluator.Invoke(compositeRuntime, "getAt", [twoItems, new ModuleI64(1)]).Value is ModuleI64 { Value: 9 }, "seq.get preserves zero-based order");
+    var pairResult = ModulesReferenceEvaluator.Invoke(compositeRuntime, "makePair", [new ModuleI64(5)]);
+    Check(pairResult.Value is ModuleRecord { RecordTypeId: "Pair" } pair
+        && pair.Fields["first"] is ModuleI64 { Value: 5 }
+        && pair.Fields["items"] is ModuleSequence { Items.Length: 1 }, "record.make preserves typed fields including a nested sequence");
+    var pairInput = new ModuleRecord("Pair", new Dictionary<string, ModuleValue>
+    {
+        ["first"] = new ModuleI64(11),
+        ["items"] = oneItem
+    });
+    Check(ModulesReferenceEvaluator.Invoke(compositeRuntime, "readFirst", [pairInput]).Value is ModuleI64 { Value: 11 }, "record.get accepts a recursively validated record input");
+    var reverseFields = ImmutableSortedDictionary.CreateRange(
+        Comparer<string>.Create((left, right) => StringComparer.Ordinal.Compare(right, left)),
+        new Dictionary<string, ModuleValue> { ["first"] = new ModuleI64(12), ["items"] = oneItem });
+    Check(ModulesReferenceEvaluator.Invoke(compositeRuntime, "readFirst", [new ModuleRecord("Pair", reverseFields)]).Value is ModuleI64 { Value: 12 }, "record input identity does not depend on the caller dictionary comparer");
+
+    var fullAppend = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "append", [twoItems, new ModuleI64(10)]));
+    Check(fullAppend.Code == "SequenceCapacityExceeded" && fullAppend.EntityId == "function/append/body/node/result", "seq.append rejects capacity overflow at the stable node locus");
+    var badIndex = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "getAt", [oneItem, new ModuleI64(1)]));
+    Check(badIndex.Code == "SequenceIndexOutOfRange" && badIndex.EntityId == "function/getAt/body/node/result", "seq.get rejects an out-of-range index at the stable node locus");
+    var negativeIndex = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "getAt", [oneItem, new ModuleI64(-1)]));
+    Check(negativeIndex.Code == "SequenceIndexOutOfRange" && negativeIndex.EntityId == "function/getAt/body/node/result", "seq.get rejects a negative index at the stable node locus");
+    var wrongCapacity = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "size", [new ModuleSequence(new TypeRef("I64"), 3, [new ModuleI64(7)])]));
+    Check(wrongCapacity.Code == "RuntimeTypeMismatch" && wrongCapacity.EntityId == "function/size/parameter/items", "runtime sequence input must match the declared capacity");
+    var missingRecordField = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "readFirst", [new ModuleRecord("Pair", new Dictionary<string, ModuleValue> { ["first"] = new ModuleI64(1) })]));
+    Check(missingRecordField.Code == "RuntimeTypeMismatch" && missingRecordField.EntityId == "function/readFirst/parameter/pair", "runtime record input must contain exactly the declared fields");
+    var wrongNestedItem = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeRuntime, "readFirst", [new ModuleRecord("Pair", new Dictionary<string, ModuleValue>
+    {
+        ["first"] = new ModuleI64(1),
+        ["items"] = new ModuleSequence(new TypeRef("I64"), 2, [new ModuleBool(true)])
+    })]));
+    Check(wrongNestedItem.Code == "RuntimeTypeMismatch" && wrongNestedItem.EntityId == "function/readFirst/parameter/pair/field/items/item/0", "runtime composite validation reports the nested value locus");
+    reports.Add(new { kind = "runtime", fixture = "composite-runtime-valid.json", semanticChecks = 12 });
     var importedBranchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")))
         .Replace("\"imports\": []", "\"imports\": [{\"moduleId\":\"external.sample\",\"sourceDigest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"contractDigest\":\"1111111111111111111111111111111111111111111111111111111111111111\"}]", StringComparison.Ordinal);
     var importedBranching = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(importedBranchingText)));
