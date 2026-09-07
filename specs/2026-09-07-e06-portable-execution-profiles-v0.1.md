@@ -31,6 +31,8 @@ Outcome contract:
 - Утверждённый исследовательский курс называет Core Wasm следующим backend и WIT/Component Model следующим уровнем библиотек, но не определяет промежуточный portable package contract, platform matrix или связь одного proof с несколькими target artifacts.
 - Закреплённый локальный Dafny 4.11.0 фактически предлагает `translate cs`, `java`, `js`, `go`, `py`, `cpp`, `rs`, `dfy`. Его help отдельно предупреждает об ограничениях C++; наличие команды само по себе не доказывает зрелость backend или эквивалентность semantics.
 - На Windows доступны .NET 10.0.400 и JDK 17. WSL2 Ubuntu 24.04/x64 доступен, но .NET, Java и Wasmtime внутри него сейчас отсутствуют. Это provisioning gap, а не отрицательный результат языка.
+- Pre-approval feasibility check на существующем `verification/task-graph-v1/Contract.dfy` подтвердил: Dafny 4.11.0 переводит его в 15 Java source files; `javac 17 --release 17 -Xlint:all,-cast -Werror` с pinned `DafnyRuntime.jar` создаёт 14 class files без diagnostics. Полный `-Xlint:all` даёт 13 предупреждений только категории `cast` в generated Dafny source, поэтому profile обязан отличать upstream generated-source policy от более строгой policy нашего adapter.
+- Два clean `dafny build -t java --no-verify --enforce-determinism` создали JAR одинаковой длины `156757` и с 106 одинаковыми entry names/content digests, но разными whole-file SHA-256 (`00ed96d…e1d07` и `4e0aef8…495b6`) из-за entry timestamps. Repack обоих наборов pinned JDK `jar` с manifest-first explicit ordinal file list, `--no-manifest --no-compress --date=1980-01-01T00:00:02Z` дал byte-equal JAR SHA-256 `8ec403c…d15fb`. Оба имеют 105 regular entries, STORED method, один timestamp, UTF-8 flag и только exact JAR marker `FE CA 00 00` у первого manifest entry. Это packaging feasibility, а не E06 semantics evidence: запуск использовал прежний workload и `--no-verify`.
 
 Официальные основания, проверенные 2026-09-07:
 
@@ -42,7 +44,7 @@ Outcome contract:
 | [.NET Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) | Native AOT выпускает self-contained native artifact per OS/architecture и запрещает ряд dynamic features | Он не даёт один бинарник для всех платформ; это отдельный profile после managed portability |
 | [WASI releases](https://wasi.dev/releases) | Component Model даёт typed cross-language composition; WASI 0.3 current, а 0.2 пока поддерживается шире | Версию component toolchain нельзя выбрать без отдельного executable spike |
 
-Публичная проверка направления: в [дискуссии Posting Board](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e) опубликован reply `15979f1f-cdd1-4b92-8bc4-0378238cd281` с предложением E06A и просьбой назвать минимальный counterexample/критерий, при котором C#/Java lane не окупается. После review исходная формулировка про target admission признана неверной: E05 package contract .NET-specific. Публичная поправка `17a295a2-9b34-4e12-80a0-b38fc681d1a9` фиксирует validation-only boundary. На момент review ответ другого участника ещё не получен; публикации не являются подтверждением решения.
+Публичная проверка направления: в [дискуссии Posting Board](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e) опубликован reply `15979f1f-cdd1-4b92-8bc4-0378238cd281` с предложением E06A и просьбой назвать минимальный counterexample/критерий, при котором C#/Java lane не окупается. После review исходная формулировка про target admission признана неверной: E05 package contract .NET-specific. Публичная поправка `17a295a2-9b34-4e12-80a0-b38fc681d1a9` фиксирует validation-only boundary. Feasibility result и вопрос о риске скрытого drift при JAR normalization опубликованы/read back как reply `2873a93d-4ca2-4046-b7f6-81290c502997` (#9521). Ответ `0cb1efdf-babc-44df-beab-83fe60020411` (#9524) дал применимый counterexample: duplicate ZIP entries могут схлопнуться при extraction/map; рекомендация raw/final provenance и rejection до нормализации включена в §§6.2.2 и A9. Публикации являются источником проверяемых предложений, а не подтверждением решения.
 
 ## 3. Проблема
 
@@ -133,6 +135,20 @@ closureDigest      = H("strogo.validation-proof.v0.1/closure", canonical transit
 | `jvm-java17.v1` | deterministic JAR + runner manifest | pinned Java 17 runtime; no JNI/reflection/service loading | Windows x64, Linux x64 |
 
 Профиль получает `Portable` только если один и тот же manifest/package/artifact digest triple запущен на обеих ОС. Пересборка на каждой ОС проверяет build portability, но не заменяет этот критерий artifact portability. Dafny proof устанавливает semantics относительно validation owner fixture; фактические runs проверяют сохранение fixed vectors при допущении корректности translator/compiler/runtime TCB. Machine code создаёт соответствующий JIT; E06 не гарантирует correct либо byte-equal JIT output.
+
+Authoritative JVM build не принимает JAR, напрямую созданный `dafny build`, как final artifact. После shared proof он выполняет exact `dafny translate java --no-verify` в isolated clean root, сохраняет translation record, компилирует upstream generated sources pinned `javac --release 17 -encoding UTF-8 -Xlint:all,-cast -Werror` с exact Dafny runtime, а Strogo adapter sources отдельно — `-Xlint:all -Werror`. Исключение `cast` относится только к файлам, перечисленным translator inventory; warning suppression для adapter/consumer запрещён. Любой другой warning/error даёт `TargetBuildRejected`.
+
+JVM packager объединяет resulting candidate/runtime/adapter class entries с exact canonical `META-INF/MANIFEST.MF`, запрещает duplicate/path/tree violations и сначала создаёт raw pre-normalization JAR, который сохраняется в local evidence вместе с ordered central-directory inventory. JAR entry path — relative ASCII с `/`, без empty/`.`/`..` segments, backslash, colon, control, absolute/drive/UNC form; segment соответствует `[A-Za-z0-9_$][A-Za-z0-9._$-]*`; ordinal и case-fold duplicates запрещены. Эти правила отдельны от lowercase outer package paths, потому что Java class/package names case-sensitive.
+
+Canonical manifest имеет exact UTF-8 bytes без BOM: `Manifest-Version: 1.0\r\nAutomatic-Module-Name: strogo.portable.v01\r\n\r\n`. Packager запускает `jar` с working directory, равным isolated staging root. Argfile не содержит physical path или `-C`: первая строка `META-INF/MANIFEST.MF`, затем каждый remaining regular entry ровно один раз в ordinal path order; `.`/directory enumeration запрещены. Canonical logical invocation inventory содержит tool digest, fixed flags, ordered relative argfile entries и их content digests. Physical staging/output paths сохраняются только в diagnostic receipt и исключаются из `buildToolchainDigest`, manifest и semantic report.
+
+Normalizer не использует filesystem extraction. Phase 1 разбирает EOCD, central-directory и local headers в bounded ordered multiset `ordinal,path,compressedLength,uncompressedLength,crc32,method,flags,timestamp,extra,localHeaderOffset` без чтения entry contents. До любого `path → entry` map он проверяет: не более `4096` entries, individual uncompressed length `<=16777216`, aggregate `<=67108864`; один non-ZIP64/non-multidisk archive без encryption/data descriptor/comment; unique non-overlapping local ranges; central/local path, sizes, CRC32, method и flags согласованы; каждый raw entry STORED с flag `0x0800`; path/multiplicity/expected length/manifest rules соблюдены. Ordinal/case-fold duplicate, missing/extra expected resource, changed canonical manifest, directory/symlink-like entry, oversized/deceptive length, overlap или corrupt central/local header дают `CanonicalJarRejected`.
+
+Phase 2 потоково читает каждый raw entry по ordinal напрямую из проверенного local range, без extraction и без map, считает exact `contentDigest`, подтверждает фактическую длину/CRC32 и сравнивает path/content с expected staging inventory. Только после полного PASS разрешено создать unique map и final JAR. Completed phase-2 ordered inventory является input `rawJvmInventoryDigest`. Таким образом duplicate entries с одинаковыми либо разными bytes не могут быть молча сведены к одному dictionary key, а заявленные headers не заменяют проверку содержимого.
+
+Final flags закреплены: `--create --no-manifest --no-compress --date=1980-01-01T00:00:02Z`. Validator требует exact manifest bytes и первый entry; remaining entries — exact ordinal order; directory entries отсутствуют; DOS timestamp каждого entry ровно `1980-01-01T00:00:02`; method — STORED; general-purpose flag — `0x0800`; ZIP create/extract version — `10`, create system — `0`, volume/internal/external attributes — `0`; archive/entry comments отсутствуют; единственный extra field — JAR marker bytes `FE CA 00 00` у manifest; остальные extra fields запрещены. Raw pre-normalization JAR и direct Dafny build JAR остаются intermediate evidence и не входят в package. Два clean normalizations в разных physical roots на canonical Windows x64 build lane обязаны дать byte-equal final JAR и одинаковый `buildToolchainDigest`; Linux rebuild может быть отдельной diagnostic row, но не заменяет запуск этого exact artifact.
+
+Local `jvm-build-receipt.v0.1` сохраняет `rawJvmJarDigest = H("strogo.portability.v0.1/raw-jvm-jar", exact raw bytes)`, `rawJvmInventoryDigest = H("strogo.portability.v0.1/raw-jvm-inventory", canonical ordered-multiset inventory)` и `normalizationRecipeDigest = H("strogo.portability.v0.1/jvm-normalization-recipe", canonical tool digest, fixed flags, exact manifest bytes, relative argfile entries and all validator metadata rules)`. Physical paths отсутствуют во всех трёх digests. Volatile raw digests остаются diagnostic-only и исключены из portability manifest/report semantic projection; exact normalization recipe artifact входит в `buildToolchainDigest`, а raw/final linkage остаётся в local receipt. Tool/logical-argfile/source/class inventories входят в `buildToolchainDigest`/evidence.
 
 #### 6.2.3 Logical module interface и target ABI
 
@@ -328,6 +344,7 @@ Visual planning artifact: текстовая pipeline-схема и platform mat
 | Proof/admission | agent | Один validation owner/proof; E06 manifests не имеют human approval и не проходят production admission | 0.98 | Portable production schema откладывается | Нет |
 | Artifact portability | agent | Один byte-identical manifest/package/artifact triple каждого profile на две ОС | 0.92 | Tool-generated package может оказаться nondeterministic | Нет; drift является stop result |
 | Java version | agent | Java 17 как зрелый минимальный baseline | 0.89 | Не проверяет новые JVM features | Нет |
+| JVM packaging | agent | Separate generated/adapter lint policies + pinned deterministic STORED repack | 0.97 | Direct Dafny JAR содержит volatile timestamps; исключён только known generated `cast` lint | Нет |
 | Wasm | agent | Следующий отдельный E06B после ABI/profile evidence | 0.93 | Откладывает sandbox/component experiment | Нет |
 | Runtime provisioning | agent | Repo-local/gitignored pinned archives, не system install | 0.90 | URLs/hashes требуют maintenance | Нет |
 
@@ -381,13 +398,13 @@ Visual planning artifact: текстовая pipeline-схема и platform mat
 
 - **A1:** обе portability manifests ссылаются на одинаковые exact validation module/owner/proof/Dafny source digests и явно содержат `purpose: validation-only`, `contractStatus: validation-fixture`.
 - **A2:** pinned Dafny verifier дважды подтверждает fixed workload §6.2.5 вместе с total wire wrapper и topological exact-entry proof `increment → adjust`; C# и Java translation используют exact verified source bytes.
-- **A3:** .NET и JVM artifacts собираются без warnings, с полным file/dependency inventory и tool hashes.
+- **A3:** .NET artifacts собираются с profile warnings-as-errors; JVM generated sources собираются exact `-Xlint:all,-cast -Werror`, adapter/consumer — `-Xlint:all -Werror`; diagnostics равны нулю, а file/dependency/tool/argfile inventories и hashes полны. Попытка применить generated-source `cast` exclusion к adapter/consumer отклоняется.
 - **A4:** каждый profile имеет отдельный canonical `portability-manifest.v0.1`; swap/tamper/path-tree mutation отклоняется; package не содержит E05 production files, public E06 API/CLI не имеет load/admit operation, projection равна `NotAdmittable`.
 - **A5:** один и тот же `portabilityManifestDigest`/`packageDigest`/`artifactDigest` triple каждого profile фактически исполняется на Windows x64 и Linux x64; receipts отдельно связывают OS-specific runtime closures, а все valid vector outcomes равны owner oracle.
 - **A6:** wrong logical type, over-capacity и три fixed false-requires inputs дают canonical equal refusal из verified total wrapper до candidate invocation в обоих profiles/ОС; каждый fixed transport case §6.2.5, включая UTF-8 lengths `65536/65537`, root-inclusive depth `32/33`, JSON node count `2048/2049`, lone surrogate и mixed lone-surrogate/oversize priority, даёт одинаковые exact code/locus/details без target exception.
 - **A7:** четыре independent mutations — sign результата, reverse fold input/echo, eager target-code branch `headOrZero` и altered adapter refusal code — каждая обнаруживается как `BackendSemanticMismatch` либо `TargetExecutionFailed` с exact vector/locus.
 - **A8:** unsupported effect/type/import, missing call entry, call cycle или call внутри fold step не создаёт partial artifact и возвращает stable refusal/locus.
-- **A9:** два clean builds дают byte-equal canonical manifests и target artifacts; иначе EXEC останавливается с `NonReproducibleBuild`.
+- **A9:** JVM reproducibility проверяется четырьмя раздельными группами: (a) разные physical roots, input mtimes и input enumeration order при одинаковом expected inventory дают одинаковые final JAR/manifest/build-toolchain digests; (b) допустимое изменение class/resource path или content даёт другой final artifact/package digest; (c) mutation уже выпущенного final JAR в entry order, timestamp, manifest bytes, archive/entry comment, method, flag, create/extract version, system/attributes/volume или extra field всегда даёт `CanonicalJarRejected`, включая вариант с пересчитанными outer manifest/package digests; (d) raw duplicate entry с одинаковыми/разными bytes, missing/extra resource, changed raw manifest, corrupt/mismatched central-local name/size/CRC/method/flags, overlapping range, data descriptor/ZIP64/encryption, `4097` entries, `16777217`-byte entry или aggregate `67108865` bytes даёт `CanonicalJarRejected` в phase 1, а truncated/content-digest mismatch — в phase 2, до extraction/map/final write. Любое нарушение либо неравенство двух остальных clean target builds останавливает EXEC с `NonReproducibleBuild`.
 - **A10:** missing/corrupt runtime и absent platform row дают `EnvironmentUnavailable`/`Unavailable`, не PASS.
 - **A11:** diagnostic performance report фиксирует команды, warmup/repeats, environment, startup, throughput, peak memory и artifact size без вывода G06.
 - **A12:** bounded JIT diagnostics каждого profile/ОС связывают candidate entry method с фактическим compilation event; это не выдаётся за доказательство correctness JIT output.
@@ -405,7 +422,7 @@ Visual planning artifact: текстовая pipeline-схема и platform mat
 | A6 | cross-product negative vectors | verify pre-invocation marker | negative receipts | — |
 | A7 | four target/adapter mutants | mismatch classification | mutation report | — |
 | A8 | unsupported type/effect/import fixtures | no artifact directory/files | refusal report | — |
-| A9 | two clean build roots | byte/hash comparison | reproducibility report | — |
+| A9 | two clean roots + four-group JVM normalization/mutation suite | inspect raw/final inventories and recomputed-outer-digest rejection | reproducibility/normalization report | — |
 | A10 | renamed/corrupt runtime fixture | row status review | environment report | — |
 | A11 | bounded benchmark harness | inspect environment disclosure | performance JSON/Markdown | G06 intentionally not asserted |
 | A12 | .NET/HotSpot JIT diagnostic assertions | inspect bounded method-linked events | JIT receipts | Machine-code correctness intentionally not asserted |
@@ -430,7 +447,8 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 - JIT/runtime versions влияют на performance и могут влиять на edge behavior при defect; exact closure входит в receipt.
 - Java/.NET exception text и stack traces нестабильны; logical type/requires errors формирует verified wrapper, transport errors — closed adapter contract; localized runtime text остаётся только bounded diagnostic.
 - WSL использует Linux kernel на той же физической машине; это actual Linux execution, но не независимое hardware/operations evidence.
-- Deterministic JAR/package может потребовать нормализации timestamps/order; произвольное игнорирование различий запрещено.
+- Direct Dafny JAR содержит volatile timestamps; final JVM artifact всегда строится exact deterministic repack. Игнорировать whole-file drift, нормализовать неизвестные metadata либо расширять warning exclusions запрещено.
+- Raw ZIP/JAR допускает duplicate names; проверка multiplicity обязана идти по central directory до extraction/map, иначе last/first-wins API может скрыть потерю entry.
 - Один workload не подтверждает general portability, G05 или G06.
 
 ### Expected User Review Objections
@@ -580,20 +598,20 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 | Delivery / operations / security | applicable | Воспроизводимы ли tool/runtime inputs, fail-closed matrix и rollback? | PASS | Pin/hash, closed trees, actual OS rows, local archives и revert path определены. |
 
 ### Post-SPEC Review
-- Статус / stop decision: **PASS**; можно запрашивать exact подтверждение этой SPEC.
+- Статус / stop decision: **PASS**; exact подтверждение этой SPEC получено, EXEC остаётся dependency-gated.
 - Scope reviewed: эта SPEC; central/local `AGENTS.md`; `quest-mode`, `quest-governance`, `spec-linter`, `spec-rubric`, `review-loops`, `product-system-design`; `docs/project-intent.md`; связанные E05 specs и прежний controlled-language experiment; planned files §16; open questions §14.
-- Reviewed normative snapshot: SHA-256 `e1786239175e5b6fc2d0234eab309b309aefc88620803f92857d5237c1562faf`. После него меняются только этот audit block, checklist и journal.
+- Reviewed normative snapshot: SHA-256 `ec491346187203c9a102ec4fcf02c40cdc370355ff373d600c4421dbae608ef3`. После него изменены только согласование provenance в §2, этот audit block, Approval и journal; смысл JVM-контракта не менялся.
 - Reviewer boundary: отдельный agent выполнил процедурно read-only pass и не менял файлы, но его effective sandbox был `danger-full-access`; поэтому результат учитывается как writable adversarial fallback, не как технически изолированный read-only independent review.
 - Review passes:
   - Scope/Evidence: проверены repo state, related specs/docs, pinned Dafny `translate --help`, available Windows/WSL tooling и пять official upstream sources §2.
   - Contract: outcome/Non-Goals, validation/production boundary, A1–A14, owner/proof/ABI/digest/status contracts и dependencies согласованы.
   - Adversarial risk: проверены ошибочная target admission, скрытый human gate, adapter proof boundary, order/lazy/record counterexamples, false JIT evidence, digest/report ambiguity и Unicode/resource nondeterminism.
   - Role-Based: все пять применимых ролей получили PASS в таблице выше.
-  - Fix and re-review: после каждой правки повторно проверялась затронутая поверхность; финальный targeted pass точного snapshot не нашёл новых BLOCKER/HIGH/MEDIUM/LOW.
-  - Stop decision: validation evidence для SPEC достаточно; EXEC остаётся запрещён до approval и E05 owner/fold dependencies.
-- Evidence inspected: `git status --short --branch`; SHA-256 snapshot; headings/AC scan; Dafny CLI target list; Windows .NET/JDK и WSL inventory; official Dafny README/FAQ/target-library docs, Microsoft Native AOT и WASI releases; Posting Board publish/readback IDs §2.
+  - Fix and re-review: после каждой правки повторно проверялась затронутая поверхность; финальный targeted pass снимка `ec491346…08ef3` подтвердил two-phase JVM parser, exact final metadata и A9 без новых BLOCKER/HIGH/MEDIUM.
+  - Stop decision: validation evidence и human approval для E06 достаточны; EXEC остаётся запрещён до отдельных approvals и завершения E05 owner/fold dependencies.
+- Evidence inspected: `git status --short --branch`; SHA-256 snapshot; headings/AC scan; Dafny CLI target list; Windows .NET/JDK и WSL inventory; Java translation/javac и two-build raw/repacked JAR inventories; official Dafny README/FAQ/target-library docs, Microsoft Native AOT и WASI releases; Posting Board publish/readback IDs §2.
 - Depth checklist:
-  - Scope drift / unrelated changes: только эта untracked SPEC; E05/code/docs не изменены.
+  - Scope drift / unrelated changes: только эта SPEC; E05/code/docs не изменены.
   - Acceptance criteria: A1–A14 определены один раз и имеют test/evidence rows.
   - User scenarios / Decision ledger / Expected objections: заполнены; user-owned скрытых решений до EXEC нет.
   - Validation evidence: SPEC-level structural/source/environment checks выполнены; runtime evidence честно оставлено EXEC.
@@ -602,7 +620,7 @@ Harness обязан сам проверить prerequisite versions/hashes и �
   - Comments/docs/changelog: после EXEC обязательны README/docs/knowledge log; до EXEC меняется только SPEC.
   - Hidden contract change: изменение порядка Wasm→managed profiles вынесено в это approval; E05 admission не меняется.
   - Manual-review challenge: наиболее вероятен общий defect shared lowering/oracle; его граница раскрыта в TCB и частично различается independent owner model, reference evaluator, two targets и mutations.
-- No-findings justification: финальный reviewer повторно проверил точные исправленные строки ABI limits/status и весь нормативный snapshot; новых findings не обнаружено.
+- No-findings justification: финальный reviewer повторно проверил phase-1 header-only bounds/multiplicity/overlap/central-local rules, phase-2 streaming content/CRC/digest rules, exact final JAR metadata и A9 rejection matrix; новых HIGH/MEDIUM findings не обнаружено.
 
 | Severity | Area | Finding | Required action | Status |
 | --- | --- | --- | --- | --- |
@@ -616,10 +634,15 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 | MEDIUM | JIT evidence | Runtime/JIT claim допускал ложный pass по decoy/inlined method. | Связать два exact symbols с process receipt, отключить inlining и добавить self-tests. | fixed |
 | MEDIUM | report | Row/profile status, reason codes и semantic digest projection были неоднозначны. | Задать closed statuses/reasons, aggregation и domain-separated semantic projection. | fixed |
 | MEDIUM | transport | I64 representation, error priority, result shapes и resource counting могли разойтись между targets. | Использовать decimal string, closed refusal forms, scalar-first UTF-8 rules, root depth/node count и exact boundary vectors. | fixed |
+| MEDIUM | JVM build | Direct Dafny JAR оказался timestamp-dependent, а полный javac lint выдаёт generated cast warnings. | Разделить lint policies и закрепить deterministic pinned-JDK STORED repack с exact entry metadata/order. | fixed, re-reviewed |
+| MEDIUM | JVM identity | Physical staging path мог загрязнить digest; manifest/order/timestamp metadata были закрыты не полностью. | Сделать argfile relative-only из fixed cwd, исключить diagnostic paths и задать exact manifest/ZIP fields. | fixed, re-reviewed |
+| MEDIUM | JVM oracle | Metadata mutation могла пройти A9 только потому, что SHA изменился; raw duplicate мог исчезнуть при extraction/dictionary. | Разделить equivalence/identity/rejection группы, пересчитывать outer digests в negative test и валидировать raw ordered multiset до map. | fixed, re-reviewed |
+| MEDIUM | JVM parser | Raw inventory требовал `contentDigest` до чтения entry bytes и не закрывал corrupt header/size boundary. | Разделить bounded header и streaming-content phases; запретить extraction/map до обеих проверок. | fixed, re-reviewed |
+| — | targeted re-review | Нет находок в снимке `ec491346…08ef3`. | Дополнительные изменения JVM-контракта не требуются. | PASS |
 
 - Fixed before continuing: все находки таблицы включены в нормативные §§6–12; публичное ошибочное admission-допущение исправлено отдельным Posting Board reply.
 - Checks rerun: exact snapshot hash; targeted reviewer pass; A1–A14 uniqueness/reference scan; headings/required sections scan; после audit выполняются whitespace/link/diff checks.
-- Needs human: только принять или отклонить смену порядка и E06 validation experiment фразой из Approval. Это не утверждает три pending E05 specs.
+- Needs human: E06 подтверждена; для начала её EXEC отдельно остаются нужны approvals E05 owner-composite и fold specs. Two-stage admission amendment не является зависимостью E06.
 - Residual risks / follow-ups: фактического read-only sandbox reviewer нет; WSL runtimes ещё не provisioned; Posting Board может дать новый контрпример; Dafny/target/JIT correctness остаётся TCB; один fixed workload не доказывает общую переносимость.
 
 ### Post-EXEC Review
@@ -627,9 +650,9 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»**.
+Подтверждено владельцем 2026-09-07 точной фразой **«Спеку подтверждаю»**.
 
-Подтверждение распространяется на смену порядка portability experiments, E06 v0.1 validation EXEC и локальные checkpoint commits после завершения owner-composite/fold dependencies. Оно не разрешает E05 EXEC без отдельных approvals, изменение E05 admission schema, production load/release admission, Wasm/WASI/NativeAOT implementation, push, merge, release или публикацию GitHub.
+Подтверждение распространяется на смену порядка portability experiments и E06 v0.1 validation EXEC после завершения owner-composite/fold dependencies. Оно не разрешает E05 EXEC без отдельных approvals, изменение E05 admission schema, production load/release admission, Wasm/WASI/NativeAOT implementation, merge или release. Отдельной фразой в том же сообщении владелец разрешил периодический push сделанных checkpoint commits.
 
 ## 20. Журнал действий агента
 
@@ -641,3 +664,7 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 | SPEC | Запросить внешний counterexample к смене порядка backend | 0.88 | Ответ участника Posting Board | Учесть рациональный ответ при поступлении; review не блокировать ожиданием | Нет | Публичный reply `15979f1f-cdd1-4b92-8bc4-0378238cd281` опубликован и прочитан обратно | Вопрос сформулирован вокруг falsifiable stop criterion, а не поддержки идеи | Эта SPEC, Posting Board thread |
 | SPEC | Исправить публичную target-admission формулировку после review | 0.99 | Нет | Сохранить оба provenance ID | Нет | Поправка `17a295a2-9b34-4e12-80a0-b38fc681d1a9` опубликована и прочитана обратно | Не скрывать опровергнутое допущение: E06A validation-only, portable admission — отдельная SPEC | Эта SPEC, Posting Board thread |
 | SPEC | Завершить quality gate и adversarial re-review | 0.98 | Только решение владельца | Запросить exact approval | Да | Отдельный reviewer дал PASS снимку `e1786239…62faf`; effective sandbox writable | Все HIGH/MEDIUM исправлены; 20/20 linter PASS, rubric 30/30, все применимые роли PASS; ограничение независимости раскрыто | Эта SPEC §19 |
+| SPEC | Проверить Java backend/package до approval | 0.97 | E06 workload и Linux runtime ещё не реализованы | Закрепить build contract и повторить targeted review | Нет | Posting Board новых ответов после correction не содержит; local feasibility выполнялась только во временных каталогах | Java translation/javac проходят; raw JAR timestamp-dependent, entry contents stable, pinned `jar` repack byte-equal; это не выдано за E06 proof/run | Эта SPEC §§2,6.2.2,11,12 |
+| SPEC | Опубликовать Java packaging evidence и закрыть targeted findings | 0.98 | Внешний counterexample пока не получен | Повторить exact-snapshot review | Нет | Reply `2873a93d-4ca2-4046-b7f6-81290c502997` опубликован/read back; reviewer нашёл physical-path digest и incomplete validator gaps | Публичный вопрос просит falsifying case; spec теперь отделяет semantic inventory от diagnostic paths и закрывает JAR bytes/metadata mutations | Эта SPEC §§2,6.2.2,11,19 |
+| SPEC | Учесть counterexample Помощника архитектора | 0.99 | Реализация normalizer ещё не существует | Добавить raw/final provenance и rejection fixtures | Нет | Posting Board reply `0cb1efdf-babc-44df-beab-83fe60020411` (#9524) прочитан; duplicate-entry behavior отдельно воспроизведён автором ответа | Ordered multiset проверяется до extraction/map; raw/final inventories и normalization recipe получают domain-separated digests | Эта SPEC §§2,6.2.2,6.2.4,11,12,19 |
+| SPEC | Закрыть targeted JVM review и получить решение владельца | 0.99 | E05 owner/fold approvals и EXEC evidence | Зафиксировать checkpoint и продолжить с первой зависимостью | Да | Reviewer дал PASS снимку `ec491346…08ef3`; владелец подтвердил SPEC точной фразой и отдельно разрешил периодические push | Two-phase parser и A9 закрывают найденные обходы; approval не снимает dependency gate | Эта SPEC §§6.2.2,12,19, Approval |
