@@ -13,7 +13,7 @@
 
 ## Validation
 
-Подробные отчёты находятся в gitignored `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`. Tracked `source-manifest.json` связывает 21 файл со snapshot digest `ac43046d…ab6bf0ae`; manifest SHA-256 `14d6624a…333700c8`. `validation-summary.json` SHA-256 `37fe0029…c51a28fb`.
+Подробные отчёты находятся в gitignored `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`. Tracked `source-manifest.json` связывает 22 файла со snapshot digest `653f2926…8297a437`; manifest SHA-256 `aa3976d0…bff5b4f7`. `validation-summary.json` SHA-256 `1a12c7c3…9c01ca58`.
 
 | Проверка | Результат |
 | --- | --- |
@@ -29,6 +29,7 @@
 | Reserve v0 regression | PASS, 29/29 cases, 10 904 assertions |
 | TaskGraph E04 regression | PASS, 141 checks |
 | Final procedural read-only review | PASS, 0 remaining BLOCKER/HIGH/MEDIUM |
+| Independent Windows reproduction of `c99fd1f` | PASS, 276 Modules checks and full Dafny harness; public read-back #9674 |
 
 ## Диагностические наблюдения
 

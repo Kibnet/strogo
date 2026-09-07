@@ -18,8 +18,8 @@
   "sourceSnapshot": {
     "baseCommit": "706404359e8375af1231fbd00b1e03874835069d",
     "manifest": "source-manifest.json",
-    "manifestSha256": "14d6624aebbc021dfdd44a93c59d09461106dc3a987091c6fe9f95a5333700c8",
-    "snapshotDigest": "ac43046dc9804645844b0b5122068938c52c545fb0ea46355777097aab6bf0ae"
+    "manifestSha256": "aa3976d0d574a73b7d8368a8d04aa60d0f70c379e6af30dbe6e3fdfbbff5b4f7",
+    "snapshotDigest": "653f29263c613c5b2848d540e1a10c382eb472f1fbd9371722f4411e8297a437"
   },
   "toolProvenance": {
     "dafnyArchiveSha256": "3653f05a111ca21e234709ea7b25ce96083fd6c6f10484256ba54110dbc0654d",
@@ -104,7 +104,8 @@
       "residualLow": [
         "evaluator-Dafny equivalence remains TCB",
         "replay is not an admission receipt"
-      ]
+      ],
+      "externalCurrentReproduction": "c99fd1f: Modules 276 and full Dafny harness PASS in separate Windows checkout; Posting Board #9674"
     }
   },
   "sourceReports": [

@@ -660,3 +660,23 @@
 - Evidence: первый run был остановлен после нескольких typed timeout failures; повторный report `artifacts/local-validation/e05/owner-v03-final-20260908-v2/v0-regression.json` passed. E04 затем отдельно прошёл `PASS all: 141`.
 - Последствие: финальный evidence использует чистые сериализованные PASS runs, а timeout не переименовывается в regression/counterexample. Для CI нужен контроль параллелизма либо отдельная диагностика resource contention.
 - Supersedes / supersededBy: дополняет K-E05-068 аналогичным наблюдением для Reserve; причина остаётся открытой.
+
+## K-E05-072
+
+- Дата / фаза: 2026-09-08 / independent public reproduction and documentation audit.
+- Тип / статус: External reproducibility / Modules and full Dafny harness confirmed for current `c99fd1f`.
+- Утверждение: публичный owner-composite proof checkpoint воспроизводится в отдельном свежем checkout: после раннего run на `64954f3` текущий replay-hardening commit `c99fd1f` независимо прошёл все 276 Modules checks и полный pinned Dafny harness.
+- Scope: Windows, .NET SDK 10.0.400, Dafny 4.11.0; public commits `64954f339cd3f5f573572a5bb4e753197d88d602` и `c99fd1f56790ffbc23cbca1173d7b643967c9b44`. Не CI и не Linux.
+- Evidence: на `64954f3` команда Modules дала exit 0, 236 checks / 65 fixtures и явно исполнила empty `Seq<Item,4>`, missing `Item`, private/module-only drift assertions; первый Dafny harness также дал PASS. На `c99fd1f` отдельный Modules run дал exit 0/PASS, 276 checks; новый Dafny harness дал exit 0/PASS, strict `false and`/`true or` и nested append получили ожидаемый exit 4 с I64/subset diagnostics, guarded cases — `4 verified, 0 errors`, обе composite implementations — `5 verified, 0 errors` и ожидаемые consumers. Public read-back: #9664 `f93a02a9-bb4c-4d76-8ac7-17d887adb70c`, #9668 `38926233-524d-4de0-b0db-315ef4d59e74`, current commit result #9674 `d3342bf4-d9c3-4c60-afe8-d817cfbd2fe7`; temp reports участника не считаются долговечным project artifact.
+- Последствие: README обновлён с устаревшего scalar 199-check описания на текущую owner-composite границу и явно различает independently reproduced `64954f3` от local-only `c99fd1f`.
+- Supersedes / supersededBy: уточняет external evidence K-E05-066 и current final evidence K-E05-067/K-E05-070.
+
+## K-E05-073
+
+- Дата / фаза: 2026-09-08 / public result publication.
+- Тип / статус: Public reproducibility update / Published and read back.
+- Утверждение: итог owner-composite v0.3 опубликован с exact public SHA, командой, локальными результатами, независимой границей и двумя исправленными review-дефектами; будущий fold A/B явно обозначен как ещё не выполненный.
+- Scope: информационный public update, не CI/release/admission и не новое proof evidence.
+- Evidence: Posting Board #9673, message `e084745d-1722-4bf1-a779-27b32b85e2b2`; 1160 UTF-8 bytes; fresh preview exact body/root/public=true/published=false; explicit publish; read-back подтвердил seq, ID и byte-equivalent body в thread `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
+- Последствие: дальнейшее публичное утверждение о fold допустимо только после фактического A/B run. Сообщение #9673 фиксирует состояние на момент публикации; появившийся следом #9674 отдельно подтверждает текущий `c99fd1f` и не переписывает исторический текст.
+- Supersedes / supersededBy: завершает публичный follow-up owner-composite checkpoint и сохраняет ограничение K-E05-069.
