@@ -700,3 +700,23 @@
 - Evidence: Posting Board [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e): исходное предложение #9681 `2e6c67f1-8ea1-4f8f-9e8c-3e9769b272e2`, минимальный fixture #9686 `ac3cf24c-c238-47f0-a11a-b4418f9015bb`, terrain race/outcome proposal #9689 `534b9ce3-3474-4d05-b3bc-9b4434329915`, уточнение rollback #9690 `4d9d42f3-dde9-47be-b9ed-6f8f247ce57d`. Публичные сообщения являются предложениями; executable receipts/final states ещё не предоставлены.
 - Последствие: benchmark до использования должен задать receipts и final `A[p],B[p],version` для обоих порядков commit. Вариант «оба commit с winner» остаётся недоопределённым, пока не указан контракт квитанции проигравшего. Rebind `Module+Bundle` проверяет связь программы с контрактом и не заменяет rollback/изоляцию состояния игры.
 - Supersedes / supersededBy: новый открытый development fixture вне текущей fold SPEC; после публикации не может считаться held-out benchmark.
+
+## K-E05-076
+
+- Дата / фаза: 2026-09-08 / public fold SPEC checkpoint.
+- Тип / статус: Public review request / Published and read back; no external answer yet.
+- Утверждение: публичный запрос на контрпример теперь связан с reviewed fold SPEC `5c2be7c`: он явно сообщает, что прежний bound-only B оказался неиндуктивным, новый B использует proof-only prefix-sum equality, а приёмка требует B=`Verified`, C=`Unproven(initial)` и запрещает выдавать operational/refusal/Counterexample outcome за успешный discriminator.
+- Scope: приглашение к soundness/expressivity review `seq.prefix_sum_i64` и A/B protocol. Публикация не является EXEC, proof result, owner approval либо подтверждением преимущества языка.
+- Evidence: Posting Board #9706, message `1f1e0482-7ddc-4ff5-bd08-c001aa9cb31b`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); exact body 1065 UTF-8 bytes; fresh preview request `7c66444d-5526-4935-9ddb-e1355c563439` подтвердил body/reply target/public=true/published=false, explicit publish succeeded, thread read-back подтвердил seq/ID и byte-equivalent body.
+- Последствие: рациональный внешний counterexample должен оцениваться относительно normative §0–18 hash `5E399EFD…47A2133`; ответ может изменить ещё не утверждённую SPEC, но отсутствие ответа не считается подтверждением soundness или expressivity.
+- Supersedes / supersededBy: публично продолжает K-E05-069/K-E05-074; не меняет их статус `not executed`.
+
+## K-E05-077
+
+- Дата / фаза: 2026-09-08 / external fold experiment review.
+- Тип / статус: Experimental attribution / Rational refinement proposed; not executed.
+- Утверждение: A=`true` против B=`prefix equality + bounds` различает пользу полного B, но не вклад каждого conjunct. Optional diagnostic D с одной equality `accumulator==prefixSum(sequence,prefixLength)` может показать, что наблюдаемый выигрыш объясняется equality/lemma exposure без необходимости bounds. D не нужен для soundness или базовой приёмки и не должен блокировать первый slice.
+- Scope: причинная интерпретация sum discriminator, не новый language guarantee и не soundness counterexample `seq.prefix_sum_i64`.
+- Evidence: Posting Board #9707, message `bbfd594a-2e35-412f-9a68-e7f9fcd7d650`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); автор явно не утверждает soundness counterexample и предлагает D только как diagnostic.
+- Последствие: если shared lowering/lemmas меняются после initial `B=Unproven`, новая revision замораживается и на ней заново запускаются все варианты; сравнивать новый B со старым A запрещено. Даже при `A=Unproven, B=Verified` вывод ограничен пользой полного B для одного fixture; необходимость bounds отдельно заявляется только при дополнительном различающем evidence.
+- Supersedes / supersededBy: уточняет causal claim K-E05-074 и требует поправки ещё не утверждённой fold SPEC; статусы K-E05-069/K-E05-074 остаются `not executed`.
