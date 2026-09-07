@@ -1,54 +1,64 @@
 {
-  "schemaVersion": "strogo.owner-bundle.v0.2",
+  "schemaVersion": "strogo.owner-bundle.v0.3",
   "bundleId": "math.add.owner-weak-v1",
   "entryContracts": [
     {
       "id": "contractA",
       "functionRef": "addOne",
       "parameters": [
-        { "id": "x", "type": "I64" }
+        {
+          "id": "x",
+          "type": "I64"
+        }
       ],
       "returnType": "I64",
-      "requires": { "op": "bool.const", "type": "Bool", "value": true },
-      "ensures": {
-        "op": "eq",
+      "requires": {
+        "op": "bool.const",
         "type": "Bool",
-        "args": [
-          { "op": "result", "type": "I64" },
-          {
-            "op": "model.call",
-            "type": "I64",
-            "modelRef": "addOne.model-v1",
-            "args": [
-              { "op": "param", "type": "I64", "id": "x" }
-            ]
-          }
-        ]
+        "value": true
       },
       "effects": [],
       "witnesses": [
         {
           "id": "zero-v1",
           "arguments": [
-            { "parameterId": "x", "value": { "type": "I64", "value": "0" } }
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            }
           ]
         }
-      ]
+      ],
+      "modelRef": "addOne.model-v1"
     }
   ],
   "models": [
     {
       "id": "addOne.model-v1",
       "parameters": [
-        { "id": "x", "type": "I64" }
+        {
+          "id": "x",
+          "type": "I64"
+        }
       ],
       "returnType": "I64",
       "body": {
         "op": "i64.add",
         "type": "I64",
         "args": [
-          { "op": "param", "type": "I64", "id": "x" },
-          { "op": "i64.const", "type": "I64", "value": "1" }
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "x"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "1"
+          }
         ]
       }
     }
@@ -56,6 +66,8 @@
   "limits": {
     "maxExpressionNodes": "128",
     "maxExpressionDepth": "16",
-    "maxWitnessesPerEntry": "8"
-  }
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "4096"
+  },
+  "types": []
 }

@@ -186,7 +186,11 @@ try
 
     var ownerBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-add-one-valid.json"));
     var owner = OwnerBundleParser.Parse(ownerBytes);
-    Check(owner.SchemaVersion == "strogo.owner-bundle.v0.2", "owner bundle schemaVersion");
+    Check(owner.SchemaVersion == "strogo.owner-bundle.v0.3", "owner bundle schemaVersion");
+    var migratedOwnerBytes = OwnerBundleMigrator.MigrateV02ToV03(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-add-one-valid-v0.2.json")));
+    Check(migratedOwnerBytes.SequenceEqual(owner.CanonicalBytes), "v0.2 exact scalar owner migrates to the canonical v0.3 artifact");
+    var oldOwnerDirect = CaptureOwnerReject(() => OwnerBundleParser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-add-one-valid-v0.2.json"))));
+    Check(oldOwnerDirect.Code == "OwnerBundleMigrationRequired", "v0.2 owner requires explicit migration");
     Check(owner.EntryContracts.Length == 1 && owner.Models.Length == 1, "owner bundle entries and models parsed");
     Check(owner.BundleDigest.Length == 64, "owner bundle has canonical digest");
     Check(owner.BundleDigest == OwnerBundleCodec.BundleDigest(owner.CanonicalBytes), "owner bundle digest uses the versioned artifact domain");
@@ -199,7 +203,7 @@ try
     Check(typeof(OwnerBundle).GetConstructors().Length == 0, "validated owner bundle cannot be publicly forged");
     var ownerBinding = OwnerContractBinder.Bind(ir, owner);
     Check(ownerBinding.Entries.Length == 1 && ownerBinding.Entries[0].Function.Id == "addOne", "owner contract binds exact module entry");
-    Check(ownerBinding.Entries[0].Witnesses[0].ModelResult.I64 == 1, "owner witness is independently evaluated through the model");
+    Check(ownerBinding.Entries[0].Witnesses[0].ModelResult is ModuleI64 { Value: 1 }, "owner witness is independently evaluated through the model");
     var contractedLowering = ModulesDafnyLowerer.Lower(ir, owner);
     Check(contractedLowering.Source.Contains("requires (p000 <= 9223372036854775806)", StringComparison.Ordinal), "owner requires is emitted into Dafny");
     Check(contractedLowering.Source.Contains("ensures result == M000(p000)", StringComparison.Ordinal), "exact owner outcome is emitted into Dafny");
@@ -336,16 +340,14 @@ try
     emptyWitnessNode["entryContracts"]![0]!["witnesses"] = new JsonArray();
     var emptyWitnessArray = CaptureOwnerReject(() => OwnerBundleParser.Parse(emptyWitnessNode.ToJsonString()));
     Check(emptyWitnessArray.Code == "RequiresWitnessRequired", "owner bundle rejects an empty witness array");
-    var nonExactEnsures = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"op\": \"model.call\"", "\"op\": \"param\"", StringComparison.Ordinal))));
-    Check(nonExactEnsures.Code is "SchemaInvalid" or "ExactOutcomeRequired", "owner ensures cannot omit exact model call");
-    var reversedEnsuresNode = JsonNode.Parse(ownerText)!.AsObject();
-    var reversedEnsuresArgs = reversedEnsuresNode["entryContracts"]![0]!["ensures"]!["args"]!.AsArray();
-    var originalResult = reversedEnsuresArgs[0]!.DeepClone();
-    var originalModelCall = reversedEnsuresArgs[1]!.DeepClone();
-    reversedEnsuresArgs[0] = originalModelCall;
-    reversedEnsuresArgs[1] = originalResult;
-    var reversedEnsures = CaptureOwnerReject(() => OwnerBundleParser.Parse(reversedEnsuresNode.ToJsonString()));
-    Check(reversedEnsures.Code == "ExactOutcomeRequired", "owner exact outcome has one canonical operand order");
+    var forbiddenEnsuresNode = JsonNode.Parse(ownerText)!.AsObject();
+    forbiddenEnsuresNode["entryContracts"]![0]!["ensures"] = JsonNode.Parse("{\"op\":\"bool.const\",\"type\":\"Bool\",\"value\":true}");
+    var forbiddenEnsures = CaptureOwnerReject(() => OwnerBundleParser.Parse(forbiddenEnsuresNode.ToJsonString()));
+    Check(forbiddenEnsures.Code == "SchemaInvalid", "v0.3 owner schema has no free ensures field");
+    var unknownModelNode = JsonNode.Parse(ownerText)!.AsObject();
+    unknownModelNode["entryContracts"]![0]!["modelRef"] = "missing.model";
+    var unknownModel = CaptureOwnerReject(() => OwnerBundleParser.Parse(unknownModelNode.ToJsonString()));
+    Check(unknownModel.Code == "UnknownOwnerModel", "v0.3 exact outcome uses one explicit modelRef");
     var effectfulOwner = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(ownerText.Replace("\"effects\": []", "\"effects\": [\"network\"]", StringComparison.Ordinal))));
     Check(effectfulOwner.Code == "EffectsNotSupported", "scalar owner bundle rejects effects");
     string EffectfulOwner(bool networkFirst)
@@ -362,16 +364,16 @@ try
     Check(effectOrderOne.Code == effectOrderTwo.Code && effectOrderOne.EntityId == effectOrderTwo.EntityId && effectOrderOne.DetailsJson == effectOrderTwo.DetailsJson, "unsupported owner effects return transport-order-independent diagnostics");
     var arithmeticRequiresNode = JsonNode.Parse(ownerText)!.AsObject();
     arithmeticRequiresNode["entryContracts"]![0]!["requires"] = JsonNode.Parse("{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"i64.add\",\"type\":\"I64\",\"args\":[{\"op\":\"param\",\"type\":\"I64\",\"id\":\"x\"},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]}");
-    var arithmeticRequires = CaptureOwnerReject(() => OwnerBundleParser.Parse(arithmeticRequiresNode.ToJsonString()));
-    Check(arithmeticRequires.Code == "ArithmeticInRequiresNotSupported", "scalar owner requires fails closed outside its total predicate subset");
+    var arithmeticRequires = OwnerBundleParser.Parse(arithmeticRequiresNode.ToJsonString());
+    Check(arithmeticRequires.EntryContracts[0].Requires.Op == "eq", "v0.3 requires accepts the closed executable expression set");
     var booleanArithmeticModelNode = JsonNode.Parse(ownerText)!.AsObject();
     booleanArithmeticModelNode["entryContracts"]![0]!["returnType"] = "Bool";
-    booleanArithmeticModelNode["entryContracts"]![0]!["ensures"]!["args"]![0]!["type"] = "Bool";
-    booleanArithmeticModelNode["entryContracts"]![0]!["ensures"]!["args"]![1]!["type"] = "Bool";
+    booleanArithmeticModelNode["entryContracts"]![0]!["requires"] = JsonNode.Parse("{\"op\":\"bool.const\",\"type\":\"Bool\",\"value\":true}");
+    booleanArithmeticModelNode["entryContracts"]![0]!["witnesses"]![0]!["arguments"]![0]!["value"]!["value"] = long.MaxValue.ToString();
     booleanArithmeticModelNode["models"]![0]!["returnType"] = "Bool";
     booleanArithmeticModelNode["models"]![0]!["body"] = JsonNode.Parse("{\"op\":\"bool.or\",\"type\":\"Bool\",\"args\":[{\"op\":\"bool.const\",\"type\":\"Bool\",\"value\":true},{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"i64.add\",\"type\":\"I64\",\"args\":[{\"op\":\"param\",\"type\":\"I64\",\"id\":\"x\"},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"1\"}]},{\"op\":\"i64.const\",\"type\":\"I64\",\"value\":\"0\"}]}]}");
     var booleanArithmeticModel = CaptureOwnerReject(() => OwnerBundleParser.Parse(booleanArithmeticModelNode.ToJsonString()));
-    Check(booleanArithmeticModel.Code == "ArithmeticInBooleanContractNotSupported", "Boolean models cannot hide undefined I64 arithmetic behind backend short-circuit evaluation");
+    Check(booleanArithmeticModel.Code == "ModelUndefinedAtWitness", "strict owner bool operations cannot hide undefined I64 arithmetic");
     var undefinedModelText = ownerText.Replace("9223372036854775806", "9223372036854775807", StringComparison.Ordinal)
         .Replace("\"value\": \"0\"", "\"value\": \"9223372036854775807\"", StringComparison.Ordinal);
     var undefinedModel = CaptureOwnerReject(() => OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(undefinedModelText)));
@@ -392,6 +394,43 @@ try
     var helperMismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "call-safe.json")))), owner));
     Check(helperMismatch.Code == "UnsupportedOwnerHelpers", "scalar owner checkpoint fails closed for helper contracts");
     reports.Add(new { kind = "owner-contract", fixture = "owner-add-one-valid.json", owner.BundleDigest, contractedLowering.SourceDigest, alternativeSourceDigest = alternativeOwnerLowering.SourceDigest, wrongSourceDigest = wrongOwnerLowering.SourceDigest, witnesses = ownerBinding.Entries[0].Witnesses.Length });
+
+    var compositeOwnerBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-composite-valid.json"));
+    var compositeOwner = OwnerBundleParser.Parse(compositeOwnerBytes);
+    Check(compositeOwner.Types.Length == 1 && compositeOwner.Types[0].Id == "Summary", "owner v0.3 parses its exact composite type closure");
+    Check(compositeOwner.EntryContracts[0].Witnesses[0].Arguments[0].Value is ModuleI64 { Value: 0 }, "owner v0.3 stores witnesses in the shared immutable value algebra");
+    var compositeCandidateIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-composite-module.json"))));
+    var compositeBinding = OwnerContractBinder.Bind(compositeCandidateIr, compositeOwner);
+    var compositeModelResult = compositeBinding.Entries[0].Witnesses[0].ModelResult;
+    var compositeCandidateResult = ModulesReferenceEvaluator.Invoke(compositeCandidateIr, "makeSummary", [new ModuleI64(0)]).Value;
+    Check(compositeModelResult is ModuleRecord && OwnerContractEvaluator.StructuralEquals(compositeModelResult, compositeCandidateResult), "composite owner model and candidate agree structurally on the owner witness");
+
+    var capacityFiveOwner = OwnerBundleParser.Parse(Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(compositeOwnerBytes).Replace("\"capacity\": \"4\"", "\"capacity\": \"5\"", StringComparison.Ordinal)));
+    Check(capacityFiveOwner.BundleDigest != compositeOwner.BundleDigest, "reachable sequence capacity changes owner digest");
+    var compositeOwnerNode = JsonNode.Parse(compositeOwnerBytes)!.AsObject();
+    compositeOwnerNode["types"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"Unused\",\"fields\":[]}"));
+    var extraneousOwnerType = CaptureOwnerReject(() => OwnerBundleParser.Parse(compositeOwnerNode.ToJsonString()));
+    Check(extraneousOwnerType.Code == "OwnerTypeClosureExtraneous" && extraneousOwnerType.EntityId == "Unused", "owner bundle rejects declarations outside exact semantic closure");
+
+    var emptyClosureBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-empty-sequence-closure.json"));
+    var emptyClosureOwner = OwnerBundleParser.Parse(emptyClosureBytes);
+    Check(emptyClosureOwner.Types.Single().Id == "Item", "declared Seq<Item,4> reaches Item even when witness sequence is empty");
+    var missingClosureNode = JsonNode.Parse(emptyClosureBytes)!.AsObject();
+    missingClosureNode["types"] = new JsonArray();
+    var missingClosureType = CaptureOwnerReject(() => OwnerBundleParser.Parse(missingClosureNode.ToJsonString()));
+    Check(missingClosureType.Code == "OwnerTypeClosureMissing" && missingClosureType.EntityId == "Item", "empty witness cannot hide a missing declared element type");
+    var emptyClosureModuleText = File.ReadAllText(Path.Combine(fixtureDir, "owner-empty-sequence-module.json"));
+    var emptyClosureModule = ModulesCompiler.Compile(ModulesParser.ParseModule(emptyClosureModuleText));
+    _ = OwnerContractBinder.Bind(emptyClosureModule, emptyClosureOwner);
+    var privateTypeModuleNode = JsonNode.Parse(emptyClosureModuleText)!.AsObject();
+    privateTypeModuleNode["types"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"PrivateU\",\"fields\":[]}"));
+    var privateTypeModule = ModulesCompiler.Compile(ModulesParser.ParseModule(privateTypeModuleNode.ToJsonString()));
+    _ = OwnerContractBinder.Bind(privateTypeModule, emptyClosureOwner);
+    Check(privateTypeModule.SourceDigest != emptyClosureModule.SourceDigest, "private module type changes module/proof identity while owner digest stays fixed");
+    var mismatchedClosureModule = ModulesCompiler.Compile(ModulesParser.ParseModule(emptyClosureModuleText.Replace("\"id\": \"value\", \"type\": \"I64\"", "\"id\": \"value\", \"type\": \"Bool\"", StringComparison.Ordinal)));
+    var closureMismatch = CaptureOwnerReject(() => OwnerContractBinder.Bind(mismatchedClosureModule, emptyClosureOwner));
+    Check(closureMismatch.Code == "OwnerTypeClosureMismatch" && closureMismatch.EntityId == "Item", "binder rejects drift in an owner-reachable module type");
+    reports.Add(new { kind = "owner-composite", fixture = "owner-composite-valid.json", compositeDigest = compositeOwner.BundleDigest, emptyClosureDigest = emptyClosureOwner.BundleDigest, modelCandidateEqual = true });
 
     var first = ir.Functions[0];
     Check(first.Instructions.Length == valid.Source.Functions[0].Body.Nodes.Length, "ir instruction count");

@@ -4,91 +4,116 @@ namespace Strogo.Modules;
 
 internal static class OwnerContractSemantics
 {
-    internal static ImmutableArray<OwnerEntryContract> Validate(
+    internal static void Validate(
+        ImmutableArray<TypeDecl> types,
         ImmutableArray<OwnerEntryContract> entries,
         ImmutableArray<OwnerModel> models)
     {
+        var typeById = types.ToImmutableDictionary(type => type.Id, StringComparer.Ordinal);
         var modelById = models.ToImmutableDictionary(model => model.Id, StringComparer.Ordinal);
+        ValidateExactTypeClosure(types, entries, models, typeById);
+
         foreach (var model in models)
         {
             var parameterTypes = model.Parameters.ToImmutableDictionary(parameter => parameter.Id, parameter => parameter.Type, StringComparer.Ordinal);
-            var actual = ValidateExpression(model.Body, parameterTypes, null, modelById, allowResult: false, allowModelCall: false, $"model/{model.Id}/body");
+            var actual = ValidateExpression(model.Body, parameterTypes, typeById, $"model/{model.Id}/body");
             EnsureSameType(model.ReturnType, actual, $"model/{model.Id}/body");
-            EnsureBooleanExpressionsUseTotalScalarOperands(model.Body, $"model/{model.Id}/body");
         }
 
-        var validated = ImmutableArray.CreateBuilder<OwnerEntryContract>(entries.Length);
         var referencedModels = new HashSet<string>(StringComparer.Ordinal);
         foreach (var entry in entries)
         {
             var parameterTypes = entry.Parameters.ToImmutableDictionary(parameter => parameter.Id, parameter => parameter.Type, StringComparer.Ordinal);
-            var requiresType = ValidateExpression(entry.Requires, parameterTypes, null, modelById, allowResult: false, allowModelCall: false, $"contract/{entry.Id}/requires");
-            EnsureKind("Bool", requiresType, $"contract/{entry.Id}/requires");
-            EnsureNoExecutableArithmetic(entry.Requires, $"contract/{entry.Id}/requires");
-            var ensuresType = ValidateExpression(entry.Ensures, parameterTypes, entry.ReturnType, modelById, allowResult: true, allowModelCall: true, $"contract/{entry.Id}/ensures");
-            EnsureKind("Bool", ensuresType, $"contract/{entry.Id}/ensures");
-            var modelRef = RequireExactOutcome(entry, modelById);
-            if (!referencedModels.Add(modelRef))
-                throw ModulesExceptionFactory.Error("owner-parse", "OwnerModelReuseNotSupported", entry.Id, new { modelRef });
-            var model = modelById[modelRef];
+            EnsureKind("Bool", ValidateExpression(entry.Requires, parameterTypes, typeById, $"contract/{entry.Id}/requires"), $"contract/{entry.Id}/requires");
+            if (!modelById.TryGetValue(entry.ModelRef, out var model))
+                throw ModulesExceptionFactory.Error("owner-parse", "UnknownOwnerModel", entry.Id, new { entry.ModelRef });
+            if (!referencedModels.Add(entry.ModelRef))
+                throw ModulesExceptionFactory.Error("owner-parse", "OwnerModelReuseNotSupported", entry.Id, new { entry.ModelRef });
             EnsureSignature(entry.Parameters, entry.ReturnType, model.Parameters, model.ReturnType, $"contract/{entry.Id}");
 
             foreach (var witness in entry.Witnesses)
             {
                 var environment = witness.Arguments.ToImmutableDictionary(argument => argument.ParameterId, argument => argument.Value, StringComparer.Ordinal);
-                if (!OwnerContractEvaluator.EvaluateBoolean(entry.Requires, environment, $"contract/{entry.Id}/witness/{witness.Id}/requires"))
+                if (!OwnerContractEvaluator.EvaluateBoolean(entry.Requires, environment, types, $"contract/{entry.Id}/witness/{witness.Id}/requires"))
                     throw ModulesExceptionFactory.Error("owner-evaluate", "RequiresWitnessRejected", $"contract/{entry.Id}/witness/{witness.Id}");
-                _ = OwnerContractEvaluator.Evaluate(model.Body, environment, $"contract/{entry.Id}/witness/{witness.Id}/model");
+                try
+                {
+                    _ = OwnerContractEvaluator.Evaluate(model.Body, environment, types, $"contract/{entry.Id}/witness/{witness.Id}/model");
+                }
+                catch (ModuleException exception) when (exception.Code is "SequenceIndexOutOfRange" or "SequenceCapacityExceeded" or "ModelUndefinedAtWitness")
+                {
+                    throw ModulesExceptionFactory.Error("owner-evaluate", "ModelUndefinedAtWitness", $"contract/{entry.Id}/witness/{witness.Id}/model");
+                }
             }
-            validated.Add(entry with { ModelRef = modelRef });
         }
 
         var unusedModels = modelById.Keys.Except(referencedModels, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
         if (unusedModels.Length != 0)
             throw ModulesExceptionFactory.Error("owner-parse", "UnusedOwnerModel", unusedModels[0], new { models = unusedModels });
-        return validated.ToImmutable();
     }
 
-    private static void EnsureNoExecutableArithmetic(OwnerExpression expression, string locus)
+    private static void ValidateExactTypeClosure(
+        ImmutableArray<TypeDecl> types,
+        ImmutableArray<OwnerEntryContract> entries,
+        ImmutableArray<OwnerModel> models,
+        IReadOnlyDictionary<string, TypeDecl> typeById)
     {
-        if (expression.Op is "i64.add" or "i64.sub")
-            throw ModulesExceptionFactory.Error("owner-parse", "ArithmeticInRequiresNotSupported", locus);
-        for (var index = 0; index < expression.Args.Length; index++)
-            EnsureNoExecutableArithmetic(expression.Args[index], $"{locus}/arg/{index}");
-    }
+        var reachable = new HashSet<string>(StringComparer.Ordinal);
+        var visiting = new HashSet<string>(StringComparer.Ordinal);
 
-    private static void EnsureBooleanExpressionsUseTotalScalarOperands(OwnerExpression expression, string locus)
-    {
-        if (expression.Type.Kind == "Bool" && ContainsExecutableArithmetic(expression))
-            throw ModulesExceptionFactory.Error("owner-parse", "ArithmeticInBooleanContractNotSupported", locus);
-        for (var index = 0; index < expression.Args.Length; index++)
-            EnsureBooleanExpressionsUseTotalScalarOperands(expression.Args[index], $"{locus}/arg/{index}");
-    }
+        void Visit(TypeRef type, string locus)
+        {
+            if (type.Kind is "I64" or "Bool") return;
+            if (type.Kind == "Seq" && type.Element is not null)
+            {
+                Visit(type.Element, locus);
+                return;
+            }
+            if (type.Kind != "Record" || type.Name is null || !typeById.TryGetValue(type.Name, out var declaration))
+                throw ModulesExceptionFactory.Error("owner-parse", "OwnerTypeClosureMissing", type.Name ?? locus);
+            if (visiting.Contains(type.Name))
+                throw ModulesExceptionFactory.Error("owner-parse", "RecursiveType", type.Name);
+            if (!reachable.Add(type.Name)) return;
+            visiting.Add(type.Name);
+            foreach (var field in declaration.Fields.OrderBy(field => field.Id, StringComparer.Ordinal))
+                Visit(field.Type, $"type/{declaration.Id}/field/{field.Id}");
+            visiting.Remove(type.Name);
+        }
 
-    private static bool ContainsExecutableArithmetic(OwnerExpression expression)
-        => expression.Op is "i64.add" or "i64.sub" || expression.Args.Any(ContainsExecutableArithmetic);
+        void VisitExpression(OwnerExpression expression, string locus)
+        {
+            Visit(expression.Type, locus);
+            if (expression.ElementType is not null) Visit(expression.ElementType, locus);
+            if (expression.RecordType is not null) Visit(new TypeRef("Record", Name: expression.RecordType), locus);
+            for (var index = 0; index < expression.Args.Length; index++)
+                VisitExpression(expression.Args[index], $"{locus}/arg/{index}");
+        }
 
-    private static string RequireExactOutcome(OwnerEntryContract entry, IReadOnlyDictionary<string, OwnerModel> models)
-    {
-        var ensures = entry.Ensures;
-        if (ensures.Op != "eq" || ensures.Args.Length != 2 || ensures.Args[0].Op != "result" || ensures.Args[1].Op != "model.call")
-            throw ModulesExceptionFactory.Error("owner-parse", "ExactOutcomeRequired", entry.Id);
-        var call = ensures.Args[1];
-        if (call.ReferenceId is null || !models.ContainsKey(call.ReferenceId))
-            throw ModulesExceptionFactory.Error("owner-parse", "UnknownOwnerModel", entry.Id, new { modelRef = call.ReferenceId });
-        if (call.Args.Length != entry.Parameters.Length || call.Args.Where((argument, index) =>
-                argument.Op != "param" || argument.ReferenceId != entry.Parameters[index].Id || argument.Type.Kind != entry.Parameters[index].Type.Kind).Any())
-            throw ModulesExceptionFactory.Error("owner-parse", "ExactOutcomeArgumentsMismatch", entry.Id);
-        return call.ReferenceId;
+        foreach (var entry in entries.OrderBy(entry => entry.Id, StringComparer.Ordinal))
+        {
+            foreach (var parameter in entry.Parameters) Visit(parameter.Type, $"contract/{entry.Id}/parameter/{parameter.Id}");
+            Visit(entry.ReturnType, $"contract/{entry.Id}/returnType");
+            VisitExpression(entry.Requires, $"contract/{entry.Id}/requires");
+            foreach (var witness in entry.Witnesses.OrderBy(witness => witness.Id, StringComparer.Ordinal))
+                foreach (var argument in witness.Arguments.OrderBy(argument => argument.ParameterId, StringComparer.Ordinal))
+                    Visit(entry.Parameters.Single(parameter => parameter.Id == argument.ParameterId).Type, $"contract/{entry.Id}/witness/{witness.Id}/{argument.ParameterId}");
+        }
+        foreach (var model in models.OrderBy(model => model.Id, StringComparer.Ordinal))
+        {
+            foreach (var parameter in model.Parameters) Visit(parameter.Type, $"model/{model.Id}/parameter/{parameter.Id}");
+            Visit(model.ReturnType, $"model/{model.Id}/returnType");
+            VisitExpression(model.Body, $"model/{model.Id}/body");
+        }
+
+        var extraneous = types.Select(type => type.Id).Except(reachable, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+        if (extraneous.Length != 0)
+            throw ModulesExceptionFactory.Error("owner-parse", "OwnerTypeClosureExtraneous", extraneous[0], new { types = extraneous });
     }
 
     private static TypeRef ValidateExpression(
         OwnerExpression expression,
         IReadOnlyDictionary<string, TypeRef> parameters,
-        TypeRef? resultType,
-        IReadOnlyDictionary<string, OwnerModel> models,
-        bool allowResult,
-        bool allowModelCall,
+        IReadOnlyDictionary<string, TypeDecl> types,
         string locus)
     {
         TypeRef actual;
@@ -98,59 +123,89 @@ internal static class OwnerContractSemantics
                 if (expression.ReferenceId is null || !parameters.TryGetValue(expression.ReferenceId, out actual!))
                     throw ModulesExceptionFactory.Error("owner-parse", "UnknownContractParameter", locus, new { parameterId = expression.ReferenceId });
                 break;
-            case "result":
-                if (!allowResult || resultType is null)
-                    throw ModulesExceptionFactory.Error("owner-parse", "ResultOutsideEnsures", locus);
-                actual = resultType;
-                break;
             case "i64.const": actual = new TypeRef("I64"); break;
             case "bool.const": actual = new TypeRef("Bool"); break;
             case "i64.add" or "i64.sub":
                 RequireArity(expression, 2, locus);
-                RequireArguments(expression, parameters, resultType, models, allowResult, allowModelCall, locus, "I64", "I64");
+                RequireArguments(expression, parameters, types, locus, new TypeRef("I64"), new TypeRef("I64"));
                 actual = new TypeRef("I64");
                 break;
             case "i64.le":
                 RequireArity(expression, 2, locus);
-                RequireArguments(expression, parameters, resultType, models, allowResult, allowModelCall, locus, "I64", "I64");
+                RequireArguments(expression, parameters, types, locus, new TypeRef("I64"), new TypeRef("I64"));
                 actual = new TypeRef("Bool");
                 break;
             case "eq":
                 RequireArity(expression, 2, locus);
-                var left = ValidateExpression(expression.Args[0], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/0");
-                var right = ValidateExpression(expression.Args[1], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/1");
+                var left = ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0");
+                var right = ValidateExpression(expression.Args[1], parameters, types, $"{locus}/arg/1");
                 EnsureSameType(left, right, locus);
                 actual = new TypeRef("Bool");
                 break;
             case "bool.not":
                 RequireArity(expression, 1, locus);
-                RequireArguments(expression, parameters, resultType, models, allowResult, allowModelCall, locus, "Bool");
+                RequireArguments(expression, parameters, types, locus, new TypeRef("Bool"));
                 actual = new TypeRef("Bool");
                 break;
             case "bool.and" or "bool.or":
                 RequireArity(expression, 2, locus);
-                RequireArguments(expression, parameters, resultType, models, allowResult, allowModelCall, locus, "Bool", "Bool");
+                RequireArguments(expression, parameters, types, locus, new TypeRef("Bool"), new TypeRef("Bool"));
                 actual = new TypeRef("Bool");
                 break;
             case "if":
                 RequireArity(expression, 3, locus);
-                var condition = ValidateExpression(expression.Args[0], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/0");
-                EnsureKind("Bool", condition, $"{locus}/arg/0");
-                var thenType = ValidateExpression(expression.Args[1], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/1");
-                var elseType = ValidateExpression(expression.Args[2], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/2");
+                EnsureKind("Bool", ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0"), $"{locus}/arg/0");
+                var thenType = ValidateExpression(expression.Args[1], parameters, types, $"{locus}/arg/1");
+                var elseType = ValidateExpression(expression.Args[2], parameters, types, $"{locus}/arg/2");
                 EnsureSameType(thenType, elseType, locus);
                 actual = thenType;
                 break;
-            case "model.call":
-                if (!allowModelCall || expression.ReferenceId is null || !models.TryGetValue(expression.ReferenceId, out var model))
-                    throw ModulesExceptionFactory.Error("owner-parse", "UnknownOrDisallowedModelCall", locus, new { modelRef = expression.ReferenceId });
-                RequireArity(expression, model.Parameters.Length, locus);
-                for (var index = 0; index < expression.Args.Length; index++)
+            case "record.make":
+                if (expression.RecordType is null || !types.TryGetValue(expression.RecordType, out var declaration))
+                    throw ModulesExceptionFactory.Error("owner-parse", "OwnerTypeClosureMissing", expression.RecordType ?? locus);
+                var expectedIds = declaration.Fields.Select(field => field.Id).Order(StringComparer.Ordinal).ToArray();
+                var actualIds = expression.FieldIds.Order(StringComparer.Ordinal).ToArray();
+                if (expression.Args.Length != expression.FieldIds.Length || !actualIds.SequenceEqual(expectedIds, StringComparer.Ordinal))
+                    throw ModulesExceptionFactory.Error("owner-parse", "RecordFieldMismatch", locus, new { expected = expectedIds, actual = actualIds });
+                foreach (var pair in expression.FieldIds.Select((fieldId, index) => (fieldId, index)).OrderBy(pair => pair.fieldId, StringComparer.Ordinal))
                 {
-                    var argumentType = ValidateExpression(expression.Args[index], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/{index}");
-                    EnsureSameType(model.Parameters[index].Type, argumentType, $"{locus}/arg/{index}");
+                    var argumentType = ValidateExpression(expression.Args[pair.index], parameters, types, $"{locus}/arg/{pair.index}");
+                    EnsureSameType(declaration.Fields.Single(field => field.Id == pair.fieldId).Type, argumentType, $"{locus}/arg/{pair.index}");
                 }
-                actual = model.ReturnType;
+                actual = new TypeRef("Record", Name: expression.RecordType);
+                break;
+            case "record.get":
+                RequireArity(expression, 1, locus);
+                var recordType = ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0");
+                if (recordType.Kind != "Record" || recordType.Name is null || !types.TryGetValue(recordType.Name, out var recordDecl))
+                    throw ModulesExceptionFactory.Error("owner-parse", "ContractTypeMismatch", locus);
+                var field = recordDecl.Fields.SingleOrDefault(field => field.Id == expression.ReferenceId);
+                if (field is null)
+                    throw ModulesExceptionFactory.Error("owner-parse", "UnknownRecordField", locus, new { fieldId = expression.ReferenceId });
+                actual = field.Type;
+                break;
+            case "seq.empty":
+                RequireArity(expression, 0, locus);
+                if (expression.ElementType is null || expression.Capacity is null)
+                    throw ModulesExceptionFactory.Error("owner-parse", "SchemaInvalid", locus);
+                actual = new TypeRef("Seq", Element: expression.ElementType, Capacity: expression.Capacity);
+                break;
+            case "seq.length":
+                RequireArity(expression, 1, locus);
+                EnsureSequence(ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0"), $"{locus}/arg/0");
+                actual = new TypeRef("I64");
+                break;
+            case "seq.get":
+                RequireArity(expression, 2, locus);
+                var sequenceType = EnsureSequence(ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0"), $"{locus}/arg/0");
+                EnsureKind("I64", ValidateExpression(expression.Args[1], parameters, types, $"{locus}/arg/1"), $"{locus}/arg/1");
+                actual = sequenceType.Element!;
+                break;
+            case "seq.append":
+                RequireArity(expression, 2, locus);
+                var appendType = EnsureSequence(ValidateExpression(expression.Args[0], parameters, types, $"{locus}/arg/0"), $"{locus}/arg/0");
+                EnsureSameType(appendType.Element!, ValidateExpression(expression.Args[1], parameters, types, $"{locus}/arg/1"), $"{locus}/arg/1");
+                actual = appendType;
                 break;
             default:
                 throw ModulesExceptionFactory.Error("owner-parse", "UnsupportedContractOpcode", locus, new { expression.Op });
@@ -159,21 +214,15 @@ internal static class OwnerContractSemantics
         return actual;
     }
 
-    private static void RequireArguments(
-        OwnerExpression expression,
-        IReadOnlyDictionary<string, TypeRef> parameters,
-        TypeRef? resultType,
-        IReadOnlyDictionary<string, OwnerModel> models,
-        bool allowResult,
-        bool allowModelCall,
-        string locus,
-        params string[] expectedKinds)
+    private static TypeRef EnsureSequence(TypeRef type, string locus)
+        => type.Kind == "Seq" && type.Element is not null && type.Capacity is not null
+            ? type
+            : throw ModulesExceptionFactory.Error("owner-parse", "ContractTypeMismatch", locus, new { expected = "Seq", actual = type.ToString() });
+
+    private static void RequireArguments(OwnerExpression expression, IReadOnlyDictionary<string, TypeRef> parameters, IReadOnlyDictionary<string, TypeDecl> types, string locus, params TypeRef[] expected)
     {
-        for (var index = 0; index < expectedKinds.Length; index++)
-        {
-            var actual = ValidateExpression(expression.Args[index], parameters, resultType, models, allowResult, allowModelCall, $"{locus}/arg/{index}");
-            EnsureKind(expectedKinds[index], actual, $"{locus}/arg/{index}");
-        }
+        for (var index = 0; index < expected.Length; index++)
+            EnsureSameType(expected[index], ValidateExpression(expression.Args[index], parameters, types, $"{locus}/arg/{index}"), $"{locus}/arg/{index}");
     }
 
     private static void RequireArity(OwnerExpression expression, int expected, string locus)
@@ -189,16 +238,16 @@ internal static class OwnerContractSemantics
         TypeRef actualReturn,
         string locus)
     {
-        if (expectedParameters.Length != actualParameters.Length ||
-            expectedParameters.Where((parameter, index) => parameter.Id != actualParameters[index].Id || parameter.Type.Kind != actualParameters[index].Type.Kind).Any() ||
-            expectedReturn.Kind != actualReturn.Kind)
+        if (expectedParameters.Length != actualParameters.Length
+            || expectedParameters.Where((parameter, index) => parameter.Id != actualParameters[index].Id || !ModulesParser.TypesEquivalent(parameter.Type, actualParameters[index].Type)).Any()
+            || !ModulesParser.TypesEquivalent(expectedReturn, actualReturn))
             throw ModulesExceptionFactory.Error("owner-bind", "OwnerSignatureMismatch", locus);
     }
 
-    private static void EnsureSameType(TypeRef expected, TypeRef actual, string locus)
+    internal static void EnsureSameType(TypeRef expected, TypeRef actual, string locus)
     {
-        if (expected.Kind != actual.Kind)
-            throw ModulesExceptionFactory.Error("owner-parse", "ContractTypeMismatch", locus, new { expected = expected.Kind, actual = actual.Kind });
+        if (!ModulesParser.TypesEquivalent(expected, actual))
+            throw ModulesExceptionFactory.Error("owner-parse", "ContractTypeMismatch", locus, new { expected = expected.ToString(), actual = actual.ToString() });
     }
 
     private static void EnsureKind(string expected, TypeRef actual, string locus)
@@ -210,30 +259,40 @@ internal static class OwnerContractSemantics
 
 public static class OwnerContractEvaluator
 {
-    public static OwnerScalarValue Evaluate(OwnerExpression expression, IReadOnlyDictionary<string, OwnerScalarValue> environment, string locus = "expression")
+    public static ModuleValue Evaluate(
+        OwnerExpression expression,
+        IReadOnlyDictionary<string, ModuleValue> environment,
+        IEnumerable<TypeDecl> types,
+        string locus = "expression")
     {
+        var typeById = types.ToImmutableDictionary(type => type.Id, StringComparer.Ordinal);
         try
         {
             var result = expression.Op switch
             {
                 "param" when expression.ReferenceId is { } parameterId && environment.TryGetValue(parameterId, out var value) => value,
                 "param" => throw ModulesExceptionFactory.Error("owner-evaluate", "UnknownContractParameter", locus, new { parameterId = expression.ReferenceId }),
-                "i64.const" => OwnerScalarValue.FromI64(expression.I64Value!.Value),
-                "bool.const" => OwnerScalarValue.FromBool(expression.BoolValue!.Value),
-                "i64.add" => OwnerScalarValue.FromI64(checked(AsI64(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0") + AsI64(Evaluate(expression.Args[1], environment, $"{locus}/arg/1"), $"{locus}/arg/1"))),
-                "i64.sub" => OwnerScalarValue.FromI64(checked(AsI64(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0") - AsI64(Evaluate(expression.Args[1], environment, $"{locus}/arg/1"), $"{locus}/arg/1"))),
-                "i64.le" => OwnerScalarValue.FromBool(AsI64(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0") <= AsI64(Evaluate(expression.Args[1], environment, $"{locus}/arg/1"), $"{locus}/arg/1")),
-                "eq" => OwnerScalarValue.FromBool(Equal(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), Evaluate(expression.Args[1], environment, $"{locus}/arg/1"))),
-                "bool.not" => OwnerScalarValue.FromBool(!AsBool(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0")),
-                "bool.and" => EvaluateStrictBooleanBinary(expression, environment, locus, static (left, right) => left && right),
-                "bool.or" => EvaluateStrictBooleanBinary(expression, environment, locus, static (left, right) => left || right),
-                "if" => AsBool(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0")
-                    ? Evaluate(expression.Args[1], environment, $"{locus}/arg/1")
-                    : Evaluate(expression.Args[2], environment, $"{locus}/arg/2"),
+                "i64.const" => new ModuleI64(expression.I64Value!.Value),
+                "bool.const" => new ModuleBool(expression.BoolValue!.Value),
+                "i64.add" => new ModuleI64(checked(AsI64(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0") + AsI64(Evaluate(expression.Args[1], environment, typeById.Values, $"{locus}/arg/1"), $"{locus}/arg/1"))),
+                "i64.sub" => new ModuleI64(checked(AsI64(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0") - AsI64(Evaluate(expression.Args[1], environment, typeById.Values, $"{locus}/arg/1"), $"{locus}/arg/1"))),
+                "i64.le" => new ModuleBool(AsI64(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0") <= AsI64(Evaluate(expression.Args[1], environment, typeById.Values, $"{locus}/arg/1"), $"{locus}/arg/1")),
+                "eq" => new ModuleBool(Equal(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), Evaluate(expression.Args[1], environment, typeById.Values, $"{locus}/arg/1"))),
+                "bool.not" => new ModuleBool(!AsBool(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0")),
+                "bool.and" => EvaluateStrictBoolean(expression, environment, typeById.Values, locus, static (left, right) => left && right),
+                "bool.or" => EvaluateStrictBoolean(expression, environment, typeById.Values, locus, static (left, right) => left || right),
+                "if" => AsBool(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0")
+                    ? Evaluate(expression.Args[1], environment, typeById.Values, $"{locus}/arg/1")
+                    : Evaluate(expression.Args[2], environment, typeById.Values, $"{locus}/arg/2"),
+                "record.make" => MakeRecord(expression, environment, typeById, locus),
+                "record.get" => GetRecord(expression, environment, typeById, locus),
+                "seq.empty" => new ModuleSequence(expression.ElementType!, expression.Capacity!.Value, ImmutableArray<ModuleValue>.Empty),
+                "seq.length" => new ModuleI64(AsSequence(Evaluate(expression.Args[0], environment, typeById.Values, $"{locus}/arg/0"), $"{locus}/arg/0").Items.Length),
+                "seq.get" => GetSequence(expression, environment, typeById, locus),
+                "seq.append" => AppendSequence(expression, environment, typeById, locus),
                 _ => throw ModulesExceptionFactory.Error("owner-evaluate", "UnsupportedEvaluationOpcode", locus, new { expression.Op })
             };
-            if (result.Type != expression.Type.Kind)
-                throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = expression.Type.Kind, actual = result.Type });
+            EnsureValueType(result, expression.Type, typeById, locus);
             return result;
         }
         catch (OverflowException)
@@ -242,32 +301,92 @@ public static class OwnerContractEvaluator
         }
     }
 
-    public static bool EvaluateBoolean(OwnerExpression expression, IReadOnlyDictionary<string, OwnerScalarValue> environment, string locus = "expression")
+    public static bool EvaluateBoolean(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IEnumerable<TypeDecl> types, string locus = "expression")
+        => AsBool(Evaluate(expression, environment, types, locus), locus);
+
+    public static bool StructuralEquals(ModuleValue left, ModuleValue right) => Equal(left, right);
+
+    internal static void EnsureValueType(ModuleValue value, TypeRef expected, IReadOnlyDictionary<string, TypeDecl> types, string locus)
     {
-        var result = Evaluate(expression, environment, locus);
-        if (result.Type != "Bool") throw ModulesExceptionFactory.Error("owner-evaluate", "ExpectedBoolean", locus);
-        return result.Bool;
+        switch (expected.Kind)
+        {
+            case "I64" when value is ModuleI64:
+            case "Bool" when value is ModuleBool:
+                return;
+            case "Seq" when value is ModuleSequence sequence && expected.Element is not null && expected.Capacity is not null:
+                if (!ModulesParser.TypesEquivalent(sequence.ElementType, expected.Element) || sequence.Capacity != expected.Capacity || sequence.Items.Length > sequence.Capacity)
+                    break;
+                for (var index = 0; index < sequence.Items.Length; index++) EnsureValueType(sequence.Items[index], expected.Element, types, $"{locus}/item/{index}");
+                return;
+            case "Record" when value is ModuleRecord record && expected.Name is not null && record.RecordTypeId == expected.Name && types.TryGetValue(expected.Name, out var declaration):
+                var expectedFields = declaration.Fields.Select(field => field.Id).Order(StringComparer.Ordinal).ToArray();
+                if (!record.Fields.Keys.SequenceEqual(expectedFields, StringComparer.Ordinal)) break;
+                foreach (var field in declaration.Fields) EnsureValueType(record.Fields[field.Id], field.Type, types, $"{locus}/field/{field.Id}");
+                return;
+        }
+        throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = expected.ToString(), actual = value.GetType().Name });
     }
 
-    private static bool Equal(OwnerScalarValue left, OwnerScalarValue right)
-        => left.Type == right.Type && (left.Type == "I64" ? left.I64 == right.I64 : left.Bool == right.Bool);
+    private static ModuleValue MakeRecord(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IReadOnlyDictionary<string, TypeDecl> types, string locus)
+        => new ModuleRecord(expression.RecordType!, expression.FieldIds.Select((fieldId, index) =>
+            KeyValuePair.Create(fieldId, Evaluate(expression.Args[index], environment, types.Values, $"{locus}/arg/{index}"))));
 
-    private static OwnerScalarValue EvaluateStrictBooleanBinary(
-        OwnerExpression expression,
-        IReadOnlyDictionary<string, OwnerScalarValue> environment,
-        string locus,
-        Func<bool, bool, bool> operation)
+    private static ModuleValue GetRecord(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IReadOnlyDictionary<string, TypeDecl> types, string locus)
     {
-        var left = AsBool(Evaluate(expression.Args[0], environment, $"{locus}/arg/0"), $"{locus}/arg/0");
-        var right = AsBool(Evaluate(expression.Args[1], environment, $"{locus}/arg/1"), $"{locus}/arg/1");
-        return OwnerScalarValue.FromBool(operation(left, right));
+        var record = Evaluate(expression.Args[0], environment, types.Values, $"{locus}/arg/0") as ModuleRecord
+            ?? throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus);
+        return record.Fields.TryGetValue(expression.ReferenceId!, out var value)
+            ? value
+            : throw ModulesExceptionFactory.Error("owner-evaluate", "UnknownRecordField", locus, new { fieldId = expression.ReferenceId });
     }
 
-    private static long AsI64(OwnerScalarValue value, string locus)
-        => value.Type == "I64" ? value.I64 : throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = "I64", actual = value.Type });
+    private static ModuleValue GetSequence(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IReadOnlyDictionary<string, TypeDecl> types, string locus)
+    {
+        var sequence = AsSequence(Evaluate(expression.Args[0], environment, types.Values, $"{locus}/arg/0"), $"{locus}/arg/0");
+        var index = AsI64(Evaluate(expression.Args[1], environment, types.Values, $"{locus}/arg/1"), $"{locus}/arg/1");
+        if (index < 0 || index >= sequence.Items.Length)
+            throw ModulesExceptionFactory.Error("owner-evaluate", "SequenceIndexOutOfRange", locus, new { index, length = sequence.Items.Length });
+        return sequence.Items[(int)index];
+    }
 
-    private static bool AsBool(OwnerScalarValue value, string locus)
-        => value.Type == "Bool" ? value.Bool : throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = "Bool", actual = value.Type });
+    private static ModuleValue AppendSequence(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IReadOnlyDictionary<string, TypeDecl> types, string locus)
+    {
+        var sequence = AsSequence(Evaluate(expression.Args[0], environment, types.Values, $"{locus}/arg/0"), $"{locus}/arg/0");
+        var item = Evaluate(expression.Args[1], environment, types.Values, $"{locus}/arg/1");
+        if (sequence.Items.Length >= sequence.Capacity)
+            throw ModulesExceptionFactory.Error("owner-evaluate", "SequenceCapacityExceeded", locus, new { length = sequence.Items.Length, capacity = sequence.Capacity });
+        return sequence with { Items = sequence.Items.Add(item) };
+    }
+
+    private static ModuleBool EvaluateStrictBoolean(OwnerExpression expression, IReadOnlyDictionary<string, ModuleValue> environment, IEnumerable<TypeDecl> types, string locus, Func<bool, bool, bool> operation)
+    {
+        var left = AsBool(Evaluate(expression.Args[0], environment, types, $"{locus}/arg/0"), $"{locus}/arg/0");
+        var right = AsBool(Evaluate(expression.Args[1], environment, types, $"{locus}/arg/1"), $"{locus}/arg/1");
+        return new ModuleBool(operation(left, right));
+    }
+
+    private static bool Equal(ModuleValue left, ModuleValue right) => (left, right) switch
+    {
+        (ModuleI64 a, ModuleI64 b) => a.Value == b.Value,
+        (ModuleBool a, ModuleBool b) => a.Value == b.Value,
+        (ModuleSequence a, ModuleSequence b) => a.Capacity == b.Capacity
+            && ModulesParser.TypesEquivalent(a.ElementType, b.ElementType)
+            && a.Items.Length == b.Items.Length
+            && a.Items.Zip(b.Items).All(pair => Equal(pair.First, pair.Second)),
+        (ModuleRecord a, ModuleRecord b) => a.RecordTypeId == b.RecordTypeId
+            && a.Fields.Count == b.Fields.Count
+            && a.Fields.All(pair => b.Fields.TryGetValue(pair.Key, out var value) && Equal(pair.Value, value)),
+        _ => false
+    };
+
+    private static long AsI64(ModuleValue value, string locus)
+        => value is ModuleI64 integer ? integer.Value : throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = "I64" });
+
+    private static bool AsBool(ModuleValue value, string locus)
+        => value is ModuleBool boolean ? boolean.Value : throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = "Bool" });
+
+    private static ModuleSequence AsSequence(ModuleValue value, string locus)
+        => value as ModuleSequence ?? throw ModulesExceptionFactory.Error("owner-evaluate", "RuntimeContractTypeMismatch", locus, new { expected = "Seq" });
 }
 
 public static class OwnerContractBinder
@@ -276,12 +395,19 @@ public static class OwnerContractBinder
     {
         ArgumentNullException.ThrowIfNull(module);
         ArgumentNullException.ThrowIfNull(bundle);
-        if (module.Imports.Length != 0 || module.Types.Length != 0)
-            throw ModulesExceptionFactory.Error("owner-bind", "UnsupportedOwnerCompositeModule", details: new { imports = module.Imports.Length, types = module.Types.Length });
+        if (module.Imports.Length != 0)
+            throw ModulesExceptionFactory.Error("owner-bind", "UnsupportedOwnerImports", details: new { imports = module.Imports.Length });
         var exported = module.Exports.ToImmutableHashSet(StringComparer.Ordinal);
         var helpers = module.Functions.Where(function => !exported.Contains(function.Id)).Select(function => function.Id).Order(StringComparer.Ordinal).ToArray();
         if (helpers.Length != 0)
             throw ModulesExceptionFactory.Error("owner-bind", "UnsupportedOwnerHelpers", helpers[0], new { helpers });
+
+        var moduleTypes = module.Types.ToImmutableDictionary(type => type.Id, StringComparer.Ordinal);
+        foreach (var ownerType in bundle.Types)
+        {
+            if (!moduleTypes.TryGetValue(ownerType.Id, out var moduleType) || !TypeDeclarationEquals(ownerType, moduleType))
+                throw ModulesExceptionFactory.Error("owner-bind", "OwnerTypeClosureMismatch", ownerType.Id);
+        }
 
         var contractByFunction = bundle.EntryContracts.ToImmutableDictionary(entry => entry.FunctionRef, StringComparer.Ordinal);
         var missing = exported.Except(contractByFunction.Keys, StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
@@ -301,12 +427,20 @@ public static class OwnerContractBinder
             var witnesses = contract.Witnesses.Select(witness =>
             {
                 var environment = witness.Arguments.ToImmutableDictionary(argument => argument.ParameterId, argument => argument.Value, StringComparer.Ordinal);
-                if (!OwnerContractEvaluator.EvaluateBoolean(contract.Requires, environment, $"contract/{contract.Id}/witness/{witness.Id}/requires"))
+                if (!OwnerContractEvaluator.EvaluateBoolean(contract.Requires, environment, bundle.Types, $"contract/{contract.Id}/witness/{witness.Id}/requires"))
                     throw ModulesExceptionFactory.Error("owner-evaluate", "RequiresWitnessRejected", witness.Id);
-                return new EvaluatedOwnerWitness(witness.Id, witness.Arguments, OwnerContractEvaluator.Evaluate(model.Body, environment, $"contract/{contract.Id}/witness/{witness.Id}/model"));
+                return new EvaluatedOwnerWitness(witness.Id, witness.Arguments,
+                    OwnerContractEvaluator.Evaluate(model.Body, environment, bundle.Types, $"contract/{contract.Id}/witness/{witness.Id}/model"));
             }).ToImmutableArray();
             entries.Add(new BoundOwnerEntry(function, contract, model, witnesses));
         }
         return new OwnerContractBinding(module, bundle, entries.ToImmutable());
     }
+
+    private static bool TypeDeclarationEquals(TypeDecl left, TypeDecl right)
+        => left.Id == right.Id
+            && left.Fields.Length == right.Fields.Length
+            && left.Fields.OrderBy(field => field.Id, StringComparer.Ordinal)
+                .Zip(right.Fields.OrderBy(field => field.Id, StringComparer.Ordinal))
+                .All(pair => pair.First.Id == pair.Second.Id && ModulesParser.TypesEquivalent(pair.First.Type, pair.Second.Type));
 }

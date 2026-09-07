@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.3",
+  "bundleId": "closure.empty-sequence-v1",
+  "types": [
+    {
+      "id": "Item",
+      "fields": [
+        { "id": "value", "type": "I64" }
+      ]
+    }
+  ],
+  "entryContracts": [
+    {
+      "id": "echoItemsContract",
+      "functionRef": "echoItems",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "Item", "capacity": "4" } }
+      ],
+      "returnType": { "kind": "Seq", "elementType": "Item", "capacity": "4" },
+      "requires": { "op": "bool.const", "type": "Bool", "value": true },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty-v1",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": { "kind": "Seq", "elementType": "Item", "capacity": "4" },
+                "value": []
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "echoItems.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "echoItems.model-v1",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "Item", "capacity": "4" } }
+      ],
+      "returnType": { "kind": "Seq", "elementType": "Item", "capacity": "4" },
+      "body": { "op": "param", "type": { "kind": "Seq", "elementType": "Item", "capacity": "4" }, "id": "items" }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "32",
+    "maxExpressionDepth": "8",
+    "maxWitnessesPerEntry": "4",
+    "maxWitnessValueNodes": "16"
+  }
+}

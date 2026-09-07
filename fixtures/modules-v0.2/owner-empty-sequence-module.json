@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "closure.empty-sequence-candidate",
+  "types": [
+    {
+      "id": "Item",
+      "fields": [
+        { "id": "value", "type": "I64" }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "echoItems",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "Item", "capacity": "4" } }
+      ],
+      "returnType": { "kind": "Seq", "elementType": "Item", "capacity": "4" },
+      "contractRef": "echoItemsContract",
+      "body": { "parameters": ["items"], "nodes": [], "result": "items" }
+    }
+  ],
+  "exports": ["echoItems"]
+}

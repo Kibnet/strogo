@@ -4,17 +4,20 @@ namespace Strogo.Modules;
 
 public static class OwnerBundleVersions
 {
-    public const string SchemaVersion = "strogo.owner-bundle.v0.2";
+    public const string SchemaVersion = "strogo.owner-bundle.v0.3";
+    public const string PreviousSchemaVersion = "strogo.owner-bundle.v0.2";
 }
 
 public sealed record OwnerBundleLimits(
     int MaxExpressionNodes,
     int MaxExpressionDepth,
-    int MaxWitnessesPerEntry)
+    int MaxWitnessesPerEntry,
+    int MaxWitnessValueNodes)
 {
     public const int ExpressionNodesHardMaximum = 1024;
     public const int ExpressionDepthHardMaximum = 32;
     public const int WitnessesPerEntryHardMaximum = 32;
+    public const int WitnessValueNodesHardMaximum = 4096;
 }
 
 public sealed record OwnerExpression(
@@ -23,7 +26,11 @@ public sealed record OwnerExpression(
     ImmutableArray<OwnerExpression> Args,
     string? ReferenceId = null,
     long? I64Value = null,
-    bool? BoolValue = null);
+    bool? BoolValue = null,
+    string? RecordType = null,
+    ImmutableArray<string> FieldIds = default,
+    TypeRef? ElementType = null,
+    int? Capacity = null);
 
 public sealed record OwnerModel(
     string Id,
@@ -31,13 +38,7 @@ public sealed record OwnerModel(
     TypeRef ReturnType,
     OwnerExpression Body);
 
-public readonly record struct OwnerScalarValue(string Type, long I64, bool Bool)
-{
-    public static OwnerScalarValue FromI64(long value) => new("I64", value, false);
-    public static OwnerScalarValue FromBool(bool value) => new("Bool", 0, value);
-}
-
-public sealed record OwnerWitnessArgument(string ParameterId, OwnerScalarValue Value);
+public sealed record OwnerWitnessArgument(string ParameterId, ModuleValue Value);
 
 public sealed record OwnerWitness(
     string Id,
@@ -49,7 +50,6 @@ public sealed record OwnerEntryContract(
     ImmutableArray<FunctionParameter> Parameters,
     TypeRef ReturnType,
     OwnerExpression Requires,
-    OwnerExpression Ensures,
     ImmutableArray<string> Effects,
     ImmutableArray<OwnerWitness> Witnesses,
     string ModelRef);
@@ -61,6 +61,7 @@ public sealed class OwnerBundle
     internal OwnerBundle(
         string schemaVersion,
         string bundleId,
+        ImmutableArray<TypeDecl> types,
         ImmutableArray<OwnerEntryContract> entryContracts,
         ImmutableArray<OwnerModel> models,
         OwnerBundleLimits limits,
@@ -68,6 +69,7 @@ public sealed class OwnerBundle
     {
         SchemaVersion = schemaVersion;
         BundleId = bundleId;
+        Types = types;
         EntryContracts = entryContracts;
         Models = models;
         Limits = limits;
@@ -77,6 +79,7 @@ public sealed class OwnerBundle
 
     public string SchemaVersion { get; }
     public string BundleId { get; }
+    public ImmutableArray<TypeDecl> Types { get; }
     public ImmutableArray<OwnerEntryContract> EntryContracts { get; }
     public ImmutableArray<OwnerModel> Models { get; }
     public OwnerBundleLimits Limits { get; }
@@ -87,7 +90,7 @@ public sealed class OwnerBundle
 public sealed record EvaluatedOwnerWitness(
     string Id,
     ImmutableArray<OwnerWitnessArgument> Arguments,
-    OwnerScalarValue ModelResult);
+    ModuleValue ModelResult);
 
 public sealed record BoundOwnerEntry(
     FunctionIr Function,
