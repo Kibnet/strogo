@@ -680,3 +680,23 @@
 - Evidence: Posting Board #9673, message `e084745d-1722-4bf1-a779-27b32b85e2b2`; 1160 UTF-8 bytes; fresh preview exact body/root/public=true/published=false; explicit publish; read-back подтвердил seq, ID и byte-equivalent body в thread `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
 - Последствие: дальнейшее публичное утверждение о fold допустимо только после фактического A/B run. Сообщение #9673 фиксирует состояние на момент публикации; появившийся следом #9674 отдельно подтверждает текущий `c99fd1f` и не переписывает исторический текст.
 - Supersedes / supersededBy: завершает публичный follow-up owner-composite checkpoint и сохраняет ограничение K-E05-069.
+
+## K-E05-074
+
+- Дата / фаза: 2026-09-08 / fold post-SPEC adversarial review.
+- Тип / статус: Hypothesis discriminator / Revised proposal; reviewed, not executed, pending owner approval.
+- Утверждение: bound `0<=accumulator<=sum(sequence)` сам по себе семантически истинен, но не является достаточным локальным индуктивным invariant для checked step `accumulator+element`: из текущей верхней границы и `element>=0` не следует верхняя граница следующего accumulator. Различающий B обязан дополнительно связывать accumulator с математической суммой обработанного префикса. Для этого fold SPEC вводит proof-only `seq.prefix_sum_i64(sequence,prefixLength)` с equations для нулевого и следующего префикса; B требует equality с prefix sum и bounds.
+- Scope: `specs/2026-09-07-e05-fold-regions-and-invariants-v0.1.md`, checked-I64 sum A/B/C до настройки heuristics. Это reviewed design, не результат Dafny, не подтверждение обязательности invariant и не evidence G05.
+- Evidence: independent review snapshot `C2E9008…F09A3` нашёл неиндуктивный B и неполный negative-control outcome contract; fixes прошли exact-snapshot review. Commit `5c2be7c0d7bc90a5a278957a6a28de682a2f4620`; normative §0–18 SHA-256 `5E399EFDF2973E1A44484BAC51F1525C7E339CECC48E7BE4786A5372947A2133`; открытых BLOCKER/HIGH/MEDIUM нет.
+- Последствие: F-AC4 допускает только две различающие матрицы: A=`Verified` либо `Unproven`, B=`Verified`, C=`Unproven(initial)`. Parse/bind refusal, `Timeout`, `ToolError`, `Counterexample` или иной outcome любого control блокирует эксперимент; invariant-independent generated source сравнивается после canonical span normalization byte-for-byte.
+- Supersedes / supersededBy: уточняет и частично supersede предложенный B из K-E05-069; сохраняет статус всего эксперимента `not executed` до EXEC утверждённой fold SPEC.
+
+## K-E05-075
+
+- Дата / фаза: 2026-09-08 / public concurrency benchmark design.
+- Тип / статус: External benchmark / Proposed and refined publicly; not executed.
+- Утверждение: доказательство инварианта отдельного перехода не покрывает конкурентный commit. Минимальный write-skew fixture: при `A[p]=0`, `B[p]=0`, version `7` два агента читают один snapshot и независимо предлагают `A[p]=1` и `B[p]=1`; каждый переход допустим относительно version 7, но совместный результат нарушает boundary invariant. Для первого допустимого outcome нужен сериализованный compare-version-and-commit: победитель создаёт version 8, проигравший получает `Conflict` без state effect, отбрасывает только своё speculative state и перечитывает version 8. Откат общего состояния к snapshot 7 после принятого commit неверен, потому что стирает подтверждённое изменение победителя.
+- Scope: будущая модель effects/state/atomicity и host commit для multiplayer terrain chunks. Это не pure fold, не текущая owner-bundle semantics, не реализованная гарантия Strogo и не hidden evidence преимущества языка.
+- Evidence: Posting Board [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e): исходное предложение #9681 `2e6c67f1-8ea1-4f8f-9e8c-3e9769b272e2`, минимальный fixture #9686 `ac3cf24c-c238-47f0-a11a-b4418f9015bb`, terrain race/outcome proposal #9689 `534b9ce3-3474-4d05-b3bc-9b4434329915`, уточнение rollback #9690 `4d9d42f3-dde9-47be-b9ed-6f8f247ce57d`. Публичные сообщения являются предложениями; executable receipts/final states ещё не предоставлены.
+- Последствие: benchmark до использования должен задать receipts и final `A[p],B[p],version` для обоих порядков commit. Вариант «оба commit с winner» остаётся недоопределённым, пока не указан контракт квитанции проигравшего. Rebind `Module+Bundle` проверяет связь программы с контрактом и не заменяет rollback/изоляцию состояния игры.
+- Supersedes / supersededBy: новый открытый development fixture вне текущей fold SPEC; после публикации не может считаться held-out benchmark.
