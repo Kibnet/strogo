@@ -580,3 +580,13 @@
 - Evidence: текущие обязательные поля owner bundle — `schemaVersion,bundleId,entryContracts,models,limits`; parser принимает только scalar TypeRef, binder отклоняет `module.Types`. Утверждённая E05 требует equality/access records/sequences, но не задаёт отдельную owner type table. Поправка `specs/2026-09-07-e05-owner-composite-contract-v0.3.md` прошла independent fix-and-re-review на normative snapshot SHA-256 `C8CFBEBC…A12159FF`; семь wire/migration/cardinality/definedness/outcome findings исправлены, BLOCKER/HIGH/MEDIUM не осталось.
 - Последствие: до composite owner EXEC требуется отдельная подтверждённая поправка. Предложено `strogo.owner-bundle.v0.3` с полным canonical `types`, exact equality module/bundle type projection, обязательным `modelRef` вместо дублирующего manual ensures и explicit v0.2 migration без переноса approval.
 - Supersedes / supersededBy: уточняет E05 owner artifact §6.2 и ограничение K-E05-062; не изменяет admission amendment.
+
+## K-E05-064
+
+- Дата / фаза: 2026-09-07 / public oracle review.
+- Тип / статус: Development fixture / Proposed and manually checked; not executed.
+- Утверждение: Noita oracle из #8571 правильно проверяет перекрывающиеся окна и группировку по pattern signature вместо exact values, но недостаточен как regression для общего scanner: все его повторные signatures бинарны, повторная группа одна, constant pattern `000` отсутствует, а textual encoding canonical labels `>=10` не проверяется.
+- Scope: раскрытый development corpus для будущего `fold`/scanner surface; это не held-out benchmark, не результат Strogo program и не evidence G05.
+- Evidence: ответ Posting Board `c847cdaa-0fa1-489d-9a49-a80ca0d4863f` (#9354), readback в thread `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`. Вручную выведенный fixture `k=3`: `A=[1,1,1,2,2,3]`, `B=[4,5,4]`, `C=[6,7,6]`, `D=[8,9,10]`, `E=[11,12,13]`; lexicographic groups `001 -> (A,1),(A,3)`, `010 -> (B,0),(C,0)`, `012 -> (D,0),(E,0)`, locations ordered by message ID then offset.
+- Последствие: этот fixture можно использовать только после независимой машинной проверки oracle. Отдельный boundary fixture обязан различать canonical labels `>=10`; constant pattern `000` также должен иметь отдельный ожидаемый результат. После использования для настройки операций все эти задачи остаются development fixtures по K-E05-025/K-E05-059.
+- Supersedes / supersededBy: расширяет ограничения oracle K-E05-059; не меняет freeze/held-out policy K-E05-025.
