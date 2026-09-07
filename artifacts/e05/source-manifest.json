@@ -2,7 +2,7 @@
   "schemaVersion": "strogo.e05.source-manifest.v1",
   "baseCommit": "706404359e8375af1231fbd00b1e03874835069d",
   "digestAlgorithm": "sha256 of UTF-8 path<TAB>sha256<LF>, paths sorted ordinal",
-  "snapshotDigest": "653f29263c613c5b2848d540e1a10c382eb472f1fbd9371722f4411e8297a437",
+  "snapshotDigest": "52b9dcc43837acd8d96de24e2985d57ccf830ab4870c2f8fa95d7e1b462245f2",
   "files": [
     {
       "path": "README.md",
@@ -11,8 +11,8 @@
     },
     {
       "path": "docs/knowledge-log.md",
-      "sha256": "c4a9773bf7735ee05f82c6e78099e992e94954b6eb4206730392902404eaf51a",
-      "bytes": 91129
+      "sha256": "c5c7f2bfdc4082f1a7cb6e35fb7227d55e16e04054c4f34776dd15c1a02f85fa",
+      "bytes": 91189
     },
     {
       "path": "docs/modules-v0.2.md",

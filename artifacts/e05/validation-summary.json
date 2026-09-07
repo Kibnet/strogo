@@ -18,8 +18,8 @@
   "sourceSnapshot": {
     "baseCommit": "706404359e8375af1231fbd00b1e03874835069d",
     "manifest": "source-manifest.json",
-    "manifestSha256": "aa3976d0d574a73b7d8368a8d04aa60d0f70c379e6af30dbe6e3fdfbbff5b4f7",
-    "snapshotDigest": "653f29263c613c5b2848d540e1a10c382eb472f1fbd9371722f4411e8297a437"
+    "manifestSha256": "86766833fa6c81d3893fc289a720bcf8d8b16c9067c613554d4abc4792f06c55",
+    "snapshotDigest": "52b9dcc43837acd8d96de24e2985d57ccf830ab4870c2f8fa95d7e1b462245f2"
   },
   "toolProvenance": {
     "dafnyArchiveSha256": "3653f05a111ca21e234709ea7b25ce96083fd6c6f10484256ba54110dbc0654d",

@@ -13,7 +13,7 @@
 
 ## Validation
 
-Подробные отчёты находятся в gitignored `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`. Tracked `source-manifest.json` связывает 22 файла со snapshot digest `653f2926…8297a437`; manifest SHA-256 `aa3976d0…bff5b4f7`. `validation-summary.json` SHA-256 `1a12c7c3…9c01ca58`.
+Подробные отчёты находятся в gitignored `artifacts/local-validation/e05/owner-v03-final-20260908-v2/`. Tracked `source-manifest.json` связывает 22 файла со snapshot digest `52b9dcc4…462245f2`; manifest SHA-256 `86766833…92f06c55`. `validation-summary.json` SHA-256 `6bcf6ac3…ae74e958`.
 
 | Проверка | Результат |
 | --- | --- |

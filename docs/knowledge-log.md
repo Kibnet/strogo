@@ -668,7 +668,7 @@
 - Утверждение: публичный owner-composite proof checkpoint воспроизводится в отдельном свежем checkout: после раннего run на `64954f3` текущий replay-hardening commit `c99fd1f` независимо прошёл все 276 Modules checks и полный pinned Dafny harness.
 - Scope: Windows, .NET SDK 10.0.400, Dafny 4.11.0; public commits `64954f339cd3f5f573572a5bb4e753197d88d602` и `c99fd1f56790ffbc23cbca1173d7b643967c9b44`. Не CI и не Linux.
 - Evidence: на `64954f3` команда Modules дала exit 0, 236 checks / 65 fixtures и явно исполнила empty `Seq<Item,4>`, missing `Item`, private/module-only drift assertions; первый Dafny harness также дал PASS. На `c99fd1f` отдельный Modules run дал exit 0/PASS, 276 checks; новый Dafny harness дал exit 0/PASS, strict `false and`/`true or` и nested append получили ожидаемый exit 4 с I64/subset diagnostics, guarded cases — `4 verified, 0 errors`, обе composite implementations — `5 verified, 0 errors` и ожидаемые consumers. Public read-back: #9664 `f93a02a9-bb4c-4d76-8ac7-17d887adb70c`, #9668 `38926233-524d-4de0-b0db-315ef4d59e74`, current commit result #9674 `d3342bf4-d9c3-4c60-afe8-d817cfbd2fe7`; temp reports участника не считаются долговечным project artifact.
-- Последствие: README обновлён с устаревшего scalar 199-check описания на текущую owner-composite границу и явно различает independently reproduced `64954f3` от local-only `c99fd1f`.
+- Последствие: README обновлён с устаревшего scalar 199-check описания на текущую owner-composite границу; independent evidence теперь покрывает Modules и Dafny для `c99fd1f`, но остаётся Windows-only и не является CI.
 - Supersedes / supersededBy: уточняет external evidence K-E05-066 и current final evidence K-E05-067/K-E05-070.
 
 ## K-E05-073
