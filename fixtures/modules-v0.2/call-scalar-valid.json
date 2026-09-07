@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "call.scalar",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "addOne",
+      "parameters": [{ "id": "value", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "addOneContract",
+      "body": {
+        "parameters": ["value"],
+        "nodes": [
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "sum", "op": "i64.add", "type": "I64", "args": ["value", "one"] }
+        ],
+        "result": "sum"
+      }
+    },
+    {
+      "id": "twice",
+      "parameters": [{ "id": "value", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "twiceContract",
+      "body": {
+        "parameters": ["value"],
+        "nodes": [
+          { "id": "first", "op": "call", "type": "I64", "args": ["value"], "functionRef": "addOne" },
+          { "id": "second", "op": "call", "type": "I64", "args": ["first"], "functionRef": "addOne" }
+        ],
+        "result": "second"
+      }
+    }
+  ],
+  "exports": ["twice"]
+}

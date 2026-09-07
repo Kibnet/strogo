@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "branch.lazy-overflow",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "safeSelect",
+      "parameters": [
+        { "id": "condition", "type": "Bool" },
+        { "id": "value", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "safeSelectContract",
+      "body": {
+        "parameters": ["condition", "value"],
+        "nodes": [
+          {
+            "id": "chosen",
+            "op": "if",
+            "type": "I64",
+            "args": ["condition", "value"],
+            "thenRegion": {
+              "parameters": ["thenValue"],
+              "nodes": [
+                { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+                { "id": "overflow", "op": "i64.add", "type": "I64", "args": ["thenValue", "one"] }
+              ],
+              "result": "overflow"
+            },
+            "elseRegion": {
+              "parameters": ["elseValue"],
+              "nodes": [],
+              "result": "elseValue"
+            }
+          }
+        ],
+        "result": "chosen"
+      }
+    }
+  ],
+  "exports": ["safeSelect"]
+}

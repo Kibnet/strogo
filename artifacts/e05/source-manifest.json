@@ -1,13 +1,18 @@
 {
   "schemaVersion": "strogo.e05.source-manifest.v1",
-  "baseCommit": "c6f2c205ab25842bcb1b296beff63d70160645b8",
+  "baseCommit": "95a0a1520c9b6f61bd69b7308702f9c9561c9518",
   "digestAlgorithm": "sha256 of UTF-8 path<TAB>sha256<LF>, paths sorted ordinal",
-  "snapshotDigest": "2720b2de589d207e2b95140e92785dd0dd1d81bba75adbfea9916e856974826f",
+  "snapshotDigest": "3021df6ba01111573d178b5893d3c58bf46b3f1f31bb495db89288dd8f14e83c",
   "files": [
     {
       "path": "docs/modules-v0.2.md",
-      "sha256": "70a38f840d0a7b7372b4bbf86b2371d56b7dda7e49bf24dc86d75133a03fc381",
-      "bytes": 14324
+      "sha256": "2bc619a6d03d612b7433440439911e155313efefa002ffb3da102f63380532f3",
+      "bytes": 16722
+    },
+    {
+      "path": "fixtures/modules-v0.2/call-scalar-valid.json",
+      "sha256": "a80724733739ed0474087c90e0007018f2c1e8f45498491710add3857d4fef21",
+      "bytes": 1062
     },
     {
       "path": "fixtures/modules-v0.2/composite-invalid-call-cycle.json",
@@ -65,6 +70,11 @@
       "bytes": 1744
     },
     {
+      "path": "fixtures/modules-v0.2/if-lazy-overflow.json",
+      "sha256": "8cec85afde73e39c18b7bf769d04a57c4066590ccd3cc7ec72d50e7e380eb749",
+      "bytes": 1169
+    },
+    {
       "path": "fixtures/modules-v0.2/if-valid-shuffled.json",
       "sha256": "35602519382eab93b866a48d85b24a7adf9a79a2a1b7a2b58b8739b3ef508d4b",
       "bytes": 1469
@@ -115,6 +125,11 @@
       "bytes": 1124
     },
     {
+      "path": "fixtures/modules-v0.2/scalar-reference-valid.json",
+      "sha256": "0012c7613553796bf7d49132665f979dc311cd1195fa15b87b98d3c81f6123ee",
+      "bytes": 2500
+    },
+    {
       "path": "specs/2026-09-06-composable-verified-modules-v0.2.md",
       "sha256": "f4aa891383cdda7ca89e9ab4fb232789852aa8b62c6245ff90788348de06c5de",
       "bytes": 54625
@@ -150,6 +165,11 @@
       "bytes": 42093
     },
     {
+      "path": "src/Strogo.Modules/ReferenceEvaluator.cs",
+      "sha256": "fd7446e2816117e84ab0aa4782ebeb9cfd1a8b3a0b6f0a1ecf4526382138f823",
+      "bytes": 10297
+    },
+    {
       "path": "src/Strogo.Modules/Strogo.Modules.csproj",
       "sha256": "e94f516a37262c3338e0d85c6fe2897be131e180cddf318d1e22531cf64021fb",
       "bytes": 293
@@ -161,8 +181,8 @@
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Program.cs",
-      "sha256": "5cf6f91ddcd66962209514d37f3f340f78f0fed5a0abac895811c7135665599b",
-      "bytes": 25467
+      "sha256": "11c4706fe34be69d15865f57a2b24193c6e57b0e255711c5bc06a0ccd5515196",
+      "bytes": 33279
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj",

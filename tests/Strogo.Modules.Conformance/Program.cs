@@ -59,6 +59,19 @@ ModuleException CaptureParserReject(string source)
     }
 }
 
+ModuleException CaptureEvaluationReject(Func<ModuleEvaluationResult> evaluate)
+{
+    try
+    {
+        _ = evaluate();
+        throw new Exception("Expected evaluation rejection");
+    }
+    catch (ModuleException exception)
+    {
+        return exception;
+    }
+}
+
 void ExpectParserRejectWithLimits(string file, StrogoLimits limits, params string[] expectedCodes)
 {
     var bytes = File.ReadAllBytes(Path.Combine(fixtureDir, file));
@@ -154,6 +167,64 @@ try
     var elseRegion = branchInstruction.ElseRegion ?? throw new Exception("Missing else region");
     Check(thenRegion.Parameters.Select(parameter => parameter.Type.Kind).SequenceEqual(["I64", "I64"]), "if environment types are explicit in typed IR");
     Check(thenRegion.Instructions.Length == 2 && elseRegion.Instructions.Length == 2, "if branches are lowered as nested regions instead of eager outer instructions");
+
+    var trueBranch = ModulesReferenceEvaluator.Invoke(branchingIr, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)]);
+    var falseBranch = ModulesReferenceEvaluator.Invoke(branchingIr, "choosePlusOne", [new ModuleBool(false), new ModuleI64(2), new ModuleI64(9)]);
+    Check(trueBranch.Value is ModuleI64 { Value: 3 }, "reference evaluator selects the then branch");
+    Check(falseBranch.Value is ModuleI64 { Value: 10 }, "reference evaluator selects the else branch");
+    Check(trueBranch.Steps == 3 && falseBranch.Steps == 3, "only the selected branch contributes evaluation steps");
+    var scalarResult = ModulesReferenceEvaluator.Invoke(scalarIr, "compare", [new ModuleI64(5)]);
+    Check(scalarResult.Value is ModuleBool { Value: true } && scalarResult.Steps == 8, "all scalar opcodes have executable reference semantics");
+    var scalarReference = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "scalar-reference-valid.json"))));
+    long EvalI64(string function, params long[] values) => ((ModuleI64)ModulesReferenceEvaluator.Invoke(scalarReference, function, values.Select(value => (ModuleValue)new ModuleI64(value)).ToArray()).Value).Value;
+    bool EvalBool(string function, params ModuleValue[] values) => ((ModuleBool)ModulesReferenceEvaluator.Invoke(scalarReference, function, values).Value).Value;
+    Check(EvalI64("subtract", 7, 2) == 5, "i64.sub preserves operand order");
+    Check(EvalI64("subtract", -3, 2) == -5, "i64.sub preserves negative exact results");
+    Check(EvalBool("lessOrEqual", new ModuleI64(2), new ModuleI64(2)), "i64.le includes equality");
+    Check(!EvalBool("lessOrEqual", new ModuleI64(3), new ModuleI64(2)), "i64.le has an observable false case");
+    Check(EvalBool("equal", new ModuleI64(2), new ModuleI64(2)), "i64.eq has an observable true case");
+    Check(!EvalBool("equal", new ModuleI64(2), new ModuleI64(3)), "i64.eq has an observable false case");
+    Check(!EvalBool("negate", new ModuleBool(true)), "bool.not maps true to false");
+    Check(EvalBool("negate", new ModuleBool(false)), "bool.not maps false to true");
+    foreach (var left in new[] { false, true })
+    foreach (var right in new[] { false, true })
+    {
+        Check(EvalBool("conjunction", new ModuleBool(left), new ModuleBool(right)) == (left && right), $"bool.and truth table {left}/{right}");
+        Check(EvalBool("disjunction", new ModuleBool(left), new ModuleBool(right)) == (left || right), $"bool.or truth table {left}/{right}");
+    }
+    reports.Add(new { kind = "runtime", fixture = "scalar-reference-valid.json", semanticChecks = 16 });
+
+    var lazyModule = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "if-lazy-overflow.json"))));
+    var safeMaximum = ModulesReferenceEvaluator.Invoke(lazyModule, "safeSelect", [new ModuleBool(false), new ModuleI64(long.MaxValue)]);
+    Check(safeMaximum.Value is ModuleI64 { Value: long.MaxValue }, "unused overflowing branch is not evaluated");
+    Check(safeMaximum.Steps == 1, "empty selected branch does not consume hidden evaluation steps");
+    var overflow = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(lazyModule, "safeSelect", [new ModuleBool(true), new ModuleI64(long.MaxValue)]));
+    Check(overflow.Code == "ArithmeticOverflow" && overflow.EntityId == "function/safeSelect/body/node/chosen/then/node/overflow", "selected overflowing branch fails at its stable node locus");
+    var wrongRuntimeType = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(lazyModule, "safeSelect", [new ModuleI64(0), new ModuleI64(1)]));
+    Check(wrongRuntimeType.Code == "RuntimeTypeMismatch" && wrongRuntimeType.EntityId == "function/safeSelect/parameter/condition", "runtime input types are checked before evaluation");
+    var stepLimit = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(branchingIr, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)], new ModuleEvaluationLimits { MaxSteps = 2 }));
+    Check(stepLimit.Code == "EvaluationStepLimitExceeded", "reference evaluation fails closed at its explicit step limit");
+    var invalidEvaluationLimits = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(branchingIr, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)], new ModuleEvaluationLimits { MaxSteps = 0 }));
+    Check(invalidEvaluationLimits.Code == "InvalidEvaluationLimits", "reference evaluator rejects a zero step budget");
+    var excessiveEvaluationLimits = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(branchingIr, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)], new ModuleEvaluationLimits { MaxSteps = ModuleEvaluationLimits.StepsHardMaximum + 1 }));
+    Check(excessiveEvaluationLimits.Code == "InvalidEvaluationLimits", "reference evaluator rejects a step budget above its hard maximum");
+    var scalarCalls = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "call-scalar-valid.json"))));
+    var twice = ModulesReferenceEvaluator.Invoke(scalarCalls, "twice", [new ModuleI64(2)]);
+    Check(twice.Value is ModuleI64 { Value: 4 } && twice.Steps == 6, "local scalar calls use the same checked reference semantics and shared step budget");
+    var nestedCallLimit = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(scalarCalls, "twice", [new ModuleI64(2)], new ModuleEvaluationLimits { MaxSteps = 5 }));
+    Check(nestedCallLimit.Code == "EvaluationStepLimitExceeded" && nestedCallLimit.EntityId == "function/addOne/body/node/sum", "one step budget is enforced across the complete local call tree");
+    var internalCall = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(scalarCalls, "addOne", [new ModuleI64(2)]));
+    Check(internalCall.Code == "FunctionNotExported", "public reference invocation cannot bypass module exports");
+    var wrongArity = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(scalarCalls, "twice", Array.Empty<ModuleValue>()));
+    Check(wrongArity.Code == "ArgumentCountMismatch", "runtime arity is checked before evaluation");
+    var unsupportedComposite = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(compositeIr, "countValues", [new ModuleI64(2)]));
+    Check(unsupportedComposite.Code == "UnsupportedRuntimeOpcode", "reference evaluator fails closed outside its scalar checkpoint");
+    var importedBranchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")))
+        .Replace("\"imports\": []", "\"imports\": [{\"moduleId\":\"external.sample\",\"sourceDigest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"contractDigest\":\"1111111111111111111111111111111111111111111111111111111111111111\"}]", StringComparison.Ordinal);
+    var importedBranching = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(importedBranchingText)));
+    var unsupportedImports = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(importedBranching, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)]));
+    Check(unsupportedImports.Code == "UnsupportedRuntimeImports", "reference evaluator does not silently ignore an unresolved import closure");
+    reports.Add(new { kind = "runtime", fixture = "if-lazy-overflow.json", safe = long.MaxValue.ToString(), overflow = overflow.Code, overflow.EntityId, safeSteps = safeMaximum.Steps });
 
     Check(typeof(ModuleParseResult).GetConstructors().Length == 0, "validated parse result cannot be publicly forged");
     Check(typeof(ModuleIr).GetConstructors().Length == 0, "canonical IR cannot be publicly forged");

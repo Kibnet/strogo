@@ -77,7 +77,7 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 - локальный `call` с `functionRef`.
 - `if` с `condition`, явными environment-аргументами, `thenRegion` и `elseRegion`.
 
-У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Runtime/lowering выбранной ветви ещё не реализован и не считается проверенным этим свойством представления.
+У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Generated runtime/lowering выбранной ветви ещё не реализован; текущая executable семантика ограничена reference evaluator из раздела 8.
 
 `value` обязателен только у констант. Лишнее `value: null` у другой операции является ошибкой schema, а не допустимым default. `call` проверяет сигнатуру и общий локальный call graph, включая вызовы внутри ветвей; рекурсия и взаимная рекурсия запрещены. Разрешение вызовов через import closure относится к следующему checkpoint.
 
@@ -131,7 +131,15 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 
 `ModuleParseResult` и `ModuleIr` создаются только внутри доверенных стадий parser/compiler. Canonical bytes возвращаются defensive copy, а compiler повторно сверяет source bytes и digest перед lowering. `ModuleIr` дополнительно хранит canonical bytes и domain-separated `FunctionCountDigest`.
 
-## 8) Artefact и проверяемые границы checkpoint
+## 8) Reference evaluator
+
+`ModulesReferenceEvaluator.Invoke` исполняет провалидированный `ModuleIr` как ограниченную эталонную семантику. Текущий профиль поддерживает `I64`, `Bool`, все scalar opcodes, локальный `call` и `if`. Публичный вызов разрешён только для функции из `exports`; внутренние функции доступны только через `call`.
+
+Арифметика `I64` проверяемая: переполнение даёт `evaluation:ArithmeticOverflow` с устойчивым locus узла. У `if` вычисляется только выбранная `RegionIr`; environment передаётся её локальным параметрам. Один `MaxSteps` действует на весь вызов вместе с вложенными regions и локальными calls и ограничен hard maximum `1_000_000`. Нулевой, отрицательный или превышающий hard maximum бюджет отклоняется до исполнения.
+
+Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны records, sequences, imports, `fold`, canonical JSON ABI, owner contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
+
+## 9) Artefact и проверяемые границы checkpoint
 
 - `ModulesCodec.Canonicalize(ModuleSource)` выдает каноническое представление.
 - `ModulesCodec.SourceDigest` — `RawDigest` от canonical source.
@@ -139,23 +147,27 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 - На этом checkpoint покрыто:
   - формальная структура формата и синтаксическая строгость;
   - парсер + типовые валидации v0.2;
-  - компиляция в детерминированный IR-слой.
+  - компиляция в детерминированный IR-слой;
+  - ограниченная исполняемая reference-семантика scalar/`if`/local call.
 
-## 9) Проверяемые фикстуры
+## 10) Проверяемые фикстуры
 
 Для conformance сейчас доступны:
 - `fixtures/modules-v0.2/math-add-valid.json`;
 - `fixtures/modules-v0.2/scalar-ops-valid.json`, покрывающий lowering/type rules остальных scalar/bool operations;
+- `fixtures/modules-v0.2/scalar-reference-valid.json` с различающими outcomes для `sub`, `le`, `eq`, `not` и полными truth tables `and`/`or`;
 - `fixtures/modules-v0.2/math-invalid-op.json`;
 - `fixtures/modules-v0.2/math-invalid-return-mismatch.json`.
 - `fixtures/modules-v0.2/math-invalid-i64-plus.json`, `math-invalid-i64-leading-zero.json`, `math-invalid-i64-negative-zero.json`;
 - `fixtures/modules-v0.2/composite-valid.json` и эквивалентный `composite-valid-shuffled.json`;
 - негативные `composite-invalid-record.json`, `composite-invalid-call-cycle.json`, `composite-invalid-seq-element.json`, `composite-invalid-recursive-type.json`, `composite-invalid-type-depth.json`, `composite-invalid-numeric-capacity.json` и `math-invalid-extra-value.json`.
 - `if-valid.json` и эквивалентный `if-valid-shuffled.json`;
+- `if-lazy-overflow.json`, различающий lazy branch semantics и ошибочный eager evaluator;
+- `call-scalar-valid.json`, проверяющий локальные вызовы и общий step budget;
 - негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
-## 10) Текущая граница
+## 11) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph и deterministic typed IR, включая рекурсивное представление `if`. Он ещё не реализует исполнение/lowering условной ветви, `fold`, разрешение import closure, contracts или proof lowering. Поэтому он не доказывает lazy runtime semantics, безопасность арифметики, exact outcome и пока не может выразить обязательные ClampSeries/OrderedExactAllocation из E05 целиком.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR и lazy `if` semantics в ограниченном reference evaluator. Он ещё не реализует generated Dafny/C# lowering, records/sequences runtime, `fold`, разрешение import closure, contracts или proof/admission. Поэтому он не доказывает свойства будущей исполняемой библиотеки, exact outcome относительно owner model и пока не может выразить ClampSeries/OrderedExactAllocation из E05 целиком.

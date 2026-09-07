@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "scalar.reference",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "subtract",
+      "parameters": [{ "id": "left", "type": "I64" }, { "id": "right", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "subtractContract",
+      "body": {
+        "parameters": ["left", "right"],
+        "nodes": [{ "id": "result", "op": "i64.sub", "type": "I64", "args": ["left", "right"] }],
+        "result": "result"
+      }
+    },
+    {
+      "id": "lessOrEqual",
+      "parameters": [{ "id": "left", "type": "I64" }, { "id": "right", "type": "I64" }],
+      "returnType": "Bool",
+      "contractRef": "lessOrEqualContract",
+      "body": {
+        "parameters": ["left", "right"],
+        "nodes": [{ "id": "result", "op": "i64.le", "type": "Bool", "args": ["left", "right"] }],
+        "result": "result"
+      }
+    },
+    {
+      "id": "equal",
+      "parameters": [{ "id": "left", "type": "I64" }, { "id": "right", "type": "I64" }],
+      "returnType": "Bool",
+      "contractRef": "equalContract",
+      "body": {
+        "parameters": ["left", "right"],
+        "nodes": [{ "id": "result", "op": "i64.eq", "type": "Bool", "args": ["left", "right"] }],
+        "result": "result"
+      }
+    },
+    {
+      "id": "negate",
+      "parameters": [{ "id": "value", "type": "Bool" }],
+      "returnType": "Bool",
+      "contractRef": "negateContract",
+      "body": {
+        "parameters": ["value"],
+        "nodes": [{ "id": "result", "op": "bool.not", "type": "Bool", "args": ["value"] }],
+        "result": "result"
+      }
+    },
+    {
+      "id": "conjunction",
+      "parameters": [{ "id": "left", "type": "Bool" }, { "id": "right", "type": "Bool" }],
+      "returnType": "Bool",
+      "contractRef": "conjunctionContract",
+      "body": {
+        "parameters": ["left", "right"],
+        "nodes": [{ "id": "result", "op": "bool.and", "type": "Bool", "args": ["left", "right"] }],
+        "result": "result"
+      }
+    },
+    {
+      "id": "disjunction",
+      "parameters": [{ "id": "left", "type": "Bool" }, { "id": "right", "type": "Bool" }],
+      "returnType": "Bool",
+      "contractRef": "disjunctionContract",
+      "body": {
+        "parameters": ["left", "right"],
+        "nodes": [{ "id": "result", "op": "bool.or", "type": "Bool", "args": ["left", "right"] }],
+        "result": "result"
+      }
+    }
+  ],
+  "exports": ["subtract", "lessOrEqual", "equal", "negate", "conjunction", "disjunction"]
+}

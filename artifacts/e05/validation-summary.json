@@ -1,7 +1,7 @@
 {
   "schemaVersion": "strogo.e05.validation-summary.v1",
-  "runId": "20260907-if-locus-final",
-  "generatedAtUtc": "2026-09-07T12:10:56Z",
+  "runId": "20260907-reference-evaluator",
+  "generatedAtUtc": "2026-09-07T12:42:27Z",
   "environment": {
     "os": "Microsoft Windows NT 10.0.22631.0",
     "dotnetSdk": "10.0.400",
@@ -15,10 +15,10 @@
     "dotnet run --project tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj -c Release --no-build"
   ],
   "sourceSnapshot": {
-    "baseCommit": "c6f2c205ab25842bcb1b296beff63d70160645b8",
+    "baseCommit": "95a0a1520c9b6f61bd69b7308702f9c9561c9518",
     "manifest": "source-manifest.json",
-    "manifestSha256": "16cb3d9df8d6918ec27e7a6c802c3d25a77207ae63e81e681e17eb3bdfa54600",
-    "snapshotDigest": "2720b2de589d207e2b95140e92785dd0dd1d81bba75adbfea9916e856974826f"
+    "manifestSha256": "8303cec3c78be6f3df7c2977b7babac8ef510308c958d82785c33e8fe153863c",
+    "snapshotDigest": "3021df6ba01111573d178b5893d3c58bf46b3f1f31bb495db89288dd8f14e83c"
   },
   "results": {
     "build": {
@@ -28,8 +28,8 @@
     },
     "modulesV02": {
       "passed": true,
-      "checks": 104,
-      "reportedCases": 54
+      "checks": 137,
+      "reportedCases": 56
     },
     "reserveV0": {
       "passed": true,
@@ -46,13 +46,13 @@
   "sourceReports": [
     {
       "name": "modules-v0.2.json",
-      "sha256": "b0dac013f68e44d99d1537502ed9b8916780e2547569efeeba401a2943b52cb4",
-      "bytes": 10521
+      "sha256": "33f8d6f2a80a15b0385b48b43baf5a9c1e579d787ae6c85bbb8350c59e3eface",
+      "bytes": 10797
     },
     {
       "name": "v0-regression.json",
-      "sha256": "85606da913a3e0b762d72cd70cb2838a5b3c7fbac6ad10b7943c946c48e05bc4",
-      "bytes": 79437
+      "sha256": "87e506e5c9ed67039e195646b76adcc5ae6f0d5e2889dbcd02eb9d45cbda6b5f",
+      "bytes": 79436
     }
   ],
   "e04EvidenceBoundary": "The E04 executable prints its full case stream but has no report option; this checkpoint records the fresh exit-0 summary without inventing a report hash.",

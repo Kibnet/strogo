@@ -247,7 +247,7 @@
 - Тип / статус: Evidence defect / Resolved.
 - Утверждение: первая генерация nested-`if` manifest использовала PowerShell `Sort-Object`, зависящий от текущей culture, хотя алгоритм объявлял ordinal path sorting; individual file hashes были верны, но aggregate digest нельзя было воспроизвести по контракту.
 - Scope: `artifacts/e05/source-manifest.json` и `validation-summary.json`; исходный код языка не затронут.
-- Evidence: независимый пересчёт дал `7f37cf75…2459` вместо записанного `b0d11af5…0e41`; генерация исправлена через `[Array]::Sort(..., [StringComparer]::Ordinal)`. После следующего source-fix digest закономерно изменился на текущий `025cc320…28eb` и снова воспроизводится тем же алгоритмом.
+- Evidence: независимый пересчёт дал `7f37cf75…2459` вместо записанного `b0d11af5…0e41`; генерация исправлена через `[Array]::Sort(..., [StringComparer]::Ordinal)`. После следующего source-fix digest nested-`if` snapshot закономерно изменился на `025cc320…28eb` и воспроизводился тем же алгоритмом.
 - Последствие: aggregate evidence digest снова соответствует объявленному алгоритму; будущая генерация manifests не должна использовать culture-sensitive сортировку.
 - Supersedes / supersededBy: исправляет первоначальную evidence-часть K-E05-029.
 
@@ -290,3 +290,63 @@
 - Evidence: финальный read-only re-review сверил slash-delimited counterexample, оба report hashes/sizes, Reserve 29/29 и 10904 assertions, manifest SHA; итог `PASS`.
 - Последствие: checkpoint можно фиксировать коммитом; K-E05-028 остаётся открытой границей следующего эксперимента.
 - Supersedes / supersededBy: завершает review готовности K-E05-029.
+
+## K-E05-035
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Hypothesis / Confirmed for reference semantics.
+- Утверждение: вложенная `RegionIr` достаточна, чтобы однозначно исполнить `if` лениво: evaluator вычисляет condition и environment, затем только одну region с позиционным binding локальных параметров.
+- Scope: `ModulesReferenceEvaluator` для `I64`/`Bool`, scalar opcodes и local calls; не generated Dafny/C# runtime.
+- Evidence: `if-lazy-overflow.json`: при `condition=false` и `value=I64.MAX` возвращается MAX за один step, а при `condition=true` выбранный `i64.add` даёт `ArithmeticOverflow` на `function/safeSelect/body/node/chosen/then/node/overflow`; обычные then/else дают разные ожидаемые результаты.
+- Последствие: future lowering получает исполняемый oracle, чувствительный к eager-branch mutation; сравнение с ним не заменяет owner model/proof.
+- Supersedes / supersededBy: частично закрывает K-E05-028 только для reference evaluator.
+
+## K-E05-036
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Limitation / Open.
+- Утверждение: reference evaluator поверх уже созданного typed IR разделяет execution implementation и будущий backend, но разделяет с ним parser/compiler и поэтому не является независимым oracle всей цепочки source→IR.
+- Scope: доверенная база следующего differential lowering checkpoint.
+- Evidence: API `ModulesReferenceEvaluator.Invoke(ModuleIr, ...)`; records/sequences/fold/contracts/proof/canonical JSON ABI и generated assembly отсутствуют и fail closed как unsupported; непустой import closure отдельно отклоняется до исполнения.
+- Последствие: owner model evaluator должен работать от отдельного owner artifact, а Dafny/C# candidate сравниваться и с owner model, и с reference evaluator на boundary/mutation fixtures.
+- Supersedes / supersededBy: уточняет TCB risk из E05 SPEC и K-E05-035.
+
+## K-E05-037
+
+- Дата / фаза: 2026-09-07 / validation.
+- Тип / статус: Validation / Confirmed.
+- Утверждение: scalar reference semantics checkpoint собирается без предупреждений, проходит 137 Modules checks и не изменяет результаты Reserve v0 и TaskGraph E04.
+- Scope: source snapshot `3021df6b…e83c` поверх base commit `95a0a1520c9b6f61bd69b7308702f9c9561c9518`; не generated runtime/proof часть E05.
+- Evidence: `artifacts/e05/source-manifest.json`, `artifacts/e05/validation-summary.json`; Modules 137 checks/56 reported cases, Reserve 29/29 и 10904 assertions, E04 141 checks, build 0 warnings/errors.
+- Последствие: checkpoint готов к independent adversarial review; K-E05-036 и отсутствие proof/library остаются открытыми ограничениями.
+- Supersedes / supersededBy: новый validation baseline после K-E05-029.
+
+## K-E05-038
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Test oracle defect / Resolved.
+- Утверждение: проверка только итогового `Steps == 6` не отличает единый бюджет call tree от ошибочной реализации, которая обнуляет лимит для каждого callee.
+- Scope: reference evaluator resource boundary для local calls.
+- Evidence: independent-review finding; `twice(addOne(addOne(2)))` с `MaxSteps=5` теперь обязан дать `EvaluationStepLimitExceeded` на втором `function/addOne/body/node/sum`.
+- Последствие: conformance различает общий счётчик и общий enforcement budget; будущие resource-oracles должны включать failing boundary, а не только успешный total.
+- Supersedes / supersededBy: усиливает K-E05-035 и validation K-E05-037.
+
+## K-E05-039
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Test oracle defect / Resolved.
+- Утверждение: один составной scalar-result `true` не различал несколько правдоподобных ошибок evaluator: identity вместо `not`, всегда истинные comparison и неполные таблицы `and`/`or`.
+- Scope: reference semantics для scalar opcodes.
+- Evidence: independent-review finding; `scalar-reference-valid.json` теперь наблюдает порядок и знак `sub`, true/false outcomes `le`/`eq`/`not`, четыре входа `and` и четыре входа `or`; отдельная boundary проверка отклоняет `MaxSteps > StepsHardMaximum`.
+- Последствие: scalar oracle стал mutation-sensitive для перечисленных простых ошибок; будущие opcodes требуют таких же различающих outcomes, а не только одного интеграционного happy path.
+- Supersedes / supersededBy: усиливает K-E05-025 и K-E05-035.
+
+## K-E05-040
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Validation / Confirmed.
+- Утверждение: scalar reference semantics checkpoint после усиления resource/scalar oracles не имеет оставшихся BLOCKER/HIGH/MEDIUM findings.
+- Scope: source snapshot `3021df6b…e83c`, manifests/summary и local run `20260907-reference-evaluator`; не generated runtime/proof.
+- Evidence: финальный read-only reviewer пересчитал 38 file hashes, ordinal snapshot, manifest SHA и оба report hashes/sizes; проверил lazy `if`, checked I64, local calls/shared budget, export/import/unsupported fail-closed boundaries и documentation claims; итог `PASS`.
+- Последствие: checkpoint готов к локальному commit; следующий эксперимент должен сравнить reference outcome с generated Dafny/C# candidate и не переносить этот PASS на proof/library goals.
+- Supersedes / supersededBy: завершает review K-E05-037, K-E05-038 и K-E05-039.
