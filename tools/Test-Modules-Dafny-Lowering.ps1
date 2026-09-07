@@ -423,6 +423,8 @@ $safeSource = Join-Path $runPath 'Candidate.dfy'
 $callSource = Join-Path $runPath 'CallCandidate.dfy'
 $unsafeSource = Join-Path $runPath 'UnsafeCandidate.dfy'
 $scalarSource = Join-Path $runPath 'ScalarCandidate.dfy'
+$compositeSource = Join-Path $runPath 'CompositeCandidate.dfy'
+$unsafeCompositeSource = Join-Path $runPath 'UnsafeCompositeCandidate.dfy'
 $ownerSource = Join-Path $runPath 'OwnerCandidate.dfy'
 $weakOwnerSource = Join-Path $runPath 'WeakOwnerCandidate.dfy'
 $alternativeOwnerSource = Join-Path $runPath 'AlternativeOwnerCandidate.dfy'
@@ -437,7 +439,7 @@ Remove-Item -LiteralPath $summaryPath -ErrorAction SilentlyContinue
 
 Push-Location $repoRoot
 try {
-    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource)
+    $conformanceRun = Invoke-BoundedProcess -Executable 'dotnet' -WorkingDirectory $repoRoot -Arguments @('run', '--project', 'tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj', '-c', 'Release', '--', '--report', $moduleReport, '--dafny-out', $safeSource, '--dafny-call-out', $callSource, '--dafny-unsafe-out', $unsafeSource, '--dafny-scalar-out', $scalarSource, '--dafny-composite-out', $compositeSource, '--dafny-composite-unsafe-out', $unsafeCompositeSource, '--dafny-owner-out', $ownerSource, '--dafny-owner-weak-out', $weakOwnerSource, '--dafny-owner-alternative-out', $alternativeOwnerSource, '--dafny-owner-wrong-out', $wrongOwnerSource)
     if ($conformanceRun.ExitCode -ne 0) { throw "Modules conformance failed:`n$($conformanceRun.Output)" }
 
     $safeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('translate', 'cs', $safeSource, '--include-runtime', '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15', '--output', $safeGenerated)
@@ -454,6 +456,19 @@ try {
     $scalarVerification = $scalarRun.Output.Trim()
     $scalarExitCode = $scalarRun.ExitCode
     if ($scalarExitCode -ne 0 -or $scalarVerification -notmatch '(?m)^Dafny program verifier finished with 2 verified, 0 errors\r?$') { throw "Safe scalar verification failed:`n$scalarVerification" }
+
+    $compositeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $compositeSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $compositeVerification = $compositeRun.Output.Trim()
+    $compositeExitCode = $compositeRun.ExitCode
+    if ($compositeExitCode -ne 0 -or $compositeVerification -notmatch '(?m)^Dafny program verifier finished with 4 verified, 0 errors\r?$') { throw "Safe composite verification failed:`n$compositeVerification" }
+
+    $unsafeCompositeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $unsafeCompositeSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
+    $unsafeCompositeVerification = $unsafeCompositeRun.Output.Trim()
+    $unsafeCompositeExitCode = $unsafeCompositeRun.ExitCode
+    $unsafeCompositeRangeDiagnostics = [regex]::Matches($unsafeCompositeVerification, 'assertion might not hold').Count
+    if ($unsafeCompositeExitCode -eq 0 -or $unsafeCompositeRangeDiagnostics -lt 3) {
+        throw "Unsafe composite candidate did not fail its capacity/index obligations:`n$unsafeCompositeVerification"
+    }
 
     $unsafeRun = Invoke-BoundedProcess -Executable $dafny -WorkingDirectory $repoRoot -Arguments @('verify', $unsafeSource, '--enforce-determinism', '--cores', '2', '--verification-time-limit', '15')
     $unsafeVerification = $unsafeRun.Output.Trim()
@@ -646,6 +661,22 @@ return minimum == long.MinValue + 1L && ordinary == 42L && maximum == long.MaxVa
             verification = $scalarVerification
             generatedMethod = 'Candidate.__default.F000(bool,bool):bool'
             consumer = $scalarOutcomeLine
+        }
+        safeCompositeValues = [ordered]@{
+            status = 'Verified'
+            exitCode = $compositeExitCode
+            verification = $compositeVerification
+            source = 'CompositeCandidate.dfy'
+            sourceSha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $compositeSource).Hash.ToLowerInvariant()
+            runtimeScope = 'reference evaluator only; generated composite consumer remains pending'
+        }
+        unsafeCompositeWithoutRangeContract = [ordered]@{
+            status = 'Unproven'
+            exitCode = $unsafeCompositeExitCode
+            expectedAssertionDiagnostics = 3
+            actualAssertionDiagnostics = $unsafeCompositeRangeDiagnostics
+            verification = $unsafeCompositeVerification
+            source = 'UnsafeCompositeCandidate.dfy'
         }
         missingOwnerPrecondition = [ordered]@{
             status = 'Unproven'

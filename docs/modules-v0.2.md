@@ -1,6 +1,6 @@
 # Strogo Modules v0.2: структура, owner contracts, regions и IR
 
-Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar reference semantics, скалярный owner bundle и ограниченный lowering в Dafny/C# с exact-outcome proof.
+Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar/composite reference semantics, скалярный owner bundle и lowering scalar/composite candidate в Dafny с ограниченным exact-outcome proof.
 
 ## 1) Структура исходного модуля
 
@@ -141,9 +141,12 @@ Runtime composite values представлены `ModuleRecord` с точным
 
 Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, `fold`, canonical JSON ABI, owner composite contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
 
-## 9) Scalar lowering в Dafny/C#
+## 9) Lowering в Dafny/C#
 
-`ModulesDafnyLowerer.Lower` принимает только провалидированный `ModuleIr` и детерминированно создаёт Dafny source для `I64`, `Bool`, scalar operations, local calls и nested `if`. Functions, parameters и local values получают generated symbols `Fnnn`, `pnnn`, `vnnn`; пользовательские ID не вставляются в синтаксис и сохраняются отдельно в source map `entityId → generatedName + line`.
+`ModulesDafnyLowerer.Lower` принимает только провалидированный `ModuleIr` и детерминированно создаёт Dafny source для `I64`, `Bool`, records, bounded sequences, scalar/composite operations, local calls и nested `if`. Functions, parameters, records, fields, sequence shapes и local values получают generated symbols; пользовательские ID не вставляются в синтаксис и сохраняются отдельно в source map `entityId → generatedName + line`.
+
+Record понижается в immutable Dafny `datatype`, а каждый структурно уникальный `Seq<T,N>` — в subset type над `seq<T>` с ограничением `|s| <= N`. `seq.get` создаёт явное obligation `0 <= index < length`; `seq.append` — `length < capacity`. `seq.length` и index используют явные conversions между mathematical `int` Dafny и native `I64`, поэтому backend не получает неявного преобразования.
+Safe fixture доказывает эти obligations на последовательности, построенной внутри candidate. Функции, принимающие произвольную sequence/index без owner range contract, остаются `Unproven`: harness требует три фактических `assertion might not hold` вместо добавления скрытого предусловия.
 
 `I64` задаётся как native newtype с точным диапазоном `Int64`. Поэтому безопасный selector и безопасный local call проверяются и переводятся в C# методы с параметрами/результатами `long`. Арифметика без достаточного owner `requires` не получает скрытого предусловия: Dafny отклоняет `addOne(x)` на полном диапазоне как `Unproven`, потому что результат может выйти за границу newtype.
 
@@ -155,9 +158,9 @@ Evaluator намеренно отделён от будущей generated librar
 pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/modules-dafny-lowering
 ```
 
-Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call и остальные scalar operators закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, проверяет две структурно разные реализации одного owner contract и обязательный отказ неверной реализации/слабого domain. Он публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers. Каждый внешний процесс имеет общий deadline 180 секунд и общий лимит stdout/stderr 1 MiB. Windows Job Object связывается с root, созданным в suspended-состоянии, до его запуска; timeout/output overflow завершают всё дерево и возвращают типизированный отказ. Harness сам проверяет timeout, переполнение вывода и завершение дочернего процесса, пережившего root. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
+Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call, scalar operators и composite record/sequence candidate закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, проверяет две структурно разные реализации одного owner contract и обязательный отказ неверной реализации/слабого domain. Он публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers. Каждый внешний процесс имеет общий deadline 180 секунд и общий лимит stdout/stderr 1 MiB. Windows Job Object связывается с root, созданным в suspended-состоянии, до его запуска; timeout/output overflow завершают всё дерево и возвращают типизированный отказ. Harness сам проверяет timeout, переполнение вывода и завершение дочернего процесса, пережившего root. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
 
-Текущий lowering fail closed для records, sequences, непустых imports и helper contracts. Owner proof пока поддерживает только `I64`/`Bool`; arithmetic в `requires` и внутри Boolean model expressions отклоняется, чтобы strict contract evaluator не расходился с short-circuit definedness backend. Модель обязана быть отдельным чистым выражением. Нет proof receipt, human approval artifact, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification устанавливает соответствие скалярного кандидата конкретному parsed owner bundle и его формальной модели, но не соответствие bundle человеческой спецификации и не неизменность будущего исполняемого пакета.
+Текущий lowering fail closed для `fold`, непустых imports и composite owner/helper contracts. Owner proof пока поддерживает только `I64`/`Bool`; arithmetic в `requires` и внутри Boolean model expressions отклоняется, чтобы strict contract evaluator не расходился с short-circuit definedness backend. Composite candidate проходит structural/range proof без owner exact-outcome contract; отдельный generated composite consumer ещё не выполнен. Нет proof receipt, human approval artifact, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification composite fixture подтверждает только типы и явные sequence obligations этого candidate, а скалярная owner verification — соответствие конкретному parsed bundle/model; ни одна из них не подтверждает соответствие bundle человеческой спецификации или неизменность будущего пакета.
 
 ## 10) Скалярный owner bundle
 
@@ -207,6 +210,7 @@ Binder требует точного совпадения exports, `contractRef`
 - `fixtures/modules-v0.2/math-invalid-i64-plus.json`, `math-invalid-i64-leading-zero.json`, `math-invalid-i64-negative-zero.json`;
 - `fixtures/modules-v0.2/composite-valid.json` и эквивалентный `composite-valid-shuffled.json`;
 - `fixtures/modules-v0.2/composite-runtime-valid.json`, различающий порядок bounded sequence, record field access, capacity/index failures и рекурсивную проверку runtime input;
+- `fixtures/modules-v0.2/composite-lowering-safe.json`, дающий проверяемые record/sequence construction, length/index и local call без скрытого I64 overflow;
 - негативные `composite-invalid-record.json`, `composite-invalid-call-cycle.json`, `composite-invalid-seq-element.json`, `composite-invalid-recursive-type.json`, `composite-invalid-type-depth.json`, `composite-invalid-numeric-capacity.json` и `math-invalid-extra-value.json`.
 - `if-valid.json` и эквивалентный `if-valid-shuffled.json`;
 - `if-lazy-overflow.json`, различающий lazy branch semantics и ошибочный eager evaluator;
@@ -221,4 +225,4 @@ Binder требует точного совпадения exports, `contractRef`
 
 ## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` и record/sequence semantics в reference evaluator и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует records/sequences proof lowering, `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics в reference evaluator, composite structural/range lowering и скалярный exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует `fold`, composite owner model, разрешение import closure, helper contracts, generated composite consumer, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.

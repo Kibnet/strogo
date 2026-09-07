@@ -21,6 +21,12 @@ if (dafnyUnsafeOutOption >= 0 && dafnyUnsafeOutOption + 1 >= args.Length)
 var dafnyScalarOutOption = Array.IndexOf(args, "--dafny-scalar-out");
 if (dafnyScalarOutOption >= 0 && dafnyScalarOutOption + 1 >= args.Length)
     throw new ArgumentException("--dafny-scalar-out requires a path");
+var dafnyCompositeOutOption = Array.IndexOf(args, "--dafny-composite-out");
+if (dafnyCompositeOutOption >= 0 && dafnyCompositeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-composite-out requires a path");
+var dafnyCompositeUnsafeOutOption = Array.IndexOf(args, "--dafny-composite-unsafe-out");
+if (dafnyCompositeUnsafeOutOption >= 0 && dafnyCompositeUnsafeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-composite-unsafe-out requires a path");
 var dafnyOwnerOutOption = Array.IndexOf(args, "--dafny-owner-out");
 if (dafnyOwnerOutOption >= 0 && dafnyOwnerOutOption + 1 >= args.Length)
     throw new ArgumentException("--dafny-owner-out requires a path");
@@ -41,6 +47,8 @@ var dafnyOutPath = dafnyOutOption >= 0 ? Path.GetFullPath(args[dafnyOutOption + 
 var dafnyCallOutPath = dafnyCallOutOption >= 0 ? Path.GetFullPath(args[dafnyCallOutOption + 1], root) : null;
 var dafnyUnsafeOutPath = dafnyUnsafeOutOption >= 0 ? Path.GetFullPath(args[dafnyUnsafeOutOption + 1], root) : null;
 var dafnyScalarOutPath = dafnyScalarOutOption >= 0 ? Path.GetFullPath(args[dafnyScalarOutOption + 1], root) : null;
+var dafnyCompositeOutPath = dafnyCompositeOutOption >= 0 ? Path.GetFullPath(args[dafnyCompositeOutOption + 1], root) : null;
+var dafnyCompositeUnsafeOutPath = dafnyCompositeUnsafeOutOption >= 0 ? Path.GetFullPath(args[dafnyCompositeUnsafeOutOption + 1], root) : null;
 var dafnyOwnerOutPath = dafnyOwnerOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerOutOption + 1], root) : null;
 var dafnyOwnerWeakOutPath = dafnyOwnerWeakOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerWeakOutOption + 1], root) : null;
 var dafnyOwnerAlternativeOutPath = dafnyOwnerAlternativeOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerAlternativeOutOption + 1], root) : null;
@@ -594,18 +602,42 @@ try
     var alternateSafeSelect = Encoding.UTF8.GetString(safeSelectBytes).Replace("\"value\": \"1\"", "\"value\": \"2\"", StringComparison.Ordinal);
     var alternateLowering = ModulesDafnyLowerer.Lower(ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(alternateSafeSelect))));
     Check(alternateLowering.SourceDigest != safeLowering.SourceDigest, "semantic branch mutation changes generated Dafny candidate");
-    var unsupportedLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(compositeIr));
-    Check(unsupportedLowering.Code == "UnsupportedLoweringTypes", "Dafny lowering rejects composite type declarations before emission");
+    var compositeLoweringIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "composite-lowering-safe.json"))));
+    var compositeLowering = ModulesDafnyLowerer.Lower(compositeLoweringIr);
+    if (dafnyCompositeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyCompositeOutPath) ?? throw new InvalidOperationException("Dafny composite output path has no directory"));
+        File.WriteAllBytes(dafnyCompositeOutPath, compositeLowering.SourceBytes);
+    }
+    Check(compositeLowering.Source.Contains("datatype R000 = C000(", StringComparison.Ordinal), "Dafny lowering emits an immutable generated record declaration");
+    Check(compositeLowering.Source.Contains("type S000 = s: seq<I64> | |s| <= 2 witness []", StringComparison.Ordinal), "Dafny lowering emits a bounded sequence subset type");
+    Check(compositeLowering.Source.Contains("assert |", StringComparison.Ordinal) && compositeLowering.Source.Contains("assert 0 <=", StringComparison.Ordinal), "Dafny lowering emits sequence append and index proof obligations");
+    Check(compositeLowering.Source.Contains(" + [", StringComparison.Ordinal) && compositeLowering.Source.Contains(".R000F", StringComparison.Ordinal), "Dafny lowering emits sequence append and generated record field access");
+    Check(!compositeLowering.Source.Contains("Summary", StringComparison.Ordinal) && !compositeLowering.Source.Contains("makeSummary", StringComparison.Ordinal), "composite source identifiers are not inserted into generated Dafny syntax");
+    Check(compositeLowering.SourceMap.Any(entry => entry.EntityId == "type/Summary" && entry.GeneratedName == "R000"), "source map binds record identity to its generated type symbol");
+    Check(compositeLowering.SourceMap.Any(entry => entry.EntityId == "type/Summary/field/count"), "source map binds record field identity to its generated field symbol");
+    var repeatedCompositeLowering = ModulesDafnyLowerer.Lower(compositeLoweringIr);
+    Check(repeatedCompositeLowering.SourceDigest == compositeLowering.SourceDigest && repeatedCompositeLowering.SourceBytes.SequenceEqual(compositeLowering.SourceBytes), "composite Dafny lowering is deterministic for one typed IR");
+    var unsafeCompositeLowering = ModulesDafnyLowerer.Lower(compositeRuntime);
+    if (dafnyCompositeUnsafeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyCompositeUnsafeOutPath) ?? throw new InvalidOperationException("Dafny unsafe composite output path has no directory"));
+        File.WriteAllBytes(dafnyCompositeUnsafeOutPath, unsafeCompositeLowering.SourceBytes);
+    }
+    Check(unsafeCompositeLowering.Source.Contains("assert |p000| < 2;", StringComparison.Ordinal), "composite lowering preserves the caller obligation for append capacity");
+    Check(unsafeCompositeLowering.Source.Contains("assert 0 <= (p001 as int) < |p000|;", StringComparison.Ordinal), "composite lowering preserves the caller obligation for sequence index bounds");
     var unusedRecordText = Encoding.UTF8.GetString(safeSelectBytes).Replace("\"types\": []", "\"types\": [{\"id\":\"Unused.Record-v1\",\"fields\":[{\"id\":\"value-v1\",\"type\":\"I64\"}]}]", StringComparison.Ordinal);
     var unusedRecordIr = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(unusedRecordText)));
-    var unusedRecordLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(unusedRecordIr));
-    Check(unusedRecordLowering.Code == "UnsupportedLoweringTypes" && unusedRecordLowering.DetailsJson?.Contains("Unused.Record-v1", StringComparison.Ordinal) == true, "Dafny lowering cannot silently erase an unused composite declaration");
+    var unusedRecordLowering = ModulesDafnyLowerer.Lower(unusedRecordIr);
+    Check(unusedRecordLowering.Source.Contains("datatype R000 = C000(", StringComparison.Ordinal) && unusedRecordLowering.SourceMap.Any(entry => entry.EntityId == "type/Unused.Record-v1"), "Dafny lowering preserves an unused composite declaration in generated source and source map");
     var unsupportedImportLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(importedBranching));
     Check(unsupportedImportLowering.Code == "UnsupportedLoweringImports", "Dafny lowering does not ignore unresolved imports");
     reports.Add(new { kind = "lowering", fixture = "if-nested-safe.json", safeLowering.SourceDigest, sourceMapEntries = safeLowering.SourceMap.Length });
     reports.Add(new { kind = "lowering", fixture = "call-safe.json", callLowering.SourceDigest, sourceMapEntries = callLowering.SourceMap.Length });
     reports.Add(new { kind = "lowering", fixture = "math-add-valid.json", unsafeLowering.SourceDigest, sourceMapEntries = unsafeLowering.SourceMap.Length, expectedVerification = "reject-without-owner-precondition" });
     reports.Add(new { kind = "lowering", fixture = "scalar-lowering-safe.json", scalarLowering.SourceDigest, sourceMapEntries = scalarLowering.SourceMap.Length });
+    reports.Add(new { kind = "lowering", fixture = "composite-lowering-safe.json", compositeLowering.SourceDigest, sourceMapEntries = compositeLowering.SourceMap.Length, expectedVerification = "verified-with-sequence-obligations" });
+    reports.Add(new { kind = "lowering", fixture = "composite-runtime-valid.json", unsafeCompositeLowering.SourceDigest, sourceMapEntries = unsafeCompositeLowering.SourceMap.Length, expectedVerification = "unproven-without-caller-range-contract" });
     reports.Add(new { kind = "runtime", fixture = "if-lazy-overflow.json", safe = long.MaxValue.ToString(), overflow = overflow.Code, overflow.EntityId, safeSteps = safeMaximum.Steps });
 
     Check(typeof(ModuleParseResult).GetConstructors().Length == 0, "validated parse result cannot be publicly forged");

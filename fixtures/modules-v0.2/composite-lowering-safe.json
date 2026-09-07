@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "composite.lowering-safe-v1",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        { "id": "count", "type": "I64" },
+        { "id": "first", "type": "I64" },
+        { "id": "values", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" } }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "firstValue",
+      "parameters": [],
+      "returnType": "I64",
+      "contractRef": "firstValueContract",
+      "body": {
+        "parameters": [],
+        "nodes": [
+          { "id": "summary", "op": "call", "type": "Summary", "args": [], "functionRef": "makeSummary" },
+          { "id": "result", "op": "record.get", "type": "I64", "args": ["summary"], "fieldId": "first" }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "makeSummary",
+      "parameters": [],
+      "returnType": "Summary",
+      "contractRef": "makeSummaryContract",
+      "body": {
+        "parameters": [],
+        "nodes": [
+          { "id": "one", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "two", "op": "i64.const", "type": "I64", "args": [], "value": "2" },
+          { "id": "zero", "op": "i64.const", "type": "I64", "args": [], "value": "0" },
+          { "id": "empty", "op": "seq.empty", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": [], "elementType": "I64", "capacity": "2" },
+          { "id": "first", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": ["empty", "one"] },
+          { "id": "values", "op": "seq.append", "type": { "kind": "Seq", "elementType": "I64", "capacity": "2" }, "args": ["first", "two"] },
+          { "id": "count", "op": "seq.length", "type": "I64", "args": ["values"] },
+          { "id": "selected", "op": "seq.get", "type": "I64", "args": ["values", "zero"] },
+          { "id": "summary", "op": "record.make", "type": "Summary", "args": ["count", "selected", "values"], "recordType": "Summary", "fieldIds": ["count", "first", "values"] }
+        ],
+        "result": "summary"
+      }
+    }
+  ],
+  "exports": ["firstValue"]
+}

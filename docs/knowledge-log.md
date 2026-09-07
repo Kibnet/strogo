@@ -560,3 +560,13 @@
 - Evidence: целевой порядок `check --approval` → `build --check` и одновременно обязательные поля `proofDigest`/`buildManifestDigest` в approval невозможно выполнить без placeholder, мутации подписанного артефакта или скрытого второго approval.
 - Последствие: до реализации admission нужна отдельная утверждаемая поправка с двумя явными решениями человека: semantic approval owner bundle до proof и release admission exact proof/toolchain/build manifest после build; runtime принимает только второй артефакт. Нельзя молча ослабить binding или объявить один из шагов автоматическим.
 - Supersedes / supersededBy: выявляет противоречие в E05-K09; требует SPEC amendment перед checkpoint 3.
+
+## K-E05-062
+
+- Дата / фаза: 2026-09-07 / implementation and bounded proof validation.
+- Тип / статус: Composite lowering / Confirmed for structural and sequence range obligations.
+- Утверждение: records и bounded `Seq<T,N>` можно детерминированно понизить из общего typed IR в Dafny без предметных helper operations: records становятся immutable generated datatypes, а structural sequence shapes — subset types; `seq.get` и `seq.append` создают явные index/capacity obligations.
+- Scope: локальные modules без imports и `fold`; composite owner model и generated composite .NET consumer ещё не реализованы. Verified относится к fixture с внутренне построенной sequence, а не к произвольному внешнему input.
+- Evidence: fixture `composite-lowering-safe.json`; bounded run `artifacts/local-validation/e05/composite-dafny-final-v2`; Modules conformance `220` checks / `64` fixtures; safe composite — `4 verified, 0 errors`, source SHA-256 `0d8123f3…9e9c2931`. `composite-runtime-valid.json` без caller range contract ожидаемо `Unproven` с тремя `assertion might not hold`. Summary SHA-256 `84f8b24c…6932cc3a`, module report SHA-256 `d7e16ab7…26617bc`; Reserve regression `29/29`, `10904` assertions, report SHA-256 `5ae5d697…15e4bb93`; E04 regression `PASS all: 141`, локальная копия report SHA-256 `8d35d274…cd5d4bef`.
+- Последствие: reference evaluator и Dafny backend теперь имеют сравнимую composite operation surface. Следующий proof шаг обязан добавить composite owner predicates/модель либо `fold` invariant; нельзя трактовать structural/range verification как exact-outcome proof.
+- Supersedes / supersededBy: снимает ограничение records/sequences candidate lowering из K-E05-060 и `docs/modules-v0.2.md`, сохраняя открытыми `fold`, imports, owner composite contracts и admission.
