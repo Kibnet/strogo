@@ -1,6 +1,6 @@
 # Strogo Modules v0.2: структура, составные значения, regions и IR
 
-Этот документ закрепляет checkpoint для шага 1–4: входная структура, строгость формы, лексер, парсер и компиляция в промежуточный код.
+Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar reference semantics и первый ограниченный lowering в Dafny/C#.
 
 ## 1) Структура исходного модуля
 
@@ -77,7 +77,7 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 - локальный `call` с `functionRef`.
 - `if` с `condition`, явными environment-аргументами, `thenRegion` и `elseRegion`.
 
-У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Generated runtime/lowering выбранной ветви ещё не реализован; текущая executable семантика ограничена reference evaluator из раздела 8.
+У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Scalar lowering сохраняет это ветвление в Dafny, а reference evaluator исполняет только выбранную ветвь.
 
 `value` обязателен только у констант. Лишнее `value: null` у другой операции является ошибкой schema, а не допустимым default. `call` проверяет сигнатуру и общий локальный call graph, включая вызовы внутри ветвей; рекурсия и взаимная рекурсия запрещены. Разрешение вызовов через import closure относится к следующему checkpoint.
 
@@ -139,18 +139,36 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 
 Evaluator намеренно отделён от будущей generated library: он нужен как executable reference oracle для differential checks lowering. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны records, sequences, imports, `fold`, canonical JSON ABI, owner contracts, proof/admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
 
-## 9) Artefact и проверяемые границы checkpoint
+## 9) Scalar lowering в Dafny/C#
+
+`ModulesDafnyLowerer.Lower` принимает только провалидированный `ModuleIr` и детерминированно создаёт Dafny source для `I64`, `Bool`, scalar operations, local calls и nested `if`. Functions, parameters и local values получают generated symbols `Fnnn`, `pnnn`, `vnnn`; пользовательские ID не вставляются в синтаксис и сохраняются отдельно в source map `entityId → generatedName + line`.
+
+`I64` задаётся как native newtype с точным диапазоном `Int64`. Поэтому безопасный selector и безопасный local call проверяются и переводятся в C# методы с параметрами/результатами `long`. Арифметика без достаточного owner `requires` не получает скрытого предусловия: Dafny отклоняет `addOne(x)` на полном диапазоне как `Unproven`, потому что результат может выйти за границу newtype.
+
+Первый end-to-end smoke запускается командой:
+
+```powershell
+pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/modules-dafny-lowering
+```
+
+Скрипт получает все Dafny candidates из production lowering, проверяет safe nested selector, local call и остальные scalar operators закреплённым Dafny 4.11.0, требует отказа unsafe arithmetic, публикует selector как ReadyToRun `win-x64`, проверяет PE native header и запускает отдельные generated consumers selector/call/scalar. Проект generated C# отключает nullable diagnostics и warnings-as-errors только для кода Dafny runtime; строгие настройки исходного Strogo и consumers остаются включены.
+
+Текущий lowering fail closed для records, sequences и непустых imports. Он ещё не соединён с owner bundle, exact-outcome model, proof receipt, package manifest, canonical ABI и публичным runtime facade. Поэтому успешная Dafny verification здесь доказывает только выполнимость и range/type obligations самого ограниченного кандидата, а не соответствие человеческой спецификации.
+
+## 10) Artefact и проверяемые границы checkpoint
 
 - `ModulesCodec.Canonicalize(ModuleSource)` выдает каноническое представление.
 - `ModulesCodec.SourceDigest` — `RawDigest` от canonical source.
 - `ModulesCodec.Canonicalize(ModuleIr)` и `ModulesCodec.IrDigest` подготовлены для следующего шага.
+- `ModulesDafnyLowerer.Lower(ModuleIr)` создаёт deterministic Dafny source, digest и source map для scalar profile.
 - На этом checkpoint покрыто:
   - формальная структура формата и синтаксическая строгость;
   - парсер + типовые валидации v0.2;
   - компиляция в детерминированный IR-слой;
-  - ограниченная исполняемая reference-семантика scalar/`if`/local call.
+  - ограниченная исполняемая reference-семантика scalar/`if`/local call;
+  - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector.
 
-## 10) Проверяемые фикстуры
+## 11) Проверяемые фикстуры
 
 Для conformance сейчас доступны:
 - `fixtures/modules-v0.2/math-add-valid.json`;
@@ -164,10 +182,12 @@ Evaluator намеренно отделён от будущей generated librar
 - `if-valid.json` и эквивалентный `if-valid-shuffled.json`;
 - `if-lazy-overflow.json`, различающий lazy branch semantics и ошибочный eager evaluator;
 - `call-scalar-valid.json`, проверяющий локальные вызовы и общий step budget;
+- `if-nested-safe.json` и `call-safe.json`, проверяющие recursive scalar lowering, три различимых исхода, generated symbol isolation и source map;
+- `scalar-lowering-safe.json`, проверяющий Dafny translation и generated C# execution `i64.sub/le/eq` и `bool.const/not/and/or`;
 - негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
-## 11) Текущая граница
+## 12) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR и lazy `if` semantics в ограниченном reference evaluator. Он ещё не реализует generated Dafny/C# lowering, records/sequences runtime, `fold`, разрешение import closure, contracts или proof/admission. Поэтому он не доказывает свойства будущей исполняемой библиотеки, exact outcome относительно owner model и пока не может выразить ClampSeries/OrderedExactAllocation из E05 целиком.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if` semantics в reference evaluator и scalar/`if` lowering до реально исполненной ReadyToRun сборки на `win-x64`. Он ещё не реализует records/sequences lowering, `fold`, разрешение import closure, owner contracts, exact-outcome proof/admission, package/facade или два требуемых E05 семейства. Поэтому результат не является готовой исполняемой библиотекой Strogo и пока не закрывает AC1–AC7 или цели G01–G06.

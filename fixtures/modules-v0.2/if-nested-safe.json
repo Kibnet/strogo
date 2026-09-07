@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "if.nested-safe-v1",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "select.nested-safe-v1",
+      "parameters": [
+        { "id": "outer.condition-v1", "type": "Bool" },
+        { "id": "input.value-v1", "type": "I64" },
+        { "id": "fallback.value-v1", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "select.nested-safe-contract-v1",
+      "body": {
+        "parameters": ["outer.condition-v1", "input.value-v1", "fallback.value-v1"],
+        "nodes": [
+          {
+            "id": "outer.branch-v1",
+            "op": "if",
+            "type": "I64",
+            "args": ["outer.condition-v1", "input.value-v1", "fallback.value-v1"],
+            "thenRegion": {
+              "parameters": ["then.value-v1", "then.fallback-v1"],
+              "nodes": [
+                {
+                  "id": "maximum.value-v1",
+                  "op": "i64.const",
+                  "type": "I64",
+                  "args": [],
+                  "value": "9223372036854775807"
+                },
+                {
+                  "id": "at-maximum-v1",
+                  "op": "i64.eq",
+                  "type": "Bool",
+                  "args": ["then.value-v1", "maximum.value-v1"]
+                },
+                {
+                  "id": "inner.branch-v1",
+                  "op": "if",
+                  "type": "I64",
+                  "args": ["at-maximum-v1", "then.value-v1"],
+                  "thenRegion": {
+                    "parameters": ["inner.then-value-v1"],
+                    "nodes": [],
+                    "result": "inner.then-value-v1"
+                  },
+                  "elseRegion": {
+                    "parameters": ["inner.else-value-v1"],
+                    "nodes": [
+                      {
+                        "id": "one.value-v1",
+                        "op": "i64.const",
+                        "type": "I64",
+                        "args": [],
+                        "value": "1"
+                      },
+                      {
+                        "id": "incremented.value-v1",
+                        "op": "i64.add",
+                        "type": "I64",
+                        "args": ["inner.else-value-v1", "one.value-v1"]
+                      }
+                    ],
+                    "result": "incremented.value-v1"
+                  }
+                }
+              ],
+              "result": "inner.branch-v1"
+            },
+            "elseRegion": {
+              "parameters": ["else.value-v1", "else.fallback-v1"],
+              "nodes": [],
+              "result": "else.fallback-v1"
+            }
+          }
+        ],
+        "result": "outer.branch-v1"
+      }
+    }
+  ],
+  "exports": ["select.nested-safe-v1"]
+}

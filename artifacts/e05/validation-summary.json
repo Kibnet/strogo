@@ -1,7 +1,7 @@
 {
   "schemaVersion": "strogo.e05.validation-summary.v1",
-  "runId": "20260907-reference-evaluator",
-  "generatedAtUtc": "2026-09-07T12:42:27Z",
+  "runId": "20260907-dafny-lowering-final",
+  "generatedAtUtc": "2026-09-07T13:42:38Z",
   "environment": {
     "os": "Microsoft Windows NT 10.0.22631.0",
     "dotnetSdk": "10.0.400",
@@ -10,15 +10,21 @@
   },
   "commands": [
     "dotnet build Kernel.slnx -c Release",
-    "dotnet run --project tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj -c Release --no-build -- --report <run>/modules-v0.2.json",
+    "pwsh -NoProfile -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-validation/e05/20260907-dafny-lowering-final",
     "dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite all --report <run>/v0-regression.json",
-    "dotnet run --project tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj -c Release --no-build"
+    "dotnet run --project tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj -c Release --no-build",
+    "dotnet format whitespace src/Strogo.Modules/Strogo.Modules.csproj --verify-no-changes --no-restore --include src/Strogo.Modules/DafnyLowering.cs"
   ],
   "sourceSnapshot": {
-    "baseCommit": "95a0a1520c9b6f61bd69b7308702f9c9561c9518",
+    "baseCommit": "463a8e6a24bf57d24a6bba01247e1fa9d5702f31",
     "manifest": "source-manifest.json",
-    "manifestSha256": "8303cec3c78be6f3df7c2977b7babac8ef510308c958d82785c33e8fe153863c",
-    "snapshotDigest": "3021df6ba01111573d178b5893d3c58bf46b3f1f31bb495db89288dd8f14e83c"
+    "manifestSha256": "a1d0eef9bf05c690f34f4bf0b8c67ba84dc863508602c8bd1732b9bd137cff3f",
+    "snapshotDigest": "066b0f3db576db9aa20806b0ff92809bef5505c2d3372111c71f97a7575979c0"
+  },
+  "toolProvenance": {
+    "dafnyArchiveSha256": "3653f05a111ca21e234709ea7b25ce96083fd6c6f10484256ba54110dbc0654d",
+    "dafnyExecutableSha256": "aebb6e5ea4aa1a8ba5432ee214c47255fd7aa5a583f5cac8e83d27d9992c4dd0",
+    "preflight": "tools/Install-Dafny.ps1 -VerifyOnly"
   },
   "results": {
     "build": {
@@ -28,8 +34,44 @@
     },
     "modulesV02": {
       "passed": true,
-      "checks": 137,
-      "reportedCases": 56
+      "checks": 158,
+      "reportedCases": 60
+    },
+    "dafnyNestedSelector": {
+      "passed": true,
+      "exitCode": 0,
+      "verified": 2,
+      "errors": 0,
+      "generatedSignature": "Candidate.__default.F000(bool,long,long):long",
+      "consumer": "outcomes=9223372036854775807,3,11;nativeHeader=196"
+    },
+    "dafnySafeLocalCall": {
+      "passed": true,
+      "exitCode": 0,
+      "verified": 3,
+      "errors": 0,
+      "consumer": "callOutcome=7"
+    },
+    "dafnySafeScalarOperators": {
+      "passed": true,
+      "exitCode": 0,
+      "verified": 2,
+      "errors": 0,
+      "consumer": "scalarOutcomes=True,False,True"
+    },
+    "missingOwnerPrecondition": {
+      "passed": true,
+      "status": "Unproven",
+      "exitCode": 4,
+      "expectedDiagnostic": "result of operation might violate newtype constraint for 'I64'"
+    },
+    "readyToRun": {
+      "passed": true,
+      "runtimeIdentifier": "win-x64",
+      "consumerOutcomes": "9223372036854775807,3,11",
+      "nativeHeaderSize": 196,
+      "assemblySha256": "cc668d2fb94d5ba020e114bbadd05c28c0886990c1aa28498f024a10cea2eead",
+      "assemblyBytes": 368640
     },
     "reserveV0": {
       "passed": true,
@@ -40,21 +82,29 @@
     "taskGraphE04": {
       "passed": true,
       "checks": 141,
-      "evidence": "fresh command exit 0 and PASS all: 141 console outcome"
+      "evidence": "fresh command exit 0 and PASS all: 141; tracked historical report restored after inspection"
     }
   },
   "sourceReports": [
     {
       "name": "modules-v0.2.json",
-      "sha256": "33f8d6f2a80a15b0385b48b43baf5a9c1e579d787ae6c85bbb8350c59e3eface",
-      "bytes": 10797
+      "sha256": "1b5b9bba9f8ebf7ff10a1a327d88d25a400de439d0275f0099ec9e16ad5333da",
+      "bytes": 11479
+    },
+    {
+      "name": "dafny-lowering.json",
+      "sha256": "a411da1f1fd9e876089b102177b81ab6b5e2f222c8a4322ba182b7ab6d19bf20",
+      "bytes": 2263
     },
     {
       "name": "v0-regression.json",
-      "sha256": "87e506e5c9ed67039e195646b76adcc5ae6f0d5e2889dbcd02eb9d45cbda6b5f",
-      "bytes": 79436
+      "sha256": "4548b60bc12dd5339d60a722f00f5fbf95614df2caeab92f5d52a6ce70486fd8",
+      "bytes": 79437
     }
   ],
-  "e04EvidenceBoundary": "The E04 executable prints its full case stream but has no report option; this checkpoint records the fresh exit-0 summary without inventing a report hash.",
-  "evidencePolicy": "Detailed local reports can contain machine-specific paths and remain gitignored. This tracked manifest preserves their hashes, selected results, tool versions and exact reproducible commands."
+  "generatedCodeBoundary": "Dafny runtime emits CS8981 for its nat helper under .NET 10; isolated generated projects permit this warning. Main solution and strict consumers remain warning-free.",
+  "formatBoundary": "Solution-wide dotnet format verify reports the repository pre-existing whitespace backlog. The new production lowering file passed scoped whitespace verify with exit 0; no formatter changed files.",
+  "e04EvidenceBoundary": "The E04 executable writes the tracked historical report; this checkpoint inspected fresh passed=true/checks=141 and restored the tracked file.",
+  "proofBoundary": "Safe candidates prove Dafny type/range obligations only. No owner bundle/model, exact-outcome postcondition, approval, admission receipt or package binding exists in this checkpoint. Generated C# arithmetic relies on the preceding proof and is not an independent checked-overflow guard.",
+  "evidencePolicy": "Detailed local reports can contain machine-specific paths and remain gitignored. This tracked manifest preserves hashes, selected results, pinned tool digests and exact reproducible commands."
 }

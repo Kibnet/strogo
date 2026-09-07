@@ -1,13 +1,18 @@
 {
   "schemaVersion": "strogo.e05.source-manifest.v1",
-  "baseCommit": "95a0a1520c9b6f61bd69b7308702f9c9561c9518",
+  "baseCommit": "463a8e6a24bf57d24a6bba01247e1fa9d5702f31",
   "digestAlgorithm": "sha256 of UTF-8 path<TAB>sha256<LF>, paths sorted ordinal",
-  "snapshotDigest": "3021df6ba01111573d178b5893d3c58bf46b3f1f31bb495db89288dd8f14e83c",
+  "snapshotDigest": "066b0f3db576db9aa20806b0ff92809bef5505c2d3372111c71f97a7575979c0",
   "files": [
     {
       "path": "docs/modules-v0.2.md",
-      "sha256": "2bc619a6d03d612b7433440439911e155313efefa002ffb3da102f63380532f3",
-      "bytes": 16722
+      "sha256": "411bf37d61dc6786dd36ca9ab778db9e8cd451a3fc1356b3eff166fb96bc47d7",
+      "bytes": 19980
+    },
+    {
+      "path": "fixtures/modules-v0.2/call-safe.json",
+      "sha256": "77a86030641515692a48eb57cf60c44c69fbd75e14b8f7e7268785a9e7870ec3",
+      "bytes": 979
     },
     {
       "path": "fixtures/modules-v0.2/call-scalar-valid.json",
@@ -75,6 +80,11 @@
       "bytes": 1169
     },
     {
+      "path": "fixtures/modules-v0.2/if-nested-safe.json",
+      "sha256": "c76fc3b15491d6bba374b94cb0730539bcfd53476d7b120033d9604a7ddfe3ad",
+      "bytes": 2805
+    },
+    {
       "path": "fixtures/modules-v0.2/if-valid-shuffled.json",
       "sha256": "35602519382eab93b866a48d85b24a7adf9a79a2a1b7a2b58b8739b3ef508d4b",
       "bytes": 1469
@@ -120,6 +130,11 @@
       "bytes": 511
     },
     {
+      "path": "fixtures/modules-v0.2/scalar-lowering-safe.json",
+      "sha256": "650733d691da5e3f6e2befa19a1d22821b19f4529295b9034459454c28c28dd7",
+      "bytes": 1789
+    },
+    {
       "path": "fixtures/modules-v0.2/scalar-ops-valid.json",
       "sha256": "5fc3d7c247450f9e2a3dffe96962ec0ea05bb8452b92a5bd91cc6f4546222095",
       "bytes": 1124
@@ -143,6 +158,11 @@
       "path": "src/Strogo.Modules/Compiler.cs",
       "sha256": "378d0549426dde5b9017a00d8e3ebe8b1820266be286a8d4416839b4e11a6e33",
       "bytes": 6441
+    },
+    {
+      "path": "src/Strogo.Modules/DafnyLowering.cs",
+      "sha256": "2697411e56649046a50c8f9d0ca4e62fd3797ca9158d461119454870be8f02cb",
+      "bytes": 9460
     },
     {
       "path": "src/Strogo.Modules/Errors.cs",
@@ -181,8 +201,8 @@
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Program.cs",
-      "sha256": "11c4706fe34be69d15865f57a2b24193c6e57b0e255711c5bc06a0ccd5515196",
-      "bytes": 33279
+      "sha256": "4278351fed250f9a419179923ab658b691a25d0e797f30b5cbbe9368c1b79218",
+      "bytes": 43405
     },
     {
       "path": "tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj",
@@ -193,6 +213,21 @@
       "path": "tests/Strogo.Modules.Conformance/packages.lock.json",
       "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a",
       "bytes": 273
+    },
+    {
+      "path": "tools/Install-Dafny.ps1",
+      "sha256": "31b563f03570cff840a163e5a85170805c032ca5dba021b77e589035498fa996",
+      "bytes": 1228
+    },
+    {
+      "path": "tools/Test-Modules-Dafny-Lowering.ps1",
+      "sha256": "43ca16fe7c4ee71a3f095c059cf381d0134614d99f70654b2aa635a88bf94a12",
+      "bytes": 10310
+    },
+    {
+      "path": "tools/dafny.json",
+      "sha256": "adb81b89a064cccff2784ee52ce0bcbdd52cd476afea9511f944b1d63bedd7e0",
+      "bytes": 304
     }
   ]
 }

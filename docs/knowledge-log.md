@@ -350,3 +350,93 @@
 - Evidence: финальный read-only reviewer пересчитал 38 file hashes, ordinal snapshot, manifest SHA и оба report hashes/sizes; проверил lazy `if`, checked I64, local calls/shared budget, export/import/unsupported fail-closed boundaries и documentation claims; итог `PASS`.
 - Последствие: checkpoint готов к локальному commit; следующий эксперимент должен сравнить reference outcome с generated Dafny/C# candidate и не переносить этот PASS на proof/library goals.
 - Supersedes / supersededBy: завершает review K-E05-037, K-E05-038 и K-E05-039.
+
+## K-E05-041
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Hypothesis / Confirmed for scalar lowering.
+- Утверждение: typed `RegionIr` достаточно, чтобы детерминированно сгенерировать nested conditional control flow в Dafny/C# и получить те же выбранные результаты, что reference evaluator.
+- Scope: `I64`/`Bool`, scalar operations, local calls и nested `if`; один `win-x64` ReadyToRun selector, не owner exact-outcome proof.
+- Evidence: `if-nested-safe.json` дважды даёт одинаковые source bytes/digest; Dafny 4.11.0 сообщает `2 verified, 0 errors`; generated `Candidate.__default.F000(bool,long,long):long` возвращает `MAX,3,11`, как reference evaluator; PE native header size положителен. Ленивость отдельно различает reference evaluator; текущий generated consumer проверяет выбранные outcomes и форму control flow, а не eager mutant.
+- Последствие: следующий proof слой может строиться поверх этого lowering, но обязан отдельно связать candidate с owner model и package identity.
+- Supersedes / supersededBy: частично закрывает runtime часть K-E05-028 и продолжает K-E05-035.
+
+## K-E05-042
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Design boundary / Confirmed.
+- Утверждение: native Dafny newtype с диапазоном `Int64` превращает потенциальное переполнение в обязательство доказательства; `addOne(x: I64)` не является total на полном домене и не должен получать скрытый `requires` от lowering.
+- Scope: `math-add-valid.json`, пока без owner bundle/contract AST.
+- Evidence: candidate, созданный тем же `ModulesDafnyLowerer`, отклонён Dafny с `result of operation might violate newtype constraint for 'I64'`; validation классифицирует результат как `Unproven`, а не выдуманный counterexample.
+- Последствие: owner должен явно определить допустимый domain; proof lowering переносит утверждённый `requires`, а отсутствие достаточного условия закрывает admission.
+- Supersedes / supersededBy: конкретизирует E05 SPEC sections 6.1–6.3 и границу K-E05-036.
+
+## K-E05-043
+
+- Дата / фаза: 2026-09-07 / validation.
+- Тип / статус: Integration defect / Resolved.
+- Утверждение: generated Dafny runtime C# не проходит строгие nullable/warnings настройки исходного репозитория без отдельной compiler boundary, а default compile items могут случайно включить один generated source в два проекта.
+- Scope: временная generated assembly и отдельный consumer сквозного smoke.
+- Evidence: первый build получил generated-code warnings/errors и повторную компиляцию `Generated.cs`; итоговый harness задаёт generated project с `Nullable=disable`, `TreatWarningsAsErrors=false`, `EnableDefaultCompileItems=false`, а consumer явно включает только `Program.cs`.
+- Последствие: будущий package builder обязан изолировать generated sources и фиксировать build configuration; ослабление diagnostics не распространяется на Strogo compiler или consumer.
+- Supersedes / supersededBy: новое operational знание для AC4.
+
+## K-E05-044
+
+- Дата / фаза: 2026-09-07 / EXEC.
+- Тип / статус: Security/identity hypothesis / Confirmed for emitted syntax.
+- Утверждение: стабильные пользовательские ID можно не вставлять в backend syntax: ordinal function table и counters дают symbols `Fnnn`/`pnnn`/`vnnn`, а отдельная source map сохраняет repair identity.
+- Scope: текущий scalar lowering; map содержит generated declaration line, но ещё не входит в подписанный package/proof receipt.
+- Evidence: fixtures используют ID с точками и дефисами; generated source не содержит эти ID, Dafny принимает source, а conformance проверяет точные declaration lines для function parameter/conditional node и mapping local call result.
+- Последствие: расширения lowering должны продолжать closed-template emission и source-map binding; package admission позже связывает map digest с source/proof.
+- Supersedes / supersededBy: реализует часть E05 syntax-injection и source-map требований.
+
+## K-E05-045
+
+- Дата / фаза: 2026-09-07 / validation.
+- Тип / статус: Validation / Confirmed for final run.
+- Утверждение: воспроизводимый script объединяет Modules conformance, три положительных Dafny run, обязательный отрицательный range case и фактические generated consumers в один run directory.
+- Scope: `tools/Test-Modules-Dafny-Lowering.ps1` и gitignored evidence; не полный E05 admission/package workflow.
+- Evidence: final run: 158 checks/60 cases; nested selector `2 verified` и `MAX,3,11`; safe call `3 verified` и `callOutcome=7`; remaining scalar operators `2 verified` и `True,False,True`; unsafe arithmetic exit 4 с фактической range diagnostic; R2R native header 196.
+- Последствие: tracked manifest/summary должны ссылаться на hashes этого final run; independent reviewer пересчитывает их перед commit.
+- Supersedes / supersededBy: заменяет исходный 153-check smoke текущим финальным run.
+
+## K-E05-046
+
+- Дата / фаза: 2026-09-07 / validation.
+- Тип / статус: Tooling baseline / Confirmed.
+- Утверждение: solution-wide `dotnet format --verify-no-changes` сейчас не является usable green gate: он обнаруживает тысячи исторических whitespace diagnostics в старых Reserve/E04 файлах, не относящихся к scalar lowering.
+- Scope: форматирование checkout; formatter запущен только в verify mode и файлов не менял.
+- Evidence: полный verify завершился exit 1 с 3307 строками diagnostics; узкий `dotnet format whitespace src/Strogo.Modules/Strogo.Modules.csproj --verify-no-changes --no-restore --include src/Strogo.Modules/DafnyLowering.cs` завершился exit 0.
+- Последствие: новый production lowering проверен formatter; очистка всего исторического baseline требует отдельного механического изменения и не входит в E05 checkpoint.
+- Supersedes / supersededBy: новое ограничение validation workflow.
+
+## K-E05-047
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Adversarial findings / Resolved.
+- Утверждение: ранняя версия checkpoint имела четыре доказательных пробела: могла молча удалить unused record declaration, не исполняла nested `if`/local call/часть scalar operators, не mapped function parameters и проверяла Dafny только по version string.
+- Scope: scalar Dafny lowering, source map и reproducibility harness.
+- Evidence: reviewer findings; `UnsupportedLoweringTypes` с unused-record counterexample; path-sensitive `if-nested-safe.json`; `call-safe.json` и `scalar-lowering-safe.json` generated consumers; parameter `pNNN` exact-line mapping; `Install-Dafny.ps1 -VerifyOnly` с archive/executable SHA.
+- Последствие: backend claims разрешены только для реально verified/executed opcodes/control flow; новые type declarations обязаны fail closed; tool provenance входит в evidence.
+- Supersedes / supersededBy: усиливает K-E05-041, K-E05-044 и K-E05-045.
+
+## K-E05-048
+
+- Дата / фаза: 2026-09-07 / independent review.
+- Тип / статус: Runtime trust boundary / Confirmed.
+- Утверждение: generated Dafny C# использует обычную unchecked `long` arithmetic; безопасность range обеспечивается предшествующим proof и binding неизменного assembly, а не повторной runtime overflow trap.
+- Scope: generated `x+1` во вложенном safe selector; package binding в этом checkpoint ещё отсутствует.
+- Evidence: generated C# содержит unchecked addition; MAX-вход выбирает другую ветвь и возвращает корректный outcome, но один только consumer не является eager-mutant oracle.
+- Последствие: документация не приписывает runtime smoke различение eager mutation. Будущий admission обязан связывать verified source/generated assembly hashes; mutation test proof layer нужен отдельно.
+- Supersedes / supersededBy: уточняет TCB K-E05-041 и открытую package boundary K-E05-036.
+
+## K-E05-049
+
+- Дата / фаза: 2026-09-07 / final validation.
+- Тип / статус: Validation / Confirmed.
+- Утверждение: после исправления всех semantic/evidence findings main solution и все три conformance suites проходят, а scalar lowering harness воспроизводит proof/runtime evidence закреплённым toolchain.
+- Scope: source snapshot `066b0f3d…75979c0` поверх `463a8e6a24bf57d24a6bba01247e1fa9d5702f31`; это scalar lowering checkpoint, не полный E05.
+- Evidence: build 0 warnings/errors; Modules 158/60; selector 2/0 + R2R outcomes MAX,3,11; call 3/0 + outcome 7; scalar 2/0 + True,False,True; unsafe arithmetic Unproven; Reserve 29/29 и 10904; E04 141.
+- Последствие: независимый read-only reviewer пересчитал 45 file hashes, ordinal snapshot, manifest/summary и три ignored report bindings; BLOCKER/HIGH/MEDIUM findings не осталось, checkpoint готов к локальному commit.
+- Supersedes / supersededBy: закрывает validation часть K-E05-045 после финального manifest review.

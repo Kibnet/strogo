@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "scalar.lowering-safe-v1",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "scalar.safe-v1",
+      "parameters": [
+        { "id": "first.flag-v1", "type": "Bool" },
+        { "id": "second.flag-v1", "type": "Bool" }
+      ],
+      "returnType": "Bool",
+      "contractRef": "scalar.safe-contract-v1",
+      "body": {
+        "parameters": ["first.flag-v1", "second.flag-v1"],
+        "nodes": [
+          { "id": "zero.value-v1", "op": "i64.const", "type": "I64", "args": [], "value": "0" },
+          { "id": "one.value-v1", "op": "i64.const", "type": "I64", "args": [], "value": "1" },
+          { "id": "difference.value-v1", "op": "i64.sub", "type": "I64", "args": ["one.value-v1", "zero.value-v1"] },
+          { "id": "within.flag-v1", "op": "i64.le", "type": "Bool", "args": ["zero.value-v1", "difference.value-v1"] },
+          { "id": "equal.flag-v1", "op": "i64.eq", "type": "Bool", "args": ["difference.value-v1", "one.value-v1"] },
+          { "id": "truth.flag-v1", "op": "bool.const", "type": "Bool", "args": [], "value": true },
+          { "id": "both.flag-v1", "op": "bool.and", "type": "Bool", "args": ["within.flag-v1", "equal.flag-v1"] },
+          { "id": "proven.flag-v1", "op": "bool.and", "type": "Bool", "args": ["both.flag-v1", "truth.flag-v1"] },
+          { "id": "negated.flag-v1", "op": "bool.not", "type": "Bool", "args": ["first.flag-v1"] },
+          { "id": "selected.flag-v1", "op": "bool.and", "type": "Bool", "args": ["proven.flag-v1", "negated.flag-v1"] },
+          { "id": "result.flag-v1", "op": "bool.or", "type": "Bool", "args": ["selected.flag-v1", "second.flag-v1"] }
+        ],
+        "result": "result.flag-v1"
+      }
+    }
+  ],
+  "exports": ["scalar.safe-v1"]
+}

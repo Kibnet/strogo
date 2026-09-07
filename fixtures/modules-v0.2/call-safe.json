@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "call.safe-v1",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "identity.safe-v1",
+      "parameters": [{ "id": "value.safe-v1", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "identity.safe-contract-v1",
+      "body": {
+        "parameters": ["value.safe-v1"],
+        "nodes": [],
+        "result": "value.safe-v1"
+      }
+    },
+    {
+      "id": "through.safe-v1",
+      "parameters": [{ "id": "input.safe-v1", "type": "I64" }],
+      "returnType": "I64",
+      "contractRef": "through.safe-contract-v1",
+      "body": {
+        "parameters": ["input.safe-v1"],
+        "nodes": [
+          {
+            "id": "called.safe-v1",
+            "op": "call",
+            "type": "I64",
+            "args": ["input.safe-v1"],
+            "functionRef": "identity.safe-v1"
+          }
+        ],
+        "result": "called.safe-v1"
+      }
+    }
+  ],
+  "exports": ["through.safe-v1"]
+}

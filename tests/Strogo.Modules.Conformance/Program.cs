@@ -7,10 +7,26 @@ var fixtureDir = Path.Combine(root, "fixtures", "modules-v0.2");
 var reportOption = Array.IndexOf(args, "--report");
 if (reportOption >= 0 && reportOption + 1 >= args.Length)
     throw new ArgumentException("--report requires a path");
+var dafnyOutOption = Array.IndexOf(args, "--dafny-out");
+if (dafnyOutOption >= 0 && dafnyOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-out requires a path");
+var dafnyCallOutOption = Array.IndexOf(args, "--dafny-call-out");
+if (dafnyCallOutOption >= 0 && dafnyCallOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-call-out requires a path");
+var dafnyUnsafeOutOption = Array.IndexOf(args, "--dafny-unsafe-out");
+if (dafnyUnsafeOutOption >= 0 && dafnyUnsafeOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-unsafe-out requires a path");
+var dafnyScalarOutOption = Array.IndexOf(args, "--dafny-scalar-out");
+if (dafnyScalarOutOption >= 0 && dafnyScalarOutOption + 1 >= args.Length)
+    throw new ArgumentException("--dafny-scalar-out requires a path");
 
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
     : Path.Combine(root, "artifacts", "local-validation", "e05", "modules-v0.2", "conformance.json");
+var dafnyOutPath = dafnyOutOption >= 0 ? Path.GetFullPath(args[dafnyOutOption + 1], root) : null;
+var dafnyCallOutPath = dafnyCallOutOption >= 0 ? Path.GetFullPath(args[dafnyCallOutOption + 1], root) : null;
+var dafnyUnsafeOutPath = dafnyUnsafeOutOption >= 0 ? Path.GetFullPath(args[dafnyUnsafeOutOption + 1], root) : null;
+var dafnyScalarOutPath = dafnyScalarOutOption >= 0 ? Path.GetFullPath(args[dafnyScalarOutOption + 1], root) : null;
 var reportDir = Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("Report path has no directory");
 Directory.CreateDirectory(reportDir);
 var reports = new List<object>();
@@ -65,6 +81,19 @@ ModuleException CaptureEvaluationReject(Func<ModuleEvaluationResult> evaluate)
     {
         _ = evaluate();
         throw new Exception("Expected evaluation rejection");
+    }
+    catch (ModuleException exception)
+    {
+        return exception;
+    }
+}
+
+ModuleException CaptureLoweringReject(Func<DafnyLoweringResult> lower)
+{
+    try
+    {
+        _ = lower();
+        throw new Exception("Expected lowering rejection");
     }
     catch (ModuleException exception)
     {
@@ -224,6 +253,79 @@ try
     var importedBranching = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(importedBranchingText)));
     var unsupportedImports = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(importedBranching, "choosePlusOne", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(9)]));
     Check(unsupportedImports.Code == "UnsupportedRuntimeImports", "reference evaluator does not silently ignore an unresolved import closure");
+
+    var safeSelectBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "if-nested-safe.json"));
+    var safeSelectIr = ModulesCompiler.Compile(ModulesParser.ParseModule(safeSelectBytes));
+    var safeSelectFirst = ModulesReferenceEvaluator.Invoke(safeSelectIr, "select.nested-safe-v1", [new ModuleBool(true), new ModuleI64(long.MaxValue), new ModuleI64(11)]);
+    var safeSelectSecond = ModulesReferenceEvaluator.Invoke(safeSelectIr, "select.nested-safe-v1", [new ModuleBool(true), new ModuleI64(2), new ModuleI64(11)]);
+    var safeSelectThird = ModulesReferenceEvaluator.Invoke(safeSelectIr, "select.nested-safe-v1", [new ModuleBool(false), new ModuleI64(long.MaxValue), new ModuleI64(11)]);
+    Check(safeSelectFirst.Value is ModuleI64 { Value: long.MaxValue }, "nested lowering fixture does not evaluate overflowing inner else branch at I64.MAX");
+    Check(safeSelectSecond.Value is ModuleI64 { Value: 3 }, "nested lowering fixture evaluates guarded increment away from I64.MAX");
+    Check(safeSelectThird.Value is ModuleI64 { Value: 11 }, "nested lowering fixture reference outcome selects outer else value");
+    var safeLowering = ModulesDafnyLowerer.Lower(safeSelectIr);
+    if (dafnyOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyOutPath) ?? throw new InvalidOperationException("Dafny output path has no directory"));
+        File.WriteAllBytes(dafnyOutPath, safeLowering.SourceBytes);
+    }
+    var safeCalls = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "call-safe.json"))));
+    var callLowering = ModulesDafnyLowerer.Lower(safeCalls);
+    if (dafnyCallOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyCallOutPath) ?? throw new InvalidOperationException("Dafny call output path has no directory"));
+        File.WriteAllBytes(dafnyCallOutPath, callLowering.SourceBytes);
+    }
+    var unsafeLowering = ModulesDafnyLowerer.Lower(ir);
+    if (dafnyUnsafeOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyUnsafeOutPath) ?? throw new InvalidOperationException("Dafny unsafe output path has no directory"));
+        File.WriteAllBytes(dafnyUnsafeOutPath, unsafeLowering.SourceBytes);
+    }
+    var scalarLoweringIr = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "scalar-lowering-safe.json"))));
+    var scalarLowering = ModulesDafnyLowerer.Lower(scalarLoweringIr);
+    if (dafnyScalarOutPath is not null)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dafnyScalarOutPath) ?? throw new InvalidOperationException("Dafny scalar output path has no directory"));
+        File.WriteAllBytes(dafnyScalarOutPath, scalarLowering.SourceBytes);
+    }
+    var scalarGeneratedTrue = ModulesReferenceEvaluator.Invoke(scalarLoweringIr, "scalar.safe-v1", [new ModuleBool(false), new ModuleBool(false)]);
+    var scalarGeneratedFalse = ModulesReferenceEvaluator.Invoke(scalarLoweringIr, "scalar.safe-v1", [new ModuleBool(true), new ModuleBool(false)]);
+    Check(scalarGeneratedTrue.Value is ModuleBool { Value: true } && scalarGeneratedFalse.Value is ModuleBool { Value: false }, "safe scalar lowering fixture has distinct reference outcomes");
+    Check(new[] { " - ", " <= ", " == ", "!", " && ", " || " }.All(token => scalarLowering.Source.Contains(token, StringComparison.Ordinal)), "Dafny lowering emits every non-add scalar operator in the safe candidate");
+    var repeatedLowering = ModulesDafnyLowerer.Lower(safeSelectIr);
+    Check(safeLowering.SourceDigest == repeatedLowering.SourceDigest && safeLowering.SourceBytes.SequenceEqual(repeatedLowering.SourceBytes), "Dafny lowering is deterministic for one typed IR");
+    Check(safeLowering.Source.Contains("newtype {:nativeType \"long\"} I64", StringComparison.Ordinal), "Dafny lowering requests native signed 64-bit I64");
+    Check(safeLowering.Source.Split("if ", StringSplitOptions.None).Length - 1 == 2, "Dafny lowering preserves two levels of conditional control flow");
+    Check(!safeLowering.Source.Contains("select.nested-safe-v1", StringComparison.Ordinal) && !safeLowering.Source.Contains("inner.branch-v1", StringComparison.Ordinal), "source identifiers are not inserted into generated Dafny syntax");
+    Check(safeLowering.SourceMap.Any(entry => entry.EntityId == "function/select.nested-safe-v1" && entry.GeneratedName == "F000"), "source map binds function identity to generated symbol");
+    var firstParameterMap = safeLowering.SourceMap.Single(entry => entry.EntityId == "function/select.nested-safe-v1/parameter/outer.condition-v1");
+    var parameterLine = safeLowering.Source.Split('\n')[firstParameterMap.Line - 1];
+    Check(firstParameterMap.GeneratedName == "p000" && parameterLine.Contains("p000: bool", StringComparison.Ordinal), "source map binds a parameter to its exact generated method line");
+    var conditionalMap = safeLowering.SourceMap.Single(entry => entry.EntityId == "function/select.nested-safe-v1/body/node/outer.branch-v1/then/node/inner.branch-v1");
+    var conditionalLine = safeLowering.Source.Split('\n')[conditionalMap.Line - 1];
+    Check(conditionalLine.Contains($"var {conditionalMap.GeneratedName}: I64;", StringComparison.Ordinal), "source map binds conditional node to its exact generated declaration line");
+    Check(callLowering.Source.Contains("F000(p000)", StringComparison.Ordinal), "Dafny lowering binds a local call to its deterministic generated symbol");
+    Check(!callLowering.Source.Contains("identity.safe-v1", StringComparison.Ordinal) && !callLowering.Source.Contains("called.safe-v1", StringComparison.Ordinal), "local-call identifiers are not inserted into generated Dafny syntax");
+    Check(callLowering.SourceMap.Any(entry => entry.EntityId == "function/through.safe-v1/body/node/called.safe-v1" && entry.GeneratedName == "v000"), "source map binds a local call result to its generated variable");
+    Check(unsafeLowering.Source.Contains("p000 + v000", StringComparison.Ordinal), "Dafny lowering emits proof obligations for potentially overflowing I64 arithmetic");
+    var loweringCopy = safeLowering.SourceBytes;
+    loweringCopy[0] ^= 0x01;
+    Check(ModulesDafnyLowerer.Lower(safeSelectIr).SourceDigest == safeLowering.SourceDigest, "Dafny source bytes are defensively copied");
+    var alternateSafeSelect = Encoding.UTF8.GetString(safeSelectBytes).Replace("\"value\": \"1\"", "\"value\": \"2\"", StringComparison.Ordinal);
+    var alternateLowering = ModulesDafnyLowerer.Lower(ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(alternateSafeSelect))));
+    Check(alternateLowering.SourceDigest != safeLowering.SourceDigest, "semantic branch mutation changes generated Dafny candidate");
+    var unsupportedLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(compositeIr));
+    Check(unsupportedLowering.Code == "UnsupportedLoweringTypes", "Dafny lowering rejects composite type declarations before emission");
+    var unusedRecordText = Encoding.UTF8.GetString(safeSelectBytes).Replace("\"types\": []", "\"types\": [{\"id\":\"Unused.Record-v1\",\"fields\":[{\"id\":\"value-v1\",\"type\":\"I64\"}]}]", StringComparison.Ordinal);
+    var unusedRecordIr = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(unusedRecordText)));
+    var unusedRecordLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(unusedRecordIr));
+    Check(unusedRecordLowering.Code == "UnsupportedLoweringTypes" && unusedRecordLowering.DetailsJson?.Contains("Unused.Record-v1", StringComparison.Ordinal) == true, "Dafny lowering cannot silently erase an unused composite declaration");
+    var unsupportedImportLowering = CaptureLoweringReject(() => ModulesDafnyLowerer.Lower(importedBranching));
+    Check(unsupportedImportLowering.Code == "UnsupportedLoweringImports", "Dafny lowering does not ignore unresolved imports");
+    reports.Add(new { kind = "lowering", fixture = "if-nested-safe.json", safeLowering.SourceDigest, sourceMapEntries = safeLowering.SourceMap.Length });
+    reports.Add(new { kind = "lowering", fixture = "call-safe.json", callLowering.SourceDigest, sourceMapEntries = callLowering.SourceMap.Length });
+    reports.Add(new { kind = "lowering", fixture = "math-add-valid.json", unsafeLowering.SourceDigest, sourceMapEntries = unsafeLowering.SourceMap.Length, expectedVerification = "reject-without-owner-precondition" });
+    reports.Add(new { kind = "lowering", fixture = "scalar-lowering-safe.json", scalarLowering.SourceDigest, sourceMapEntries = scalarLowering.SourceMap.Length });
     reports.Add(new { kind = "runtime", fixture = "if-lazy-overflow.json", safe = long.MaxValue.ToString(), overflow = overflow.Code, overflow.EntityId, safeSteps = safeMaximum.Steps });
 
     Check(typeof(ModuleParseResult).GetConstructors().Length == 0, "validated parse result cannot be publicly forged");
