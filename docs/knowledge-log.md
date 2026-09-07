@@ -730,3 +730,13 @@
 - Evidence: fold SPEC commit `2e3b3241c59f406aa2b975dd325daf9cb8dbb494`; normative §0–18 SHA-256 `9E76E1FF07699A3873A3128CEAB077D37BDD1BA945FA143EB746F0AE2FFDE438`; два procedural read-only reviewers дали PASS exact pre-audit snapshot `EE1AD974…2BD71A`, открытых BLOCKER/HIGH/MEDIUM нет.
 - Последствие: после любого shared proof change меняется `toolchainDigest` и полностью повторяется A/B/C плюс D, если он запускался; cross-revision comparison запрещён. Доказательство общего выигрыша агента, стоимости либо устойчивости требует отдельного experiment.
 - Supersedes / supersededBy: закрывает amendment, потребованный K-E05-077, и уточняет causal wording K-E05-074; весь fold experiment остаётся `not executed` до owner approval.
+
+## K-E05-079
+
+- Дата / фаза: 2026-09-08 / Linux portability reproduction.
+- Тип / статус: External and local reproducibility / Confirmed for Modules conformance under Ubuntu 24.04 WSL2.
+- Утверждение: текущий .NET Modules conformance executable воспроизводится на Linux x64 под WSL2 из чистого публичного checkout без Windows `bin/obj`: parser, codec, compiler, reference evaluator и owner replay suite проходит 276 checks / 65 fixtures на .NET SDK 10.0.400/runtime 10.0.11.
+- Scope: Ubuntu 24.04.2 LTS under WSL2, x86_64, public commits `c99fd1f` (external participant) и `2e3b3241c59f406aa2b975dd325daf9cb8dbb494` (повтор текущей задачей; между ними production Modules code не менялся). Это не отдельный native Linux host, CI, Dafny proof run, generated ReadyToRun Linux artifact или объявление supported Linux profile.
+- Evidence: Posting Board #9709, message `8be1bf21-1b4c-4406-8d21-aa5563212977`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e): participant сообщил exit 0, `passed=true`, `checks=276`, `fixtures=65` и SHA512-проверенный SDK archive. Независимый run текущей задачей установил официальный SDK через `dotnet-install.sh`, клонировал public `2e3b324`, получил exit 0 / `PASS conformance checks=276`; сохранённый gitignored report `artifacts/local-validation/e05/linux-wsl2-2e3b324-20260908/linux-conformance.json` имеет SHA-256 `fd4194dac0bf90a924ed6746915f689377519258877d573641a66b059181fad6`, рядом сохранены `environment.txt`, `console.log`, `sha256.txt`.
+- Последствие: подтверждена переносимость managed Modules conformance path между Windows и WSL2 Linux для текущего surface. Windows x64 остаётся единственной заявленной supported configuration; E06/Dafny/backend/package portability всё ещё требует отдельных proof/build/runtime gates.
+- Supersedes / supersededBy: уточняет Windows-only evidence boundary K-E05-072 и публичный запрос #9680; не подтверждает G02/G06 или всю Linux toolchain.
