@@ -1540,3 +1540,23 @@
 - Evidence: local `artifacts/local-validation/e06/jvm-prototype-1/**`; normative compile exit `1`, log `40228` bytes и exact warning categories/counts; strict adapter/consumer compile exit `0`; consumer output `8/24/1/13` PASS; solution build `0` warnings/errors; portability conformance `143`.
 - Последствие: текущую JVM строку нельзя провести через A4: по утверждённому stop-rule она остаётся `TargetBuildRejected`. Рациональная поправка должна разрешить минимальный закрытый набор upstream-only lint categories (`cast,rawtypes,varargs,serial`) либо выбрать иной pinned translator, который проходит прежний gate. Adapter и consumer не получают suppression и сохраняют `-Xlint:all -Werror`; расширять исключения автоматически при будущих warning запрещено.
 - Supersedes / supersededBy: первый фактический counterexample к E06 §6.2.2; до human-approved amendment исходное правило остаётся нормативным.
+
+## K-E06-057
+
+- Дата / фаза: 2026-09-08 / E06A Stage 1 exact JVM warning capture.
+- Тип / статус: Upstream diagnostic truncation counterexample and approval-gated baseline candidate / Confirmed on clean public commit `d21d969`; owner baseline approval pending.
+- Утверждение: javac без явного `-Xmaxwarns` показал только первые `100` из `106` warnings, поэтому обычный `-Xlint:all` не давал исчерпывающего baseline. Команда с `-Xmaxwarns 10000` на двух независимых translation lanes clean commit `d21d969` дала одинаковые canonical bytes: `106` warnings (`cast:35`, `rawtypes:67`, `serial:1`, `varargs:3`), baseline digest `cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1`, normalized diagnostics digest `c18b3cf91a4d2a47f022738a8b807a30463c5548847c1f6e7eed87571f369d2c`. Обе probe compilations завершились exit `0`, empty stdout, одинаковым stderr SHA-256 `4bb25969…3640`; exact output quarantine удалён без `.class` residuals.
+- Scope: только fixed E06 validation fixture, pinned Dafny `4.11.0`, Zulu javac `17.0.19`, .NET SDK `10.0.400`/runtime `10.0.11` и Stage 1 E06A. Candidate не является approved baseline, phase 2/JAR/runtime/HotSpot не запускались, portability не заявляется.
+- Evidence: `artifacts/e06/jvm-baseline-candidate-d21d969/{REPORT.md,report.json,lane-a-receipt.json,lane-b-receipt.json,sha256.txt}`; exact untracked candidate `artifacts/local-validation/e06/jvm-baseline-d21d969/baseline-candidate.json` SHA-256 `5fd98abb…e0007`; solution build `0 warnings / 0 errors`; portability conformance `198` checks; full managed regressions: Modules `362`, Graph `141`, Reserve `29/29` и `10904` assertions. Independent post-EXEC review — PASS без BLOCKER/HIGH/MEDIUM, но sandbox был writable и review является procedural fallback.
+- Последствие: `-Xmaxwarns 10000` и exact .NET/JDK/Dafny/source/command/validator/harness identities обязательны для воспроизводимого warning gate. Stage 2 остаётся запрещён до точной фразы владельца **«Baseline подтверждаю»** для digest `cafa0caa…c0e1`.
+- Supersedes / supersededBy: уточняет и заменяет неполный warning count K-E06-056; финальный approved baseline либо отказ владельца должен обновить эту запись.
+
+## K-E06-058
+
+- Дата / фаза: 2026-09-08 / exact-revision managed regression validation.
+- Тип / статус: Validation ordering constraint / Confirmed by failure and clean rebuild rerun.
+- Утверждение: `Kernel.Graph.Conformance --no-build` нельзя считать exact-revision проверкой сразу после commit, если загруженный test output был собран до изменения HEAD, а сам harness внутри запуска пересобирает `Kernel.Graph.Cli`. В этом состоянии два последовательных запуска вернули `ArtifactMismatch`; после полного `dotnet build Kernel.slnx -c Release --no-restore` на текущем HEAD тот же Graph run прошёл `PASS all: 141`. Первичная гипотеза о конфликте параллельных тестов была опровергнута вторым последовательным failure; наблюдение согласуется с тем, что Graph admission связывает hash фактически загруженного `Kernel.Graph.Core.dll`.
+- Scope: порядок локальной exact-revision validation для Graph harness; semantic поведение Graph и изменения E06A этим failure не опровергнуты.
+- Evidence: два `ArtifactMismatch` в `GraphToolchain.ValidateAdmission` до post-commit full build; затем solution build `0 warnings / 0 errors` и serial Graph `PASS all: 141` без изменения source.
+- Последствие: после создания commit, который должен быть exact evidence revision, сначала требуется пересобрать весь solution, и только затем запускать `--no-build` conformance. Ошибку нельзя автоматически списывать на parallel interference без последовательного повторения.
+- Supersedes / supersededBy: уточняет validation discipline K-E06-057 и исправляет первичную неверную гипотезу текущего run.
