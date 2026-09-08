@@ -940,6 +940,63 @@ try
     })]));
     Check(wrongNestedItem.Code == "RuntimeTypeMismatch" && wrongNestedItem.EntityId == "function/readFirst/parameter/pair/field/items/item/0", "runtime composite validation reports the nested value locus");
     reports.Add(new { kind = "runtime", fixture = "composite-runtime-valid.json", semanticChecks = 12 });
+
+    var foldBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "fold-sum-valid.json"));
+    var foldParsed = ModulesParser.ParseModule(foldBytes);
+    var foldIr = ModulesCompiler.Compile(foldParsed);
+    var foldCanonical = ModulesCodec.Canonicalize(foldParsed.Source);
+    Check(ModulesParser.ParseModule(foldCanonical).SourceDigest == foldParsed.SourceDigest, "fold source survives canonical roundtrip");
+    var foldRoot = JsonNode.Parse(foldBytes)!.AsObject();
+    var shuffledFoldRoot = new JsonObject();
+    foreach (var property in foldRoot.Reverse()) shuffledFoldRoot[property.Key] = property.Value?.DeepClone();
+    Check(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(shuffledFoldRoot.ToJsonString())).SourceDigest == foldParsed.SourceDigest, "fold digest ignores JSON object property order");
+    Check(foldIr.Functions.All(function => function.Instructions.Single().Fold is not null), "compiler retains typed fold step and invariant in IR");
+    Check(Encoding.UTF8.GetString(foldIr.CanonicalBytes).Contains("\"invariant\"", StringComparison.Ordinal), "canonical IR commits to the invariant subtree");
+
+    var foldItems = new ModuleSequence(new TypeRef("I64"), 4, [new ModuleI64(1), new ModuleI64(2), new ModuleI64(3)]);
+    var emptyFoldItems = new ModuleSequence(new TypeRef("I64"), 4, Array.Empty<ModuleValue>());
+    var foldSum = ModulesReferenceEvaluator.Invoke(foldIr, "sum", [foldItems, new ModuleI64(10)]);
+    var foldEmpty = ModulesReferenceEvaluator.Invoke(foldIr, "sum", [emptyFoldItems, new ModuleI64(10)]);
+    var foldBiased = ModulesReferenceEvaluator.Invoke(foldIr, "sumWithBias", [foldItems, new ModuleI64(10), new ModuleI64(2)]);
+    Check(foldSum.Value is ModuleI64 { Value: 16 } && foldSum.Steps == 7, "fold executes a deterministic left traversal with one dispatch and one iteration step");
+    Check(foldEmpty.Value is ModuleI64 { Value: 10 } && foldEmpty.Steps == 1, "empty fold returns the initial accumulator without executing step");
+    Check(foldBiased.Value is ModuleI64 { Value: 22 } && foldBiased.Steps == 10, "fold binds ordered explicit environment values on every step");
+    Check(foldItems.Items.Select(item => ((ModuleI64)item).Value).SequenceEqual([1L, 2L, 3L]), "fold leaves its immutable sequence input unchanged");
+    var foldLimit = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(foldIr, "sum", [foldItems, new ModuleI64(10)], new ModuleEvaluationLimits { MaxSteps = 5 }));
+    Check(foldLimit.Code == "EvaluationStepLimitExceeded" && foldLimit.EntityId == "function/sum/body/node/result/iteration/2", "fold shares the evaluation budget and refuses before a partial iteration");
+
+    JsonObject MutateFold(Action<JsonObject, JsonObject, JsonObject> mutation)
+    {
+        var rootNode = JsonNode.Parse(foldBytes)!.AsObject();
+        var function = rootNode["functions"]![0]!.AsObject();
+        var fold = function["body"]!["nodes"]![0]!.AsObject();
+        mutation(rootNode, function, fold);
+        return rootNode;
+    }
+    ModuleException RejectFold(string name, Action<JsonObject, JsonObject, JsonObject> mutation)
+    {
+        var failure = CaptureParserReject(MutateFold(mutation).ToJsonString());
+        reports.Add(new { kind = "negative", fixture = name, code = failure.Code, stage = failure.Stage, detail = failure.DetailsJson });
+        return failure;
+    }
+
+    Check(RejectFold("fold-missing-invariant", (_, _, fold) => fold.Remove("invariant")).Code == "InvariantRequired", "fold requires an explicit invariant");
+    Check(RejectFold("fold-environment-out-of-range", (_, _, fold) => fold["invariant"] = JsonNode.Parse("{\"op\":\"fold.environment\",\"type\":\"I64\",\"position\":\"0\"}")).Code == "FoldEnvironmentOutOfRange", "fold invariant cannot reference an absent environment value");
+    Check(RejectFold("fold-param-in-invariant", (_, _, fold) => fold["invariant"] = JsonNode.Parse("{\"op\":\"param\",\"type\":\"I64\",\"id\":\"initial\"}")).Code == "UnsupportedProofOpcode", "fold invariant is closed over explicit fold roles");
+    Check(RejectFold("fold-hidden-step-capture", (_, _, fold) => fold["stepRegion"]!["nodes"]![0]!["args"]![1] = "initial").Code == "DanglingNodeArg", "fold step cannot capture a function parameter implicitly");
+    Check(RejectFold("fold-nested", (_, _, fold) => fold["stepRegion"]!["nodes"]![0]!["op"] = "fold").Code == "NestedFoldNotSupported", "fold step cannot contain another fold");
+    Check(RejectFold("fold-step-call", (_, _, fold) => fold["stepRegion"]!["nodes"]![0] = JsonNode.Parse("{\"id\":\"next\",\"op\":\"call\",\"type\":\"I64\",\"args\":[\"accumulator\",\"element\"],\"functionRef\":\"sum\"}")).Code == "FoldStepCallNotSupported", "fold step cannot contain a call");
+    Check(RejectFold("fold-not-function-result", (_, function, _) =>
+    {
+        function["body"]!["nodes"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"zero\",\"op\":\"i64.const\",\"type\":\"I64\",\"args\":[],\"value\":\"0\"}"));
+        function["body"]!["result"] = "zero";
+    }).Code == "FoldMustBeFunctionResult", "the reachable function result must be its single fold");
+    Check(RejectFold("fold-prefix-arity", (_, _, fold) => fold["invariant"]!["args"]![0]!["args"]![1]!["args"]!.AsArray().RemoveAt(1)).Code == "ArityMismatch", "prefix sum has one canonical arity");
+    Check(RejectFold("fold-prefix-type", (_, _, fold) => fold["invariant"]!["args"]![0]!["args"]![1]!["args"]![1]!["type"] = "Bool").Code == "TypeMismatch", "prefix sum length must be I64");
+    var quantifiedFold = MutateFold((_, _, fold) => fold["invariant"] = JsonNode.Parse("{\"op\":\"forall.sequence\",\"type\":\"Bool\",\"binderId\":\"i\",\"sequence\":{\"op\":\"fold.sequence\",\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"4\"}},\"body\":{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"proof.bound\",\"type\":\"I64\",\"binderId\":\"i\"},{\"op\":\"proof.bound\",\"type\":\"I64\",\"binderId\":\"i\"}]}}")).ToJsonString();
+    Check(ModulesParser.ParseModule(quantifiedFold).Source.Functions.Length == 2, "fold proof supports one bounded sequence quantifier and scoped binder");
+    reports.Add(new { kind = "fold", fixture = "fold-sum-valid.json", sourceDigest = foldParsed.SourceDigest, irDigest = ModulesCodec.IrDigest(foldIr.CanonicalBytes), semanticChecks = 17 });
+
     var importedBranchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")))
         .Replace("\"imports\": []", "\"imports\": [{\"moduleId\":\"external.sample\",\"sourceDigest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"contractDigest\":\"1111111111111111111111111111111111111111111111111111111111111111\"}]", StringComparison.Ordinal);
     var importedBranching = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(importedBranchingText)));

@@ -16,7 +16,15 @@ public static class ModulesParser
     private static readonly Regex CanonicalI64Pattern = new("^(0|-?[1-9][0-9]*)$", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking);
     private static readonly ImmutableHashSet<string> SupportedOpcodes = ImmutableHashSet.Create(StringComparer.Ordinal,
         "i64.const", "bool.const", "i64.add", "i64.sub", "i64.le", "i64.eq", "bool.not", "bool.and", "bool.or",
-        "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append", "if", "call");
+        "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append", "if", "call", "fold");
+    private static readonly ImmutableHashSet<string> SupportedProofOpcodes = ImmutableHashSet.Create(StringComparer.Ordinal,
+        "param", "fold.prefixLength", "fold.sequence", "fold.initialAccumulator", "fold.accumulator", "fold.environment", "proof.bound",
+        "i64.const", "bool.const", "math.const", "eq", "i64.add", "i64.sub", "i64.le", "math.le", "bool.not", "bool.and", "bool.or", "if",
+        "math.from_i64", "math.add", "math.sub", "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append",
+        "seq.sum_i64", "seq.prefix_sum_i64", "forall.sequence");
+    private const int ProofExpressionNodesHardMaximum = 1024;
+    private const int ProofExpressionDepthHardMaximum = 32;
+    private const int ProofEvaluationStepsHardMaximum = 262144;
 
     public static ModuleParseResult ParseModule(string source, StrogoLimits? limits = null)
         => ParseModule(Encoding.UTF8.GetBytes(source), limits);
@@ -275,6 +283,10 @@ public static class ModulesParser
             var op = RequireString(RequireProperty(nodeValue, "op", $"{path}.nodes[]"));
             if (!SupportedOpcodes.Contains(op))
                 throw ModulesExceptionFactory.Error("parse", "UnsupportedOpcode", new { opcode = op });
+            if (op == "fold" && depth != 0)
+                throw ModulesExceptionFactory.Error("parse", "NestedFoldNotSupported", $"{path}/node/{SortId(nodeValue, "id")}");
+            if (op == "fold" && !nodeValue.TryGetProperty("invariant", out _))
+                throw ModulesExceptionFactory.Error("parse", "InvariantRequired", $"{path}/node/{SortId(nodeValue, "id")}");
             CheckObject(nodeValue, $"{path}.nodes[]", ExpectedNodeFields(op));
             var nodeId = RequireId(nodeValue.GetProperty("id"));
             var nodeEntityId = $"{path}/node/{nodeId}";
@@ -284,7 +296,14 @@ public static class ModulesParser
             EnsureTypeRef(nodeType, typeIds, $"{nodeEntityId}/type");
             var thenRegion = op == "if" ? ParseRegionSyntax(nodeValue.GetProperty("thenRegion"), $"{nodeEntityId}/then", depth + 1, typeIds, limits) : null;
             var elseRegion = op == "if" ? ParseRegionSyntax(nodeValue.GetProperty("elseRegion"), $"{nodeEntityId}/else", depth + 1, typeIds, limits) : null;
-            nodes.Add(new FunctionNode(nodeId, op, nodeType, ParseIdArray(nodeValue.GetProperty("args"), $"{nodeEntityId}/args", null), ParseNodeMetadata(nodeValue, nodeId, nodeEntityId, op, limits), thenRegion, elseRegion));
+            var stepRegion = op == "fold" ? ParseRegionSyntax(nodeValue.GetProperty("stepRegion"), $"{nodeEntityId}/step", depth + 1, typeIds, limits) : null;
+            ProofExpression? invariant = null;
+            if (op == "fold")
+            {
+                var proofNodes = 0;
+                invariant = ParseProofExpression(nodeValue.GetProperty("invariant"), $"{nodeEntityId}/invariant", 1, typeIds, limits, ref proofNodes);
+            }
+            nodes.Add(new FunctionNode(nodeId, op, nodeType, ParseIdArray(nodeValue.GetProperty("args"), $"{nodeEntityId}/args", null), ParseNodeMetadata(nodeValue, nodeId, nodeEntityId, op, limits), thenRegion, elseRegion, stepRegion, invariant));
         }
 
         var nodeArray = nodes.ToImmutable();
@@ -313,7 +332,17 @@ public static class ModulesParser
                 ValidateBranch(node, node.ThenRegion!, "then", environmentTypes);
                 ValidateBranch(node, node.ElseRegion!, "else", environmentTypes);
             }
+            else if (node.Op == "fold")
+            {
+                ValidateFoldNode(node, regionLocus, parameterTypes, nodeTypes, functions, typeById);
+            }
         }
+
+        var folds = region.Nodes.Where(node => node.Op == "fold").ToArray();
+        if (folds.Length > 1)
+            throw ModulesExceptionFactory.Error("parse", "NestedFoldNotSupported", regionLocus, new { actual = folds.Length, max = 1 });
+        if (folds.Length == 1 && region.Result != folds[0].Id)
+            throw ModulesExceptionFactory.Error("parse", "FoldMustBeFunctionResult", $"{regionLocus}/node/{folds[0].Id}");
 
         var resultId = region.Result;
         if (!parameterTypes.ContainsKey(resultId) && !nodeTypes.ContainsKey(resultId))
@@ -334,6 +363,60 @@ public static class ModulesParser
         }
     }
 
+    private static void ValidateFoldNode(
+        FunctionNode node,
+        string regionLocus,
+        IReadOnlyDictionary<string, TypeRef> parameterTypes,
+        IReadOnlyDictionary<string, TypeRef> nodeTypes,
+        IReadOnlyDictionary<string, FunctionHeader> functions,
+        IReadOnlyDictionary<string, TypeDecl> typeById)
+    {
+        var locus = $"{regionLocus}/node/{node.Id}";
+        TypeRef Resolve(string id) => ResolveValueType(id, parameterTypes, nodeTypes, locus);
+        if (node.Args.Length < 2)
+            throw ModulesExceptionFactory.Error("parse", "ArityMismatch", locus, new { op = "fold", expectedAtLeast = 2, actual = node.Args.Length });
+        var sequence = Resolve(node.Args[0]);
+        if (sequence.Kind != "Seq" || sequence.Element is null)
+            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { op = "fold", role = "sequence", expected = "Seq", actual = sequence.ToString() });
+        var accumulator = Resolve(node.Args[1]);
+        if (!TypesEquivalent(node.Type, accumulator))
+            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { op = "fold", role = "result", expected = accumulator.ToString(), actual = node.Type.ToString() });
+        if (node.StepRegion is null)
+            throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", locus, new { reason = "MissingStepRegion" });
+        if (node.Invariant is null)
+            throw ModulesExceptionFactory.Error("parse", "InvariantRequired", locus);
+
+        var environment = node.Args.Skip(2).Select(Resolve).ToImmutableArray();
+        var stepTypes = ImmutableArray.CreateBuilder<TypeRef>(3 + environment.Length);
+        stepTypes.Add(new TypeRef("I64"));
+        stepTypes.Add(sequence.Element);
+        stepTypes.Add(accumulator);
+        stepTypes.AddRange(environment);
+        if (node.StepRegion.Parameters.Length != stepTypes.Count)
+            throw ModulesExceptionFactory.Error("parse", "RegionParametersMismatch", $"{locus}/step", new { branch = "step", expected = stepTypes.Count, actual = node.StepRegion.Parameters.Length });
+        var stepParameters = node.StepRegion.Parameters.Select((id, index) => new FunctionParameter(id, stepTypes[index])).ToImmutableArray();
+        EnsureFoldStepRestrictions(node.StepRegion, $"{locus}/step");
+        ValidateRegion(node.StepRegion, stepParameters, accumulator, "RegionResultTypeMismatch", $"{locus}/step", functions, typeById);
+
+        var proofType = ValidateProofExpression(node.Invariant, sequence, accumulator, environment, typeById, ImmutableDictionary<string, TypeRef>.Empty, insideQuantifier: false, locus: $"{locus}/invariant");
+        if (!TypesEquivalent(proofType, new TypeRef("Bool")))
+            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", $"{locus}/invariant", new { expected = "Bool", actual = proofType.ToString() });
+        var worstCaseCost = ProofWorstCaseCost(node.Invariant);
+        if (worstCaseCost > ProofEvaluationStepsHardMaximum)
+            throw ModulesExceptionFactory.Error("parse", "ProofWorstCaseCostExceeded", $"{locus}/invariant", new { actual = ">262144", max = "262144" });
+    }
+
+    private static void EnsureFoldStepRestrictions(FunctionBody body, string locus)
+    {
+        foreach (var node in body.Nodes)
+        {
+            if (node.Op == "fold") throw ModulesExceptionFactory.Error("parse", "NestedFoldNotSupported", $"{locus}/node/{node.Id}");
+            if (node.Op == "call") throw ModulesExceptionFactory.Error("parse", "FoldStepCallNotSupported", $"{locus}/node/{node.Id}");
+            if (node.ThenRegion is not null) EnsureFoldStepRestrictions(node.ThenRegion, $"{locus}/node/{node.Id}/then");
+            if (node.ElseRegion is not null) EnsureFoldStepRestrictions(node.ElseRegion, $"{locus}/node/{node.Id}/else");
+        }
+    }
+
     private static TypeRef ResolveValueType(string id, IReadOnlyDictionary<string, TypeRef> parameterTypes, IReadOnlyDictionary<string, TypeRef> nodeTypes, string ownerId)
         => parameterTypes.TryGetValue(id, out var parameterType) ? parameterType
             : nodeTypes.TryGetValue(id, out var nodeType) ? nodeType
@@ -342,7 +425,8 @@ public static class ModulesParser
     private static int CountNodes(FunctionBody region)
         => checked(region.Nodes.Length + region.Nodes.Sum(node =>
             (node.ThenRegion is null ? 0 : CountNodes(node.ThenRegion))
-            + (node.ElseRegion is null ? 0 : CountNodes(node.ElseRegion))));
+            + (node.ElseRegion is null ? 0 : CountNodes(node.ElseRegion))
+            + (node.StepRegion is null ? 0 : CountNodes(node.StepRegion))));
 
     private static IReadOnlyCollection<string> ExpectedNodeFields(string op) => op switch
     {
@@ -351,6 +435,7 @@ public static class ModulesParser
         "record.get" => ["id", "op", "type", "args", "fieldId"],
         "seq.empty" => ["id", "op", "type", "args", "elementType", "capacity"],
         "if" => ["id", "op", "type", "args", "thenRegion", "elseRegion"],
+        "fold" => ["id", "op", "type", "args", "stepRegion", "invariant"],
         "call" => ["id", "op", "type", "args", "functionRef"],
         _ => ["id", "op", "type", "args"]
     };
@@ -473,6 +558,11 @@ public static class ModulesParser
                 if (node.ThenRegion is null || node.ElseRegion is null)
                     throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", entityId, new { reason = "MissingBranchRegion" });
                 return;
+            case "fold":
+                if (node.Args.Length < 2)
+                    throw ModulesExceptionFactory.Error("parse", "ArityMismatch", entityId, new { op = node.Op, expectedAtLeast = 2, actual = node.Args.Length });
+                for (var index = 0; index < node.Args.Length; index++) _ = ArgType(index);
+                return;
             case "call":
                 if (node.Metadata.FunctionRef is null || !functions.TryGetValue(node.Metadata.FunctionRef, out var callee))
                     throw ModulesExceptionFactory.Error("parse", "UnknownFunction", entityId, new { functionRef = node.Metadata.FunctionRef });
@@ -529,6 +619,8 @@ public static class ModulesParser
                 foreach (var nested in EnumerateNodes(node.ThenRegion)) yield return nested;
             if (node.ElseRegion is not null)
                 foreach (var nested in EnumerateNodes(node.ElseRegion)) yield return nested;
+            if (node.StepRegion is not null)
+                foreach (var nested in EnumerateNodes(node.StepRegion)) yield return nested;
         }
     }
 
@@ -599,6 +691,262 @@ public static class ModulesParser
         var unreachable = byId.Keys.Where(id => !reachable.Contains(id)).OrderBy(id => id, StringComparer.Ordinal).ToArray();
         if (unreachable.Length > 0) throw ModulesExceptionFactory.Error("parse", "UnreachableNode", regionLocus, new { result = resultId, unreachable });
     }
+
+    private static TypeRef ValidateProofExpression(
+        ProofExpression expression,
+        TypeRef foldSequence,
+        TypeRef accumulator,
+        ImmutableArray<TypeRef> environment,
+        IReadOnlyDictionary<string, TypeDecl> typeById,
+        ImmutableDictionary<string, TypeRef> boundTypes,
+        bool insideQuantifier,
+        string locus)
+    {
+        void Arity(int expected)
+        {
+            if (expression.Args.Length != expected)
+                throw ModulesExceptionFactory.Error("parse", "ArityMismatch", locus, new { op = expression.Op, expected, actual = expression.Args.Length });
+        }
+        TypeRef Arg(int index) => ValidateProofExpression(expression.Args[index], foldSequence, accumulator, environment, typeById, boundTypes, insideQuantifier, $"{locus}/arg/{index}");
+        void Require(TypeRef actual, TypeRef expected, string role)
+        {
+            if (!TypesEquivalent(actual, expected))
+                throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { op = expression.Op, role, expected = expected.ToString(), actual = actual.ToString() });
+        }
+        TypeRef inferred;
+        switch (expression.Op)
+        {
+            case "param":
+                throw ModulesExceptionFactory.Error("parse", "UnsupportedProofOpcode", locus, new { opcode = expression.Op });
+            case "fold.prefixLength": inferred = new TypeRef("I64"); break;
+            case "fold.sequence": inferred = foldSequence; break;
+            case "fold.initialAccumulator":
+            case "fold.accumulator": inferred = accumulator; break;
+            case "fold.environment":
+                if (expression.Position is null || expression.Position < 0 || expression.Position >= environment.Length)
+                    throw ModulesExceptionFactory.Error("parse", "FoldEnvironmentOutOfRange", locus, new { position = expression.Position ?? -1, count = environment.Length });
+                inferred = environment[expression.Position.Value];
+                break;
+            case "proof.bound":
+                if (expression.BinderId is null || !boundTypes.TryGetValue(expression.BinderId, out var boundType))
+                    throw ModulesExceptionFactory.Error("parse", "UnknownProofBinder", locus, new { binderId = expression.BinderId });
+                inferred = boundType;
+                break;
+            case "i64.const": inferred = new TypeRef("I64"); break;
+            case "math.const": inferred = new TypeRef("MathInt"); break;
+            case "bool.const": inferred = new TypeRef("Bool"); break;
+            case "eq":
+                Arity(2);
+                var equalityLeft = Arg(0);
+                var equalityRight = Arg(1);
+                Require(equalityRight, equalityLeft, "arg1");
+                inferred = new TypeRef("Bool");
+                break;
+            case "i64.add":
+            case "i64.sub":
+                Arity(2); Require(Arg(0), new TypeRef("I64"), "arg0"); Require(Arg(1), new TypeRef("I64"), "arg1"); inferred = new TypeRef("I64"); break;
+            case "i64.le":
+                Arity(2); Require(Arg(0), new TypeRef("I64"), "arg0"); Require(Arg(1), new TypeRef("I64"), "arg1"); inferred = new TypeRef("Bool"); break;
+            case "math.le":
+                Arity(2); Require(Arg(0), new TypeRef("MathInt"), "arg0"); Require(Arg(1), new TypeRef("MathInt"), "arg1"); inferred = new TypeRef("Bool"); break;
+            case "math.from_i64":
+                Arity(1); Require(Arg(0), new TypeRef("I64"), "arg0"); inferred = new TypeRef("MathInt"); break;
+            case "math.add":
+            case "math.sub":
+                Arity(2); Require(Arg(0), new TypeRef("MathInt"), "arg0"); Require(Arg(1), new TypeRef("MathInt"), "arg1"); inferred = new TypeRef("MathInt"); break;
+            case "bool.not":
+                Arity(1); Require(Arg(0), new TypeRef("Bool"), "arg0"); inferred = new TypeRef("Bool"); break;
+            case "bool.and":
+            case "bool.or":
+                Arity(2); Require(Arg(0), new TypeRef("Bool"), "arg0"); Require(Arg(1), new TypeRef("Bool"), "arg1"); inferred = new TypeRef("Bool"); break;
+            case "if":
+                Arity(3); Require(Arg(0), new TypeRef("Bool"), "condition"); var thenType = Arg(1); Require(Arg(2), thenType, "else"); inferred = thenType; break;
+            case "record.make":
+                if (expression.RecordType is null || !typeById.TryGetValue(expression.RecordType, out var declaration))
+                    throw ModulesExceptionFactory.Error("parse", "UnknownType", locus, new { type = expression.RecordType });
+                var expectedFields = declaration.Fields.OrderBy(field => field.Id, StringComparer.Ordinal).ToArray();
+                var actualFields = expression.FieldIds.OrderBy(id => id, StringComparer.Ordinal).ToArray();
+                if (expression.Args.Length != expectedFields.Length || !actualFields.SequenceEqual(expectedFields.Select(field => field.Id), StringComparer.Ordinal))
+                    throw ModulesExceptionFactory.Error("parse", "RecordFieldMismatch", locus, new { recordType = declaration.Id });
+                var argumentByField = expression.FieldIds.Select((id, index) => (id, index)).ToDictionary(pair => pair.id, pair => pair.index, StringComparer.Ordinal);
+                foreach (var field in expectedFields) Require(Arg(argumentByField[field.Id]), field.Type, field.Id);
+                inferred = new TypeRef("Record", Name: declaration.Id);
+                break;
+            case "record.get":
+                Arity(1);
+                var recordType = Arg(0);
+                if (recordType.Kind != "Record" || recordType.Name is null || !typeById.TryGetValue(recordType.Name, out var recordDeclaration))
+                    throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Record", actual = recordType.ToString() });
+                var fieldDeclaration = recordDeclaration.Fields.SingleOrDefault(field => field.Id == expression.ReferenceId)
+                    ?? throw ModulesExceptionFactory.Error("parse", "UnknownRecordField", locus, new { recordType = recordType.Name, fieldId = expression.ReferenceId });
+                inferred = fieldDeclaration.Type;
+                break;
+            case "seq.empty":
+                Arity(0);
+                if (expression.ElementType is null || expression.Capacity is null or < 0 or > 256)
+                    throw ModulesExceptionFactory.Error("parse", "InvalidSeqCapacity", locus);
+                inferred = new TypeRef("Seq", Element: expression.ElementType, Capacity: expression.Capacity);
+                break;
+            case "seq.length":
+                Arity(1); var lengthSequence = Arg(0); if (lengthSequence.Kind != "Seq") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq", actual = lengthSequence.ToString() }); inferred = new TypeRef("I64"); break;
+            case "seq.get":
+                Arity(2); var getSequence = Arg(0); if (getSequence.Kind != "Seq" || getSequence.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq", actual = getSequence.ToString() }); Require(Arg(1), new TypeRef("I64"), "index"); inferred = getSequence.Element; break;
+            case "seq.append":
+                Arity(2); var appendSequence = Arg(0); if (appendSequence.Kind != "Seq" || appendSequence.Element is null) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq", actual = appendSequence.ToString() }); Require(Arg(1), appendSequence.Element, "element"); inferred = appendSequence; break;
+            case "seq.sum_i64":
+                Arity(1); var sumSequence = Arg(0); if (sumSequence.Kind != "Seq" || sumSequence.Element?.Kind != "I64") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq<I64,N>", actual = sumSequence.ToString() }); inferred = new TypeRef("MathInt"); break;
+            case "seq.prefix_sum_i64":
+                Arity(2); var prefixSequence = Arg(0); if (prefixSequence.Kind != "Seq" || prefixSequence.Element?.Kind != "I64") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq<I64,N>", actual = prefixSequence.ToString() }); Require(Arg(1), new TypeRef("I64"), "prefixLength"); inferred = new TypeRef("MathInt"); break;
+            case "forall.sequence":
+                if (insideQuantifier) throw ModulesExceptionFactory.Error("parse", "NestedProofQuantifierNotSupported", locus);
+                if (expression.BinderId is null || expression.Sequence is null || expression.Body is null)
+                    throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", locus);
+                if (boundTypes.ContainsKey(expression.BinderId)) throw ModulesExceptionFactory.Error("parse", "DuplicateProofBinder", locus, new { expression.BinderId });
+                var quantifiedSequence = ValidateProofExpression(expression.Sequence, foldSequence, accumulator, environment, typeById, boundTypes, false, $"{locus}/sequence");
+                if (quantifiedSequence.Kind != "Seq") throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { expected = "Seq", actual = quantifiedSequence.ToString() });
+                var quantifiedBody = ValidateProofExpression(expression.Body, foldSequence, accumulator, environment, typeById, boundTypes.Add(expression.BinderId, new TypeRef("I64")), true, $"{locus}/body");
+                Require(quantifiedBody, new TypeRef("Bool"), "body");
+                inferred = new TypeRef("Bool");
+                break;
+            default:
+                throw ModulesExceptionFactory.Error("parse", "UnsupportedProofOpcode", locus, new { opcode = expression.Op });
+        }
+        if (!TypesEquivalent(expression.Type, inferred))
+            throw ModulesExceptionFactory.Error("parse", "TypeMismatch", locus, new { op = expression.Op, role = "result", expected = inferred.ToString(), actual = expression.Type.ToString() });
+        return inferred;
+    }
+
+    private static int ProofWorstCaseCost(ProofExpression expression)
+    {
+        const int saturation = ProofEvaluationStepsHardMaximum + 1;
+        int Add(int left, int right) => left >= saturation - right ? saturation : left + right;
+        int Multiply(int left, int right) => left == 0 || right == 0 ? 0 : left > saturation / right ? saturation : left * right;
+        var cost = 1;
+        foreach (var argument in expression.Args) cost = Add(cost, ProofWorstCaseCost(argument));
+        if (expression.Sequence is not null) cost = Add(cost, ProofWorstCaseCost(expression.Sequence));
+        if (expression.Body is not null && expression.Op != "forall.sequence") cost = Add(cost, ProofWorstCaseCost(expression.Body));
+        if (expression.Op is "seq.sum_i64" or "seq.prefix_sum_i64") cost = Add(cost, expression.Args[0].Type.Capacity ?? 0);
+        if (expression.Op == "forall.sequence")
+        {
+            var capacity = expression.Sequence!.Type.Capacity ?? 0;
+            cost = Add(cost, Multiply(capacity, Add(1, ProofWorstCaseCost(expression.Body!))));
+        }
+        return cost;
+    }
+
+    private static ProofExpression ParseProofExpression(
+        JsonElement value,
+        string locus,
+        int depth,
+        ImmutableHashSet<string> typeIds,
+        StrogoLimits limits,
+        ref int nodes)
+    {
+        if (depth > ProofExpressionDepthHardMaximum)
+            throw ModulesExceptionFactory.Error("parse", "ProofExpressionDepthExceeded", locus, new { depth, max = ProofExpressionDepthHardMaximum });
+        nodes++;
+        if (nodes > ProofExpressionNodesHardMaximum)
+            throw ModulesExceptionFactory.Error("parse", "ProofExpressionNodeLimitExceeded", locus, new { actual = nodes, max = ProofExpressionNodesHardMaximum });
+        if (value.ValueKind != JsonValueKind.Object || !value.TryGetProperty("op", out var opValue))
+            throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", locus, new { expected = "proof object" });
+        var op = RequireString(opValue);
+        if (!SupportedProofOpcodes.Contains(op))
+            throw ModulesExceptionFactory.Error("parse", "UnsupportedProofOpcode", locus, new { opcode = op });
+        CheckObject(value, locus, ProofExpressionFields(op));
+        var type = ParseProofType(value.GetProperty("type"), typeIds, limits);
+
+        return op switch
+        {
+            "param" => new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty, ReferenceId: RequireId(value.GetProperty("id"))),
+            "proof.bound" => new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty, BinderId: RequireId(value.GetProperty("binderId"))),
+            "fold.environment" => new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty, Position: RequireInt32(value.GetProperty("position"), $"{locus}/position")),
+            "i64.const" => ParseProofNumber(op, type, value.GetProperty("value"), locus, requireI64: true),
+            "math.const" => ParseProofNumber(op, type, value.GetProperty("value"), locus, requireI64: false),
+            "bool.const" => value.GetProperty("value").ValueKind is JsonValueKind.True or JsonValueKind.False
+                ? new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty, BoolValue: value.GetProperty("value").GetBoolean())
+                : throw ModulesExceptionFactory.Error("parse", "SchemaInvalid", locus, new { reason = "ExpectedBool" }),
+            "record.make" => new ProofExpression(op, type, ParseProofArguments(value.GetProperty("args"), locus, depth, typeIds, limits, ref nodes), RecordType: RequireId(value.GetProperty("recordType")), FieldIds: ParseIdArray(value.GetProperty("fieldIds"), $"{locus}/fieldIds", "DuplicateFieldId")),
+            "record.get" => new ProofExpression(op, type, ParseProofArguments(value.GetProperty("args"), locus, depth, typeIds, limits, ref nodes), ReferenceId: RequireId(value.GetProperty("fieldId"))),
+            "seq.empty" => ParseProofEmptySequence(op, type, value, locus, depth, typeIds, limits, ref nodes),
+            "forall.sequence" => new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty,
+                BinderId: RequireId(value.GetProperty("binderId")),
+                Sequence: ParseProofExpression(value.GetProperty("sequence"), $"{locus}/sequence", depth + 1, typeIds, limits, ref nodes),
+                Body: ParseProofExpression(value.GetProperty("body"), $"{locus}/body", depth + 1, typeIds, limits, ref nodes)),
+            "fold.prefixLength" or "fold.sequence" or "fold.initialAccumulator" or "fold.accumulator"
+                => new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty),
+            _ => new ProofExpression(op, type, ParseProofArguments(value.GetProperty("args"), locus, depth, typeIds, limits, ref nodes))
+        };
+    }
+
+    private static ProofExpression ParseProofEmptySequence(
+        string op,
+        TypeRef type,
+        JsonElement value,
+        string locus,
+        int depth,
+        ImmutableHashSet<string> typeIds,
+        StrogoLimits limits,
+        ref int nodes)
+    {
+        var elementType = ParseType(value.GetProperty("elementType"), 0, limits);
+        EnsureTypeRef(elementType, typeIds, $"{locus}/elementType");
+        return new ProofExpression(
+            op,
+            type,
+            ParseProofArguments(value.GetProperty("args"), locus, depth, typeIds, limits, ref nodes),
+            ElementType: elementType,
+            Capacity: RequireInt32(value.GetProperty("capacity"), $"{locus}/capacity"));
+    }
+
+    private static ImmutableArray<ProofExpression> ParseProofArguments(
+        JsonElement value,
+        string locus,
+        int depth,
+        ImmutableHashSet<string> typeIds,
+        StrogoLimits limits,
+        ref int nodes)
+    {
+        RequireArray(value, $"{locus}/args");
+        var result = ImmutableArray.CreateBuilder<ProofExpression>();
+        var index = 0;
+        foreach (var item in value.EnumerateArray())
+            result.Add(ParseProofExpression(item, $"{locus}/arg/{index++}", depth + 1, typeIds, limits, ref nodes));
+        return result.ToImmutable();
+    }
+
+    private static ProofExpression ParseProofNumber(string op, TypeRef type, JsonElement value, string locus, bool requireI64)
+    {
+        var text = RequireString(value);
+        if (!CanonicalI64Pattern.IsMatch(text) || (requireI64 && !long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _)))
+            throw ModulesExceptionFactory.Error("parse", requireI64 ? "InvalidI64" : "SchemaInvalid", locus, new { value = text, reason = "InvalidCanonicalInteger" });
+        return new ProofExpression(op, type, ImmutableArray<ProofExpression>.Empty, NumberValue: text);
+    }
+
+    private static TypeRef ParseProofType(JsonElement value, ImmutableHashSet<string> typeIds, StrogoLimits limits)
+    {
+        if (value.ValueKind == JsonValueKind.String && value.GetString() == "MathInt") return new TypeRef("MathInt");
+        var type = ParseType(value, 0, limits);
+        EnsureTypeRef(type, typeIds, "proof.type");
+        if (ContainsMathInt(type)) throw ModulesExceptionFactory.Error("parse", "TypeMismatch", details: new { expected = "executable proof type", actual = type.ToString() });
+        return type;
+
+        static bool ContainsMathInt(TypeRef candidate)
+            => candidate.Kind == "MathInt" || candidate.Element is not null && ContainsMathInt(candidate.Element);
+    }
+
+    private static IReadOnlyCollection<string> ProofExpressionFields(string op) => op switch
+    {
+        "param" => ["op", "type", "id"],
+        "proof.bound" => ["op", "type", "binderId"],
+        "fold.environment" => ["op", "type", "position"],
+        "i64.const" or "math.const" or "bool.const" => ["op", "type", "value"],
+        "record.make" => ["op", "type", "args", "recordType", "fieldIds"],
+        "record.get" => ["op", "type", "args", "fieldId"],
+        "seq.empty" => ["op", "type", "args", "elementType", "capacity"],
+        "forall.sequence" => ["op", "type", "binderId", "sequence", "body"],
+        "fold.prefixLength" or "fold.sequence" or "fold.initialAccumulator" or "fold.accumulator" => ["op", "type"],
+        _ => ["op", "type", "args"]
+    };
 
     private static TypeRef ParseType(JsonElement value, int depth, StrogoLimits limits)
     {

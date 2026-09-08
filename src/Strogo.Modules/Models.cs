@@ -96,7 +96,25 @@ public sealed record FunctionNode(
     ImmutableArray<string> Args,
     NodeMetadata Metadata,
     FunctionBody? ThenRegion = null,
-    FunctionBody? ElseRegion = null);
+    FunctionBody? ElseRegion = null,
+    FunctionBody? StepRegion = null,
+    ProofExpression? Invariant = null);
+
+public sealed record ProofExpression(
+    string Op,
+    TypeRef Type,
+    ImmutableArray<ProofExpression> Args,
+    string? ReferenceId = null,
+    string? NumberValue = null,
+    bool? BoolValue = null,
+    string? RecordType = null,
+    ImmutableArray<string> FieldIds = default,
+    TypeRef? ElementType = null,
+    int? Capacity = null,
+    int? Position = null,
+    string? BinderId = null,
+    ProofExpression? Sequence = null,
+    ProofExpression? Body = null);
 
 public sealed record NodeMetadata(
     string? Value,
@@ -173,7 +191,12 @@ public sealed record IrInstruction(
     TypeRef Type,
     NodeMetadata Metadata,
     RegionIr? ThenRegion = null,
-    RegionIr? ElseRegion = null);
+    RegionIr? ElseRegion = null,
+    FoldRegionIr? Fold = null);
+
+public sealed record FoldRegionIr(
+    RegionIr Step,
+    ProofExpression Invariant);
 
 public sealed record RegionIr(
     ImmutableArray<FunctionParameter> Parameters,

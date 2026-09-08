@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "fold.sum",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "sum",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "sumContract",
+      "body": {
+        "parameters": ["items", "initial"],
+        "nodes": [
+          {
+            "id": "result",
+            "op": "fold",
+            "type": "I64",
+            "args": ["items", "initial"],
+            "stepRegion": {
+              "parameters": ["index", "element", "accumulator"],
+              "nodes": [
+                { "id": "next", "op": "i64.add", "type": "I64", "args": ["accumulator", "element"] }
+              ],
+              "result": "next"
+            },
+            "invariant": {
+              "op": "bool.and",
+              "type": "Bool",
+              "args": [
+                {
+                  "op": "eq",
+                  "type": "Bool",
+                  "args": [
+                    { "op": "math.from_i64", "type": "MathInt", "args": [{ "op": "fold.accumulator", "type": "I64" }] },
+                    {
+                      "op": "seq.prefix_sum_i64",
+                      "type": "MathInt",
+                      "args": [
+                        { "op": "fold.sequence", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+                        { "op": "fold.prefixLength", "type": "I64" }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "math.le",
+                  "type": "Bool",
+                  "args": [
+                    { "op": "math.const", "type": "MathInt", "value": "0" },
+                    { "op": "seq.sum_i64", "type": "MathInt", "args": [{ "op": "fold.sequence", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } }] }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "sumWithBias",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" },
+        { "id": "bias", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "contractRef": "sumWithBiasContract",
+      "body": {
+        "parameters": ["items", "initial", "bias"],
+        "nodes": [
+          {
+            "id": "result",
+            "op": "fold",
+            "type": "I64",
+            "args": ["items", "initial", "bias"],
+            "stepRegion": {
+              "parameters": ["index", "element", "accumulator", "environmentBias"],
+              "nodes": [
+                { "id": "withElement", "op": "i64.add", "type": "I64", "args": ["accumulator", "element"] },
+                { "id": "next", "op": "i64.add", "type": "I64", "args": ["withElement", "environmentBias"] }
+              ],
+              "result": "next"
+            },
+            "invariant": { "op": "eq", "type": "Bool", "args": [{ "op": "fold.environment", "type": "I64", "position": "0" }, { "op": "fold.environment", "type": "I64", "position": "0" }] }
+          }
+        ],
+        "result": "result"
+      }
+    }
+  ],
+  "exports": ["sum", "sumWithBias"]
+}

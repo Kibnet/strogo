@@ -5,6 +5,8 @@ namespace Strogo.Modules;
 
 public static class ModulesCodec
 {
+    private static object PayloadProofType(TypeRef type) => type.Kind == "MathInt" ? "MathInt" : PayloadType(type);
+
     private static object PayloadType(TypeRef type) => type.Kind switch
     {
         "I64" or "Bool" => type.Kind,
@@ -69,8 +71,55 @@ public static class ModulesCodec
             case "seq.empty": payload["elementType"] = PayloadType(node.Metadata.ElementType!); payload["capacity"] = node.Metadata.Capacity; break;
             case "call": payload["functionRef"] = node.Metadata.FunctionRef; break;
             case "if": payload["thenRegion"] = PayloadBody(node.ThenRegion!); payload["elseRegion"] = PayloadBody(node.ElseRegion!); break;
+            case "fold": payload["stepRegion"] = PayloadBody(node.StepRegion!); payload["invariant"] = PayloadProofExpression(node.Invariant!); break;
         }
 
+        return payload;
+    }
+
+    private static object PayloadProofExpression(ProofExpression expression)
+    {
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["op"] = expression.Op,
+            ["type"] = PayloadProofType(expression.Type)
+        };
+        switch (expression.Op)
+        {
+            case "param": payload["id"] = expression.ReferenceId; break;
+            case "proof.bound": payload["binderId"] = expression.BinderId; break;
+            case "fold.environment": payload["position"] = expression.Position!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture); break;
+            case "i64.const":
+            case "math.const": payload["value"] = expression.NumberValue; break;
+            case "bool.const": payload["value"] = expression.BoolValue; break;
+            case "record.make":
+                payload["args"] = expression.Args.Select(PayloadProofExpression).ToArray();
+                payload["recordType"] = expression.RecordType;
+                payload["fieldIds"] = expression.FieldIds;
+                break;
+            case "record.get":
+                payload["args"] = expression.Args.Select(PayloadProofExpression).ToArray();
+                payload["fieldId"] = expression.ReferenceId;
+                break;
+            case "seq.empty":
+                payload["args"] = Array.Empty<object>();
+                payload["elementType"] = PayloadType(expression.ElementType!);
+                payload["capacity"] = expression.Capacity;
+                break;
+            case "forall.sequence":
+                payload["binderId"] = expression.BinderId;
+                payload["sequence"] = PayloadProofExpression(expression.Sequence!);
+                payload["body"] = PayloadProofExpression(expression.Body!);
+                break;
+            case "fold.prefixLength":
+            case "fold.sequence":
+            case "fold.initialAccumulator":
+            case "fold.accumulator":
+                break;
+            default:
+                payload["args"] = expression.Args.Select(PayloadProofExpression).ToArray();
+                break;
+        }
         return payload;
     }
 
@@ -110,6 +159,7 @@ public static class ModulesCodec
             case "seq.empty": payload["elementType"] = PayloadType(instruction.Metadata.ElementType!); payload["capacity"] = instruction.Metadata.Capacity; break;
             case "call": payload["functionRef"] = instruction.Metadata.FunctionRef; break;
             case "if": payload["thenRegion"] = PayloadRegionIr(instruction.ThenRegion!); payload["elseRegion"] = PayloadRegionIr(instruction.ElseRegion!); break;
+            case "fold": payload["stepRegion"] = PayloadRegionIr(instruction.Fold!.Step); payload["invariant"] = PayloadProofExpression(instruction.Fold.Invariant); break;
         }
 
         return payload;

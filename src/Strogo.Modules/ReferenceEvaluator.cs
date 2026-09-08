@@ -152,6 +152,7 @@ public static class ModulesReferenceEvaluator
                         "seq.get" => GetSequenceItem(operands, nodeLocus),
                         "seq.append" => AppendSequence(operands, nodeLocus),
                         "if" => EvaluateIf(instruction, operands, nodeLocus, callDepth),
+                        "fold" => EvaluateFold(instruction, operands, nodeLocus, callDepth),
                         "call" => EvaluateCall(instruction, operands, nodeLocus, callDepth),
                         _ => throw ModulesExceptionFactory.Error("evaluation", "UnsupportedRuntimeOpcode", nodeLocus, new { instruction.Op })
                     };
@@ -185,6 +186,27 @@ public static class ModulesReferenceEvaluator
             if (instruction.Metadata.FunctionRef is null || !functions.TryGetValue(instruction.Metadata.FunctionRef, out var callee))
                 throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "UnknownCallee" });
             return EvaluateFunction(callee, operands, callDepth + 1);
+        }
+
+        private ModuleValue EvaluateFold(IrInstruction instruction, ModuleValue[] operands, string nodeLocus, int callDepth)
+        {
+            if (instruction.Fold is null || operands.Length < 2)
+                throw ModulesExceptionFactory.Error("evaluation", "InternalInvariantViolation", nodeLocus, new { reason = "InvalidFold" });
+
+            var sequence = Sequence(operands[0], nodeLocus);
+            var accumulator = operands[1];
+            var environment = operands.Skip(2).ToArray();
+            for (var index = 0; index < sequence.Items.Length; index++)
+            {
+                ConsumeStep($"{nodeLocus}/iteration/{index.ToString(CultureInfo.InvariantCulture)}");
+                var stepArguments = new ModuleValue[3 + environment.Length];
+                stepArguments[0] = new ModuleI64(index);
+                stepArguments[1] = sequence.Items[index];
+                stepArguments[2] = accumulator;
+                Array.Copy(environment, 0, stepArguments, 3, environment.Length);
+                accumulator = EvaluateRegion(instruction.Fold.Step, stepArguments, $"{nodeLocus}/step/{index.ToString(CultureInfo.InvariantCulture)}", callDepth);
+            }
+            return accumulator;
         }
 
         private ModuleValue MakeRecord(IrInstruction instruction, ModuleValue[] operands, string nodeLocus)

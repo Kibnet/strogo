@@ -63,13 +63,27 @@ public static class ModulesCompiler
                 : node.Metadata;
             RegionIr? thenRegion = null;
             RegionIr? elseRegion = null;
+            FoldRegionIr? fold = null;
             if (node.Op == "if")
             {
                 var environmentTypes = node.Args.Skip(1).Select(ValueType).ToImmutableArray();
                 thenRegion = CompileRegion(node.ThenRegion!, BindParameters(node.ThenRegion!, environmentTypes));
                 elseRegion = CompileRegion(node.ElseRegion!, BindParameters(node.ElseRegion!, environmentTypes));
             }
-            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, metadata, thenRegion, elseRegion);
+            else if (node.Op == "fold")
+            {
+                var sequenceType = ValueType(node.Args[0]);
+                var accumulatorType = ValueType(node.Args[1]);
+                var stepTypes = ImmutableArray.CreateBuilder<TypeRef>(node.Args.Length + 1);
+                stepTypes.Add(new TypeRef("I64"));
+                stepTypes.Add(sequenceType.Element!);
+                stepTypes.Add(accumulatorType);
+                stepTypes.AddRange(node.Args.Skip(2).Select(ValueType));
+                fold = new FoldRegionIr(
+                    CompileRegion(node.StepRegion!, BindParameters(node.StepRegion!, stepTypes.ToImmutable())),
+                    node.Invariant!);
+            }
+            var instruction = new IrInstruction(instructions.Count, node.Id, node.Op, operands, node.Type, metadata, thenRegion, elseRegion, fold);
             instructions.Add(instruction);
             nodeIndices[node.Id] = instruction.DestinationIndex;
         }
