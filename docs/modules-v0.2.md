@@ -212,7 +212,8 @@ Binder требует точного совпадения exports, `contractRef`
   - scalar и composite exact-outcome proofs: по две разные реализации приняты, wrong outcome и слабый/partial owner domain отклонены;
   - deterministic witness replay: конкретное расхождение маркируется `Counterexample` только после независимого вычисления candidate и owner model;
   - owner bundle v0.4, bounded proof evaluator и явная v0.3→v0.4 migration;
-  - root-only fold для scalar и composite accumulator, exact owner-prefix proof, stable obligations и generated .NET execution.
+  - root-only fold для scalar и composite accumulator, exact owner-prefix proof, stable obligations и generated .NET execution;
+  - validation-only `dotnet-managed.v1` package с полным `strogo.validation-proof.v0.1`, canonical manifest/package identities и одним byte-identical DLL artifact для Windows/Linux consumers.
 
 ## 12) Проверяемые фикстуры
 
@@ -246,4 +247,6 @@ Binder требует точного совпадения exports, `contractRef`
 
 ## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics, один bounded left fold, owner bundle v0.4 и scalar/composite exact-outcome proof. Он ещё не реализует разрешение import closure, helper contracts, nested folds, relational accumulator representation, human approval/admission, package binding или runtime precondition facade. G05/G06 и преимущество обязательного invariant по стоимости/устойчивости не измерены; Noita scanner остаётся development-only исследованием. Поэтому результат ещё не является готовой переносимой библиотекой Strogo и не закрывает цели проекта целиком.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics, один bounded left fold, owner bundle v0.4, scalar/composite exact-outcome proof и actual validation package `dotnet-managed.v1`. На clean `aaf2dc2` canonical proof closure из `290` файлов, full proof, cross-root checked build и два package roots воспроизводимы; один manifest/package/artifact triple прошёл validation-before-invocation и standalone consumer на Windows x64 и Linux x64 под WSL2. Публичное evidence: [`artifacts/e06/dotnet-package-aaf2dc2/`](../artifacts/e06/dotnet-package-aaf2dc2/REPORT.md).
+
+Профиль пока не получает итоговый статус `Portable`: не закрыты runtime closure digests, missing-runtime row, performance и JIT diagnostic gates A10–A12; JVM profile и общий comparison report отсутствуют. Validation package не является production admission и не подключён к `TrustedModuleRuntime`. Также не реализованы import closure, helper contracts, nested folds и relational accumulator representation. G05/G06 и преимущество обязательного invariant по стоимости/устойчивости не измерены; Noita scanner остаётся development-only исследованием.

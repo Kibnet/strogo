@@ -1,0 +1,1 @@
+{"arguments":["verify","candidate.dfy","--enforce-determinism","--cores","2","--verification-time-limit","30"],"executable":"tools/dafny","timeoutSeconds":"180"}

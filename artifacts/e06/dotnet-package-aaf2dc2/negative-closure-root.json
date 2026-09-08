@@ -1,0 +1,1 @@
+{"case":"broader-dafny-closure-root","failureCode":"PackageHarnessRejected","failureDetails":{"reason":"Dafny executable must be a direct child of the exact --dafny-root"},"failureLocus":"$","outputPackageCreated":false,"receiptCreated":false,"schemaVersion":"strogo.dotnet-package-negative.v0.1","status":"Passed"}

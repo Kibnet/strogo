@@ -1,0 +1,1 @@
+{"code":"PackageHarnessRejected","details":{"reason":"Dafny executable must be a direct child of the exact --dafny-root"},"locus":"$","status":"Rejected"}
