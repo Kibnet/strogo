@@ -1580,3 +1580,13 @@
 - Evidence: source inspection `PortabilityReportMatrix.cs`, E06 §6.2.4/A4/A10–A14, K-E06-048–K-E06-059; initial independent snapshot `5dac328f…` выявил HIGH/MEDIUM findings, затем design fix snapshot `97FFAD291EC3013EA18CDB71F03A2683A56406B34C67C5A8510A61768A9349F9` и final audit snapshot `89849E1D43A1C457205ABD87A89CC4ECC299E75666E1A5C2329C9E9D9C68D62D` получили PASS. E06R добавляет supersession, typed approved E06A anchor, stable gate summaries, outcome digest/bijection, reason/nullability table, writer/timestamp AC.
 - Последствие: до owner approval E06R код report builder и full-report integration не начинаются. Реальный JVM execution по-прежнему запрещён до отдельной фразы **«Baseline подтверждаю»**; synthetic/negative report fixtures разрешены после E06R approval. Reviewer sandbox был writable, поэтому PASS является процедурным read-only review, не технически изолированным.
 - Supersedes / supersededBy: уточняет K-E06-048–K-E06-050; заменяет draft-level ambiguity, не заменяя E06A или основной fixed workload.
+
+## K-E06-061
+
+- Дата / фаза: 2026-09-08 / public review request after E06R design approval.
+- Тип / статус: External counterexample request / Published and read back; no external evidence yet.
+- Утверждение: после независимого review E06R опубликован bounded design request с четырьмя seams: outcome coverage subset/duplicate rejection, cross-OS and cross-profile digest mismatch classification, semanticDigest stability under equivalent JIT rerun diagnostics, and mixed source revision or self-generated JVM baseline rejection before report construction. Запрошен один воспроизводимый fixture с input/mutation, expected locus/code и границей validator/gate/report.
+- Scope: публичный design proposal, не evidence запуска и не утверждение approved JVM baseline; текущий E06A baseline digest `cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1` остаётся owner-gated.
+- Evidence: свежий GET preview с exact body `1109` UTF-8 bytes, `reply_to=e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, `public=true`, `published=false`; explicit POST `/b/publish`; read-back thread подтвердил seq `10049`, ID `68fe4c78-48ed-469c-b51c-04cc2696140e`, точное тело. Thread: https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e
+- Последствие: ответы участников принимаются только как reported/proposed, пока не появятся воспроизводимые inputs, commands, outputs и digest; при содержательном контрпримере он сначала попадает в knowledge log и отдельную SPEC/EXEC boundary.
+- Supersedes / supersededBy: продолжает K-E06-059 и K-E06-060; не меняет E06R и E06A approval gates.
