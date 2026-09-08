@@ -189,6 +189,9 @@ public static class PortabilityPackage
         if (files.Count(file => file.Path == "content/runtime-requirement.json" && file.Role == "metadata") != 1) Reject("RuntimeRequirementMissing", "$/files");
         if (files.Count(file => file.Path == "content/translator-inventory.json" && file.Role == "metadata") != 1) Reject("TranslatorInventoryMissing", "$/files");
         if (files.Count(file => file.Path == "content/build-toolchain-inventory.json" && file.Role == "metadata") != 1) Reject("BuildToolchainInventoryMissing", "$/files");
+        if (files.Count(file => file.Path == "content/proof-toolchain.json" && file.Role == "metadata") != 1) Reject("ProofToolchainInventoryMissing", "$/files");
+        if (files.Count(file => file.Path == "content/proof-closure.json" && file.Role == "metadata") != 1) Reject("ProofClosureInventoryMissing", "$/files");
+        if (files.Count(file => file.Path == "content/proof-transcript.json" && file.Role == "metadata") != 1) Reject("ProofTranscriptMissing", "$/files");
     }
 
     private static void ValidateBoundMetadata(ImmutableArray<PortabilityPackageContent> content, PortabilityPackageDefinition definition, ImmutableArray<PortabilityPackageFile> files)
@@ -207,21 +210,28 @@ public static class PortabilityPackage
         var module = SingleRole(files, "module");
         var bundle = SingleRole(files, "bundle");
         var proof = SingleRole(files, "proof");
-        var proofSource = SingleRole(files, "proof-source");
-        _ = SingleRole(files, "source-map");
+        var proofSources = files.Where(file => file.Role == "proof-source").ToImmutableArray();
+        if (proofSources.Length == 0) Reject("ContentRoleCardinality", "$/files/proof-source");
+        var sourceMap = SingleRole(files, "source-map");
         _ = SingleRole(files, "adapter");
         if (module.Sha256 != definition.ModuleDigest) Reject("ModuleDigestMismatch", "$/moduleDigest");
         var bundleBytes = read(bundle.Path);
         using (var bundleDocument = CanonicalJson.ParseStrict(Encoding.UTF8.GetString(bundleBytes)))
             if (!CanonicalJson.Encode(bundleDocument.RootElement).SequenceEqual(bundleBytes)) Reject("OwnerBundleInvalid", bundle.Path);
         if (OwnerBundleV04Codec.BundleDigest(bundleBytes) != definition.OwnerBundleDigest) Reject("OwnerBundleDigestMismatch", "$/ownerBundleDigest");
-        if (proofSource.Sha256 != definition.DafnySourceDigest) Reject("DafnySourceDigestMismatch", "$/dafnySourceDigest");
+        if (proofSources.Length != 1 || proofSources[0].Sha256 != definition.DafnySourceDigest) Reject("DafnySourceDigestMismatch", "$/dafnySourceDigest");
 
         var proofBytes = read(proof.Path);
-        using var proofDocument = CanonicalJson.ParseStrict(Encoding.UTF8.GetString(proofBytes));
-        if (!CanonicalJson.Encode(proofDocument.RootElement).SequenceEqual(proofBytes)) Reject("ProofMetadataInvalid", proof.Path);
-        Fields(proofDocument.RootElement, "schemaVersion", "proofIdentity");
-        if (String(proofDocument.RootElement, "schemaVersion") != "strogo.validation-proof.v0.1" || Digest(proofDocument.RootElement, "proofIdentity") != definition.ProofDigest) Reject("ProofDigestMismatch", "$/proofDigest");
+        PortabilityValidationProof.Validate(
+            proofBytes,
+            definition.ProofDigest,
+            definition.ModuleDigest,
+            definition.OwnerBundleDigest,
+            PortabilityValidationProof.ProofSourcesDigest(proofSources),
+            PortabilityValidationProof.SourceMapDigest(read(sourceMap.Path)),
+            read("content/proof-toolchain.json"),
+            read("content/proof-closure.json"),
+            read("content/proof-transcript.json"));
 
         var api = read("content/public-api.json");
         var runtime = read("content/runtime-requirement.json");

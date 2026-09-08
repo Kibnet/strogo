@@ -1360,3 +1360,23 @@
 - Evidence: ignored reports `artifacts/local-validation/e06/package-windows-6a67a11.json` и `package-linux-6a67a11.json`; clean Git status до запусков, `Kernel.slnx` Release build.
 - Последствие: package-format implementation checkpoint воспроизводим на двух ОС; следующий run должен заменить synthetic entry bytes реальной retained DLL и сохранить сам package/receipt как public evidence.
 - Supersedes / supersededBy: подтверждает K-E06-037 на exact public revision; A4 остаётся частичным до actual target package/API scan.
+
+## K-E06-039
+
+- Дата / фаза: 2026-09-08 / public package checkpoint consultation.
+- Тип / статус: External consultation / Published and read back; no counterexample received yet.
+- Утверждение: публичный checkpoint сообщил о validation-only package validator на `513f2c7`, явно отделил synthetic entry от будущего actual package и запросил минимальный counterexample к trusted external manifest identity: replay, package/report mix-up, TOCTOU либо иной seam. Сообщение опубликовано как #9885, ID `f82cf812-d990-4e0c-af2f-9528b5e3887a`. Первая автоматическая read-back проверка ошибочно ожидала JSON, хотя thread endpoint вернул HTML; повторное чтение фактического HTML подтвердило публикацию, поэтому повторный publish не выполнялся.
+- Scope: публичная консультация и надёжность publication read-back; сообщение не является E06 evidence или внешним подтверждением validator.
+- Evidence: [Posting Board thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e), seq `9885`, message ID `f82cf812-d990-4e0c-af2f-9528b5e3887a`.
+- Последствие: публикацию следует подтверждать по фактическому media type/body, а не по предположенной JSON schema; полученный counterexample станет development fixture и не будет выдан за независимое evidence.
+- Supersedes / supersededBy: продолжает consultation history E06 и оставляет открытым TOCTOU/replay challenge после K-E06-037.
+
+## K-E06-040
+
+- Дата / фаза: 2026-09-08 / validation proof and actual package harness.
+- Тип / статус: Contract conformance defect / Confirmed and fixed on working tree; exact clean-commit package run pending.
+- Утверждение: synthetic package использовал `proof.json` только с `schemaVersion`/lowering `proofIdentity`, а manifest ошибочно называл этот internal identity `proofDigest`. Это противоречило E06 §6.2.1, где `proofDigest` является domain hash полного `strogo.validation-proof.v0.1`. Validator теперь требует все нормативные proof fields, `Verified` outcome и sorted verified obligations, вычисляет artifact digest и связывает module/bundle, proof sources, source map, verifier inventory, transitive closure inventory и normative transcript. Legacy surrogate, изменённый source map и изменённый verifier inventory отвергаются даже после пересчёта внешних package hashes.
+- Scope: E06 validation-only proof/package identity. Исправление не доказывает verifier/compiler/runtime correctness, portable production admission или JVM profile.
+- Evidence: `PortabilityValidationProof.cs`, обновлённый `PortabilityPackage.cs`, conformance `PASS portability contract checks=87 valid=10 refusals=3 transport=24 mutations=4`, Release solution build `0 warnings / 0 errors`; actual package harness и Windows/Linux validation-before-invocation drivers добавлены, но ещё не выполнены на clean commit.
+- Последствие: actual package можно строить только из proof/build reports одной clean revision; harness включает real DLL и content-addressed 290-file Dafny closure inventory, строит два byte-equal package roots и требует external manifest digest перед staging/invocation.
+- Supersedes / supersededBy: исправляет proof-identity часть K-E06-037/K-E06-038; exact actual package run должен заменить working-tree статус.

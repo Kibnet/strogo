@@ -13,5 +13,6 @@
     <Project Path="tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj" />
     <Project Path="tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj" />
     <Project Path="tests/Strogo.Modules.Portability.Conformance/Strogo.Modules.Portability.Conformance.csproj" />
+    <Project Path="tests/Strogo.Modules.Portability.PackageHarness/Strogo.Modules.Portability.PackageHarness.csproj" />
   </Folder>
 </Solution>

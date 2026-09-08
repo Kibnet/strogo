@@ -156,13 +156,65 @@ var buildToolchainInventoryBytes = CanonicalJson.Encode(new
 });
 var canonicalModuleBytes = parsed.CanonicalSource;
 var canonicalOwnerBytes = OwnerBundleV04Codec.Canonicalize(owner.BundleId, owner.Types, owner.EntryContracts, owner.Models, owner.Limits);
+var sourceMapBytes = CanonicalJson.Encode(lowering.SourceMap);
+var proofToolchainBytes = CanonicalJson.Encode(new
+{
+    files = new[] { new { path = "tools/dafny", sha256 = new string('c', 64), length = "1", role = "executable" } },
+    versions = new[] { new { id = "dafny", value = "4.11.0" } }
+});
+var proofClosureBytes = CanonicalJson.Encode(new
+{
+    files = new[] { new { path = "closure/dafny", sha256 = new string('d', 64), length = "1", role = "runtime" } },
+    versions = new[] { new { id = "dafny-closure", value = "4.11.0-linux-x64" } }
+});
+var proofSourceFile = new PortabilityPackageFile(
+    "content/candidate.dfy",
+    CanonicalJson.RawDigest(lowering.SourceBytes),
+    lowering.SourceBytes.LongLength.ToString(System.Globalization.CultureInfo.InvariantCulture),
+    "proof-source");
+var proofTranscriptBytes = CanonicalJson.Encode(new
+{
+    schemaVersion = "strogo.validation-proof-transcript.v0.1",
+    outcome = "Verified",
+    runs = new[]
+    {
+        new { lane = "a", verified = "42", errors = "0" },
+        new { lane = "b", verified = "42", errors = "0" }
+    },
+    twoCleanReplay = "ByteEqual"
+});
+var validationProof = PortabilityValidationProof.Build(new(
+    binding.Module.SourceDigest,
+    binding.OwnerBundle.BundleDigest,
+    PortabilityValidationProof.ToolchainDigest(proofToolchainBytes),
+    PortabilityValidationProof.ClosureDigest(proofClosureBytes),
+    PortabilityValidationProof.ProofSourcesDigest([proofSourceFile]),
+    PortabilityValidationProof.TranscriptDigest(proofTranscriptBytes),
+    PortabilityValidationProof.SourceMapDigest(sourceMapBytes),
+    "Verified",
+    lowering.Obligations.Select(obligation => new PortabilityValidationProofObligation(
+        obligation.Id,
+        obligation.Kind,
+        "Verified",
+        PortabilityValidationProof.EvidenceDigest(obligation.Kind, CanonicalJson.Encode(new
+        {
+            obligationId = obligation.Id,
+            entityId = obligation.EntityId,
+            line = obligation.Line.ToString(System.Globalization.CultureInfo.InvariantCulture)
+        })))).ToArray()));
+Check(validationProof.Digest != lowering.ProofIdentity, "validation proof artifact digest is distinct from lowering proof identity");
+using (var validationProofDocument = JsonDocument.Parse(validationProof.Bytes))
+    Fields(validationProofDocument.RootElement, "schemaVersion", "contractStatus", "moduleDigest", "bundleDigest", "toolchainDigest", "closureDigest", "proofSourcesDigest", "transcriptDigest", "sourceMapDigest", "outcome", "obligations");
 var packageContent = new List<PortabilityPackageContent>
 {
     new("content/module.json", "module", canonicalModuleBytes),
     new("content/owner.json", "bundle", canonicalOwnerBytes),
-    new("content/proof.json", "proof", CanonicalJson.Encode(new { schemaVersion = "strogo.validation-proof.v0.1", proofIdentity = lowering.ProofIdentity })),
+    new("content/proof.json", "proof", validationProof.Bytes),
     new("content/candidate.dfy", "proof-source", lowering.SourceBytes),
-    new("content/source-map.json", "source-map", CanonicalJson.Encode(lowering.SourceMap)),
+    new("content/source-map.json", "source-map", sourceMapBytes),
+    new("content/proof-toolchain.json", "metadata", proofToolchainBytes),
+    new("content/proof-closure.json", "metadata", proofClosureBytes),
+    new("content/proof-transcript.json", "metadata", proofTranscriptBytes),
     new("content/strogo.portable.v01.dll", "entry-artifact", Encoding.ASCII.GetBytes("deterministic-test-assembly")),
     new("content/module-api.cs", "adapter", Encoding.ASCII.GetBytes("namespace Strogo.Portable.V01;")),
     new("content/public-api.json", "metadata", binding.PublicApiBytes),
@@ -174,7 +226,7 @@ var packageDefinition = new PortabilityPackageDefinition(
     PortabilityVersions.DotNetProfile,
     binding.Module.SourceDigest,
     binding.OwnerBundle.BundleDigest,
-    lowering.ProofIdentity,
+    validationProof.Digest,
     lowering.SourceDigest,
     PortabilityContract.DomainHash($"strogo.portability.v0.1/translator/{PortabilityVersions.DotNetProfile}", translatorInventoryBytes),
     PortabilityContract.DomainHash($"strogo.portability.v0.1/build-toolchain/{PortabilityVersions.DotNetProfile}", buildToolchainInventoryBytes),
@@ -255,6 +307,26 @@ try
     var changedAdapterReceipt = PortabilityPackage.Build(changedAdapterPackage, packageDefinition with { Content = changedAdapterContent });
     Check(changedAdapterReceipt.PortabilityManifestDigest != receiptA.PortabilityManifestDigest && PortabilityPackage.Validate(changedAdapterPackage, changedAdapterReceipt.PortabilityManifestDigest).PortabilityManifestDigest == changedAdapterReceipt.PortabilityManifestDigest, "self-consistent changed package has a distinct identity");
     Check(RejectsPackage(() => PortabilityPackage.Validate(changedAdapterPackage, receiptA.PortabilityManifestDigest)), "changed package is rejected against expected manifest identity");
+
+    var legacyProofBytes = CanonicalJson.Encode(new { schemaVersion = PortabilityValidationProof.SchemaVersion, proofIdentity = lowering.ProofIdentity });
+    var legacyProofContent = packageContent.Select(file => file.Path == "content/proof.json" ? new PortabilityPackageContent(file.Path, file.Role, legacyProofBytes) : file).ToArray();
+    var legacyProofDefinition = packageDefinition with
+    {
+        ProofDigest = PortabilityValidationProof.Digest(legacyProofBytes),
+        Content = legacyProofContent
+    };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "legacy-proof"), legacyProofDefinition)), "legacy proof identity surrogate is rejected even with recomputed outer digest");
+
+    var changedSourceMapContent = packageContent.Select(file => file.Path == "content/source-map.json" ? new PortabilityPackageContent(file.Path, file.Role, CanonicalJson.Encode(Array.Empty<object>())) : file).ToArray();
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "changed-source-map"), packageDefinition with { Content = changedSourceMapContent })), "proof rejects a changed source map even when package hashes are recomputed");
+
+    var changedProofToolchainBytes = CanonicalJson.Encode(new
+    {
+        files = new[] { new { path = "tools/dafny", sha256 = new string('e', 64), length = "1", role = "executable" } },
+        versions = new[] { new { id = "dafny", value = "4.11.0" } }
+    });
+    var changedProofToolchainContent = packageContent.Select(file => file.Path == "content/proof-toolchain.json" ? new PortabilityPackageContent(file.Path, file.Role, changedProofToolchainBytes) : file).ToArray();
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "changed-proof-toolchain"), packageDefinition with { Content = changedProofToolchainContent })), "proof rejects a changed verifier inventory even when package hashes are recomputed");
 
     var wrongRuntimeBytes = CanonicalJson.Encode(new { schemaVersion = PortabilityPackageVersions.RuntimeRequirementSchema, profileId = PortabilityVersions.JvmProfile, vmFamily = "java", vmMajor = "17", dynamicFeatures = new[] { "jit" }, nativeFeatures = Array.Empty<string>() });
     var wrongRuntimeContent = packageContent.Select(file => file.Path == "content/runtime-requirement.json" ? new PortabilityPackageContent(file.Path, file.Role, wrongRuntimeBytes) : file).ToArray();
