@@ -669,6 +669,42 @@ try
     {
         if (Directory.Exists(reportTemp)) Directory.Delete(reportTemp, recursive: true);
     }
+
+    foreach (var injected in new[]
+    {
+        ("write", new PortabilityReportWriterFaultPlan(FailWriteOrdinal: 1), "write-report"),
+        ("read", new PortabilityReportWriterFaultPlan(FailReadOrdinal: 1), "read-back-validation"),
+        ("hash", new PortabilityReportWriterFaultPlan(FailHashOrdinal: 1), "hash-completion-marker")
+    })
+    {
+        var failureDirectory = Path.Combine(Path.GetTempPath(), "strogo-report-failure-" + injected.Item1 + "-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var failure = CaptureWriterFailure(() => PortabilityReportWriter.WriteNewDirectory(portabilityReport, reportEvidence, failureDirectory, injected.Item2));
+            Check(failure.Stage == injected.Item3 && !Directory.Exists(failureDirectory) && !File.Exists(Path.Combine(failureDirectory, "sha256.txt")), $"injected {injected.Item1} failure leaves no final directory or completion marker");
+            Check(failure.CleanupException is null && failure.StagingDirectory.Length > 0, $"injected {injected.Item1} failure retains bounded staging diagnostic");
+        }
+        finally
+        {
+            if (Directory.Exists(failureDirectory)) Directory.Delete(failureDirectory, recursive: true);
+            foreach (var staging in Directory.EnumerateDirectories(Path.GetDirectoryName(failureDirectory)!, Path.GetFileName(failureDirectory) + ".staging-*"))
+                Directory.Delete(staging, recursive: true);
+        }
+    }
+
+    var cleanupFailureDirectory = Path.Combine(Path.GetTempPath(), "strogo-report-failure-cleanup-" + Guid.NewGuid().ToString("N"));
+    try
+    {
+        var cleanupFailure = CaptureWriterFailure(() => PortabilityReportWriter.WriteNewDirectory(portabilityReport, reportEvidence, cleanupFailureDirectory, new PortabilityReportWriterFaultPlan(FailWriteOrdinal: 1, FailCleanup: true)));
+        Check(cleanupFailure.Stage == "cleanup" && cleanupFailure.CleanupException is not null && !Directory.Exists(cleanupFailureDirectory) && !File.Exists(Path.Combine(cleanupFailureDirectory, "sha256.txt")), "cleanup failure keeps final directory and completion marker absent while retaining cleanup diagnostic");
+        Check(Directory.Exists(cleanupFailure.StagingDirectory), "cleanup failure retains residual staging path for bounded local diagnosis");
+    }
+    finally
+    {
+        if (Directory.Exists(cleanupFailureDirectory)) Directory.Delete(cleanupFailureDirectory, recursive: true);
+        foreach (var staging in Directory.EnumerateDirectories(Path.GetDirectoryName(cleanupFailureDirectory)!, Path.GetFileName(cleanupFailureDirectory) + ".staging-*"))
+            Directory.Delete(staging, recursive: true);
+    }
 }
 finally
 {
@@ -785,6 +821,19 @@ static bool RejectsReport(Action action, string reason)
     {
         using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
         return details.RootElement.GetProperty("reason").GetString() == reason;
+    }
+}
+
+static PortabilityReportWriterException CaptureWriterFailure(Action action)
+{
+    try
+    {
+        action();
+        throw new InvalidOperationException("expected PortabilityReportWriterException");
+    }
+    catch (PortabilityReportWriterException exception)
+    {
+        return exception;
     }
 }
 

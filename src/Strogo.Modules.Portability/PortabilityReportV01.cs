@@ -774,9 +774,30 @@ public sealed record PortabilityReportPlatform(
 
 public sealed record PortabilityReportDiagnostics(string? ConsumerReceiptDigest, string? JitReceiptDigest, string? StderrDigest, string? PerformanceReceiptDigest);
 
+public sealed record PortabilityReportWriterFaultPlan(
+    int? FailWriteOrdinal = null,
+    int? FailReadOrdinal = null,
+    int? FailHashOrdinal = null,
+    bool FailCleanup = false);
+
+public sealed class PortabilityReportWriterException : Exception
+{
+    public PortabilityReportWriterException(string stage, string stagingDirectory, Exception innerException, Exception? cleanupException = null)
+        : base($"portability report writer failed during {stage}", innerException)
+    {
+        Stage = stage;
+        StagingDirectory = stagingDirectory;
+        CleanupException = cleanupException;
+    }
+
+    public string Stage { get; }
+    public string StagingDirectory { get; }
+    public Exception? CleanupException { get; }
+}
+
 public static class PortabilityReportWriter
 {
-    public static void WriteNewDirectory(PortabilityReportV01 report, PortabilityReportEvidenceSet evidence, string finalDirectory)
+    public static void WriteNewDirectory(PortabilityReportV01 report, PortabilityReportEvidenceSet evidence, string finalDirectory, PortabilityReportWriterFaultPlan? faultPlan = null)
     {
         ArgumentNullException.ThrowIfNull(report);
         ArgumentNullException.ThrowIfNull(evidence);
@@ -788,12 +809,15 @@ public static class PortabilityReportWriter
         Directory.CreateDirectory(parent);
         RejectReparse(parent, "$/finalDirectory/parent");
         var staging = finalPath + ".staging-" + Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        var faults = new FaultController(faultPlan);
+        string stage = "create-staging";
         try
         {
             Directory.CreateDirectory(staging);
             RejectReparse(staging, "$/staging");
-            File.WriteAllBytes(Path.Combine(staging, "report.json"), report.CanonicalJsonBytes());
-            File.WriteAllBytes(Path.Combine(staging, "REPORT.md"), report.MarkdownBytes("report.json"));
+            stage = "write-report";
+            faults.Write(Path.Combine(staging, "report.json"), report.CanonicalJsonBytes());
+            faults.Write(Path.Combine(staging, "REPORT.md"), report.MarkdownBytes("report.json"));
             var evidenceRoot = Path.Combine(staging, "evidence");
             Directory.CreateDirectory(evidenceRoot);
             var index = new List<EvidenceIndexEntry>();
@@ -801,37 +825,50 @@ public static class PortabilityReportWriter
             {
                 var profileRoot = Path.Combine(evidenceRoot, profile.ProfileId, "profile"); Directory.CreateDirectory(profileRoot);
                 var reportProfile = report.Profiles.Single(item => item.ProfileId == profile.ProfileId);
-                WriteReceipt(profileRoot, "build.json", profile.Build.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/profile/build.json", "build", reportProfile.BuildGateDigest);
+                WriteReceipt(profileRoot, "build.json", profile.Build.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/profile/build.json", "build", reportProfile.BuildGateDigest, faults);
                 foreach (var platform in profile.Platforms.OrderBy(platform => platform.Os, StringComparer.Ordinal))
                 {
                     var platformRoot = Path.Combine(evidenceRoot, profile.ProfileId, $"{platform.Os}-{platform.Arch}"); Directory.CreateDirectory(platformRoot);
                     var reportRow = reportProfile.Platforms.Single(item => item.Os == platform.Os && item.Arch == platform.Arch);
-                    WriteReceipt(platformRoot, "consumer.json", platform.Consumer.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/consumer.json", "consumer", reportRow.ConsumerGateDigest);
-                    WriteReceipt(platformRoot, "jit.json", platform.Jit.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/jit.json", "jit", reportRow.JitGateDigest);
-                    WriteReceipt(platformRoot, "oracle.json", platform.Oracle.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/oracle.json", "oracle", reportRow.OracleGateDigest);
+                    WriteReceipt(platformRoot, "consumer.json", platform.Consumer.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/consumer.json", "consumer", reportRow.ConsumerGateDigest, faults);
+                    WriteReceipt(platformRoot, "jit.json", platform.Jit.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/jit.json", "jit", reportRow.JitGateDigest, faults);
+                    WriteReceipt(platformRoot, "oracle.json", platform.Oracle.RawReceiptBytes, index, $"evidence/{profile.ProfileId}/{platform.Os}-{platform.Arch}/oracle.json", "oracle", reportRow.OracleGateDigest, faults);
                 }
             }
-            File.WriteAllBytes(Path.Combine(staging, "evidence-index.json"), Kernel.Core.CanonicalJson.Encode(index.OrderBy(item => item.Path, StringComparer.Ordinal).ToArray()));
-            _ = PortabilityReportV01.Validate(File.ReadAllBytes(Path.Combine(staging, "report.json")), evidence);
+            faults.Write(Path.Combine(staging, "evidence-index.json"), Kernel.Core.CanonicalJson.Encode(index.OrderBy(item => item.Path, StringComparer.Ordinal).ToArray()));
+            stage = "read-back-validation";
+            _ = PortabilityReportV01.Validate(faults.Read(Path.Combine(staging, "report.json")), evidence);
+            stage = "hash-completion-marker";
             var marker = new StringBuilder();
             foreach (var path in Directory.EnumerateFiles(staging, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
             {
                 var relative = Path.GetRelativePath(staging, path).Replace(Path.DirectorySeparatorChar, '/');
-                marker.Append(CanonicalJson.RawDigest(File.ReadAllBytes(path))).Append("  ").AppendLine(relative);
+                marker.Append(faults.Hash(faults.Read(path))).Append("  ").AppendLine(relative);
             }
-            File.WriteAllText(Path.Combine(staging, "sha256.txt"), marker.ToString(), new UTF8Encoding(false));
+            stage = "write-completion-marker";
+            faults.Write(Path.Combine(staging, "sha256.txt"), new UTF8Encoding(false).GetBytes(marker.ToString()));
+            stage = "publish-rename";
             Directory.Move(staging, finalPath);
         }
-        catch
+        catch (Exception exception)
         {
-            if (Directory.Exists(staging)) Directory.Delete(staging, recursive: true);
-            throw;
+            if (!Directory.Exists(staging)) throw new PortabilityReportWriterException(stage, staging, exception);
+            try
+            {
+                if (faults.FailCleanup) throw new IOException("injected cleanup failure");
+                Directory.Delete(staging, recursive: true);
+            }
+            catch (Exception cleanupException)
+            {
+                throw new PortabilityReportWriterException("cleanup", staging, exception, cleanupException);
+            }
+            throw new PortabilityReportWriterException(stage, staging, exception);
         }
     }
 
-    private static void WriteReceipt(string directory, string name, byte[] bytes, List<EvidenceIndexEntry> index, string relative, string role, string? gateDigest)
+    private static void WriteReceipt(string directory, string name, byte[] bytes, List<EvidenceIndexEntry> index, string relative, string role, string? gateDigest, FaultController faults)
     {
-        File.WriteAllBytes(Path.Combine(directory, name), bytes);
+        faults.Write(Path.Combine(directory, name), bytes);
         index.Add(new EvidenceIndexEntry(role, relative, CanonicalJson.RawDigest(bytes), gateDigest));
     }
 
@@ -841,4 +878,33 @@ public static class PortabilityReportWriter
     }
 
     private sealed record EvidenceIndexEntry(string Role, string Path, string RawReceiptDigest, string? GateDigest);
+
+    private sealed class FaultController
+    {
+        private readonly PortabilityReportWriterFaultPlan _plan;
+        private int _writes;
+        private int _reads;
+        private int _hashes;
+
+        public FaultController(PortabilityReportWriterFaultPlan? plan) => _plan = plan ?? new();
+        public bool FailCleanup => _plan.FailCleanup;
+
+        public void Write(string path, byte[] bytes)
+        {
+            if (++_writes == _plan.FailWriteOrdinal) throw new IOException("injected write failure");
+            File.WriteAllBytes(path, bytes);
+        }
+
+        public byte[] Read(string path)
+        {
+            if (++_reads == _plan.FailReadOrdinal) throw new IOException("injected read failure");
+            return File.ReadAllBytes(path);
+        }
+
+        public string Hash(byte[] bytes)
+        {
+            if (++_hashes == _plan.FailHashOrdinal) throw new IOException("injected hash failure");
+            return CanonicalJson.RawDigest(bytes);
+        }
+    }
 }

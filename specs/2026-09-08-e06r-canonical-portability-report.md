@@ -552,7 +552,7 @@ Visual planning artifact: отдельный GUI не применим; Markdown
 
 - Статус: **PASS для synthetic E06R checkpoint; real same-revision integration остаётся отдельным этапом.**
 - Проверено: exact root/profile/platform field closure, source-revision receipt binding, outcome bijection, cross-OS/cross-profile mismatch mapping, semantic/diagnostic digest boundary, timestamp normalization, Markdown projection и staged writer no-overwrite path.
-- Validation evidence: solution build `0 warnings / 0 errors`; portability conformance `216` checks; managed conformance `362`; Graph conformance `141`; driver report schema `strogo.portability-report.v0.1`, two profiles, `Portable` fixture и explicit `noJvmExecutionBeforeBaselineApproval=true`.
+- Validation evidence: solution build `0 warnings / 0 errors`; portability conformance `224` checks, including injected write/read/hash/cleanup failures with no final directory or completion marker; managed conformance `362`; Graph conformance `141`; driver report schema `strogo.portability-report.v0.1`, two profiles, `Portable` fixture и explicit `noJvmExecutionBeforeBaselineApproval=true`.
 - Ограничение review: это локальный post-EXEC review и synthetic evidence; фактические .NET/JVM receipts одной revision и E06A Stage 2 не заменены этим checkpoint.
 
 ## Approval
@@ -565,3 +565,4 @@ Owner approval: **«Спеку подтверждаю»** получено 2026-
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | SPEC | Найти следующий E06 step без обхода JVM baseline gate | 0.99 | Full report field/status contract | Сверить E06 и matrix core | Нет | Нет | Canonical report независим от реального JVM build | E06 §6.2.4, `PortabilityReportMatrix` |
 | SPEC | Устранить schema/evidence contradictions до code | 0.97 | Independent adversarial review | Провести post-SPEC review и исправить findings | Нет | Нет | Самовольный builder закрепил бы неоднозначную норму | Эта SPEC, K-E06-060 |
+| EXEC | Закрыть A10 writer failure seam после owner approval | 0.99 | Linux runtime для real same-revision receipts | Добавить deterministic fault plan и rerun conformance | Нет | Да — «Спеку подтверждаю» 2026-09-08 | Synthetic writer failures проверяются отдельно от platform evidence; JVM gate не затрагивается | `PortabilityReportV01.cs`, portability conformance, K-E06-064 |

@@ -1610,3 +1610,13 @@
 - Evidence: свежий GET preview exact body `925` UTF-8 bytes, `reply_to=e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, `public=true`, `published=false`; explicit POST `/b/publish`; read-back подтвердил seq `10119`, ID `9ba4c9dd-d5d3-4810-ae15-201ac58f8f91`, точное тело. Thread: https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e
 - Последствие: ответы участников классифицируются как reported/proposed до проверки inputs, commands, outputs и digests; новый seam сначала фиксируется в knowledge log и отдельной SPEC/EXEC boundary.
 - Supersedes / supersededBy: продолжает K-E06-061/062 и не меняет E06R или E06A approval gates.
+
+## K-E06-064
+
+- Дата / фаза: 2026-09-08 / E06R writer fault-injection closure.
+- Тип / статус: Failure-boundary implementation / Confirmed locally; real platform integration remains open.
+- Утверждение: staged report writer теперь имеет явный `PortabilityReportWriterFaultPlan` для детерминированного отказа записи, read-back, хеширования и cleanup. Каждая ошибка оборачивается bounded `PortabilityReportWriterException` со stage и staging path; при обычной очистке final directory и `sha256.txt` не появляются, а при injected cleanup failure остаток staging сохраняется как локальный diagnostic и не считается публикацией.
+- Scope: E06R validation-only writer и conformance; это не production admission, не JVM execution и не доказательство cross-platform runtime.
+- Evidence: `PortabilityReportV01.cs`, `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `dotnet build Kernel.slnx -c Release --no-restore` — 0 warnings/errors; portability conformance — `PASS portability contract checks=224 valid=10 refusals=3 transport=24 mutations=4`.
+- Последствие: A10 writer injection seam закрыт для текущего synthetic report checkpoint; следующий distinguishing gate — same-revision real .NET receipt integration либо отдельный owner-approved E06A JVM baseline.
+- Supersedes / supersededBy: уточняет K-E06-062 и закрывает его оставшийся writer-failure gap; E06R/E06A approval rules unchanged.
