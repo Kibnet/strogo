@@ -8,7 +8,7 @@ using Strogo.Modules.Portability;
 
 try
 {
-    if (args.Length == 0) Fail("command is required: build, validate, runtime or matrix");
+    if (args.Length == 0) Fail("command is required: build, validate, runtime, matrix, jit-plan or jit-receipt");
     var options = ParseOptions(args.Skip(1).ToArray());
     switch (args[0])
     {
@@ -23,6 +23,12 @@ try
             break;
         case "matrix":
             BuildMatrixCheck(options);
+            break;
+        case "jit-receipt":
+            BuildJitReceipt(options);
+            break;
+        case "jit-plan":
+            BuildJitPlan(options);
             break;
         default:
             Fail($"unknown command: {args[0]}");
@@ -421,6 +427,46 @@ static void BuildMatrixCheck(IReadOnlyDictionary<string, string> options)
         }).ToArray()
     }));
     Console.WriteLine($"PASS portability matrix profile={profileId} status={matrixStatus} rows={completed.Length}");
+}
+
+static void BuildJitReceipt(IReadOnlyDictionary<string, string> options)
+{
+    var package = FullPath(Required(options, "--package"));
+    var expectedManifestDigest = Required(options, "--expected-manifest-digest");
+    var runtimeReport = FullPath(Required(options, "--runtime-report"));
+    var consumerOutput = FullPath(Required(options, "--consumer-output"));
+    var jitLog = FullPath(Required(options, "--jit-log"));
+    var os = Required(options, "--os");
+    var arch = Required(options, "--arch");
+    var output = FullPath(Required(options, "--output"));
+    RequireFile(runtimeReport);
+    RequireFile(consumerOutput);
+    RequireFile(jitLog);
+    if (File.Exists(output) || Directory.Exists(output)) Fail("JIT receipt output path already exists");
+
+    var plan = DotNetJitDiagnostics.Bind(package, expectedManifestDigest);
+    var receipt = DotNetJitDiagnostics.Validate(
+        plan,
+        File.ReadAllBytes(runtimeReport),
+        File.ReadAllBytes(consumerOutput),
+        File.ReadAllBytes(jitLog),
+        os,
+        arch);
+    Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("JIT receipt path has no directory"));
+    File.WriteAllBytes(output, receipt.Bytes);
+    Console.WriteLine($"PASS dotnet JIT receipt os={os} events={receipt.CompilationEvents.Length} calls={receipt.Calls} process={receipt.ProcessId}");
+}
+
+static void BuildJitPlan(IReadOnlyDictionary<string, string> options)
+{
+    var package = FullPath(Required(options, "--package"));
+    var expectedManifestDigest = Required(options, "--expected-manifest-digest");
+    var output = FullPath(Required(options, "--output"));
+    if (File.Exists(output) || Directory.Exists(output)) Fail("JIT plan output path already exists");
+    var plan = DotNetJitDiagnostics.Bind(package, expectedManifestDigest);
+    Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("JIT plan path has no directory"));
+    File.WriteAllBytes(output, DotNetJitDiagnostics.PlanBytes(plan));
+    Console.WriteLine($"PASS dotnet JIT plan entry={plan.EntrySymbol} candidate={plan.CandidateSymbol} calls={DotNetJitDiagnostics.RequiredCalls}");
 }
 
 static PortabilityPlatformStatus ReadPlatformStatus(string path, string profileId)

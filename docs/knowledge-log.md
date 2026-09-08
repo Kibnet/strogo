@@ -1480,3 +1480,13 @@
 - Evidence: `artifacts/e06/dotnet-matrix-e222523/**`; conformance `121`; absent/complete/mismatched-package cases на exact revision.
 - Последствие: A10 закрыт для .NET checkpoint: missing/corrupt runtime подтверждены K-E06-047, absent mandatory row и report mix-up — этой записью. Следующий .NET gate — A11 performance либо A12 JIT; общий report строится после появления нужных receipts.
 - Supersedes / supersededBy: заменяет working-tree status K-E06-049 и завершает A10 .NET behavior; full E06 остаётся открыт.
+
+## K-E06-051
+
+- Дата / фаза: 2026-09-08 / .NET JIT diagnostic implementation.
+- Тип / статус: A12 .NET behavior / Confirmed on working tree; exact revision evidence pending.
+- Утверждение: package-bound plan до process start выводит public `ModuleApi:Invoke` из frozen API и `Candidate.__default:F004` из `function/summarize` source-map entry; Windows x64 и Linux x64 под WSL2 на pinned .NET `10.0.11` после `50000` вызовов дали по два exact `FullOpts` compilation events при disabled ReadyToRun/tiering/inlining. Decoy, удалённый candidate event и `49999` calls дают `JitEvidenceMissing` в conformance.
+- Scope: диагностическое подтверждение факта JIT compilation для .NET validation profile; не correctness/byte stability машинного кода, не performance и не независимая Linux machine.
+- Evidence: working-tree conformance `131`; local Windows/Linux JIT receipts and bounded disassembly logs; official CoreCLR `viewing-jit-dumps.md` и `jitconfigvalues.h` для shipped method filter/output/no-inline flags. Первый Windows запуск через системный `dotnet` после появления дополнительного `hostfxr` корректно завершился `EnvironmentUnavailable/AmbiguousRuntimeSelection`; тот же run через isolated exact closure прошёл.
+- Последствие: runtime launcher из `PATH` не является стабильной execution identity даже при наличии нужной runtime patch. A12 runner обязан сначала закрыть exact runtime closure, затем построить symbol plan из проверенного package и лишь после этого запускать diagnostic process.
+- Supersedes / supersededBy: развивает K-E06-047 и K-E06-048; exact clean-commit evidence должно заменить working-tree status.

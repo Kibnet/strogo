@@ -352,6 +352,12 @@ try
     Check(dotnetWindowsPackageDriver.Contains("\"-p:ImportDirectoryBuildProps=false\" \"-p:ImportDirectoryBuildTargets=false\" \"-p:PortableAssemblyPath=", StringComparison.Ordinal), "windows package consumer excludes ancestor Directory.Build imports");
     Check(dotnetWindowsPackageDriver.Contains("--expected-runtime-closure-digest", StringComparison.Ordinal) && dotnetWindowsPackageDriver.Contains("runtimeClosureDigest = $environment.runtimeClosureDigest", StringComparison.Ordinal), "windows package row binds the expected runtime closure");
     Check(dotnetWindowsPackageDriver.Contains("& $targetDotNet $consumerDll $vectors", StringComparison.Ordinal) && !dotnetWindowsPackageDriver.Contains("& $targetDotNet run --project", StringComparison.Ordinal), "windows target runtime executes the built consumer without the SDK run command");
+    var dotnetWindowsJitDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Jit.ps1"));
+    Check(dotnetWindowsJitDriver.Contains("$jitPlan.entrySymbol", StringComparison.Ordinal) && dotnetWindowsJitDriver.Contains("$jitPlan.candidateSymbol", StringComparison.Ordinal) && !dotnetWindowsJitDriver.Contains("Candidate.__default:F004", StringComparison.Ordinal), "windows JIT driver resolves both symbols from the pre-run package plan");
+    Check(dotnetWindowsJitDriver.Contains("WaitForExit(180000)", StringComparison.Ordinal) && dotnetWindowsJitDriver.Contains("pid=$($process.Id)", StringComparison.Ordinal) && dotnetWindowsJitDriver.Contains("DOTNET_JitNoInline", StringComparison.Ordinal), "windows JIT diagnostic is bounded, process-bound and disables inlining");
+    var dotnetLinuxJitDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Jit.sh"));
+    Check(dotnetLinuxJitDriver.Contains("${symbols[0]} ${symbols[1]}", StringComparison.Ordinal) && !dotnetLinuxJitDriver.Contains("Candidate.__default:F004", StringComparison.Ordinal), "linux JIT driver resolves both symbols from the pre-run package plan");
+    Check(dotnetLinuxJitDriver.Contains("sleep 180", StringComparison.Ordinal) && dotnetLinuxJitDriver.Contains("pid=$consumer_pid", StringComparison.Ordinal) && dotnetLinuxJitDriver.Contains("DOTNET_JitNoInline=1", StringComparison.Ordinal), "linux JIT diagnostic is bounded, process-bound and disables inlining");
     var packageHarnessSource = File.ReadAllText(Path.Combine(root, "tests", "Strogo.Modules.Portability.PackageHarness", "Program.cs"));
     Check(packageHarnessSource.Contains("Path.GetDirectoryName(dafny), Path.TrimEndingDirectorySeparator(dafnyRoot)", StringComparison.Ordinal), "package harness fixes the proof closure root at the Dafny executable parent");
     Check(packageHarnessSource.Contains("code = \"PackageHarnessRejected\"", StringComparison.Ordinal) && packageHarnessSource.Contains("throw new PackageHarnessException(message)", StringComparison.Ordinal), "package harness preflight failures are structured");
@@ -417,6 +423,52 @@ try
     Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Failed", ["Unknown"])]), "UnknownReasonCode"), "unknown reason code is rejected");
     Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Passed")]), "PassedRowEvidenceMissing"), "passing row requires exact evidence identities");
     Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [PassedRow("windows"), PassedRow("linux", 'b')]), "PlatformArtifactIdentityMismatch"), "passing rows from different package identities are rejected");
+
+    var jitPlan = DotNetJitDiagnostics.Bind(packageA, receiptA.PortabilityManifestDigest);
+    Check(jitPlan.EntrySymbol == DotNetJitDiagnostics.EntrySymbol && jitPlan.CandidateEntityId == "function/summarize" && jitPlan.CandidateGeneratedName == "F004" && jitPlan.CandidateSymbol == "Candidate.__default:F004", "JIT symbols are derived from the bound public API and source map");
+    using (var planDocument = JsonDocument.Parse(DotNetJitDiagnostics.PlanBytes(jitPlan)))
+        Fields(planDocument.RootElement, "schemaVersion", "profileId", "moduleDigest", "dafnySourceDigest", "portabilityManifestDigest", "packageDigest", "artifactDigest", "entryAssemblyDigest", "sourceMapDigest", "publicApiDigest", "entrySymbol", "candidateEntityId", "candidateGeneratedName", "candidateSymbol", "calls");
+    var jitRuntimeReport = CanonicalJson.Encode(new
+    {
+        schemaVersion = "strogo.environment-report.v0.1",
+        status = "Passed",
+        reasonCode = "None",
+        profileId = PortabilityVersions.DotNetProfile,
+        os = runtimeOs,
+        arch = "x64",
+        runtimeVendor = "Microsoft",
+        runtimeVersion = "10.0.11",
+        runtimeClosureDigest = new string('e', 64),
+        launcherDigest = new string('f', 64),
+        harnessDigest = new string('1', 64),
+        runtimeFiles = "3"
+    });
+    var jitConsumerOutput = Encoding.UTF8.GetBytes("PASS dotnet JIT diagnostic pid=1234 calls=50000\n");
+    var entrySignature = $"{jitPlan.EntrySymbol}(System.String):System.String";
+    var candidateSignature = $"{jitPlan.CandidateSymbol}(Dafny.ISequence`1[long]):Candidate._IR000";
+    var jitLog = Encoding.UTF8.GetBytes(string.Join('\n', new[]
+    {
+        $"; Assembly listing for method {entrySignature} (FullOpts)",
+        $"; BEGIN METHOD {entrySignature}",
+        $"; END METHOD {entrySignature}",
+        $"; Assembly listing for method {candidateSignature} (FullOpts)",
+        $"; BEGIN METHOD {candidateSignature}",
+        $"; END METHOD {candidateSignature}",
+        ""
+    }));
+    var jitReceipt = DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, jitConsumerOutput, jitLog, runtimeOs, "x64");
+    Check(jitReceipt.Calls == "50000" && jitReceipt.ProcessId == "1234" && jitReceipt.CompilationEvents.SequenceEqual(new[] { entrySignature, candidateSignature }, StringComparer.Ordinal), "JIT receipt binds two exact compilation events to one process marker");
+    using (var jitReceiptDocument = JsonDocument.Parse(jitReceipt.Bytes))
+        Fields(jitReceiptDocument.RootElement, "schemaVersion", "status", "profileId", "os", "arch", "runtimeVendor", "runtimeVersion", "runtimeClosureDigest", "portabilityManifestDigest", "packageDigest", "artifactDigest", "entryAssemblyDigest", "moduleDigest", "dafnySourceDigest", "sourceMapDigest", "publicApiDigest", "processId", "calls", "flags", "compilationEvents", "consumerOutputDigest", "jitLogDigest", "assertionBoundary");
+    var mutableJitReceipt = jitReceipt.Bytes;
+    mutableJitReceipt[0] ^= 0xff;
+    Check(jitReceipt.Bytes[0] != mutableJitReceipt[0], "JIT receipt bytes are defensively copied");
+    var decoyJitLog = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(jitLog).Replace(jitPlan.CandidateSymbol, jitPlan.CandidateSymbol + "Decoy", StringComparison.Ordinal));
+    Check(RejectsJit(() => DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, jitConsumerOutput, decoyJitLog, runtimeOs, "x64"), "$/events/candidate"), "decoy candidate symbol cannot satisfy JIT evidence");
+    var missingCandidateJitLog = Encoding.UTF8.GetBytes(string.Join('\n', Encoding.UTF8.GetString(jitLog).Split('\n').Where(line => !line.Contains(jitPlan.CandidateSymbol, StringComparison.Ordinal))));
+    Check(RejectsJit(() => DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, jitConsumerOutput, missingCandidateJitLog, runtimeOs, "x64"), "$/events/candidate"), "removed candidate compilation event is rejected");
+    var insufficientCalls = Encoding.UTF8.GetBytes("PASS dotnet JIT diagnostic pid=1234 calls=49999\n");
+    Check(RejectsJit(() => DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, insufficientCalls, jitLog, runtimeOs, "x64"), "$/consumerOutput/calls"), "JIT diagnostic requires the fixed call count");
 }
 finally
 {
@@ -533,6 +585,19 @@ static bool RejectsReport(Action action, string reason)
     {
         using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
         return details.RootElement.GetProperty("reason").GetString() == reason;
+    }
+}
+
+static bool RejectsJit(Action action, string locus)
+{
+    try
+    {
+        action();
+        return false;
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "JitEvidenceMissing")
+    {
+        return exception.Locus == locus;
     }
 }
 
