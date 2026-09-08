@@ -34,6 +34,17 @@ catch (PortabilityContractException exception)
     })));
     Environment.ExitCode = 1;
 }
+catch (PackageHarnessException exception)
+{
+    Console.Error.WriteLine(Encoding.UTF8.GetString(CanonicalJson.Encode(new
+    {
+        status = "Rejected",
+        code = "PackageHarnessRejected",
+        locus = "$",
+        details = new { reason = exception.Message }
+    })));
+    Environment.ExitCode = 1;
+}
 
 static void BuildPackage(IReadOnlyDictionary<string, string> options)
 {
@@ -51,7 +62,8 @@ static void BuildPackage(IReadOnlyDictionary<string, string> options)
     RequireFile(dafny);
     RequireFile(dotnet);
     RequireDirectory(dafnyRoot);
-    if (!dafny.StartsWith(dafnyRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)) Fail("Dafny executable must be inside --dafny-root");
+    if (!string.Equals(Path.GetDirectoryName(dafny), Path.TrimEndingDirectorySeparator(dafnyRoot), StringComparison.Ordinal))
+        Fail("Dafny executable must be a direct child of the exact --dafny-root");
     if (Directory.Exists(outputA) || File.Exists(outputA) || Directory.Exists(outputB) || File.Exists(outputB)) Fail("package output already exists");
     if (File.Exists(receiptPath)) Fail("receipt already exists");
 
@@ -407,6 +419,7 @@ static string Run(string executable, string workingDirectory, params string[] ar
 }
 
 [System.Diagnostics.CodeAnalysis.DoesNotReturn]
-static void Fail(string message) => throw new InvalidOperationException(message);
+static void Fail(string message) => throw new PackageHarnessException(message);
 
 internal sealed record InventoryFile(string Path, string Sha256, string Length, string Role);
+internal sealed class PackageHarnessException(string message) : Exception(message);

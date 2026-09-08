@@ -348,6 +348,9 @@ try
     Check(dotnetLinuxPackageDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:PortableAssemblyPath=", StringComparison.Ordinal), "linux package consumer excludes ancestor Directory.Build imports");
     var dotnetWindowsPackageDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Package.ps1"));
     Check(dotnetWindowsPackageDriver.Contains("\"-p:ImportDirectoryBuildProps=false\" \"-p:ImportDirectoryBuildTargets=false\" \"-p:PortableAssemblyPath=", StringComparison.Ordinal), "windows package consumer excludes ancestor Directory.Build imports");
+    var packageHarnessSource = File.ReadAllText(Path.Combine(root, "tests", "Strogo.Modules.Portability.PackageHarness", "Program.cs"));
+    Check(packageHarnessSource.Contains("Path.GetDirectoryName(dafny), Path.TrimEndingDirectorySeparator(dafnyRoot)", StringComparison.Ordinal), "package harness fixes the proof closure root at the Dafny executable parent");
+    Check(packageHarnessSource.Contains("code = \"PackageHarnessRejected\"", StringComparison.Ordinal) && packageHarnessSource.Contains("throw new PackageHarnessException(message)", StringComparison.Ordinal), "package harness preflight failures are structured");
     var portabilitySources = Directory.GetFiles(Path.Combine(root, "src", "Strogo.Modules.Portability"), "*.cs", SearchOption.AllDirectories).SelectMany(File.ReadAllLines).ToArray();
     Check(!portabilitySources.Any(line => line.Contains("TrustedModuleRuntime", StringComparison.Ordinal)), "portability project does not reference production runtime");
 }

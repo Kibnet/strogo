@@ -1389,7 +1389,7 @@
 - Scope: .NET target artifact reproducibility между native Linux root вне repository hierarchy и Windows-mounted root внутри неё в WSL2. Это одновременно проверка filesystem/root и изоляции от ambient MSBuild settings; она не доказывает идентичность между независимыми ОС/toolchain installations и не относится к JVM.
 - Evidence: `artifacts/e06/dotnet-package-4ac7781/{cross-root-drift.json,REPORT.md}`; retained build reports/DLL digests `ce291ca`/`590d3dd` и `4ac7781`; diagnostic Csc diff `/checked-` против `/checked+`; первый regression run после одного `GenerateMSBuildEditorConfigFile=false` снова различил DLL на byte `137`; второй working-tree run с pinned `/checked+` и disabled ancestor imports дал byte-equal DLL `37cb02dc8be37fe005d6515421aaba97b069168e70f52d9e8ba2ab019fe314fc` и consumer PASS; conformance `90`; structured wrong-identity probe завершился exit `1`, вернул `ArtifactIdentityMismatch` и не создал staged artifact/report.
 - Последствие: K-E06-034 ограничивается Git-revision independence внутри прежнего ambient MSBuild context. Финальный actual package evidence должен строиться только после byte-equal lane comparison через разные filesystem/ancestor contexts. Build driver и оба package platform drivers запрещают ancestor imports для standalone consumers. Package harness сериализует нормативный `PortabilityContractException` в canonical JSON, чтобы внешние runners могли проверить exact refusal reason без анализа stack trace.
-- Supersedes / supersededBy: уточняет и частично опровергает K-E06-034; exact clean-commit cross-root run должен заменить pending статус.
+- Supersedes / supersededBy: уточняет и частично опровергает K-E06-034; exact clean-commit результат сохранён в K-E06-043.
 
 ## K-E06-042
 
@@ -1400,3 +1400,23 @@
 - Evidence: первый exact proof `4ac7781` завершился `PASS`, последующая preflight-проверка не нашла run directory; повторный run под persistent home сохранил proof/build/package inputs.
 - Последствие: authoritative runbook должен использовать persistent run root и проверять наличие всех предыдущих receipts перед package build; исчезновение промежуточного каталога считается environment failure, а не отрицательным proof result.
 - Supersedes / supersededBy: новое ограничение evidence workflow.
+
+## K-E06-043
+
+- Дата / фаза: 2026-09-08 / exact clean cross-root .NET build.
+- Тип / статус: Ambient-independent target build / Confirmed on clean public commit `9ea044b`.
+- Утверждение: после explicit `CheckForOverflowUnderflow=true`, disabled generated MSBuild editor config и запрета ancestor `Directory.Build.props`/`Directory.Build.targets` imports clean build разместил lane A в native Linux filesystem вне repository, lane B — под Windows-mounted repository tree. Candidate, translation record и обе DLL byte-equal; DLL вернулась к pinned checked-semantics identity `37cb02dc8be37fe005d6515421aaba97b069168e70f52d9e8ba2ab019fe314fc`, length `189440`. Standalone consumer прошёл `8+24+1+13` cases. Оба package platform drivers с тем же import isolation отдельно прошли внутри repository ancestor context.
+- Scope: один pinned Dafny/.NET toolchain в WSL2, два filesystem/ancestor contexts и Windows/Linux consumer runs. Это не independent-host либо cross-toolchain reproducibility.
+- Evidence: exact persistent run `e06-package-9ea044b/build/report.json`; final retained package отложен из-за отдельного proof-closure identity finding K-E06-044.
+- Последствие: ambient MSBuild counterexample K-E06-041 закрыт для текущего profile driver; future build evidence обязано сохранять `directoryBuildImports=Disabled` и `overflowChecks=Enabled` и использовать различающиеся roots.
+- Supersedes / supersededBy: заменяет pending fix status K-E06-041; proof/package acceptance отдельно ограничено K-E06-044.
+
+## K-E06-044
+
+- Дата / фаза: 2026-09-08 / proof closure root identity.
+- Тип / статус: Proof identity counterexample / Confirmed; fixed on working tree, exact clean-commit rerun pending.
+- Утверждение: actual package harness принимал любой `--dafny-root`, содержащий executable. Для одного и того же набора `290` Dafny files canonical distribution root дал logical paths `closure/<hex(filename)>.bin` и `closureDigest=4b70255b…d23`; parent root дал paths с дополнительным `dafny/`, `closureDigest=91e45b1a…809` и другой full `proofDigest`, хотя file bytes, versions, source, obligations и strong transcripts не изменились. Поэтому caller мог менять proof identity выбором ancestor root. Harness теперь требует, чтобы Dafny executable был прямым ребёнком exact closure root; broader ancestor возвращает canonical `PackageHarnessRejected` с exit `1` до package output.
+- Scope: `strogo.validation-proof.v0.1` closure inventory construction в actual .NET package harness. Proof outcome `42/0x2` и target behavior не опровергнуты; опровергнута каноничность прежнего root selection contract.
+- Evidence: `artifacts/e06/dotnet-package-9ea044b/{proof-closure-root-drift.json,REPORT.md}`; field diff двух `proof.json` показал единственное различие `closureDigest`, inventory diff — только `dafny/` logical path prefix при тех же `290` files; working-tree broader-root probe получил exact canonical `PackageHarnessRejected`, exit `1`, conformance `94`, output package/receipt отсутствуют.
+- Последствие: package `9ea044b` сохраняется как functional/negative identity checkpoint и не принимается как финальное A4 evidence. Следующий exact run обязан передать parent directory самого pinned `dafny` executable и получить прежний canonical closure/proof identity при новых build-toolchain bytes.
+- Supersedes / supersededBy: добавляет root-selection invariant к K-E06-040; exact clean-commit rerun должен заменить pending status.
