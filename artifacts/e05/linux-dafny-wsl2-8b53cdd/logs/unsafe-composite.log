@@ -1,0 +1,17 @@
+sources/UnsafeCompositeCandidate.dfy(7,4): Error: assertion might not hold
+  |
+7 |     assert |p000| < 2;
+  |     ^^^^^^
+
+sources/UnsafeCompositeCandidate.dfy(13,13): Error: assertion might not hold
+   |
+13 |     assert 0 <= (p001 as int) < |p000|;
+   |              ^^
+
+sources/UnsafeCompositeCandidate.dfy(13,30): Error: assertion might not hold
+   |
+13 |     assert 0 <= (p001 as int) < |p000|;
+   |                               ^
+
+
+Dafny program verifier finished with 5 verified, 3 errors

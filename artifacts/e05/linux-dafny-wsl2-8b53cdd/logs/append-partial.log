@@ -1,0 +1,7 @@
+sources/AppendPartialOwnerCandidate.dfy(10,31): Error: value does not satisfy the subset constraints of 'S000'
+   |
+10 |     (|(var e000: S000 := (p000 + [C000(0)]); e000)| as I64)
+   |                                ^
+
+
+Dafny program verifier finished with 4 verified, 1 error

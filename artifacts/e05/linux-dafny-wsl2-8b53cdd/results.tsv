@@ -1,0 +1,20 @@
+case	mode	exit	expectation
+safe-selector	translate	0	verified:2
+safe-call	translate	0	verified:3
+safe-scalar	translate	0	verified:2
+safe-composite	verify	0	verified:4
+unsafe-composite	verify	4	reject3:assertion might not hold
+unsafe-arithmetic	verify	4	reject:might violate newtype constraint for 'I64'
+owner	translate	0	verified:4
+composite-owner	translate	0	verified:5
+alternative-composite-owner	translate	0	verified:5
+wrong-composite-owner	verify	4	reject:a postcondition could not be proved
+partial-composite-owner	verify	4	reject:index out of range
+strict-and	verify	4	reject:might violate newtype constraint for 'I64'
+strict-or	verify	4	reject:might violate newtype constraint for 'I64'
+guarded-false	verify	0	verified:any
+guarded-true	verify	0	verified:any
+append-partial	verify	4	reject:subset constraints
+weak-owner	verify	4	reject2:result of operation might violate newtype constraint for 'I64'
+alternative-owner	translate	0	verified:4
+wrong-owner	verify	4	reject:a postcondition could not be proved

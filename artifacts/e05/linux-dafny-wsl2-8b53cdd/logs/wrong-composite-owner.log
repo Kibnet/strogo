@@ -1,0 +1,12 @@
+sources/WrongCompositeOwnerCandidate.dfy(15,2): Error: a postcondition could not be proved on this return path
+   |
+15 |   {
+   |   ^
+
+sources/WrongCompositeOwnerCandidate.dfy(14,19): Related location: this is the postcondition that could not be proved
+   |
+14 |     ensures result == M000(p000)
+   |                    ^^
+
+
+Dafny program verifier finished with 4 verified, 1 error

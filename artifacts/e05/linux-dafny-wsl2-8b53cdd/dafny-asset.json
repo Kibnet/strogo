@@ -1,0 +1,13 @@
+{
+  "tag_name": "v4.11.0",
+  "target_commitish": "master",
+  "published_at": "2025-08-25T19:53:51Z",
+  "asset": {
+    "name": "dafny-4.11.0-x64-ubuntu-22.04.zip",
+    "browser_download_url": "https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip",
+    "digest": "sha256:a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179",
+    "size": 65307946,
+    "created_at": "2025-08-25T17:56:56Z",
+    "updated_at": "2025-08-25T17:57:02Z"
+  }
+}

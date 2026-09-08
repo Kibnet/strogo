@@ -1,0 +1,17 @@
+sources/PartialCompositeOwnerCandidate.dfy(10,154): Error: index out of range
+   |
+10 |     (if (p000 <= 0) then C000(2, (var e002: S000 := ((var e000: S000 := ([] + [p000]); e000) + [(var e001: I64 := (p000 + 1); e001)]); e002)) else C000([][0 as int], []))
+   |                                                                                                                                                           ^
+
+sources/PartialCompositeOwnerCandidate.dfy(15,2): Error: a postcondition could not be proved on this return path
+   |
+15 |   {
+   |   ^
+
+sources/PartialCompositeOwnerCandidate.dfy(14,19): Related location: this is the postcondition that could not be proved
+   |
+14 |     ensures result == M000(p000)
+   |                    ^^
+
+
+Dafny program verifier finished with 3 verified, 2 errors

@@ -1,0 +1,9 @@
+commit=8b53cddb6d143cc1517ba07d6e7597255b876894
+uname=Linux <WSL2-host> 6.18.33.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun 18 21:54:43 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+os_release=PRETTY_NAME="Ubuntu 24.04.2 LTS" NAME="Ubuntu" VERSION_ID="24.04" VERSION="24.04.2 LTS (Noble Numbat)" VERSION_CODENAME=noble ID=ubuntu ID_LIKE=debian HOME_URL="https://www.ubuntu.com/" SUPPORT_URL="https://help.ubuntu.com/" BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/" PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy" UBUNTU_CODENAME=noble LOGO=ubuntu-logo 
+dotnet_sdk=10.0.400
+dotnet_runtime=Microsoft.AspNetCore.App 10.0.11 [<temp>/dotnet/shared/Microsoft.AspNetCore.App];Microsoft.NETCore.App 10.0.11 [<temp>/dotnet/shared/Microsoft.NETCore.App];
+dafny_version=4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2
+dafny_asset_url=https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip
+dafny_archive_sha256=a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179
+dafny_api_digest=sha256:a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179

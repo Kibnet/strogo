@@ -1,0 +1,7 @@
+sources/StrictAndOwnerCandidate.dfy(8,46): Error: result of operation might violate newtype constraint for 'I64'
+  |
+8 |     StrictAnd(false, ((var e000: I64 := (p000 + 1); e000) == 0))
+  |                                               ^
+
+
+Dafny program verifier finished with 3 verified, 1 error

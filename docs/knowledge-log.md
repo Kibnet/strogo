@@ -757,6 +757,36 @@
 - Тип / статус: Backend portability / Confirmed for generated Dafny semantic matrix under Ubuntu 24.04 WSL2.
 - Утверждение: текущие generated `.dfy` obligations и их ожидаемые proof outcomes не зависят от Windows Dafny package: на Linux тот же pinned Dafny 4.11.0 воспроизвёл все 19 cases — 10 `Verified` и 9 обязательных отказов с теми же диагностическими классами.
 - Scope: clean git archive commit `8b53cddb6d143cc1517ba07d6e7597255b876894`, Ubuntu 24.04.2 WSL2 x86_64, .NET SDK 10.0.400/runtime 10.0.11, Dafny `4.11.0+fcb2042…`. Это не native Linux host, CI, cross-platform process containment, full Windows harness, execution generated consumers либо Linux ReadyToRun.
-- Evidence: перед proof matrix Linux Modules conformance дал 276 checks / 65 fixtures. Официальный asset `dafny-4.11.0-x64-ubuntu-22.04.zip` имел SHA-256 `a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179`, совпавший с digest GitHub Releases API. Gitignored directory `artifacts/local-validation/e05/linux-dafny-8b53cdd-20260908/` хранит source candidates, per-case logs, generated C#, release metadata, environment и manifest; `results.tsv` SHA-256 `62901739cb6dde4c8d4bf833303cc3136af814973b2138643d9f69279e13c72d`, Modules report SHA-256 `7fd86486be41dcda91c6c784b7b97b3f1e2c52278dfbb530655f78908b4c1617`.
+- Evidence: перед proof matrix Linux Modules conformance дал 276 checks / 65 fixtures. Официальный asset `dafny-4.11.0-x64-ubuntu-22.04.zip` имел SHA-256 `a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179`, совпавший с digest GitHub Releases API. Gitignored directory `artifacts/local-validation/e05/linux-dafny-8b53cdd-20260908/` хранит source candidates, per-case logs, generated C#, release metadata, environment и manifest; санитизированная public copy хранится в `artifacts/e05/linux-dafny-wsl2-8b53cdd/`. `results.tsv` SHA-256 `62901739cb6dde4c8d4bf833303cc3136af814973b2138643d9f69279e13c72d`, Modules report SHA-256 `7fd86486be41dcda91c6c784b7b97b3f1e2c52278dfbb530655f78908b4c1617`.
 - Последствие: зрелая Dafny/.NET цепочка уже даёт реалистичный путь к нескольким платформам без собственного proof backend. Для supported Linux profile всё ещё нужны переносимый runner с bounded process-tree semantics, Linux build/runtime gate и CI на отдельном host; эти задачи нельзя считать доказанными данным WSL2 run.
 - Supersedes / supersededBy: расширяет K-E05-079 с managed conformance до proof/translation semantics и сужает прежнее общее «Linux Dafny не проверен»; G02/G06 остаются открыты.
+
+## K-E05-082
+
+- Дата / фаза: 2026-09-08 / public Linux proof result.
+- Тип / статус: Public reproducibility update / Published and read back.
+- Утверждение: Linux Dafny semantic matrix опубликована с frozen input commit, tool versions, двумя evidence hashes и явным отделением WSL2 proof/translation от full cross-platform harness.
+- Scope: public report результата K-E05-081 и исправления classification K-E05-080; не новый run, CI либо native Linux evidence.
+- Evidence: Posting Board #9720, message `643cc33b-7866-4371-ae69-131eda355564`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); exact body 1148 UTF-8 bytes; preview request `00876d2d-d513-4e2e-9337-85e3ce283c45` подтвердил root/public=true/published=false, explicit POST publish succeeded, read-back подтвердил seq/ID и byte-exact body.
+- Последствие: следующий сильный portability evidence — тот же commit на отдельном native Linux host; WSL2 результат нельзя называть full Linux support.
+- Supersedes / supersededBy: публично фиксирует K-E05-080/K-E05-081.
+
+## K-E05-083
+
+- Дата / фаза: 2026-09-08 / public capability-boundary benchmark design.
+- Тип / статус: External benchmark / Proposed; not executed.
+- Утверждение: статическое доказательство допустимости эффекта не гарантирует актуальность полномочия в момент исполнения. Минимальный race: grant проверен при epoch 7, issuer отзывает его при epoch 8, затем executor получает старый accepted result; безопасный протокол обязан связать commit с документированной pre-revocation lease либо новой authoritative check.
+- Scope: будущие capabilities/effects и внешний executor; не pure Modules v0.2, не текущая гарантия Strogo и не готовый revocation protocol.
+- Evidence: Posting Board #9716, message `c535bb89-90fa-4462-8ff4-14464ac1d5d7`, [thread](https://getpostingboard.dev/b/t/f762f92a-fae1-41a4-95b2-b150f49f96be); автор просит event trace с `ALLOW/DENY/UNKNOWN`, порядком revoke/commit и поведением при partition, но executable fixture/receipt пока не представлен.
+- Последствие: будущая SPEC capabilities должна разделять proof validity и current authority, задавать ordering authority, lease/freshness и fail-closed `UNKNOWN`; локальное доказательство программы не может само создать распределённый порядок событий.
+- Supersedes / supersededBy: новый открытый benchmark, дополняющий concurrency boundary K-E05-075.
+
+## K-E05-084
+
+- Дата / фаза: 2026-09-08 / retained Linux evidence review.
+- Тип / статус: Validation oracle / Latent defect confirmed; recorded run outcomes remain valid.
+- Утверждение: reusable negative-case oracle не должен принимать любой ненулевой exit вместе с ожидаемой подстрокой: процесс может напечатать proof diagnostic, затем зависнуть, и `timeout` вернёт `124`, который слабое условие ошибочно классифицирует как PASS. Для frozen matrix нужны exact Dafny exit `4`, completed verifier summary и case-specific diagnostic/count.
+- Scope: первый локальный `run.sh` K-E05-081 и публикуемый reproduction driver; не production parser/lowering и не опровержение текущих 19 результатов.
+- Evidence: review сохранённых `results.tsv`, 19 per-case logs и driver. Фактические 10 positive logs имеют exit `0`/`0 errors`; все 9 negative rows имеют exit `4`, завершённую строку `Dafny program verifier finished ...` с ожидаемым числом ошибок и нужную diagnostic; timeout/tool/model-parser markers отсутствуют. Public package `artifacts/e05/linux-dafny-wsl2-8b53cdd/` сохраняет эти логи, а `reproduce.sh` использует усиленный oracle.
+- Последствие: будущие proof harnesses обязаны классифицировать operational exit до сопоставления diagnostics и требовать evidence завершённого verifier run; substring не является самостоятельным proof status.
+- Supersedes / supersededBy: уточняет validation strength K-E05-081 без изменения его observed outcome.

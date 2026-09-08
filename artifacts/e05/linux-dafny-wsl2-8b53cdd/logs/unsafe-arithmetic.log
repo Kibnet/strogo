@@ -1,0 +1,7 @@
+sources/UnsafeCandidate.dfy(6,26): Error: result of operation might violate newtype constraint for 'I64'
+  |
+6 |     var v001: I64 := p000 + v000;
+  |                           ^
+
+
+Dafny program verifier finished with 1 verified, 1 error
