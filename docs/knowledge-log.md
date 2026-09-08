@@ -1100,3 +1100,13 @@
 - Evidence: внешний source review public commit `6c73dee`; исправлено на `"$("$dafny" --version)"` и `"$("$dotnet" --version)"`.
 - Последствие: retained exact-commit evidence создаётся только после повторного запуска исправленного driver; version checks поддерживают произвольные абсолютные пути.
 - Supersedes / supersededBy: hardening для K-E06-010.
+
+## K-E06-013
+
+- Дата / фаза: 2026-09-08 / exact-revision mixed proof retention.
+- Тип / статус: Reproducible proof evidence / Confirmed on clean public commit `99415e078777bbee76e35a54a0852080c46eec00`.
+- Утверждение: исправленный Linux driver на чистом exact revision получил побайтно одинаковые полные output sets из двух независимых generation roots. Оба strong replay завершились `32 verified, 0 errors`; намеренно слабый invariant завершился ожидаемым exit `4`, `31 verified, 1 error`, причём source map связал diagnostic с obligation `owner-prefix-invariant`.
+- Scope: mixed owner-aware Dafny source, obligations и invariant counterexample на Ubuntu 24.04 WSL2 x86_64. Total wire wrapper, C#/Java translation, packages и четыре runtime rows ещё не подтверждены.
+- Evidence: `artifacts/e06/mixed-proof-99415e0/**`; report фиксирует clean revision, proof identity `077e63eae9b6734bdbaa80877c12636815a42e61409a3a369b10e16f14d0065b`, Dafny `4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2` с executable SHA-256 `e540b482…93846d`, .NET SDK `10.0.400`; `sha256.txt` покрывает retained files.
+- Последствие: mixed lowering checkpoint имеет воспроизводимый retained proof package; следующий E06 gate — verified total wire wrapper и .NET adapter, а не повторение proof run без нового риска.
+- Supersedes / supersededBy: завершает exact-commit evidence, оставшееся pending в K-E06-010.
