@@ -1247,15 +1247,28 @@ try
             foldNode["args"]![2] = "outerZero";
     }).ToJsonString()));
     var inputMutationProofIdentities = new HashSet<string>(StringComparer.Ordinal);
+    var inputMutationManifests = new List<object>();
     for (var position = 0; position < 3; position++)
     {
         var mutationLowering = ModulesDafnyLowerer.Lower(InputMutation(position), allocationOwner);
         inputMutationProofIdentities.Add(mutationLowering.ProofIdentity);
+        inputMutationManifests.Add(new { position, mutationLowering.ProofIdentity, mutationLowering.SourceDigest });
         Check(mutationLowering.Obligations.Any(obligation => obligation.Id == $"input-equivalence-{position}" && obligation.EntityId.EndsWith($"/input-equivalence/{position}", StringComparison.Ordinal)), $"input mutation {position} has its exact equivalence obligation");
         File.WriteAllBytes(Path.Combine(foldOutputPath, $"allocation-input-{position}-mutation.dfy"), mutationLowering.SourceBytes);
         File.WriteAllBytes(Path.Combine(foldOutputPath, $"allocation-input-{position}-mutation.obligations.json"), JsonSerializer.SerializeToUtf8Bytes(new { mutationLowering.ProofIdentity, mutationLowering.Obligations }));
     }
     Check(inputMutationProofIdentities.Count == 3 && !inputMutationProofIdentities.Contains(allocationPrimaryLowering.ProofIdentity), "each ordered fold argument mutation changes proof identity");
+    File.WriteAllBytes(Path.Combine(foldOutputPath, "allocation-manifest.json"), JsonSerializer.SerializeToUtf8Bytes(new
+    {
+        ownerDigest = allocationOwner.BundleDigest,
+        candidates = new[]
+        {
+            new { variant = "primary", moduleSourceDigest = allocationPrimary.SourceDigest, allocationPrimaryLowering.ProofIdentity, allocationPrimaryLowering.SourceDigest },
+            new { variant = "alternative", moduleSourceDigest = allocationAlternative.SourceDigest, allocationAlternativeLowering.ProofIdentity, allocationAlternativeLowering.SourceDigest }
+        },
+        weakInvariant = new { moduleSourceDigest = weakInvariantIr.SourceDigest, weakInvariantLowering.ProofIdentity, weakInvariantLowering.SourceDigest },
+        inputMutations = inputMutationManifests
+    }));
     reports.Add(new { kind = "fold-allocation", ownerDigest = allocationOwner.BundleDigest, primarySourceDigest = allocationPrimaryLowering.SourceDigest, alternativeSourceDigest = allocationAlternativeLowering.SourceDigest });
 
     var discriminatorOwner = OwnerBundleV04Parser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-fold-discriminator-v0.4.json")));
