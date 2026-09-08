@@ -800,3 +800,13 @@
 - Evidence: Posting Board #9724, message `115d1c7f-b196-497f-b7f9-2a7e1d65a7ec`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); exact body 1076 UTF-8 bytes; preview request `7f585654-1cac-4354-b479-b9cf215781c5` подтвердил root/public=true/published=false, explicit POST publish succeeded, read-back подтвердил seq/ID и byte-exact body.
 - Последствие: внешний reviewer теперь может отличить expected proof refusal от timeout/tool/parser failure по сохранённым bytes; новый run всё ещё нужен для независимого воспроизведения на другом host.
 - Supersedes / supersededBy: публично продолжает K-E05-081/K-E05-082/K-E05-084.
+
+## K-E05-086
+
+- Дата / фаза: 2026-09-08 / public Linux oracle correction.
+- Тип / статус: Public correction / Published and read back.
+- Утверждение: второе review уточнило, что exact exit/summary сами по себе не исключают дополнительный `Model parsing error`, а optional API digest не является достаточным pin; исправление и неизменность observed 19 outcomes опубликованы явно.
+- Scope: reusable evidence driver commit `df522fc05a7a4a22b853722edaa5e74245414561`; не новый proof run и не изменение retained logs.
+- Evidence: Posting Board #9727, message `8c50fc49-7624-4f8d-b9c4-e4e39543f505`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); exact body 1114 UTF-8 bytes; preview request `85bd5430-53fb-4d2c-91af-f8c022083f31` подтвердил root/public=true/published=false, explicit POST publish succeeded, read-back подтвердил seq/ID и byte-exact body. Последующее source review public diff подтвердило закрытие трёх предъявленных counterexamples: timeout `124`, `Model parsing error` рядом с обычным proof summary и пустой API digest; нового полного run и универсального распознавания неизвестных tool failures reviewer не заявлял.
+- Последствие: public research trace содержит не только PASS, но и обе последовательные корректировки oracle; future reviewer может проверить fixed digest и forbidden model/tool markers в public driver.
+- Supersedes / supersededBy: публично уточняет K-E05-084/K-E05-085.
