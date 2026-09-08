@@ -80,7 +80,7 @@ Automatic-Module-Name: strogo.portable.v01\r\n
 \r\n
 ```
 
-The driver writes an argfile whose first line is `META-INF/MANIFEST.MF`, followed by each remaining entry exactly once in ordinal path order. The argfile contains only relative paths and no `-C` or physical paths. The pinned invocation is:
+The driver writes an argfile whose first line is `META-INF/MANIFEST.MF`, followed by each remaining entry exactly once in ordinal path order. The argfile contains only relative paths and no `-C` or physical paths. На pinned `jar 17.0.19` проверено, что `--no-manifest` подавляет автоматическое создание manifest, а явный `--manifest META-INF/MANIFEST.MF` при этом принимается и добавляет ровно переданный файл. The pinned invocation is:
 
 ```text
 jar --create --file <quarantined-output> --no-compress \
@@ -96,6 +96,7 @@ The exact executable, JDK closure digest, logical flags, manifest bytes digest a
 - `jar` writes only to a unique quarantine output under the run root.
 - Exit `0`, empty stdout/stderr, clean process tree and exact expected inventory are required.
 - Validator opens the JAR as a ZIP reader without extraction and checks one central-directory entry per logical path, method `STORED`, fixed timestamp, UTF-8 flag, manifest-first ordering and exact bytes.
+- Для каждого central-directory record validator сверяет соответствующий local-file header: name, flags, method, timestamp fields, CRC-32, compressed/uncompressed sizes and data offset. Проверяются границы `local header + data`, отсутствие overlapping records, корректные central-directory offset/size и отсутствие trailing bytes после end record.
 - The validator rejects duplicate raw ZIP names, duplicate case-fold names, directory entries, unexpected compression, extra metadata, unsafe paths and a mismatch between raw input inventory and final inventory.
 - After successful validation, the JAR is atomically renamed to a new absent final path. Existing final paths are never overwritten.
 - Failure removes quarantine with containment and absence checks. Cleanup failure preserves bounded residual evidence and blocks promotion.
@@ -170,7 +171,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 
 - **A1:** two clean runs with identical logical inputs produce byte-identical JAR and digest.
 - **A2:** manifest, argfile, timestamp, ordering and compression are exact and reproducible.
-- **A3:** final JAR opens without extraction and matches ordered input inventory byte-for-byte.
+- **A3:** final JAR opens without extraction, has consistent local/central ZIP records and matches ordered input inventory byte-for-byte.
 - **A4:** package manifest binds the normalized JAR digest and standalone consumer reads it.
 - **A5:** duplicate, case-fold, traversal, absolute, directory, compression, timestamp, extra-entry and overwrite mutations fail closed with no promoted output.
 - **A6:** timeout, stdout/stderr overflow, nonzero `jar` and cleanup failure preserve typed bounded evidence and never promote output.
@@ -182,7 +183,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 | --- | --- | --- | --- | --- |
 | A1 | two-run byte comparison | compare logical identities | `artifacts/e06/jvm-jar-*/report.json` | — |
 | A2 | manifest/argfile/inventory assertions | inspect pinned command | receipt + inventory | — |
-| A3 | ZIP central-directory validator | inspect no-extraction rule | final inventory | — |
+| A3 | ZIP central-directory and local-header validator | inspect no-extraction rule and boundary checks | final inventory | — |
 | A4 | package build/validate + consumer | inspect digest binding | package report | — |
 | A5 | mutation matrix | verify no final path | negative receipts | — |
 | A6 | process/cleanup fault fixtures | inspect residual state | bounded logs | — |

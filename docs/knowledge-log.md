@@ -1650,3 +1650,23 @@
 - Evidence: feasibility result in E06 profile §2/§6.2.2; E06A Phase 2 evidence `artifacts/e06/jvm-phase2-d21d969/**`.
 - Последствие: до фразы **«Спеку подтверждаю»** implementation и JAR output не запускаются; v0.1 принимает только exact E06A candidate и adapter classes, без external/discovered runtime dependencies.
 - Supersedes / supersededBy: уточняет K-E06-065; не меняет approved baseline и E06R.
+
+## K-E06-068
+
+- Дата / фаза: 2026-09-08 / E06B SPEC review.
+- Тип / статус: Independent review finding / Incorporated in draft.
+- Утверждение: на pinned `jar 17.0.19` комбинация `--no-manifest --manifest META-INF/MANIFEST.MF` успешно создаёт JAR с явным manifest; это закреплено как tested command fact в E06B. ZIP validator дополнительно обязан сверять local headers с central-directory records, CRC/sizes/offsets, non-overlap и отсутствие trailing bytes.
+- Scope: локальный probe создал `out.jar` с exit `0` и manifest-first inventory; baseline и Phase 2 evidence не изменялись.
+- Evidence: pinned JDK `jar 17.0.19` probe в рабочей сессии; E06B SPEC §6.2.
+- Последствие: implementation должна валидировать raw ZIP structure без extraction и не полагаться только на высокоуровневый ZIP reader.
+- Supersedes / supersededBy: уточняет K-E06-067; owner approval gate unchanged.
+
+## K-E06-069
+
+- Дата / фаза: 2026-09-08 / E06R source review.
+- Тип / статус: Test-gap finding / Open for next approved implementation scope.
+- Утверждение: текущая E06R conformance проверяет omit-outcome и helper fixtures, но отдельная двухвекторная regression для positive/permutation/swapped digest не выделена. Source contract уже обязан принимать перестановку целых rows и отклонять mismatched `vectorId`/`inputDigest`.
+- Scope: это review finding, а не выполненная mutation; существующий validator и approved E06R behavior не менялись.
+- Evidence: `src/Strogo.Modules.Portability/PortabilityReportV01.cs` outcome coverage checks; `tests/Strogo.Modules.Portability.Conformance/Program.cs` existing fixtures.
+- Последствие: добавить отдельную двухвекторную regression перед следующим E06R integration checkpoint, сохранив distinction между row permutation и swapped digest.
+- Supersedes / supersededBy: уточняет K-E06-068 review queue; E06B baseline/JAR boundaries unchanged.
