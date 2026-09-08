@@ -1140,3 +1140,33 @@
 - Evidence: Posting Board #9863/#9864, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); это обсуждение дизайна, а не реализованная гарантия Strogo.
 - Последствие: будущую SPEC следует строить из независимых typed capability fields и explicit ambiguous outcome; необходимо искать контрпример к этой модели до approval.
 - Supersedes / supersededBy: конкретизирует K-E06-014.
+
+## K-E06-017
+
+- Дата / фаза: 2026-09-08 / verified wire-wrapper implementation.
+- Тип / статус: Proof-boundary implementation / Confirmed on working tree; exact clean-revision retention pending.
+- Утверждение: additive lowering `strogo.portable-wire-dafny-lowering.v0.1` добавляет к одному mixed candidate source закрытые `WireValue`, `WireOutcome` и total `Invoke` с `requires true`. Wrapper применяет logical refusal priority `UnknownFunction → ArityMismatch → RuntimeTypeMismatch → OwnerPreconditionFailed`, проверяет I64 range, sequence capacity/items и exact Summary field order, а каждую из пяти success-веток связывает явным assertion с owner model/prefix model после доказанного type/requires gate.
+- Scope: generic wire datatype и fixed E06 five-function wrapper; JSON parsing/transport refusals остаются обязанностью target adapter и ещё не реализованы.
+- Evidence: `src/Strogo.Modules/DafnyPortableWireLowering.cs`; two-root working-tree driver PASS `strong=42/0x2 weak=41/1`, 25 mapped proof obligations; portability conformance `checks=56`.
+- Последствие: logical validation больше не нужно дублировать в target adapters; после exact-commit proof можно собирать C# adapter только как JSON ↔ generated wire transport.
+- Supersedes / supersededBy: выполняет verified-wrapper часть E06 §§6.1,6.2.3 и развивает K-E06-013.
+
+## K-E06-018
+
+- Дата / фаза: 2026-09-08 / C# translator feasibility.
+- Тип / статус: Toolchain boundary / Confirmed locally; target profile not yet built.
+- Утверждение: Dafny 4.11.0 успешно переводит новый verified source с wire wrapper через `translate cs --no-verify --enforce-determinism --include-runtime`; полученный C# вызывает wrapper и возвращает `increment(41)=42` на .NET 10. Строгая сборка с `Nullable=enable` отвергает upstream Dafny runtime множеством nullable diagnostics; фиксированная generated-source policy `Nullable=disable`, `TreatWarningsAsErrors=true`, `NoWarn=CS8981` собирается без остальных warnings. `CS8981` относится к созданному Dafny lowercase type `nat`.
+- Scope: временный Windows translation/build/run; byte-identical package, public `ModuleApi`, Linux row и target adapter отсутствуют.
+- Evidence: local ignored `artifacts/local-validation/e06/csharp-translate-working-tree`; first strict build failure и successful isolated generated wrapper invocation.
+- Последствие: .NET builder должен разделить policies upstream generated source и нашего adapter, закрепить единственное исключение `CS8981` в toolchain inventory и отвергать любой другой warning.
+- Supersedes / supersededBy: уточняет E06 target-build contract без изменения logical ABI.
+
+## K-E06-019
+
+- Дата / фаза: 2026-09-08 / future ambiguous-delivery adversarial case.
+- Тип / статус: External test proposal / Not executed; outside current E06.
+- Утверждение: даже корректный lookup outcome `ABSENT_IN_WINDOW` не исключает будущий commit уже отправленного, но задержанного запроса. Различающий тест: задержать первую попытку до commit, получить `ABSENT`, отправить retry, затем отпустить первую попытку и посчитать эффекты. Без атомарной дедупликации конкурирующих попыток либо terminal fence против позднего commit возможно два эффекта; payload digest сам по себе дубль не запрещает.
+- Scope: будущий effectful adapter/sink protocol; не pure E06 runtime.
+- Evidence: Posting Board #9865/#9866, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); предложенный сценарий ещё не воспроизведён.
+- Последствие: будущая SPEC должна включить race fixture, closed lookup outcomes `FOUND | ABSENT_IN_WINDOW | EXPIRED` и доказуемое правило retry/fence, сохраняя `UNKNOWN_EFFECT` там, где certainty недостижима.
+- Supersedes / supersededBy: усиливает K-E06-014/K-E06-016 конкретным concurrency counterexample.

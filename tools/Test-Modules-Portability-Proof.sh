@@ -67,7 +67,7 @@ verify_strong() {
   [[ "$exit_code" == 0 ]] || { cat "$log" >&2; echo "strong-$lane exit $exit_code" >&2; exit 71; }
   [[ $(wc -c <"$log") -le 1048576 ]] || { echo "strong-$lane exceeded output limit" >&2; exit 72; }
   ! grep -Eq "$forbidden" "$log" || { cat "$log" >&2; echo "strong-$lane emitted operational failure marker" >&2; exit 73; }
-  grep -Fxq 'Dafny program verifier finished with 32 verified, 0 errors' "$log" || { cat "$log" >&2; exit 74; }
+  grep -Fxq 'Dafny program verifier finished with 42 verified, 0 errors' "$log" || { cat "$log" >&2; exit 74; }
 }
 
 verify_strong a
@@ -78,7 +78,7 @@ timeout 180s "$dafny" verify "$run_dir/a/candidate-weak.dfy" --enforce-determini
 [[ "$weak_exit" == 4 ]] || { cat "$run_dir/logs/weak.log" >&2; echo "weak exit $weak_exit" >&2; exit 75; }
 [[ $(wc -c <"$run_dir/logs/weak.log") -le 1048576 ]] || { echo "weak output exceeded limit" >&2; exit 76; }
 ! grep -Eq "$forbidden" "$run_dir/logs/weak.log" || { cat "$run_dir/logs/weak.log" >&2; echo "weak emitted operational failure marker" >&2; exit 77; }
-grep -Fxq 'Dafny program verifier finished with 31 verified, 1 error' "$run_dir/logs/weak.log" || { cat "$run_dir/logs/weak.log" >&2; exit 78; }
+grep -Fxq 'Dafny program verifier finished with 41 verified, 1 error' "$run_dir/logs/weak.log" || { cat "$run_dir/logs/weak.log" >&2; exit 78; }
 weak_line="$(python3 - "$run_dir/a/candidate-weak.obligations.json" <<'PY'
 import json, sys
 data=json.load(open(sys.argv[1], encoding='utf-8'))
@@ -107,12 +107,12 @@ report={
   'proofIdentity':contract['proofIdentity'],
   'proofObligations':contract['proofObligations'],
   'twoCleanGeneration':'ByteEqual',
-  'strongRuns':[{'lane':'a','outcome':'Verified','verified':'32','errors':'0','logSha256':sha(run/'logs/strong-a.log')},{'lane':'b','outcome':'Verified','verified':'32','errors':'0','logSha256':sha(run/'logs/strong-b.log')}],
-  'weakInvariant':{'outcome':'Unproven','verified':'31','errors':'1','logSha256':sha(run/'logs/weak.log')},
+  'strongRuns':[{'lane':'a','outcome':'Verified','verified':'42','errors':'0','logSha256':sha(run/'logs/strong-a.log')},{'lane':'b','outcome':'Verified','verified':'42','errors':'0','logSha256':sha(run/'logs/strong-b.log')}],
+  'weakInvariant':{'outcome':'Unproven','verified':'41','errors':'1','logSha256':sha(run/'logs/weak.log')},
   'toolchain':{'dafnyVersion':'4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2','dafnyExecutableSha256':dafny_sha,'dotnetSdk':'10.0.400'},
   'environment':{'system':platform.system(),'release':platform.release(),'machine':platform.machine()}
 }
 (run/'report.json').write_text(json.dumps(report,ensure_ascii=True,separators=(',',':'))+'\n',encoding='utf-8',newline='\n')
 PY
 
-echo 'PASS portability mixed proof strong=32/0x2 weak=31/1'
+echo 'PASS portability mixed proof strong=42/0x2 weak=41/1'
