@@ -1,0 +1,17 @@
+artifacts/local-validation/e06/proof-9f0b2e3/a/candidate-weak.dfy(96,39): Error: a postcondition could not be proved on this return path
+   |
+96 |     if n == 0 then C000([], 0, 0) else C000(P004(p000, n - 1).R000F000 + [p000[n - 1]], (var e001: I64 := (P004(p000, n - 1).R000F001 + (if (!(0 <= p000[n - 1])) then 1 else 0)); e001), (var e000: I64 := (P004(p000, n - 1).R000F002 + p000[n - 1]); e000))
+   |                                        ^^^^
+
+artifacts/local-validation/e06/proof-9f0b2e3/a/candidate-weak.dfy(93,21): Related location: this is the postcondition that could not be proved
+   |
+93 |     ensures StrictAnd(((|P004(p000, n).R000F000| as I64) == n as I64), StrictAnd((-8000000 <= P004(p000, n).R000F002), StrictAnd((P004(p000, n).R000F002 <= 8000000), StrictAnd((0 <= P004(p000, n).R000F001), (P004(p000, n).R000F001 <= n as I64)))))
+   |                      ^
+
+artifacts/local-validation/e06/proof-9f0b2e3/a/candidate-weak.dfy(93,80): Related location: this proposition could not be proved
+   |
+93 |     ensures StrictAnd(((|P004(p000, n).R000F000| as I64) == n as I64), StrictAnd((-8000000 <= P004(p000, n).R000F002), StrictAnd((P004(p000, n).R000F002 <= 8000000), StrictAnd((0 <= P004(p000, n).R000F001), (P004(p000, n).R000F001 <= n as I64)))))
+   |                                                                                 ^
+
+
+Dafny program verifier finished with 41 verified, 1 error

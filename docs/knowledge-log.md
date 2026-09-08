@@ -1170,3 +1170,23 @@
 - Evidence: Posting Board #9865/#9866, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); предложенный сценарий ещё не воспроизведён.
 - Последствие: будущая SPEC должна включить race fixture, closed lookup outcomes `FOUND | ABSENT_IN_WINDOW | EXPIRED` и доказуемое правило retry/fence, сохраняя `UNKNOWN_EFFECT` там, где certainty недостижима.
 - Supersedes / supersededBy: усиливает K-E06-014/K-E06-016 конкретным concurrency counterexample.
+
+## K-E06-020
+
+- Дата / фаза: 2026-09-08 / exact-revision wire proof retention.
+- Тип / статус: Reproducible proof evidence / Confirmed on clean public commit `9f0b2e39e9a09d778b107287ed8ae1656c5ad1b8`.
+- Утверждение: exact clean revision с total wire wrapper воспроизведён двумя independent generation roots: все generated files byte-equal; оба strong replay дали `42 verified, 0 errors`; weak invariant сохранил ровно один ожидаемый failure `41/1`, связанный source map с `owner-prefix-invariant`. Report фиксирует 25 obligations и новый wire source/proof identity.
+- Scope: общий Dafny candidate + verified logical wire wrapper на Ubuntu 24.04 WSL2 x86_64; JSON adapter, package и runtime matrix остаются следующими gates.
+- Evidence: `artifacts/e06/wire-proof-9f0b2e3/**`; `repositoryDirty=false`, source digest `1a6076f89ec5d233df9eeaf6b472d11c8a10407e9e8b5ceb09bc4b1fbda3bdcf`, proof identity `09c1d907c9ca9dcd6f0b3ce901c1c72cde2dab12141e21c39b2aac93839b9c74`; checked 13-entry `sha256.txt`.
+- Последствие: K-E06-017 exact-commit gate закрыт; этот source становится единственным входом обоих target translators.
+- Supersedes / supersededBy: завершает pending exact retention K-E06-017.
+
+## K-E06-021
+
+- Дата / фаза: 2026-09-08 / wire checkpoint external reproduction.
+- Тип / статус: External replication and source review / Confirmed for public commit `9f0b2e3`; no independent Dafny run.
+- Утверждение: отдельный checkout выполнил portability conformance с exit `0`, `checks=56 valid=10 refusals=3 transport=24 mutations=4`; reviewer также подтвердил по source, что function/arity/type/owner-domain checks расположены до generated candidate calls.
+- Scope: managed conformance и source order; не `42/0` proof и не .NET/Java profile execution.
+- Evidence: coordinated external run на `9f0b2e39e9a09d778b107287ed8ae1656c5ad1b8`, report `independent-portability-9f0b2e3.json` во внешнем checkout.
+- Последствие: wrapper generation и boundary checks воспроизводятся вне рабочего дерева; target translator/runtime остаётся отдельным TCB и validation gate.
+- Supersedes / supersededBy: независимо подтверждает managed часть K-E06-017 и ограничивает claim K-E06-020.
