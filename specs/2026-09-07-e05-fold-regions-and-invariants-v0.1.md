@@ -467,7 +467,7 @@ UI test video evidence: Не применимо — UI automation отсутст
 - Статус: Не выполнен до EXEC.
 
 ## Approval
-Ожидается фраза: **«Спеку подтверждаю»**.
+Получена точная фраза владельца **«Спеку подтверждаю»** 2026-09-08 после финального causal re-review нормативного §0–18 hash `9E76E1FF07699A3873A3128CEAB077D37BDD1BA945FA143EB746F0AE2FFDE438`. EXEC разрешён в границах этой SPEC.
 
 Подтверждение распространяется только на fold v0.1, owner-bundle v0.4 и локальные checkpoint commits. Отдельным указанием владельца 2026-09-08 разрешён внешний эффект: периодически push-ить эти checkpoint commits в существующий публичный `origin/main`; это разрешение не следует из approval этой SPEC. Merge отдельной ветки, tag, GitHub Release, package publication, announcement и иные публикационные действия этой SPEC не разрешены; обычные сообщения Posting Board регулируются отдельным ранее данным разрешением. Admission, imports/helpers и nested folds остаются вне scope.
 
@@ -476,7 +476,7 @@ UI test video evidence: Не применимо — UI automation отсутст
 | Фаза | Тип | Уверенность | Не хватает | Следующее действие | Нужен человек | Фактическое решение | Объяснение | Артефакты |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Expressivity gap | 0.99 | Нет | Общий fold вместо task opcode | Нет | Да | Variable sequence tasks иначе невыразимы | E05, K-E05-064 |
-| SPEC | Invariant ownership | 0.96 | Owner approval | Подтвердить split design | Да | Ещё нет | Compiler генерирует structural/exact clauses; agent supplies one semantic invariant | эта SPEC |
+| SPEC | Invariant ownership | 0.99 | Нет | Реализовать split design | Нет | Подтверждено владельцем 2026-09-08 | Compiler генерирует structural/exact clauses; agent supplies one semantic invariant | эта SPEC; Approval |
 | SPEC | Owner predicate gap | 0.99 | Нет | Добавить bounded quantified requires | Нет | Нет | Allocation domain `each request > 0` невыразим в owner v0.3 | эта SPEC §6.2 |
 | SPEC | Adversarial hardening | 0.99 | Нет | Исправить и повторить review | Нет | Нет | Закрыты migration/type/resource/domain/evidence ambiguities | Post-SPEC Review, hash `F099F214…F0D1FDE3` |
 | SPEC | Invariant discriminator | 0.98 | Post-SPEC re-review и owner approval | Зафиксировать A/B/C protocol и заранее заданную интерпретацию | Да после review | #9556 предложил sum fixture; prover ещё не запускался | Обязательное поле отделено от недоказанного требования нетривиальной property; false control ловит vacuity | K-E05-069; Posting Board #9554/#9556; эта SPEC §6.2 |
@@ -486,3 +486,4 @@ UI test video evidence: Не применимо — UI automation отсутст
 | SPEC | Public attribution review | 0.99 | Повторный exact-snapshot review и owner approval | Добавить optional D и запрет cross-revision comparison | Нет | #9707 дал рациональное уточнение, soundness counterexample не заявлен; amendment внесён | A/B измеряет полный B; вклад bounds отдельно требует D либо другого evidence | K-E05-077; Posting Board #9707; эта SPEC §6.2/F-AC4 |
 | SPEC | D outcome/claim hardening | 0.99 | Повторный exact-snapshot review | Блокировать semantic contradiction D и сузить вывод A/B до status-level | Нет | NEEDS-FIX на snapshot `DD865152…8C709`; правки внесены | Optional diagnostic не может скрыть общий defect; равный status не измеряет cost/stability | Post-SPEC Review; эта SPEC §6.2/F-AC4 |
 | SPEC | Final causal re-review | 0.99 | Owner approval | Запросить exact approval на normative §0–18 hash `9E76E1FF…FDE438` | Да | Два PASS на whole-file snapshot `EE1AD974…2BD71A`; открытых BLOCKER/HIGH/MEDIUM нет | После verdict изменена только review-запись §19–20; нормативный дизайн не менялся | Post-SPEC Review; K-E05-077 |
+| APPROVAL | Fold v0.1 EXEC | 1.00 | Нет | Начать реализацию F-AC1…F-AC9 | Нет | Владелец дал точную фразу «Спеку подтверждаю» 2026-09-08 | Approval относится к fold v0.1/owner v0.4; periodic push отдельно разрешён | Approval; normative hash `9E76E1FF…FDE438` |
