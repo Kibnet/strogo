@@ -1280,3 +1280,33 @@
 - Evidence: exact build reports при одинаковых source/adapter digests; `FileVersionInfo.ProductVersion` двух retained/local DLL.
 - Последствие: artifact bytes больше не должны зависеть от repository HEAD, не входящего в target semantic/build inputs; после commit нужен exact two-lane build и будущий no-op revision check.
 - Supersedes / supersededBy: усиливает K-E06-022 и ограничивает cross-revision interpretation K-E06-025.
+
+## K-E06-031
+
+- Дата / фаза: 2026-09-08 / full-vector exact .NET run.
+- Тип / статус: Reproducible target execution / Confirmed on clean public commit `30cffa8`; cross-revision comparison pending.
+- Утверждение: exact clean build с pinned assembly metadata снова дал byte-equal translation/record/DLL в двух roots. DLL SHA-256 `37cb02dc8be37fe005d6515421aaba97b069168e70f52d9e8ba2ab019fe314fc`, ProductVersion `0.1.0`, прошла Linux и Windows: 8 public consumer cases, все 24 frozen transport cases, escaped-surrogate case и 13 exact owner-vector outcomes. JSONL projection перед build заново создана из source fixture и побайтно совпала с tracked bytes.
+- Scope: .NET artifact functional/oracle and two-OS checkpoint; mutations, canonical portability manifest/package, runtime closure digests и performance/JIT остаются открыты.
+- Evidence: ignored exact run `artifacts/local-validation/e06/dotnet-build-30cffa8`; Windows consumer запускался вне repository hierarchy.
+- Последствие: functional owner/vector gate .NET profile закрыт; docs-only следующий commit создаёт различающую возможность проверить, что Git HEAD действительно больше не меняет DLL bytes.
+- Supersedes / supersededBy: exact-commit подтверждение K-E06-028/K-E06-030, кроме cross-revision части.
+
+## K-E06-032
+
+- Дата / фаза: 2026-09-08 / future recovery-plan proposal.
+- Тип / статус: External design proposal / Not implemented; outside current E06.
+- Утверждение: предложен closed recovery plan: `RETRY` для идемпотентного чтения, `RETRY_SAME_KEY` при живой sink deduplication, `QUARANTINE_UNKNOWN`/reconciliation для неповторимого эффекта и `RETRY_RISK_ACCEPTED` только по заранее утверждённой политике. Рестарт клиента не превращает `UNKNOWN` в разрешение второго эффекта; компенсация является новой операцией с новым ID и отдельной авторизацией.
+- Scope: будущий effectful language/capability contract; не текущий pure E06.
+- Evidence: Posting Board #9870, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); предложение участника, не исполняемый результат.
+- Последствие: future SPEC должна типизировать recovery decision отдельно от delivery observation и запретить implicit retry после process restart; terminal fence/race fixture K-E06-019 остаётся обязательным.
+- Supersedes / supersededBy: развивает K-E06-016/K-E06-019.
+
+## K-E06-033
+
+- Дата / фаза: 2026-09-08 / assembly identity external review.
+- Тип / статус: External source inspection / Fix shape confirmed; empirical cross-revision proof still required.
+- Утверждение: reviewer подтвердил, что fixed version fields и `IncludeSourceRevisionInInformationalVersion=false` адресуют найденный Git-SHA suffix, но два roots одного HEAD не доказывают стабильность между revisions. Нужна пара builds при неизменных candidate/adapter/project bytes и разных HEAD.
+- Scope: build evidence design; не новый target run.
+- Evidence: coordinated review public commit `30cffa8`.
+- Последствие: следующий docs-only commit используется как controlled no-op revision для повторной сборки и сравнения exact DLL SHA-256.
+- Supersedes / supersededBy: уточняет незакрытую часть K-E06-030/K-E06-031.
