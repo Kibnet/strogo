@@ -22,6 +22,8 @@ var dafnyOption = Array.IndexOf(args, "--dafny-out");
 if (dafnyOption >= 0 && dafnyOption + 1 >= args.Length) throw new ArgumentException("--dafny-out requires a path");
 var weakDafnyOption = Array.IndexOf(args, "--weak-dafny-out");
 if (weakDafnyOption >= 0 && weakDafnyOption + 1 >= args.Length) throw new ArgumentException("--weak-dafny-out requires a path");
+var e06rReportOption = Array.IndexOf(args, "--e06r-report");
+if (e06rReportOption >= 0 && e06rReportOption + 1 >= args.Length) throw new ArgumentException("--e06r-report requires a path");
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
     : Path.Combine(root, "artifacts", "local-validation", "e06", "contract-v0.1.json");
@@ -618,6 +620,55 @@ try
     Check(RejectsJit(() => DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, jitConsumerOutput, missingCandidateJitLog, runtimeOs, "x64"), "$/events/candidate"), "removed candidate compilation event is rejected");
     var insufficientCalls = Encoding.UTF8.GetBytes("PASS dotnet JIT diagnostic pid=1234 calls=49999\n");
     Check(RejectsJit(() => DotNetJitDiagnostics.Validate(jitPlan, jitRuntimeReport, insufficientCalls, jitLog, runtimeOs, "x64"), "$/consumerOutput/calls"), "JIT diagnostic requires the fixed call count");
+
+    var reportEvidence = CreateReportEvidence("0123456789abcdef0123456789abcdef01234567");
+    var reportTimestamp = new DateTimeOffset(2026, 9, 8, 12, 34, 56, TimeSpan.FromHours(3));
+    var portabilityReport = PortabilityReportV01.Build(reportEvidence, reportTimestamp);
+    if (e06rReportOption >= 0)
+    {
+        var output = Path.GetFullPath(args[e06rReportOption + 1], root);
+        Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("E06R report path has no directory"));
+        File.WriteAllBytes(output, portabilityReport.CanonicalJsonBytes());
+    }
+    using (var reportDocument = JsonDocument.Parse(portabilityReport.CanonicalJsonBytes()))
+        Fields(reportDocument.RootElement, "schemaVersion", "purpose", "contractStatus", "admissionStatus", "sourceRevision", "moduleDigest", "ownerBundleDigest", "proofDigest", "dafnySourceDigest", "profiles", "comparisonStatus", "reasons", "semanticDigest", "createdAtUtc");
+    Check(portabilityReport.ComparisonStatus == "Portable" && portabilityReport.Profiles.Length == 2 && portabilityReport.Profiles.All(profile => profile.Status == "Portable"), "full typed evidence produces a portable validation-only report");
+    Check(portabilityReport.CreatedAtUtc == "2026-09-08T09:34:56.0000000Z" && portabilityReport.SemanticDigest.Length == 64, "report timestamp and semantic digest are canonical");
+    Check(PortabilityContract.DomainHash("strogo.portability-report.v0.1/semantic", portabilityReport.SemanticProjectionBytes()) == portabilityReport.SemanticDigest, "semantic projection hash is self-consistent");
+    Check(RejectsReport(() => portabilityReport.MarkdownBytes("../report.json"), "InvalidMarkdownPath"), "Markdown link rejects parent traversal");
+    var rebuiltReport = PortabilityReportV01.Validate(portabilityReport.CanonicalJsonBytes(), reportEvidence);
+    Check(rebuiltReport.CanonicalJsonBytes().SequenceEqual(portabilityReport.CanonicalJsonBytes()), "report validation rebuilds exact canonical bytes");
+    var offsetEquivalent = PortabilityReportV01.Build(reportEvidence, new DateTimeOffset(2026, 9, 8, 9, 34, 56, TimeSpan.Zero));
+    Check(offsetEquivalent.CanonicalJsonBytes().SequenceEqual(portabilityReport.CanonicalJsonBytes()), "offset-equivalent timestamps canonicalize identically");
+    var diagnosticMutation = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", rawMarker: "diagnostic-b"), reportTimestamp);
+    Check(!diagnosticMutation.CanonicalJsonBytes().SequenceEqual(portabilityReport.CanonicalJsonBytes()) && diagnosticMutation.SemanticDigest == portabilityReport.SemanticDigest, "raw receipt mutation changes report bytes but not semantic digest");
+    var outcomeMutation = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", changeOutcome: true), reportTimestamp);
+    Check(outcomeMutation.SemanticDigest != portabilityReport.SemanticDigest, "owner outcome mutation changes semantic digest");
+    var crossOsMismatch = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", changeWindowsVector: true), reportTimestamp);
+    Check(crossOsMismatch.ComparisonStatus == "NotPortable" && crossOsMismatch.Profiles.All(profile => profile.ReasonCodes.Contains("OracleMismatch")), "cross-OS vector mismatch becomes a typed OracleMismatch");
+    var crossProfileMismatch = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", changeJvmVector: true), reportTimestamp);
+    Check(crossProfileMismatch.ComparisonStatus == "NotPortable" && crossProfileMismatch.Profiles.All(profile => profile.ReasonCodes.Contains("OracleMismatch")), $"cross-profile vector mismatch marks both profiles OracleMismatch (status={crossProfileMismatch.ComparisonStatus}; profiles={string.Join("|", crossProfileMismatch.Profiles.Select(profile => profile.ProfileId + ":" + profile.Status + ":" + string.Join(',', profile.ReasonCodes) + ":" + profile.CommonVectorSetDigest))})");
+    var unavailableReport = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", omitLinux: true), reportTimestamp);
+    Check(unavailableReport.Profiles.All(profile => profile.Platforms[0].Status == "Unavailable" && profile.Platforms[0].ReasonCodes.SequenceEqual(new[] { "EnvironmentUnavailable", "RowUnavailable" })), "missing mandatory OS row is synthesized as unavailable");
+    var tamperedReportBytes = portabilityReport.CanonicalJsonBytes();
+    var tamperIndex = Array.IndexOf(tamperedReportBytes, (byte)'a');
+    tamperedReportBytes[tamperIndex] = (byte)'b';
+    Check(RejectsReport(() => PortabilityReportV01.Validate(tamperedReportBytes, reportEvidence), "CanonicalReportMismatch"), "self-declared canonical report mutation is rejected by rebuild");
+    Check(RejectsReport(() => PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", omitOutcome: true), reportTimestamp), "OutcomeCoverageMismatch"), "outcome subset is rejected before oracle gate");
+    Check(RejectsReport(() => PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", omitJvm: true), reportTimestamp), "MissingProfile"), "missing mandatory profile is rejected without report output");
+    Check(RejectsReport(() => PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", mixedReceiptRevision: "fedcba9876543210fedcba9876543210fedcba98"), reportTimestamp), "SourceRevisionMismatch"), "mixed source revision is rejected before report construction");
+    var reportTemp = Path.Combine(Path.GetTempPath(), "strogo-report-" + Guid.NewGuid().ToString("N"));
+    try
+    {
+        PortabilityReportWriter.WriteNewDirectory(portabilityReport, reportEvidence, reportTemp);
+        Check(File.Exists(Path.Combine(reportTemp, "report.json")) && File.Exists(Path.Combine(reportTemp, "REPORT.md")) && File.Exists(Path.Combine(reportTemp, "sha256.txt")), "report writer publishes report, projection and completion marker");
+        Check(File.Exists(Path.Combine(reportTemp, "evidence-index.json")) && File.Exists(Path.Combine(reportTemp, "evidence", PortabilityVersions.DotNetProfile, "profile", "build.json")), "report writer retains evidence receipts and index");
+        Check(RejectsReport(() => PortabilityReportWriter.WriteNewDirectory(portabilityReport, reportEvidence, reportTemp), "DestinationExists"), "report writer refuses overwrite");
+    }
+    finally
+    {
+        if (Directory.Exists(reportTemp)) Directory.Delete(reportTemp, recursive: true);
+    }
 }
 finally
 {
@@ -757,6 +808,40 @@ static void CreateFakeDotNetRuntime(string root, string executable)
     File.WriteAllText(Path.Combine(root, executable), "launcher-v1", Encoding.ASCII);
     File.WriteAllText(Path.Combine(root, "host", "fxr", "10.0.11", "hostfxr.bin"), "hostfxr-v1", Encoding.ASCII);
     File.WriteAllText(Path.Combine(root, "shared", "Microsoft.NETCore.App", "10.0.11", "coreclr.bin"), "runtime-v1", Encoding.ASCII);
+}
+
+static PortabilityReportEvidenceSet CreateReportEvidence(string sourceRevision, string rawMarker = "receipt-a", bool changeOutcome = false, bool omitJvm = false, bool omitOutcome = false, bool changeWindowsVector = false, bool changeJvmVector = false, string? mixedReceiptRevision = null, bool omitLinux = false)
+{
+    var digest = new string('a', 64);
+    var profiles = new List<PortabilityReportProfileEvidence>
+    {
+        CreateReportProfile(PortabilityVersions.DotNetProfile, sourceRevision, digest, null, null, rawMarker, changeOutcome, omitOutcome, changeWindowsVector, false, mixedReceiptRevision, omitLinux)
+    };
+    if (!omitJvm)
+        profiles.Add(CreateReportProfile(PortabilityVersions.JvmProfile, sourceRevision, digest, new string('b', 64), new string('c', 64), rawMarker, changeOutcome, omitOutcome, changeWindowsVector, changeJvmVector, mixedReceiptRevision, omitLinux));
+    return new PortabilityReportEvidenceSet(sourceRevision, digest, new string('d', 64), new string('e', 64), new string('f', 64), profiles);
+}
+
+static PortabilityReportProfileEvidence CreateReportProfile(string profileId, string sourceRevision, string digest, string? baseline, string? approval, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeWindowsVector, bool changeAllVectors = false, string? mixedReceiptRevision = null, bool omitLinux = false)
+{
+    var receiptRevision = mixedReceiptRevision ?? sourceRevision;
+    var build = new PortabilityReportBuildEvidence("Passed", [], CanonicalJson.Encode(new { sourceRevision = receiptRevision, kind = "build", marker = rawMarker }), digest, digest, digest, digest, digest, digest);
+    var platforms = new List<PortabilityReportPlatformEvidence>();
+    if (!omitLinux) platforms.Add(CreateReportPlatform("linux", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeAllVectors));
+    platforms.Add(CreateReportPlatform("windows", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeWindowsVector || changeAllVectors));
+    return new PortabilityReportProfileEvidence(profileId, digest, digest, digest, baseline, approval, build, platforms);
+}
+
+static PortabilityReportPlatformEvidence CreateReportPlatform(string os, string sourceRevision, string digest, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeVector)
+{
+    var vectorId = changeVector ? "v-002" : "v-001";
+    var vector = new PortabilityReportVector(vectorId, digest);
+    var outcome = PortabilityReportOutcome.FromJson("success", new { type = "I64", value = changeOutcome ? "8" : "7" }, null, null, null);
+    var outcomes = omitOutcome ? Array.Empty<PortabilityReportOutcomeRow>() : new[] { new PortabilityReportOutcomeRow(vectorId, digest, "OwnerInDomain", digest, "Returned", outcome) };
+    var consumer = new PortabilityReportGateEvidence("consumer", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "consumer", os, marker = rawMarker }), digest, null, null, null, [], null);
+    var jit = new PortabilityReportGateEvidence("jit", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "jit", os, marker = rawMarker }), null, "entry", "candidate", "50000", ["FullOpts"], null);
+    var oracle = new PortabilityReportGateEvidence("oracle", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "oracle", os, marker = rawMarker }), null, null, null, null, [], digest);
+    return new PortabilityReportPlatformEvidence(os, "x64", $"{os}-identity", $"{os}-kernel", "fixture", "1", digest, digest, digest, digest, digest, digest, consumer, jit, oracle, null, [vector], outcomes);
 }
 
 static PortabilityPlatformStatus PassedRow(string os, char identity = 'a')

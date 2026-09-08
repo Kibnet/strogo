@@ -496,7 +496,7 @@ Visual planning artifact: отдельный GUI не применим; Markdown
 | 19 / E — масштаб/форма | PASS | Medium public evidence contract использует expanded template |
 | 20 / F — profile | PASS | Product system data/output/error/migration contract описан |
 
-Итог: ГОТОВО; independent post-SPEC review завершён PASS, ожидается owner approval.
+Итог: ГОТОВО; independent post-SPEC review завершён PASS, owner approval получено точной фразой «Спеку подтверждаю» 2026-09-08, EXEC checkpoint завершён.
 
 ### SPEC Rubric Result
 
@@ -546,15 +546,18 @@ Visual planning artifact: отдельный GUI не применим; Markdown
 
 - No-findings justification after re-review: all findings above have explicit text, AC and evidence mapping; no unresolved HIGH/MEDIUM remains.
 - Manual-review challenge: human should still inspect whether proposed gate-summary fields are sufficient for actual retained receipts and whether `Portable` wording is appropriate for the fixed validation fixture. Those are owner approval/design checks, not hidden implementation assumptions.
-- Residual risks / needs human: owner must approve E06R with exact **«Спеку подтверждаю»**. Real JVM work remains separately gated by **«Baseline подтверждаю»**; this SPEC does not waive it.
+- Residual risks / needs human: same-revision real receipts and remaining E06 gates still require execution evidence. Real JVM work remains separately gated by **«Baseline подтверждаю»**; this SPEC does not waive it.
 
 ### Post-EXEC Review
 
-- Не выполнен: EXEC запрещён до approval этой SPEC.
+- Статус: **PASS для synthetic E06R checkpoint; real same-revision integration остаётся отдельным этапом.**
+- Проверено: exact root/profile/platform field closure, source-revision receipt binding, outcome bijection, cross-OS/cross-profile mismatch mapping, semantic/diagnostic digest boundary, timestamp normalization, Markdown projection и staged writer no-overwrite path.
+- Validation evidence: solution build `0 warnings / 0 errors`; portability conformance `216` checks; managed conformance `362`; Graph conformance `141`; driver report schema `strogo.portability-report.v0.1`, two profiles, `Portable` fixture и explicit `noJvmExecutionBeforeBaselineApproval=true`.
+- Ограничение review: это локальный post-EXEC review и synthetic evidence; фактические .NET/JVM receipts одной revision и E06A Stage 2 не заменены этим checkpoint.
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»** именно для E06R после завершения post-SPEC review. Это не заменяет отдельную фразу E06A **«Baseline подтверждаю»**.
+Owner approval: **«Спеку подтверждаю»** получено 2026-09-08 для этой версии E06R. Это не заменяет отдельную фразу E06A **«Baseline подтверждаю»**.
 
 ## 20. Журнал действий агента
 
