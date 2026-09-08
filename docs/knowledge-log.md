@@ -1700,3 +1700,13 @@
 - Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; rebuilt conformance run — `PASS portability contract checks=228 valid=10 refusals=3 transport=24 mutations=4`.
 - Последствие: regression теперь отличает set-only acceptance от корректного vector-to-input binding; reason/locus assertion сохраняется.
 - Supersedes / supersededBy: уточняет K-E06-071; external-anchor boundary unchanged.
+
+## K-E06-073
+
+- Дата / фаза: 2026-09-08 / E06B ZIP structural review.
+- Тип / статус: Synthetic lower-layer counterexample / Confirmed, pending valid-JAR integration.
+- Утверждение: one-byte mutation `local filename A.class → B.class` при сохранённом central-directory name `A.class` читается .NET `ZipArchive` как обычный `A.class`; high-level name+payload comparison не обнаруживает несогласованность. Structural validator должен сверять raw local header и central record до promotion.
+- Scope: fixture `control.zip`/`local-name-mismatch.zip` содержит не Java class и не manifest, поэтому это не E06B JAR PASS и не меняет approved baseline.
+- Evidence: temporary pair `strogo-zip-fixture-7e75d8430f70410c8258bc22c9f89e73`; control SHA-256 `10f38f96…c57ca`; mutant SHA-256 `ca5978b0…e196`; оба файла `113` bytes, mutation offset `30`.
+- Последствие: перенести ту же one-byte mutation на полноценный valid JAR после owner-approved E06B implementation; до этого использовать fixture только для нижнего ZIP structural seam.
+- Supersedes / supersededBy: уточняет K-E06-068 и K-E06-067; JAR implementation/approval boundaries unchanged.
