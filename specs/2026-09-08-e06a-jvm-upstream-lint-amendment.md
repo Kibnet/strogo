@@ -8,7 +8,7 @@
 - Целевое семейство / behavior baseline: Strogo E06 `jvm-java17.v1`.
 - Поверхность: Codex, локальный Windows host и Ubuntu 24.04 WSL2.
 - Effective runtime: не влияет на javac artifact; фактические tool/runtime identities фиксируются в receipts.
-- Eval baseline / evidence: clean E06 source/package, Dafny `4.11.0`, Zulu OpenJDK `17.0.19`; normative probe дал exit `1`, `67 rawtypes + 3 varargs + 1 serial` вне разрешённого `cast`.
+- Eval baseline / evidence: clean E06 source/package, Dafny `4.11.0`, Zulu OpenJDK `17.0.19`; old normative probe дал exit `1`, `67 rawtypes + 3 varargs + 1 serial` вне разрешённого `cast`; первый full probe без `-Xmaxwarns` был обрезан javac после 100 из 106 warnings, exact full probe с `-Xmaxwarns 10000` дал `35 cast + 67 rawtypes + 1 serial + 3 varargs`.
 - Целевой релиз / ветка: `main`, отдельные Conventional Commits и периодический push по разрешению владельца.
 - Ограничения: применима только к translator-owned Java sources фиксированного E06 validation fixture; adapter и consumer не получают suppressions.
 - Связанные ссылки: E06 §6.2.2 и K-E06-056.
@@ -90,7 +90,7 @@ VM flags фиксируют diagnostics:
 -J-Dfile.encoding=UTF-8
 ```
 
-Обе фазы используют exact `javac 17.0.19`, `--release 17`, `-encoding UTF-8`, `-proc:none`, `-implicit:none`, явные empty `--class-path`/`--source-path`, один source argfile и новый empty output directory. `CLASSPATH`, `JDK_JAVAC_OPTIONS`, `JDK_JAVA_OPTIONS`, `JAVA_TOOL_OPTIONS` и `_JAVA_OPTIONS` очищаются. Tool executable/closure, argfile bytes, translated source inventory и logical flags входят в `buildToolchainDigest`.
+Обе фазы используют exact `javac 17.0.19`, `--release 17`, `-encoding UTF-8`, `-proc:none`, `-implicit:none`, `-Xmaxwarns 10000`, явные empty `--class-path`/`--source-path`, один source argfile и новый empty output directory. `CLASSPATH`, `JDK_JAVAC_OPTIONS`, `JDK_JAVA_OPTIONS`, `JAVA_TOOL_OPTIONS` и `_JAVA_OPTIONS` очищаются. Tool executable/closure, argfile bytes, translated source inventory и logical flags входят в `buildToolchainDigest`.
 
 #### 6.2.2 Phase 1: exact unsuppressed baseline
 
@@ -99,7 +99,7 @@ Phase 1 запускается без `-Werror`:
 ```text
 javac <fixed -J flags> --release 17 -encoding UTF-8 \
   -proc:none -implicit:none --class-path empty-classpath \
-  --source-path empty-sourcepath -Xlint:all \
+  --source-path empty-sourcepath -Xlint:all -Xmaxwarns 10000 \
   -d probe-classes @translator-sources.argfile
 ```
 
@@ -121,7 +121,7 @@ warnings(path,line,column,category,message,contextDigest)
 
 Owner-approved `baselineDigest` передаётся build как внешний expected input; self-generated либо вычисленный из рабочего дерева expected digest запрещён. `baselineDigest`, `validatorDigest` и `harnessDigest` являются обязательными inputs canonical `buildToolchainDigest`, а существующий manifest field связывает их с artifact/package identity. Coordinated baseline+validator/harness rewrite без нового owner-approved expected digest обязан завершиться mismatch, даже если изменённые компоненты внутренне согласованы.
 
-`categories` и `warnings` ordinal-sorted. Full-lint probe обязан содержать известные `rawtypes:67`, `serial:1`, `varargs:3`; `cast` count измеряется full probe в EXEC stage 1 и может быть только четвёртой категорией. Любая иная категория останавливает EXEC как новый spec finding. Exact warning list/digest сначала вычисляются независимо в двух clean roots и обязаны быть byte-equal. Кандидат и receipts показываются владельцу; только фраза **«Baseline подтверждаю»** закрепляет exact `baselineDigest` в разделе `Approved baseline snapshot` и разрешает tracked baseline/phase 2. Future baseline change требует отдельной SPEC/owner approval, а не regeneration внутри build. Несовпадение любого поля — `TargetBuildRejected / UpstreamWarningBaselineMismatch` до phase 2 и до JAR output.
+`categories` и `warnings` ordinal-sorted. Full-lint probe обязан содержать exact `cast:35`, `rawtypes:67`, `serial:1`, `varargs:3`, всего `106`; любая иная категория/count останавливает EXEC как новый spec finding. `-Xmaxwarns 10000` является частью command identity и исключает silent truncation; truncation line либо несовпадение summary count отклоняются grammar. Exact warning list/digest сначала вычисляются независимо в двух clean roots и обязаны быть byte-equal. Кандидат и receipts показываются владельцу; только фраза **«Baseline подтверждаю»** закрепляет exact `baselineDigest` в разделе `Approved baseline snapshot` и разрешает tracked baseline/phase 2. Future baseline change требует отдельной SPEC/owner approval, а не regeneration внутри build. Несовпадение любого поля — `TargetBuildRejected / UpstreamWarningBaselineMismatch` до phase 2 и до JAR output.
 
 `probe-classes` является quarantined disposable local intermediate и никогда не входит в phase 2 classpath, package, identity или evidence archive. После capture при любом exit driver удаляет только проверенный resolved path внутри нового run root и подтверждает отсутствие directory до следующего stage. Cleanup failure даёт `TargetBuildRejected/ProbeCleanupFailed`; phase 2 не запускается. Partial probe files не считаются candidate artifact и не могут остаться accepted run output.
 
@@ -133,7 +133,7 @@ Owner-approved `baselineDigest` передаётся build как внешний
 javac <fixed -J flags> --release 17 -encoding UTF-8 \
   -proc:none -implicit:none --class-path empty-classpath \
   --source-path empty-sourcepath \
-  -Xlint:all,-cast,-rawtypes,-varargs,-serial -Werror \
+  -Xlint:all,-cast,-rawtypes,-varargs,-serial -Xmaxwarns 10000 -Werror \
   -d candidate-classes @translator-sources.argfile
 ```
 
@@ -238,7 +238,7 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 
 ### Acceptance Criteria
 
-- **A1:** two clean physical roots создают byte-equal full-lint baseline candidate; известные counts — `rawtypes:67`, `serial:1`, `varargs:3`, единственная optional fourth category — измеренный `cast`, другие категории не принимаются; phase 2 требует сохранённый owner-approved expected `baselineDigest`.
+- **A1:** two clean physical roots создают byte-equal full-lint baseline candidate с exact `106` warnings (`cast:35`, `rawtypes:67`, `serial:1`, `varargs:3`) и без truncation; phase 2 требует сохранённый owner-approved expected `baselineDigest`.
 - **A2:** phase-1 identity связывает pinned tool/source inventory/relative argfile/locale/command; physical paths отсутствуют.
 - **A3:** phase 2 с closed exclusions и pinned inputs завершается exit `0`, empty stdout/stderr.
 - **A4:** adapter и standalone consumer компилируются отдельным full-lint command; consumer запускается pinned Java runner с exact identity/environment/classpath/process gates и проходит `8+24+1+13` behavior fixture.
@@ -399,7 +399,7 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 - Contract pass: draft сохраняет public ABI/proof/package semantics и меняет только upstream lint admission.
 - Adversarial risk pass: проверены новый warning разрешённой категории, исчезнувший warning, locale/path drift, coordinated baseline+validator rewrite, partial classes, process tree и inheritance exclusions adapter/consumer.
 - Role-Based pass: tester, architect и delivery применимы; business/UX неприменимы с причиной.
-- Evidence inspected: `71` primary warnings (`67/3/1`), normative exit `1`; amended diagnostic command exit `0`/empty output; adapter/consumer `8+24+1+13` PASS; conformance `143`.
+- Evidence inspected: old normative command — `71` primary warnings (`67/3/1`) и exit `1`; full lint без max override — truncation `100/106`; exact `-Xmaxwarns 10000` probe — `106` (`35/67/1/3`) и exit `0`; amended diagnostic command exit `0`/empty output; adapter/consumer `8+24+1+13` PASS; conformance `143`.
 - Depth checklist: scope drift отсутствует; AC/evidence/scenarios/decisions/objections заполнены; unsupported portability/G06 claims запрещены; rollback/docs/knowledge defined; hidden contract change вынесено в explicit amendment.
 - No-findings justification: snapshot SHA-256 `eb1c78423a6defdbc5b3f99cc1b92a5bb470d790684371c9426ece66d67cf155` повторно проверен по исправленным trust-anchor/classpath/cleanup/process/diagnostic gates; reviewer подтвердил, что все четыре остаточных MEDIUM закрыты сквозно.
 - Review isolation: reviewer был запущен с ролью `independent-reviewer`, но effective sandbox оказался `danger-full-access`. Поэтому результат учитывается как отдельный procedural adversarial fallback без изменений файлов, а не как технически изолированный read-only review; read-only sandbox в текущей collaboration surface недоступен.
@@ -416,6 +416,7 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 
 - Fixed before continuing: все первоначальные `2 BLOCKER + 3 HIGH + 2 MEDIUM` и четыре follow-up `MEDIUM` закрыты; таблица сохраняет audit trail основных findings.
 - Checks rerun: SPEC linter/rubric, локальная content consistency, `git diff --check` и procedural adversarial re-review snapshot `eb1c7842` — PASS.
+- EXEC counterexample affected-gate review: substantive snapshot `52c973703b039719b5ec423ae4a84e1dba945373c7d8df8d495fd791893349d1` с `-Xmaxwarns 10000` и exact `106` warnings — PASS, открытых `BLOCKER/HIGH/MEDIUM` нет; применяется то же procedural fallback disclosure.
 - Needs human: exact SPEC approval после review PASS; затем отдельный exact baseline approval между EXEC stages.
 - Residual risks / follow-ups: fixture-specific baseline, double javac cost и отсутствие технически read-only reviewer sandbox; все границы явно раскрыты.
 
@@ -425,7 +426,7 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 
 ## Approval
 
-Фраза **«Спеку подтверждаю»** разрешает только EXEC stage 1: validator/runner и построение two-root baseline candidate. Она не разрешает tracked baseline, phase 2, JAR или portability admission.
+Владелец подтвердил SPEC фразой **«Спеку подтверждаю»** 2026-09-08; это разрешает только EXEC stage 1: validator/runner и построение two-root baseline candidate. Подтверждение не разрешает tracked baseline, phase 2, JAR или portability admission. Добавленный после первого probe `-Xmaxwarns 10000` закрывает обнаруженную truncation и не расширяет разрешённый outcome.
 
 После stage 1 агент заполняет следующий snapshot и показывает evidence владельцу:
 
@@ -443,3 +444,4 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 | Фаза | Намерение / сценарий | Уверенность | Не хватает | Следующее действие | Нужна передача человеку | Фактическое обращение / решение | Объяснение | Артефакты |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Исправить опровергнутую upstream lint норму без blind suppression | 0.99 | Exact owner-approved baseline ещё не существует | После approval выполнить только EXEC stage 1 и показать candidate digest | Да, после stage 1 | Procedural adversarial reviewer: первоначально 2 BLOCKER + 3 HIGH + 2 MEDIUM, затем 4 MEDIUM; final snapshot `eb1c7842` PASS | Exact unsuppressed baseline с внешним owner anchor сохраняет strictness сильнее простого exclusion; writable reviewer sandbox раскрыт как residual risk | Эта SPEC, K-E06-056 |
+| EXEC→SPEC | Исключить скрытое обрезание full-lint diagnostics | 0.999 | Повторный review exact flag | Закрепить `-Xmaxwarns 10000`, exact `106` counts и truncation negative | Нет | Первый full probe exit `0`, но javac показал `only showing the first 100 warnings, of 106 total`; повтор с `-Xmaxwarns 10000` дал `35 cast + 67 rawtypes + 1 serial + 3 varargs`, terminal `106 warnings` | Без max override baseline не был бы исчерпывающим; flag является command identity и сужает blind spot | Local inspect receipts; future knowledge-log entry |
