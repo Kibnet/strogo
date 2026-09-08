@@ -1710,3 +1710,13 @@
 - Evidence: temporary pair `strogo-zip-fixture-7e75d8430f70410c8258bc22c9f89e73`; control SHA-256 `10f38f96…c57ca`; mutant SHA-256 `ca5978b0…e196`; оба файла `113` bytes, mutation offset `30`.
 - Последствие: перенести ту же one-byte mutation на полноценный valid JAR после owner-approved E06B implementation; до этого использовать fixture только для нижнего ZIP structural seam.
 - Supersedes / supersededBy: уточняет K-E06-068 и K-E06-067; JAR implementation/approval boundaries unchanged.
+
+## K-E06-074
+
+- Дата / фаза: 2026-09-08 / E06B ZIP reader behavior clarification.
+- Тип / статус: Cross-reader observation / Confirmed.
+- Утверждение: для того же `113`-byte fixture Python `zipfile.namelist()` показывает одинаковый `['A.class']`, но `open/read` mutant отклоняется `BadZipFile`; .NET `ZipArchive` в том же probe открыл и прочитал оба файла. Значит, listing, high-level read и raw structural validation имеют разные границы обнаружения.
+- Scope: observation не является JAR implementation или portability evidence; Strogo code и baseline не менялись.
+- Evidence: K-E06-073 fixture pair `control.zip`/`local-name-mismatch.zip`, mutation offset `30`, сохранённые SHA-256.
+- Последствие: E06B validator обязан проверять raw local/central consistency независимо от того, проходит ли listing или high-level reader; acceptance нельзя строить только на `namelist()`/`ZipArchive` read.
+- Supersedes / supersededBy: уточняет K-E06-073; JAR implementation/approval boundaries unchanged.
