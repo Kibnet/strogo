@@ -774,7 +774,7 @@ public sealed record PortabilityReportPlatform(
 
 public sealed record PortabilityReportDiagnostics(string? ConsumerReceiptDigest, string? JitReceiptDigest, string? StderrDigest, string? PerformanceReceiptDigest);
 
-public sealed record PortabilityReportWriterFaultPlan(
+internal sealed record PortabilityReportWriterFaultPlan(
     int? FailWriteOrdinal = null,
     int? FailReadOrdinal = null,
     int? FailHashOrdinal = null,
@@ -797,7 +797,10 @@ public sealed class PortabilityReportWriterException : Exception
 
 public static class PortabilityReportWriter
 {
-    public static void WriteNewDirectory(PortabilityReportV01 report, PortabilityReportEvidenceSet evidence, string finalDirectory, PortabilityReportWriterFaultPlan? faultPlan = null)
+    public static void WriteNewDirectory(PortabilityReportV01 report, PortabilityReportEvidenceSet evidence, string finalDirectory)
+        => WriteNewDirectory(report, evidence, finalDirectory, faultPlan: null);
+
+    internal static void WriteNewDirectory(PortabilityReportV01 report, PortabilityReportEvidenceSet evidence, string finalDirectory, PortabilityReportWriterFaultPlan? faultPlan)
     {
         ArgumentNullException.ThrowIfNull(report);
         ArgumentNullException.ThrowIfNull(evidence);
