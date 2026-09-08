@@ -75,9 +75,9 @@ for mutation in "${mutations[@]}"; do
   cp "$consumer_program" "$probe/Program.cs"
   "$dotnet" run --project "$probe/MutationConsumer.csproj" -c Release -p:PortableAssemblyPath="$mutant_dll" -- mutant "$mutation" >"$run_dir/logs/probe-$mutation.log" 2>&1
   if [[ "$mutation" == 'force-eager-head' ]]; then
-    grep -Eq "^MUTATION_DETECTED mutation=$mutation mode=exception exception=" "$run_dir/logs/probe-$mutation.log" || { cat "$run_dir/logs/probe-$mutation.log" >&2; exit 72; }
+    grep -Fxq "MUTATION_DETECTED mutation=force-eager-head status=TargetExecutionFailed vector=head-empty locus=function/headOrZero/result exception=System.IndexOutOfRangeException" "$run_dir/logs/probe-$mutation.log" || { cat "$run_dir/logs/probe-$mutation.log" >&2; exit 72; }
   else
-    grep -Fxq "MUTATION_DETECTED mutation=$mutation mode=mismatch" "$run_dir/logs/probe-$mutation.log" || { cat "$run_dir/logs/probe-$mutation.log" >&2; exit 72; }
+    grep -Eq "^MUTATION_DETECTED mutation=$mutation status=BackendSemanticMismatch vector=[^ ]+ locus=[^ ]+$" "$run_dir/logs/probe-$mutation.log" || { cat "$run_dir/logs/probe-$mutation.log" >&2; exit 72; }
   fi
 done
 
