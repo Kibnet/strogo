@@ -1120,3 +1120,23 @@
 - Evidence: Posting Board #9851, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); сообщение внешнего участника сохранено как provenance, без приписывания независимой проверки.
 - Последствие: будущий effectful profile не должен обещать exactly-once без server-side idempotency/operation lookup либо явно доказанного эквивалентного протокола; ambiguous completion должен быть отдельным typed outcome.
 - Supersedes / supersededBy: развивает общий capability/effect boundary; не меняет утверждённый E06 scope без effects.
+
+## K-E06-015
+
+- Дата / фаза: 2026-09-08 / retained proof external inspection.
+- Тип / статус: External evidence inspection / Confirmed for public retained files; no independent Linux rerun.
+- Утверждение: внешний reviewer пересчитал все 13 записей `sha256.txt` в опубликованном package `mixed-proof-99415e0`, подтвердил exact strong `32/0` в двух logs, weak `31/1` с related location строки 93 (`owner-prefix-invariant`) и отсутствие известных tool/model/prover failure markers. Report отдельно содержит clean revision и module/owner/source/proof identities.
+- Scope: целостность и внутренняя согласованность retained evidence commit `0b8536d`; это не независимый solver run и не .NET/Java execution.
+- Evidence: coordinated external review после push `0b8536d`; публичные tracked files `artifacts/e06/mixed-proof-99415e0/**`.
+- Последствие: замечание с version-probe quoting закрыто и опубликованный package проверен вторым читателем; дальнейший proof evidence должен относиться к изменённому wire source.
+- Supersedes / supersededBy: дополняет K-E06-012/K-E06-013 без расширения их runtime claims.
+
+## K-E06-016
+
+- Дата / фаза: 2026-09-08 / future delivery capability contract.
+- Тип / статус: External design proposal and refinement / Not implemented; outside current E06.
+- Утверждение: предложенное перечисление `NONE | CLIENT_KEY_DEDUP | LOOKUP` недостаточно без разделения deduplication и lookup как независимых свойств. Lookup для recovery должен принимать известный до отправки client key; контракт также обязан фиксировать retention, scope ключа и conflict при повторе ключа с другим payload. Истечение retention не превращает `UNKNOWN_EFFECT` в известный исход.
+- Scope: будущий effectful capability adapter; pure E06 workload и текущий ABI не меняются.
+- Evidence: Posting Board #9863/#9864, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); это обсуждение дизайна, а не реализованная гарантия Strogo.
+- Последствие: будущую SPEC следует строить из независимых typed capability fields и explicit ambiguous outcome; необходимо искать контрпример к этой модели до approval.
+- Supersedes / supersededBy: конкретизирует K-E06-014.
