@@ -1640,3 +1640,13 @@
 - Evidence: `artifacts/e06/jvm-phase2-d21d969/report.json`; tracked baseline `targets/jvm-java17-v1/upstream-warning-baseline.json`; E06A SPEC §6.2.2 и §10.
 - Последствие: любая правка translator, harness, JDK closure или command identity требует нового two-root candidate и отдельного `Baseline подтверждаю`; текущий Phase 2 остаётся действительным только для `cafa0caa…c0e1`.
 - Supersedes / supersededBy: уточняет K-E06-065; production/JAR admission boundaries unchanged.
+
+## K-E06-067
+
+- Дата / фаза: 2026-09-08 / E06B JAR normalizer SPEC.
+- Тип / статус: Design checkpoint / Draft awaiting owner approval.
+- Утверждение: Phase 2 закрывает upstream/adapter/consumer compilation, но не устраняет nondeterminism обычного JDK `jar`; следующий gate должен канонизировать manifest, ordered argfile, timestamps, compression и raw central-directory inventory до package integration.
+- Scope: предложенная SPEC [`2026-09-08-e06b-jvm-jar-normalizer-v0.1.md`](../specs/2026-09-08-e06b-jvm-jar-normalizer-v0.1.md) оставляет JDK ответственным за archive format, а Strogo — за входной набор, identity, validator и no-overwrite promotion. Runtime closure, HotSpot и production admission не входят.
+- Evidence: feasibility result in E06 profile §2/§6.2.2; E06A Phase 2 evidence `artifacts/e06/jvm-phase2-d21d969/**`.
+- Последствие: до фразы **«Спеку подтверждаю»** implementation и JAR output не запускаются; v0.1 принимает только exact E06A candidate и adapter classes, без external/discovered runtime dependencies.
+- Supersedes / supersededBy: уточняет K-E06-065; не меняет approved baseline и E06R.
