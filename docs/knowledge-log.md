@@ -880,3 +880,83 @@
 - Evidence: fixtures `fold-allocation-primary.json`, `fold-allocation-alternative.json`, `owner-fold-allocation-v0.4.json`; Modules conformance `PASS conformance checks=360`. Linux strict harness: обе allocation candidates `18 verified, 0 errors`; generated .NET consumers для обеих возвращают empty=`5/[]`, ordered=`0/[4,0,1]`, MAX=`0/[I64.MAX]`; weak invariant и три type-correct sequence/initial/environment mutations дают expected Unproven по mapped obligations. Два чистых lowering runs byte-identical.
 - Последствие: общий fold впервые проверен на composite accumulator и реальном исполняемом generated C#, а не только на scalar sum. Обязательный agent invariant имеет наблюдаемую роль для allocation capacity proof, хотя sum A показывает, что нетривиальное содержание не требуется каждому алгоритму.
 - Supersedes / supersededBy: закрывает proof/runtime часть K-E05-087/K-E05-088; полный EXEC ещё требует regressions, public docs/evidence и post-EXEC review.
+
+## K-E05-094
+
+- Дата / фаза: 2026-09-08 / fold checkpoint 3 reproducibility.
+- Тип / статус: External replication / Confirmed for public implementation commit.
+- Утверждение: public commit `134856f489a4e5f34ac0149d0c789b3021e43692` воспроизведён в отдельном clean Windows checkout: Modules conformance завершился exit `0` и `PASS conformance checks=360`. Отдельная инспекция подтвердила exact runtime budget checks для `7`, empty `1` и refusal на `6` с fold/iteration locus.
+- Scope: source/parser/IR/evaluator/owner v0.4/lowering conformance checkpoint 3; не запуск Dafny, generated consumer, CI или независимый аудит корректности тестов.
+- Evidence: команда `dotnet run --project tests/Strogo.Modules.Conformance -c Release -- --report independent-conformance-134856f.json` в clean checkout exact commit; временный checkout после проверки не импортировался в repository evidence.
+- Последствие: managed checkpoint воспроизводим вне исходного worktree. Proof claims по-прежнему опираются на отдельный Linux Dafny harness и его строгий oracle.
+- Supersedes / supersededBy: независимо подтверждает managed часть K-E05-093.
+
+## K-E05-095
+
+- Дата / фаза: 2026-09-08 / external agent-evaluation design.
+- Тип / статус: Experiment contract clarification / Accepted publicly; not executed.
+- Утверждение: будущий G05 oracle должен заранее фиксировать observations, admissible actions и формулу verdict. Вывод нельзя переносить между интерфейсами с разным объёмом наблюдений или допустимых действий, даже если текст задачи выглядит одинаково.
+- Scope: будущий сравнительный agent experiment; не текущий fold proof и не измерение производительности Strogo.
+- Evidence: Posting Board #9799, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); участник явно принял это ограничение эксперимента.
+- Последствие: G05 fixtures должны version/hash-bind не только task и held-out oracle, но и observation/action interface; иначе сравнение не воспроизводимо и не поддерживает причинный вывод.
+- Supersedes / supersededBy: уточняет K-E05-090.
+
+## K-E05-096
+
+- Дата / фаза: 2026-09-08 / fold completion review.
+- Тип / статус: Reproduction harness defect / Fixed and reproduced.
+- Утверждение: generated `Consumer.csproj` в `Test-Fold-Discriminator.sh` не задавал `ImplicitUsings` и случайно зависел от repository `Directory.Build.props`. При внешнем `--run-dir` проект не видел `Console`/LINQ. Шаблон теперь явно включает `ImplicitUsings=enable` и является самодостаточным относительно этой настройки.
+- Scope: Linux fold validation harness и generated consumer project; production parser/IR/lowering semantics не менялись.
+- Evidence: изолированный внешний project до исправления дал `CS0103` для `Console`; после исправления полный harness в `/tmp/strogo-fold-external-134856f-implicit-usings` завершился exit `0` и `PASS fold discriminator and allocation`, включая A/B/C, allocation mutations и оба consumers. Исправление и два explicit boundary checks опубликованы commit `9aff2dfe9435db562c6c715fb886b08c04a3156a`.
+- Последствие: документированный произвольный абсолютный `--run-dir` действительно поддержан; будущие generated test projects обязаны явно задавать настройки, от которых зависит компиляция.
+- Supersedes / supersededBy: исправляет скрытую границу воспроизводимости K-E05-092/K-E05-093.
+
+## K-E05-097
+
+- Дата / фаза: 2026-09-08 / fold v0.1 completion.
+- Тип / статус: EXEC closure / Confirmed locally and retained publicly.
+- Утверждение: утверждённый bounded fold v0.1 закрывает F-AC1–F-AC9 для первого root-only slice: strict source/IR, reference execution, owner bundle v0.4, bounded proof evaluation, exact typed owner-prefix lowering, A/B/C discriminator, две composite allocation candidates, stable obligations, mutations, migration, determinism и generated .NET execution.
+- Scope: Windows x64 managed regressions и Ubuntu 24.04 WSL2 Dafny 4.11.0. Это не native Linux/CI, admission/package, imports/helpers, nested folds, relational accumulator proof, G05/G06 или доказательство всей trusted computing base.
+- Evidence: Release build — 0 warnings/errors; Modules `PASS conformance checks=362`; Reserve `29/29 cases; 10904 assertions`; TaskGraph `PASS all: 141`; full Linux fold harness exit `0` внутри repository и с external `/tmp` run directory. Санитизированный package `artifacts/e05/fold-v0.1-134856f/` содержит 38 файлов, exact generated sources/obligations/logs/reports и `sha256.txt` без локальных absolute paths.
+- Последствие: следующий эксперимент может опираться на fold v0.1 как замороженный executable/proof baseline, но обязан version-bind toolchain/owner/interface и не переносить выводы на открытые границы.
+- Supersedes / supersededBy: завершает K-E05-087/K-E05-088/K-E05-092/K-E05-093 и учитывает corrections K-E05-094…K-E05-096.
+
+## K-E05-098
+
+- Дата / фаза: 2026-09-08 / fold completion reproducibility.
+- Тип / статус: External replication / Confirmed for public boundary-check commit.
+- Утверждение: public commit `9aff2dfe9435db562c6c715fb886b08c04a3156a` воспроизведён в отдельном clean Windows checkout: Modules conformance завершился exit `0` и `PASS conformance checks=362`; diff inspection подтвердила explicit `ImplicitUsings=enable` в generated consumer project.
+- Scope: managed conformance и source-level устранение зависимости от parent `Directory.Build.props`; внешний reviewer не запускал полный Linux fold harness.
+- Evidence: `dotnet run --project tests/Strogo.Modules.Conformance -c Release -- --report independent-conformance-9aff2df.json` в отдельном checkout exact commit.
+- Последствие: два добавленных proof-boundary cases воспроизводятся вне рабочего дерева, а конкретный build-setting defect закрыт в public history; Linux proof outcomes остаются отдельным evidence.
+- Supersedes / supersededBy: продолжает K-E05-094/K-E05-096.
+
+## K-E05-099
+
+- Дата / фаза: 2026-09-08 / fold evidence provenance review.
+- Тип / статус: Evidence attribution defect / Fixed and full matrix rerun.
+- Утверждение: validation v0.1 ошибочно помещал sum owner digest рядом с allocation outcomes и называл hash версионной строки toolchain digest без отдельного content binding. Proof run оставался фактическим, но один summary JSON не позволял однозначно связать allocation с его owner/candidates или отличить identity digest от исходников.
+- Scope: conformance-generated manifests, Linux evidence harness/report и retained package; production fold semantics не менялись.
+- Evidence: commit `c7d02c674d12532d8a7768857976e65910b58ed4`; validation schema v0.2 содержит разные sum/allocation owner digests, allocation module/proof/source identities, repository revision, compiler/harness source-tree digests и clean flags. Полный strict Linux harness после исправления завершился exit `0`; complete generated trees byte-identical.
+- Последствие: frozen proof observation теперь content-bound в пределах явно заданных compiler и harness source sets. `FoldToolchainDigest` внутри production identity остаётся digest версионного identity и в evidence так и называется; content provenance не выводится из него.
+- Supersedes / supersededBy: уточняет evidence claims K-E05-092/K-E05-093/K-E05-097.
+
+## K-E05-100
+
+- Дата / фаза: 2026-09-08 / fold evidence reproducibility.
+- Тип / статус: External replication / Confirmed for public provenance commit.
+- Утверждение: public commit `c7d02c674d12532d8a7768857976e65910b58ed4` воспроизведён в отдельном clean Windows checkout: два Modules runs дали `PASS conformance checks=362`, а полные generated output sets совпали — 20 одинаковых relative paths и SHA-256.
+- Scope: conformance generation, allocation manifest и deterministic output tree; внешний reviewer не запускал Linux Dafny matrix и не подтверждал итоговый validation v0.2 runtime report.
+- Evidence: два `dotnet run --project tests/Strogo.Modules.Conformance ... --fold-output <separate-dir>` на exact commit; source review подтвердил отдельный allocation owner digest/candidate identities и различение identity/source digests.
+- Последствие: provenance fix и полный-tree comparison воспроизводятся вне исходного worktree; semantic proof outcomes остаются связанными с локальным strict Linux run K-E05-099.
+- Supersedes / supersededBy: независимо подтверждает generated-evidence часть K-E05-099.
+
+## K-E05-101
+
+- Дата / фаза: 2026-09-08 / external G05 experiment proposal.
+- Тип / статус: Experiment-family hypothesis / Proposed publicly; not executed.
+- Утверждение: малые stateful protocols/ledgers с `balance>=0` и сохранением суммы могут быть полезным целевым классом G05: внедрённые баги и полная стоимость до корректности проверяют contracts/invariants на сценариях, где состояние существенно. Измерения USD, времени и success rate должны оставаться отдельными; одинаковая semantic information и доступ к oracle обязательны.
+- Scope: будущий эксперимент после проверки выразимости stateful protocol в фактическом Strogo; не текущий pure fold, не обещание реализации и не held-out data. Примеры с публичной доски являются открытыми development fixtures.
+- Evidence: Posting Board #9810, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); запрошены конкретный protocol и 2–3 injected bugs.
+- Последствие: до запуска нужно заранее определить target-class null criterion: проигрыш вне целевого класса не опровергает выигрыш внутри, а отсутствие выигрыша должно иметь фиксированный threshold/decision rule. Stateful scope нельзя молча приписывать текущему языку.
+- Supersedes / supersededBy: развивает K-E05-090/K-E05-095; ожидает конкретный fixture и отдельную SPEC.

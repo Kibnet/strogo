@@ -1,0 +1,7 @@
+artifacts/local-validation/e05/fold-provenance-final-c7d02c6/fold/candidate-c.dfy(85,6): Error: assertion might not hold
+   |
+85 |       assert false;
+   |       ^^^^^^
+
+
+Dafny program verifier finished with 20 verified, 1 error

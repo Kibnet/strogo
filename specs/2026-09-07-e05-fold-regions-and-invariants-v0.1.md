@@ -464,7 +464,69 @@ UI test video evidence: Не применимо — UI automation отсутст
 - Residual risks / follow-ups: exact-prefix требует одинаковый accumulator representation; SMT может дать `Unproven`/`Timeout`; evaluator/lowering/generated consumer входят в TCB; same-version module support зависит от pinned toolchain; G05/G06, nested fold, helpers/imports и public facade открыты.
 
 ### Post-EXEC Review
-- Статус: Не выполнен до EXEC.
+- Статус: **PASS** после fix-and-re-review; открытых BLOCKER/HIGH/MEDIUM нет.
+- Scope reviewed: утверждённая SPEC и F-AC1–F-AC9; commits `2f2ad9c`, `6583814`, `134856f`, `9aff2df`, `c7d02c6`; production diff source/parser/codec/compiler/evaluators/owner v0.4/binder/lowering; fixtures и `tests/Strogo.Modules.Conformance/Program.cs`; Linux/Windows harnesses; generated sources/obligations/consumers; README, modules guide, knowledge log, tracked evidence; `git status --short`, `git diff --stat`, relevant diff и полный regression evidence.
+- Decision: bounded fold v0.1 можно завершать и публиковать уже разрешённым push в `origin/main`; admission/package, imports/helpers, nested fold, relational accumulator representation и G05/G06 требуют отдельных SPEC/экспериментов.
+- Review passes:
+  - Scope/Evidence pass: каждый F-AC связан с executable check, Dafny log, generated artifact либо явной документационной границей; старый случайно изменённый `artifacts/e04/conformance.json` восстановлен и unrelated diff отсутствует.
+  - Contract pass: реализованы один canonical left fold, closed step, immutable sequence/environment, shared budget, owner v0.4, independent bounded proof evaluator, exact input/prefix/final obligations, A/B/C protocol, migration и generated .NET consumer. Non-Goals не выданы за выполненные.
+  - Adversarial risk pass: scalar-only proof path обнаружен на composite accumulator, collision generated predicate/record `R000` обнаружен при allocation lowering, отсутствующие explicit unknown-op/out-of-scope-binder checks найдены по acceptance matrix, внешний `--run-dir` выявил зависимость generated consumer от repository `ImplicitUsings`, а provenance-review отделил sum/allocation owner digests и version identity от source content.
+  - Role-Based pass: tester проверил границы, partiality, mutations, stable loci и repeat run; developer/architect — generic typed prefix, owner/candidate binding, version/migration и identity; delivery/operations/security — pinned Dafny digest, strict operational markers, external run directory, evidence sanitization и Git scope. Business/UX не применимы: предметный workflow задаёт fixture, UI отсутствует; textual projection и obligation map проверены.
+  - Fix and re-review: lowerer разделён на canonical checked-I64 sum path и generic typed accumulator path; symbols разделены на `Qnnn` predicates/`Rnnn` records; добавлены два conformance checks; generated project получил explicit `ImplicitUsings`; validation v0.2 получил отдельные family manifests и source-tree digests; затронутые Modules и полный Linux harness повторены, затем выполнен full managed regression set.
+  - Stop decision: **PASS** — обязательные checks green, исправленные findings повторно проверены, остаточные границы соответствуют утверждённым Non-Goals.
+- Independent-review boundary: large/high-risk review обычно требует independent reviewer, когда facility доступна. В текущем runtime действует более строгий запрет создавать subagents без явного запроса пользователя, поэтому новый reviewer не запускался; выполнен отдельный adversarial self-review. Это не называется независимым аудитом, а residual risk сохранён.
+
+#### Role-Based Review Result
+
+| Role | Applicability | Result | Evidence |
+| --- | --- | --- | --- |
+| Business analyst / domain workflow | limited | PASS | owner exact allocation `[4,3,1]`, empty и MAX outcomes совпадают у двух candidates и owner model |
+| UX / designer | not applicable | PASS | UI отсутствует; source map и obligation IDs дают требуемую текстовую projection |
+| Tester / validation | applicable | PASS | 362 Modules checks, strict Linux proof/refusal oracle, mutations и full regressions |
+| Developer / architect | applicable | PASS | generic scalar/record/sequence accumulator lowering, v0.4 migration и deterministic identities |
+| Delivery / operations / security | applicable | PASS | pinned executable hash, sanitized SHA-bound evidence, external run-dir reproduction, clean intended diff |
+
+#### Acceptance-to-Test Result
+
+| Criterion | Result | Evidence |
+| --- | --- | --- |
+| F-AC1 | PASS | strict schema/roles/capture/nested/call/result/prefix/unknown-op/out-of-scope-binder checks in Modules conformance |
+| F-AC2 | PASS | empty/order/immutable input/shared budget reference cases and two generated allocation consumers |
+| F-AC3 | PASS | capacity 0/1/256, MIN/MAX, strict/lazy partiality, exact proof costs, saturation and two 200000-step evaluations |
+| F-AC4 | PASS | Linux A=21/0, B=22/0, C=20/1 initial; allocation primary/alternative=18/0; normalized A/B/C source byte-equal |
+| F-AC5 | PASS | missing/false/weak invariant, wrong branch, forged result, partial operations and three input-equivalence mutations fail closed |
+| F-AC6 | PASS | direct version refusals and full inherited v0.3 proof subtree preserved byte-for-byte in v0.4 migration |
+| F-AC7 | PASS | shuffled owner identity, invariant/step/input identity changes and two byte-identical clean lowerings |
+| F-AC8 | PASS | Release build 0 warnings/errors; Modules 362; Reserve 29/29 and 10904; TaskGraph 141; prior Windows Dafny harness PASS |
+| F-AC9 | PASS | README/modules/evidence/knowledge log state all open boundaries and development-only Noita status |
+
+- Evidence inspected: `artifacts/local-validation/e05/fold-final-c7d02c6/`; `artifacts/local-validation/e05/fold-provenance-final-c7d02c6/`; `artifacts/e05/fold-v0.1-134856f/`; external clean-checkout results K-E05-094/K-E05-098/K-E05-100; identity/compiler/harness/source/proof/normalized digests and exact obligation loci.
+- Depth checklist:
+  - Scope drift / unrelated changes: implementation and completion artifacts only; regenerated E04 report excluded.
+  - Acceptance criteria: F-AC1–F-AC9 all mapped above.
+  - User-observable scenarios / matrix / objections: F-S1–F-S8 exercised; mandatory invariant remains canonical with `true` allowed; A/B result reported at status level only.
+  - Validation evidence: fresh Linux full harness plus fresh managed full gate; Windows C remains an explicitly documented model-parser ToolError and is not used for the accepted discriminator.
+  - Unsupported claims: no claim of test elimination, G05/G06 advantage, native Linux, CI, package/admission or general-purpose language readiness.
+  - Regression / edge case: empty, first/last, 0/1/256, MIN/MAX, overflow/range/capacity, strict/lazy evaluation, order, budgets, partiality, versions and mutations covered.
+  - Comments/docs/changelog: README, modules guide, SPEC, knowledge log and retained report updated; no release/changelog required for experimental checkpoint.
+  - Hidden contract change: owner v0.4 and fold toolchain identity explicit; v0.3 remains immutable and migration/approval non-carryover tested.
+  - Manual-review challenge: strongest likely finding was scalar fixture hiding a specialized lowerer; composite allocation found and fixed it. Remaining comparable risk is an untested accumulator/type shape or a solver/backend defect inside the stated TCB.
+- No-findings justification after fixes: all identified HIGH/MEDIUM findings have concrete fixes and successful reruns; remaining items are approved Non-Goals or explicit TCB/environment limitations.
+
+| Severity | Area | Finding | Required action | Status |
+| --- | --- | --- | --- | --- |
+| HIGH | correctness | Initial lowerer encoded only I64 sum and collided `R000` with generated record type | implement generic typed owner prefix and separate symbol namespaces; prove composite allocation | fixed, re-reviewed |
+| MEDIUM | acceptance evidence | Unknown prefix op and out-of-scope `proof.bound` were promised but not explicit checks | add exact fail-closed conformance cases | fixed, Modules 362 |
+| MEDIUM | reproducibility | Generated consumer inherited `ImplicitUsings` from repository and failed for external `--run-dir` | declare project setting explicitly and run full harness from `/tmp` | fixed, re-reviewed |
+| MEDIUM | evidence provenance | Summary attributed allocation outcomes рядом с sum owner digest; version identity hash выглядел как content binding | add allocation manifest, content digests, clean flags and compare full generated trees | fixed in `c7d02c6`, full Linux rerun |
+| LOW | independent review | New independent reviewer unavailable under active no-subagent runtime rule | retain adversarial fallback and state audit boundary | accepted residual risk |
+
+- Fixed before final report: generic lowering/name collision in `134856f`; missing conformance cases; external-run generated project; stale documentation and public evidence.
+- Checks rerun: `dotnet build Kernel.slnx -c Release --no-restore`; Modules/Reserve/TaskGraph commands from §11; full Linux `Test-Fold-Discriminator.sh` in repository and external `/tmp` run directory; `git diff --check`; evidence path scan/hash verification.
+- Validation evidence: fresh managed run `artifacts/local-validation/e05/fold-final-c7d02c6/`; fresh Linux proof run `artifacts/local-validation/e05/fold-provenance-final-c7d02c6/`; retained sanitized package `artifacts/e05/fold-v0.1-134856f/`.
+- Unrelated changes: нет.
+- Needs human: нет для завершения утверждённого slice.
+- Residual risks / follow-ups: evaluator, compiler, lowerer, Dafny and generated consumer remain TCB; native Linux/CI absent; exact-prefix requires same accumulator representation; nested folds/imports/helpers/admission/G05/G06 remain open.
 
 ## Approval
 Получена точная фраза владельца **«Спеку подтверждаю»** 2026-09-08 после финального causal re-review нормативного §0–18 hash `9E76E1FF07699A3873A3128CEAB077D37BDD1BA945FA143EB746F0AE2FFDE438`. EXEC разрешён в границах этой SPEC.
@@ -489,4 +551,5 @@ UI test video evidence: Не применимо — UI automation отсутст
 | APPROVAL | Fold v0.1 EXEC | 1.00 | Нет | Начать реализацию F-AC1…F-AC9 | Нет | Владелец дал точную фразу «Спеку подтверждаю» 2026-09-08 | Approval относится к fold v0.1/owner v0.4; periodic push отдельно разрешён | Approval; normative hash `9E76E1FF…FDE438` |
 | EXEC | Checkpoint 1: source/IR/runtime | 1.00 | Нет | Перейти к owner v0.4 | Нет | `2f2ad9c` опубликован в `origin/main` | Root-only fold, canonical IR и bounded reference evaluator прошли 295 checks | K-E05-087 |
 | EXEC | Checkpoint 2: owner v0.4 | 1.00 | Нет | Перейти к proof lowering | Нет | `6583814` опубликован в `origin/main`; отдельный clean checkout воспроизвёл 318 checks | Versioned owner model, proof evaluator, explicit migration, binder и replay завершены | K-E05-088, K-E05-091 |
-| EXEC | Checkpoint 3: proof/runtime matrix | 0.99 | Full regressions/docs/post-EXEC review | Зафиксировать commit и выполнить completion gates | Нет | Modules 360; Linux strict A/B/C + allocation + mutations + two clean lowerings PASS | Generic typed prefix исправил скрытую sum-only специализацию и record-name collision; Windows C остаётся ToolError, Linux oracle clean | K-E05-092, K-E05-093; `artifacts/local-validation/e05/fold-v04-harness-20260908-8/` |
+| EXEC | Checkpoint 3: proof/runtime matrix | 1.00 | Нет | Перейти к completion review | Нет | `134856f` опубликован в `origin/main`; Modules 360; Linux strict A/B/C + allocation + mutations + two clean lowerings PASS | Generic typed prefix исправил скрытую sum-only специализацию и record-name collision; Windows C остаётся ToolError, Linux oracle clean | K-E05-092, K-E05-093 |
+| EXEC | Completion review and evidence | 1.00 | Нет | Commit и push completion package | Нет | `9aff2df` и `c7d02c6` опубликованы; fresh Modules 362, Reserve 29/29/10904, TaskGraph 141, Release build clean; Linux harness PASS внутри repo и из внешнего `/tmp` | Закрыты missing negative checks, external-run dependency и ambiguous evidence attribution; docs/evidence согласованы с F-AC1–F-AC9 | Post-EXEC Review; K-E05-094…K-E05-099; `artifacts/e05/fold-v0.1-134856f/` |

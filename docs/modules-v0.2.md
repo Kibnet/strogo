@@ -1,6 +1,6 @@
 # Strogo Modules v0.2: структура, owner contracts, regions и IR
 
-Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, лексер, parser/typechecker, детерминированный IR, scalar/composite reference semantics, owner bundle v0.3 и lowering scalar/composite candidate в Dafny с exact-outcome proof на ограниченном семействе.
+Этот документ закрепляет текущий E05 checkpoint: входную структуру, строгость формы, parser/typechecker, детерминированный IR, scalar/composite reference semantics, owner bundle v0.4 и один root-only bounded left `fold` с exact owner-prefix proof в Dafny.
 
 ## 1) Структура исходного модуля
 
@@ -76,6 +76,7 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 - `seq.empty` с `elementType`/`capacity`, `seq.length`, `seq.get`, `seq.append`;
 - локальный `call` с `functionRef`.
 - `if` с `condition`, явными environment-аргументами, `thenRegion` и `elseRegion`.
+- `fold` с неизменяемой bounded sequence, initial accumulator, ordered explicit environment, closed `stepRegion` и обязательным proof `invariant`.
 
 У `if` первый аргумент обязан иметь тип `Bool`; остальные аргументы образуют environment обеих ветвей. Обе ветви проверяются независимо от значения condition, должны принять environment той же арности и вернуть тип узла `if`. В исходном и typed IR ветви остаются вложенными regions, поэтому они не превращаются в eager-операнды внешнего DAG. Scalar lowering сохраняет это ветвление в Dafny, а reference evaluator исполняет только выбранную ветвь.
 
@@ -125,7 +126,7 @@ Body и каждая ветвь `if` имеют одну форму region. Па
   - `OperandIndices` — индексы параметров/предков,
   - тип и opcode-specific metadata для констант, records, sequences и вызовов.
 
-Для `if` инструкция дополнительно содержит две `RegionIr`. Каждая хранит типизированные локальные параметры, собственные инструкции и индекс результата. Инструкции ветвей не добавляются во внешний список, что сохраняет границу условного вычисления для последующего lowering.
+Для `if` инструкция дополнительно содержит две `RegionIr`. Каждая хранит типизированные локальные параметры, собственные инструкции и индекс результата. Инструкции ветвей не добавляются во внешний список, что сохраняет границу условного вычисления для последующего lowering. `fold` хранит отдельный `FoldRegionIr`: ordered parameters имеют роли index, element, accumulator и environment; скрытый capture, `call` и nested `fold` запрещены.
 
 Порядок деклараций types/functions/imports/exports и порядок узлов не участвуют в identity: codec сортирует их по стабильным ID. Порядок parameters и обычных `args` сохраняется. Для `record.make` codec и compiler сортируют пары `fieldId→arg` вместе, чтобы перестановка полей не меняла смысл или digest.
 
@@ -133,13 +134,13 @@ Body и каждая ветвь `if` имеют одну форму region. Па
 
 ## 8) Reference evaluator
 
-`ModulesReferenceEvaluator.Invoke` исполняет провалидированный `ModuleIr` как ограниченную эталонную семантику. Текущий профиль поддерживает `I64`, `Bool`, records, bounded sequences, все реализованные scalar/composite opcodes, локальный `call` и `if`. Публичный вызов разрешён только для функции из `exports`; внутренние функции доступны только через `call`.
+`ModulesReferenceEvaluator.Invoke` исполняет провалидированный `ModuleIr` как ограниченную эталонную семантику. Текущий профиль поддерживает `I64`, `Bool`, records, bounded sequences, все реализованные scalar/composite opcodes, локальный `call`, `if` и `fold`. Публичный вызов разрешён только для функции из `exports`; внутренние функции доступны только через `call`.
 
-Арифметика `I64` проверяемая: переполнение даёт `evaluation:ArithmeticOverflow` с устойчивым locus узла. У `if` вычисляется только выбранная `RegionIr`; environment передаётся её локальным параметрам. Один `MaxSteps` действует на весь вызов вместе с вложенными regions и локальными calls и ограничен hard maximum `1_000_000`. Нулевой, отрицательный или превышающий hard maximum бюджет отклоняется до исполнения.
+Арифметика `I64` проверяемая: переполнение даёт `evaluation:ArithmeticOverflow` с устойчивым locus узла. У `if` вычисляется только выбранная `RegionIr`; environment передаётся её локальным параметрам. Один `MaxSteps` действует на весь вызов вместе с вложенными regions, локальными calls и fold iterations и ограничен hard maximum `1_000_000`. Fold расходует шаг на dispatch, шаг на каждую iteration и фактически исполненные step nodes; empty sequence возвращает initial accumulator без исполнения step. Нулевой, отрицательный или превышающий hard maximum бюджет отклоняется до исполнения.
 
 Runtime composite values представлены `ModuleRecord` с точным type ID и полным набором полей и `ModuleSequence` с element type, capacity и immutable items. Перед исполнением входы проверяются рекурсивно: другая capacity, пропущенное/лишнее поле или неверный вложенный item дают `RuntimeTypeMismatch` с точным locus. `seq.get` использует zero-based index и возвращает `SequenceIndexOutOfRange`; `seq.append` не изменяет исходное значение и возвращает `SequenceCapacityExceeded` при заполненной sequence.
 
-Evaluator намеренно отделён от generated library: он нужен как executable reference oracle для differential checks lowering и owner-witness replay. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, `fold`, canonical JSON ABI, admission и machine-code package; такой opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
+Evaluator намеренно отделён от generated library: он нужен как executable reference oracle для differential checks lowering и owner-witness replay. Сейчас он получает уже скомпилированный IR и потому не является независимой проверкой parser/compiler. Не поддержаны imports, canonical JSON ABI, admission и machine-code package; неизвестный opcode/type даёт явный `UnsupportedRuntimeOpcode`/`UnsupportedRuntimeType`, а непустой unresolved import closure — `UnsupportedRuntimeImports`, вместо частичного исполнения.
 
 ## 9) Lowering в Dafny/C#
 
@@ -162,9 +163,13 @@ pwsh -File tools/Test-Modules-Dafny-Lowering.ps1 -RunDirectory artifacts/local-v
 
 Семантическая Dafny-часть отдельно воспроизведена под Ubuntu 24.04 WSL2 из clean archive commit `8b53cdd`: Linux .NET SDK 10.0.400 сгенерировал те же 19 `.dfy` candidates, официальный Linux Dafny 4.11.0 дал 10 ожидаемых `Verified` и 9 ожидаемых proof refusals. SHA-256 Linux-архива `a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179` совпал с digest GitHub Releases API; локальный `results.tsv` имеет SHA-256 `62901739cb6dde4c8d4bf833303cc3136af814973b2138643d9f69279e13c72d`. Это проверяет переносимость generated proof obligations и Dafny translation, но не Windows Job Object, полный orchestration script, generated consumers или ReadyToRun. Санитизированный public evidence package с `.dfy`, per-case logs и воспроизводящим driver хранится в [`artifacts/e05/linux-dafny-wsl2-8b53cdd/`](../artifacts/e05/linux-dafny-wsl2-8b53cdd/REPORT.md); исходные gitignored evidence сохранены в `artifacts/local-validation/e05/linux-dafny-8b53cdd-20260908/`.
 
-Текущий lowering fail closed для `fold`, непустых imports и helper contracts. Owner proof поддерживает `I64`, `Bool`, records, bounded sequences и полный closed expression set v0.3; partial arithmetic/index/capacity операции требуют доказательства под owner `requires`. Нет proof receipt, release admission, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification подтверждает exact outcome только относительно конкретного parsed owner bundle и pinned toolchain; она не подтверждает соответствие bundle человеческой спецификации и не разрешает прямой вызов generated метода вне approved domain.
+Fold lowering создаёт compiler-owned index, bounded `while`, `decreases`, typed owner-prefix function, equality каждого candidate/owner input, exact prefix invariant, agent invariant, range и final obligations. Для checked-I64 sum используется отдельный `MathInt`/prefix-sum lemma path; record и sequence accumulators используют общий typed prefix. Стабильные obligation IDs и source map связывают отказ с fold, аргументом или proof path. Agent invariant не может удалить generated clauses.
 
-## 10) Owner bundle v0.3
+`tools/Test-Fold-Discriminator.sh` дважды генерирует и byte-for-byte сравнивает полные output trees, запускает A/B/C, две allocation candidates, weak-invariant и три input-equivalence mutations, затем компилирует и исполняет generated C# consumers. Validation v0.2 отдельно связывает sum/allocation с owner digests и записывает version identity digest, compiler/harness source-tree digests, repository revision и dirty flags. В Ubuntu 24.04 WSL2 с Dafny 4.11.0 получено A=`Verified` (`21/0`), B=`Verified` (`22/0`), C=`Unproven(initial)` (`20/1`); обе allocation candidates дали `18/0`, а consumers совпали с reference evaluator на empty, `[4,3,1]` и `I64.MAX`. A/B означает только, что полный B не требовался для статуса `Verified` на одной frozen revision; стоимость и устойчивость proof не измерены. Публичный пакет: [`artifacts/e05/fold-v0.1-134856f/`](../artifacts/e05/fold-v0.1-134856f/REPORT.md).
+
+Текущий lowering по-прежнему fail closed для непустых imports, helper contracts и nested folds. Нет proof receipt, release admission, package manifest, canonical ABI и публичного runtime facade. Поэтому успешная Dafny verification подтверждает exact outcome только относительно конкретного parsed owner bundle и pinned toolchain; она не подтверждает соответствие bundle человеческой спецификации и не разрешает прямой вызов generated метода вне approved domain.
+
+## 10) Owner bundle v0.3 и v0.4
 
 Owner artifact имеет отдельную версию `strogo.owner-bundle.v0.3` и обязательные поля `schemaVersion`, `bundleId`, `types`, `entryContracts`, `models`, `limits`. Неизвестные, пропущенные и повторные поля запрещены; canonical bytes строятся после сортировки именованных множеств по ID. Bundle digest отделён от raw hashes и других артефактов: `SHA256(UTF8("strogo.owner-bundle.v0.3/bundle\n") || canonicalBytes)`.
 
@@ -185,6 +190,8 @@ Binder требует точного совпадения exports, `contractRef`
 
 `OwnerBundleMigrator.MigrateV02ToV03` принимает только strict exact-outcome v0.2 artifact, до преобразования проверяет legacy schema/limits/expression budgets и прежние запреты partial arithmetic в `requires`/Boolean model expressions, считает также удаляемый `ensures`, удаляет единственную допустимую форму ручного `ensures`, добавляет `types: []`, `modelRef` и `maxWitnessValueNodes: "4096"`, затем выдаёт новые canonical bytes/digest. Публичная граница переводит malformed legacy structure в typed `owner-migrate:SchemaInvalid`, а не выпускает host exception. Прямой parse v0.2 возвращает `OwnerBundleMigrationRequired`; semantic approval не переносится. Boundary `4096` migrated witness value nodes принимается, следующий узел даёт `MigrationWitnessValueLimitExceeded` без output.
 
+`strogo.owner-bundle.v0.4` сохраняет весь v0.3 expression set и добавляет versioned contract для fold: root-only owner fold model и proof-only `MathInt`, `math.*`, `seq.sum_i64`, `seq.prefix_sum_i64`, `proof.bound`, bounded `forall.sequence`. `maxProofEvaluationSteps` ограничен `1..262144`; static worst-case cost saturates как `>262144`, а независимый evaluator выдаёт `ProofEvaluationStepLimitExceeded` без partial result. Каждый `requires` и каждая invariant instantiation получают новый counter. Миграция v0.3→v0.4 копирует четыре прежних limit, добавляет `262144` и сохраняет canonical `requires` subtree byte-for-byte; approval автоматически не переносится.
+
 ## 11) Artefact и проверяемые границы checkpoint
 
 - `ModulesCodec.Canonicalize(ModuleSource)` выдает каноническое представление.
@@ -203,7 +210,9 @@ Binder требует точного совпадения exports, `contractRef`
   - verified Dafny→C# translation для total selector/local call и фактический ReadyToRun `win-x64` вызов selector;
   - owner bundle v0.3 с exact owner-semantic type closure, composite witnesses и explicit v0.2 migration;
   - scalar и composite exact-outcome proofs: по две разные реализации приняты, wrong outcome и слабый/partial owner domain отклонены;
-  - deterministic witness replay: конкретное расхождение маркируется `Counterexample` только после независимого вычисления candidate и owner model.
+  - deterministic witness replay: конкретное расхождение маркируется `Counterexample` только после независимого вычисления candidate и owner model;
+  - owner bundle v0.4, bounded proof evaluator и явная v0.3→v0.4 migration;
+  - root-only fold для scalar и composite accumulator, exact owner-prefix proof, stable obligations и generated .NET execution.
 
 ## 12) Проверяемые фикстуры
 
@@ -229,9 +238,12 @@ Binder требует точного совпадения exports, `contractRef`
 - `owner-composite-valid.json`, `owner-composite-module.json`, `owner-composite-alternative.json`, `owner-composite-wrong.json` и `owner-composite-partial.json`, различающие два correct DAG, replayed wrong outcome и partial model;
 - `owner-empty-sequence-closure.json` и `owner-empty-sequence-module.json`, доказывающие, что declared element type входит в owner closure даже при пустом witness;
 - негативные `if-invalid-hidden-capture.json`, `if-invalid-branch-type.json` и `if-invalid-nested-call-cycle.json`.
+- `fold-sum-valid.json`, `fold-discriminator-a/b/c.json` и `owner-fold-discriminator-v0.4.json` для reference semantics, proof identity и A/B/C;
+- `fold-allocation-primary.json`, `fold-allocation-alternative.json` и `owner-fold-allocation-v0.4.json` для двух разных composite candidates одного owner model;
+- `owner-v03-proof-all-ops.json` для byte-identical миграции полного inherited proof subtree; дополнительные in-memory mutations проверяют hidden capture, nested fold/call, неизвестный proof opcode, out-of-scope binder, partiality, budgets, wrong branch, weak invariant и все fold inputs.
 
 Скалярные копии для документационных целей размещены в `docs/fixtures/modules-v0.2`; полный исполняемый набор является каноническим в `fixtures/modules-v0.2`. Conformance также строит ограниченные in-memory cases для malformed/duplicate/non-ASCII JSON, invalid UTF-8, opcode metadata, call signatures, type/transport limits, defensive copies и переставленных ошибочных nodes.
 
 ## 13) Текущая граница
 
-Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics в reference evaluator, composite structural/range lowering и scalar/composite exact-outcome proof относительно отдельного owner bundle. Он ещё не реализует `fold`, разрешение import closure, helper contracts, human approval/admission, package binding, runtime precondition facade или второе требуемое E05 семейство. Поэтому результат не является готовой исполняемой библиотекой Strogo и не закрывает целиком AC1–AC7 или цели G01–G06.
+Этот checkpoint проверяет schema/type/call-graph, deterministic typed IR, lazy `if`, record/sequence semantics, один bounded left fold, owner bundle v0.4 и scalar/composite exact-outcome proof. Он ещё не реализует разрешение import closure, helper contracts, nested folds, relational accumulator representation, human approval/admission, package binding или runtime precondition facade. G05/G06 и преимущество обязательного invariant по стоимости/устойчивости не измерены; Noita scanner остаётся development-only исследованием. Поэтому результат ещё не является готовой переносимой библиотекой Strogo и не закрывает цели проекта целиком.

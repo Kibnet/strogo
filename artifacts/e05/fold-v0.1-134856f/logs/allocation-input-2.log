@@ -1,0 +1,7 @@
+artifacts/local-validation/e05/fold-provenance-final-c7d02c6/fold/allocation-input-2-mutation.dfy(82,4): Error: assertion might not hold
+   |
+82 |     assert v002 == p001;
+   |     ^^^^^^
+
+
+Dafny program verifier finished with 17 verified, 1 error

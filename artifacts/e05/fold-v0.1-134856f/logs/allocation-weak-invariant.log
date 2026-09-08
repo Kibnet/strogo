@@ -1,0 +1,12 @@
+artifacts/local-validation/e05/fold-provenance-final-c7d02c6/fold/allocation-weak-invariant.dfy(59,77): Error: value does not satisfy the subset constraints of 'S000'
+   |
+59 |     if n == 0 then C000([], p001) else C000(P000(p000, p001, n - 1).R000F000 + [(if (p000[n - 1] <= P000(p000, p001, n - 1).R000F001) then p000[n - 1] else 0)], (var e000: I64 := (P000(p000, p001, n - 1).R000F001 - (if (p000[n - 1] <= P000(p000, p001, n - 1).R000F001) then p000[n - 1] else 0)); e000))
+   |                                                                              ^
+
+artifacts/local-validation/e05/fold-provenance-final-c7d02c6/fold/allocation-weak-invariant.dfy(103,6): Error: assertion might not hold
+    |
+103 |       assert |v003| < 256;
+    |       ^^^^^^
+
+
+Dafny program verifier finished with 15 verified, 2 errors

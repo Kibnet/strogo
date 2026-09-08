@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "strogo.fold-discriminator.validation.v0.2",
+  "toolchain": {
+    "identity": "strogo.fold-dafny-lowering.v0.4",
+    "identityDigest": "bf4c767508b6a4fc44986e7d1fdd9681cd74fa6982b196ed671640af3b4f9898",
+    "compilerSourceDigest": "4b4764eff5a77ffa37bf560b5d6de6d3edbed06d1b8188846bec5757c5c2a36a",
+    "harnessSourceDigest": "198374219fd307c8114a2c87578cb3334fb3bef569051428534300c858cc665a",
+    "repositoryRevision": "c7d02c674d12532d8a7768857976e65910b58ed4",
+    "compilerSourcesDirty": false,
+    "harnessSourcesDirty": false
+  },
+  "dafny": {
+    "version": "4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2",
+    "executableSha256": "e540b4826363afb87c326446239a682d45086905425fa6299c103eca9693846d"
+  },
+  "sum": {
+    "ownerDigest": "a4c1c832fb4d8196f90b01dd34dcf08903fe15cefc654b181016447a949932fa",
+    "outcomes": {
+      "a": "Verified",
+      "b": "Verified",
+      "c": "Unproven(initial)"
+    },
+    "variants": [
+      {
+        "variant": "a",
+        "ProofIdentity": "07ba2e6b25597bfa6dcf1d8766a40dea5d04b0f9eca8d4a05d38d653d620a10a",
+        "SourceDigest": "96f54cac92ceaed664745a0bc78eebbed84a39ab702da5bb98def3e3aaa22558",
+        "NormalizedSourceDigest": "1f4d9565b3127d692913b7151ec9997d5854362f5c3f9f2cf766654c0e8fc4c2"
+      },
+      {
+        "variant": "b",
+        "ProofIdentity": "a8b39209aea800440a9d86d8ab7bb0a5b11b4a57443d6e9ee3a54723e79a870e",
+        "SourceDigest": "6533d4ab5cd9de01e1fad09d6241ec18dbca88f8262e8b87bc13aa965f92aa1c",
+        "NormalizedSourceDigest": "1f4d9565b3127d692913b7151ec9997d5854362f5c3f9f2cf766654c0e8fc4c2"
+      },
+      {
+        "variant": "c",
+        "ProofIdentity": "5ed38374592b6a89c18f27d8b051487f991ea343a45dc53b6a894242e7c3016d",
+        "SourceDigest": "c90fdac91e67c944322893d8dce3e48563940c9f74a6004d5f61c7da14934bf0",
+        "NormalizedSourceDigest": "1f4d9565b3127d692913b7151ec9997d5854362f5c3f9f2cf766654c0e8fc4c2"
+      }
+    ]
+  },
+  "allocation": {
+    "ownerDigest": "0df03a01e5f78aaee6ca7d5d41359a180c8f4fa90a858e052779e315c4a3cc76",
+    "outcomes": {
+      "primary": "Verified",
+      "alternative": "Verified",
+      "weakInvariant": "Unproven",
+      "inputEquivalenceMutations": "3/3 Unproven",
+      "generatedDotnetConsumer": "Pass"
+    },
+    "candidates": [
+      {
+        "variant": "primary",
+        "moduleSourceDigest": "bd6c62da396b021b7087590cfcdcb4ccfcb47acdf8746a19f2f19afed485dee7",
+        "ProofIdentity": "26b3b9b52ae6d0fe6bc6e5deb91018cf2902de5fc1c1d196b1ac0b928c63827a",
+        "SourceDigest": "7be56cca348239e1990dd8630ded3c96276f80f17b2d50675f6ea3fc71ef6915"
+      },
+      {
+        "variant": "alternative",
+        "moduleSourceDigest": "8209c1356f660058f831cc4d7b31e521f3c5570c9019e8c58f501e3708352dde",
+        "ProofIdentity": "aed7dcedc605027b621e1e76e4847be8b97be0c8a97841bd9f381ab02e0d668c",
+        "SourceDigest": "ac853d7b8d24968b24287b7c0a0211b149a81014330f59dbaa389bb7974c8868"
+      }
+    ],
+    "weakInvariant": {
+      "moduleSourceDigest": "c411797f10b7bb056480a75d6e71bd9965cdf6fb5e3ef2f03675890cca3b3fe5",
+      "ProofIdentity": "9c8be5bb0d026f6db60dd8d6d11e875dcaaed221f8ce8054dbb1ab0cbe4d9f97",
+      "SourceDigest": "bc41289f0f7db10d3403c3122c569f893c47165b615c409510e33bae534c029c"
+    },
+    "inputMutations": [
+      {
+        "position": 0,
+        "ProofIdentity": "2c79cffe2c933d2acf3984010527338fd3715b79aae4063915af523516dfc027",
+        "SourceDigest": "4a45dd43c6b62711c1dbc47f53d4f40cb0a2e108bfb25df1c58be2a761187573"
+      },
+      {
+        "position": 1,
+        "ProofIdentity": "8a85a516f960f52b16e777564a85c8c61730b0258647927994a7d99cb7ff469b",
+        "SourceDigest": "5a56d622bc82fe71697c495ac7b0206833a6cbf6cd5780e74d8bcc94db090008"
+      },
+      {
+        "position": 2,
+        "ProofIdentity": "0bf3b556709a7684776050cec61ba166e0461f5eeabe6e1feadee0e38911da1a",
+        "SourceDigest": "8b673ff5cd41e6a9078279b5b2310b93ba658fd89ed5a20dfceaad935f4cb64e"
+      }
+    ]
+  }
+}
