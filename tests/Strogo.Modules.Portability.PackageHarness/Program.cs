@@ -6,19 +6,33 @@ using Kernel.Core;
 using Strogo.Modules;
 using Strogo.Modules.Portability;
 
-if (args.Length == 0) Fail("command is required: build or validate");
-var options = ParseOptions(args.Skip(1).ToArray());
-switch (args[0])
+try
 {
-    case "build":
-        BuildPackage(options);
-        break;
-    case "validate":
-        ValidatePackage(options);
-        break;
-    default:
-        Fail($"unknown command: {args[0]}");
-        break;
+    if (args.Length == 0) Fail("command is required: build or validate");
+    var options = ParseOptions(args.Skip(1).ToArray());
+    switch (args[0])
+    {
+        case "build":
+            BuildPackage(options);
+            break;
+        case "validate":
+            ValidatePackage(options);
+            break;
+        default:
+            Fail($"unknown command: {args[0]}");
+            break;
+    }
+}
+catch (PortabilityContractException exception)
+{
+    Console.Error.WriteLine(Encoding.UTF8.GetString(CanonicalJson.Encode(new
+    {
+        status = "Rejected",
+        code = exception.Code,
+        locus = exception.Locus,
+        details = exception.Details
+    })));
+    Environment.ExitCode = 1;
 }
 
 static void BuildPackage(IReadOnlyDictionary<string, string> options)
@@ -99,6 +113,8 @@ static void BuildPackage(IReadOnlyDictionary<string, string> options)
     RequireValue(buildRoot, "dafnySourceDigest", lowering.SourceDigest);
     RequireValue(buildRoot, "twoCleanTranslation", "ByteEqual");
     RequireValue(buildRoot, "twoCleanBuild", "ByteEqual");
+    RequireValue(buildRoot, "directoryBuildImports", "Disabled");
+    RequireValue(buildRoot, "overflowChecks", "Enabled");
     RequireValue(buildRoot, "consumerOutcome", "Passed");
     var buildRevision = String(buildRoot, "repositoryRevision");
     var currentRevision = Run("git", repo, "-C", repo, "rev-parse", "HEAD");
@@ -194,7 +210,7 @@ static void BuildPackage(IReadOnlyDictionary<string, string> options)
             Inventory("output/strogo.portable.v01.dll", artifact, "archive"),
             Inventory("tools/dotnet", dotnet, "executable")
         ],
-        [("dotnet-sdk", dotnetSdk), ("target-framework", "net10.0")]);
+        [("directory-build-imports", "disabled"), ("dotnet-sdk", dotnetSdk), ("overflow-checks", "enabled"), ("target-framework", "net10.0")]);
     var runtimeRequirementBytes = File.ReadAllBytes(Path.Combine(fixture, "dotnet-runtime-requirement.json"));
     var content = new List<PortabilityPackageContent>
     {

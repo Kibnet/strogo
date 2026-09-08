@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 --dafny /absolute/path/to/dafny --dotnet /absolute/path/to/dotnet --source /absolute/path/to/candidate.dfy --run-dir /absolute/path/to/new-directory [--repo-root /absolute/path]" >&2
+  echo "usage: $0 --dafny /absolute/path/to/dafny --dotnet /absolute/path/to/dotnet --source /absolute/path/to/candidate.dfy --run-dir /absolute/path/to/new-directory [--lane-b-root /absolute/path/to/new-directory] [--repo-root /absolute/path]" >&2
   exit 64
 }
 
@@ -11,12 +11,14 @@ dafny=""
 dotnet=""
 source_file=""
 run_dir=""
+lane_b_root=""
 while (($#)); do
   case "$1" in
     --dafny) dafny="$2"; shift 2 ;;
     --dotnet) dotnet="$2"; shift 2 ;;
     --source) source_file="$2"; shift 2 ;;
     --run-dir) run_dir="$2"; shift 2 ;;
+    --lane-b-root) lane_b_root="$2"; shift 2 ;;
     --repo-root) repo_root="$2"; shift 2 ;;
     *) usage ;;
   esac
@@ -24,6 +26,7 @@ done
 
 [[ -x "$dafny" && -x "$dotnet" && -f "$source_file" && -n "$run_dir" ]] || usage
 [[ ! -e "$run_dir" ]] || { echo "run directory already exists: $run_dir" >&2; exit 65; }
+[[ -z "$lane_b_root" || ! -e "$lane_b_root" ]] || { echo "lane B directory already exists: $lane_b_root" >&2; exit 65; }
 for tool in cmp cp git grep mkdir python3 sha256sum; do
   command -v "$tool" >/dev/null || { echo "required tool unavailable: $tool" >&2; exit 69; }
 done
@@ -44,31 +47,35 @@ vector_source="$repo_root/fixtures/portability-v0.1/vectors.json"
 vector_generator="$repo_root/tools/Generate-Portability-InvokeVectors.py"
 [[ -f "$adapter" && -f "$project" && -f "$consumer_project" && -f "$consumer_program" && -f "$invoke_vectors" && -f "$vector_source" && -f "$vector_generator" ]] || { echo 'target inputs unavailable' >&2; exit 69; }
 
-mkdir -p "$run_dir/logs" "$run_dir/artifact"
+lane_b="${lane_b_root:-$run_dir/b}"
+mkdir -p "$run_dir/logs" "$run_dir/artifact" "$run_dir/a" "$lane_b"
 python3 "$vector_generator" --input "$vector_source" --output "$run_dir/invoke-vectors.generated.jsonl"
 cmp "$invoke_vectors" "$run_dir/invoke-vectors.generated.jsonl" || { echo 'invoke vector projection drift' >&2; exit 70; }
-for lane_name in a b; do
-  lane="$run_dir/$lane_name"
-  mkdir -p "$lane"
+build_lane() {
+  local lane_name="$1"
+  local lane="$2"
   cp "$source_file" "$lane/candidate.dfy"
   cp "$adapter" "$lane/ModuleApi.cs"
   cp "$project" "$lane/Strogo.Portable.V01.csproj"
   (cd "$lane" && "$dafny" translate cs candidate.dfy --no-verify --enforce-determinism --include-runtime --output Candidate.cs --translation-record-output translation-record.dtr) >"$run_dir/logs/translate-$lane_name.log" 2>&1
-  "$dotnet" build "$lane/Strogo.Portable.V01.csproj" -c Release -p:PathMap="$lane=/_/" >"$run_dir/logs/build-$lane_name.log" 2>&1
+  "$dotnet" build "$lane/Strogo.Portable.V01.csproj" -c Release -p:PathMap="$lane=/_/" -p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false >"$run_dir/logs/build-$lane_name.log" 2>&1
   grep -Fq '0 Warning(s)' "$run_dir/logs/build-$lane_name.log" || { cat "$run_dir/logs/build-$lane_name.log" >&2; exit 71; }
   grep -Fq '0 Error(s)' "$run_dir/logs/build-$lane_name.log" || { cat "$run_dir/logs/build-$lane_name.log" >&2; exit 71; }
-done
+}
 
-cmp "$run_dir/a/Candidate.cs" "$run_dir/b/Candidate.cs"
-cmp "$run_dir/a/translation-record.dtr" "$run_dir/b/translation-record.dtr"
-cmp "$run_dir/a/bin/Release/net10.0/Strogo.Portable.V01.dll" "$run_dir/b/bin/Release/net10.0/Strogo.Portable.V01.dll"
+build_lane a "$run_dir/a"
+build_lane b "$lane_b"
+
+cmp "$run_dir/a/Candidate.cs" "$lane_b/Candidate.cs"
+cmp "$run_dir/a/translation-record.dtr" "$lane_b/translation-record.dtr"
+cmp "$run_dir/a/bin/Release/net10.0/Strogo.Portable.V01.dll" "$lane_b/bin/Release/net10.0/Strogo.Portable.V01.dll"
 cp "$run_dir/a/bin/Release/net10.0/Strogo.Portable.V01.dll" "$run_dir/artifact/strogo.portable.v01.dll"
 
 consumer="$run_dir/consumer"
 mkdir -p "$consumer"
 cp "$consumer_project" "$consumer/Consumer.csproj"
 cp "$consumer_program" "$consumer/Program.cs"
-"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:PortableAssemblyPath="$run_dir/artifact/strogo.portable.v01.dll" -- "$invoke_vectors" >"$run_dir/logs/consumer-linux.log" 2>&1
+"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:PortableAssemblyPath="$run_dir/artifact/strogo.portable.v01.dll" -- "$invoke_vectors" >"$run_dir/logs/consumer-linux.log" 2>&1
 grep -Fxq 'PASS standalone C# consumer cases=8 transport=24 additional=1' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
 grep -Fxq 'PASS standalone C# invoke vectors=13' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
 
@@ -92,6 +99,8 @@ report={
   'artifactDigest':sha(run/'artifact/strogo.portable.v01.dll'),
   'twoCleanTranslation':'ByteEqual',
   'twoCleanBuild':'ByteEqual',
+  'directoryBuildImports':'Disabled',
+  'overflowChecks':'Enabled',
   'consumerOutcome':'Passed',
   'toolchain':{'dafnyVersion':subprocess.check_output([str(dafny),'--version'],text=True).strip(),'dafnyExecutableSha256':sha(dafny),'dotnetSdk':subprocess.check_output([str(dotnet),'--version'],text=True).strip()},
   'environment':{'system':platform.system(),'release':platform.release(),'machine':platform.machine()}

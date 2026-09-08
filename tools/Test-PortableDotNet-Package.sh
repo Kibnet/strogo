@@ -25,7 +25,7 @@ done
 [[ -d "$package" && "$expected" =~ ^[0-9a-f]{64}$ && -n "$run_dir" && -x "$dotnet" ]] || usage
 [[ ! -e "$run_dir" ]] || { echo "run directory already exists: $run_dir" >&2; exit 65; }
 [[ "$("$dotnet" --version)" == '10.0.400' ]] || { echo '.NET SDK version mismatch' >&2; exit 70; }
-runtime="$("$dotnet" --list-runtimes | grep -E '^Microsoft\.NETCore\.App 10\.0\.11 ' | head -1)"
+runtime="$("$dotnet" --list-runtimes | grep -E '^Microsoft\.NETCore\.App 10\.0\.11 ' | head -1 | sed 's/ \[.*$//')"
 [[ -n "$runtime" ]] || { echo '.NET runtime 10.0.11 unavailable' >&2; exit 70; }
 
 mkdir -p "$run_dir"

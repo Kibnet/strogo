@@ -13,8 +13,9 @@ $run = [IO.Path]::GetFullPath($RunDirectory)
 if (-not (Test-Path -LiteralPath $package -PathType Container)) { throw "package unavailable: $package" }
 if (Test-Path -LiteralPath $run) { throw "run directory already exists: $run" }
 if ((& $DotNetPath --version) -ne "10.0.400") { throw ".NET SDK version mismatch" }
-$runtime = & $DotNetPath --list-runtimes | Where-Object { $_ -match '^Microsoft\.NETCore\.App 10\.0\.11 ' } | Select-Object -First 1
-if ($null -eq $runtime) { throw ".NET runtime 10.0.11 unavailable" }
+$runtimeLine = & $DotNetPath --list-runtimes | Where-Object { $_ -match '^Microsoft\.NETCore\.App 10\.0\.11 ' } | Select-Object -First 1
+if ($null -eq $runtimeLine) { throw ".NET runtime 10.0.11 unavailable" }
+$runtime = ($runtimeLine -split ' \[')[0]
 
 New-Item -ItemType Directory -Path $run | Out-Null
 $staged = Join-Path $run "validated\strogo.portable.v01.dll"

@@ -1,0 +1,1 @@
+{"schemaVersion":"strogo.dotnet-package-negative.v0.1","status":"Passed","case":"wrong-expected-manifest","expectedManifestDigest":"0000000000000000000000000000000000000000000000000000000000000000","failureCode":"PortabilityPackageRejected","failureLocus":"portability-manifest.json","stagedArtifactCreated":false,"validationReportCreated":false}

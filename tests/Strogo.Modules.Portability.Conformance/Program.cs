@@ -339,6 +339,11 @@ try
 
     var packageMethods = typeof(PortabilityPackage).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly).Select(method => method.Name).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
     Check(packageMethods.SequenceEqual(new[] { "Build", "Validate" }, StringComparer.Ordinal), "package API exposes only build and validation operations");
+    var dotnetTargetProject = File.ReadAllText(Path.Combine(root, "targets", "dotnet-managed-v1", "Strogo.Portable.V01.csproj"));
+    Check(dotnetTargetProject.Contains("<GenerateMSBuildEditorConfigFile>false</GenerateMSBuildEditorConfigFile>", StringComparison.Ordinal), "dotnet target excludes physical ProjectDir from generated compiler inputs");
+    Check(dotnetTargetProject.Contains("<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>", StringComparison.Ordinal), "dotnet target pins overflow checks independently of ancestor props");
+    var dotnetBuildDriver = File.ReadAllText(Path.Combine(root, "tools", "Build-PortableDotNet.sh"));
+    Check(dotnetBuildDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false", StringComparison.Ordinal), "dotnet build excludes ancestor Directory.Build imports");
     var portabilitySources = Directory.GetFiles(Path.Combine(root, "src", "Strogo.Modules.Portability"), "*.cs", SearchOption.AllDirectories).SelectMany(File.ReadAllLines).ToArray();
     Check(!portabilitySources.Any(line => line.Contains("TrustedModuleRuntime", StringComparison.Ordinal)), "portability project does not reference production runtime");
 }
