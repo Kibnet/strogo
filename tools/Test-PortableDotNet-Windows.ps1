@@ -22,11 +22,13 @@ New-Item -ItemType Directory -Path $consumer | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo "tests\fixtures\portability-consumers\csharp\Consumer.csproj") -Destination (Join-Path $consumer "Consumer.csproj")
 Copy-Item -LiteralPath (Join-Path $repo "tests\fixtures\portability-consumers\csharp\Program.cs") -Destination (Join-Path $consumer "Program.cs")
 
-$output = & $DotNetPath run --project (Join-Path $consumer "Consumer.csproj") -c Release "-p:PortableAssemblyPath=$artifact" 2>&1
+$vectors = Join-Path $repo "fixtures\portability-v0.1\invoke-vectors.jsonl"
+$output = & $DotNetPath run --project (Join-Path $consumer "Consumer.csproj") -c Release "-p:PortableAssemblyPath=$artifact" -- $vectors 2>&1
 $exitCode = $LASTEXITCODE
 [IO.File]::WriteAllLines((Join-Path $run "consumer-windows.log"), [string[]]$output, [Text.UTF8Encoding]::new($false))
 if ($exitCode -ne 0) { throw "consumer exit $exitCode`n$($output -join "`n")" }
 if ($output -notcontains "PASS standalone C# consumer cases=8 transport=24 additional=1") { throw "consumer PASS marker unavailable" }
+if ($output -notcontains "PASS standalone C# invoke vectors=13") { throw "invoke vector PASS marker unavailable" }
 
 $report = [ordered]@{
     schemaVersion = "strogo.dotnet-platform-run.v0.1"
@@ -42,4 +44,4 @@ $report = [ordered]@{
     repositoryDirty = [bool](git -C $repo status --porcelain)
 }
 [IO.File]::WriteAllText((Join-Path $run "report.json"), (($report | ConvertTo-Json -Compress) + "`n"), [Text.UTF8Encoding]::new($false))
-Write-Output "PASS dotnet-managed windows artifact=$($report.artifactDigest) consumer=8 transport=24 additional=1"
+Write-Output "PASS dotnet-managed windows artifact=$($report.artifactDigest) consumer=8 transport=24 additional=1 vectors=13"

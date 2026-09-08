@@ -1240,3 +1240,23 @@
 - Evidence: coordinated external review commit `405bd0b9eca73b0716eb0b316e054187a93ee85b` после push.
 - Последствие: найденный review defect закрыт двумя линиями evidence — external source inspection и our two-platform execution — с раздельно указанной независимостью.
 - Supersedes / supersededBy: дополняет K-E06-024/K-E06-025.
+
+## K-E06-027
+
+- Дата / фаза: 2026-09-08 / standalone consumer isolation review.
+- Тип / статус: Harness independence hypothesis / Refuted on `74e002b`; fixed on working tree.
+- Утверждение: `Consumer.csproj` не задавал `ImplicitUsings` и успешно собирался внутри repository только благодаря inherited root build settings. Независимый Windows driver с `RunDirectory` вне repo воспроизвёл `CS0246/CS0103`; единственный override `-p:ImplicitUsings=enable` дал exit `0` и PASS на опубликованной DLL. Consumer теперь явно закрепляет это свойство в собственном project file.
+- Scope: standalone C# consumer build isolation; DLL behavior и adapter bytes не меняются.
+- Evidence: внешний exact run `tools/Test-PortableDotNet-Windows.ps1@74e002b` во временном каталоге вне repo; failing baseline и passing single-property rerun.
+- Последствие: будущие consumer claims обязаны запускаться вне inherited repository hierarchy или проверять self-contained MSBuild properties; exact checkpoint evidence требует повторного harness run после fix commit.
+- Supersedes / supersededBy: ограничивает A14-часть K-E06-025, не опровергая independent DLL execution при исправленном build input.
+
+## K-E06-028
+
+- Дата / фаза: 2026-09-08 / complete owner-vector projection.
+- Тип / статус: Target oracle execution / Confirmed on working tree; exact clean-commit rerun pending.
+- Утверждение: детерминированная JSONL projection переводит frozen target-neutral fixture в 10 canonical success requests/outcomes и 3 owner refusals. Standalone consumer, имеющий ссылку только на опубликованную DLL, получил exact byte-equal outcomes для всех 13 строк как в Linux, так и в Windows.
+- Scope: все обязательные owner vectors E06; target mutations, manifest/package и performance/JIT ещё открыты.
+- Evidence: `tools/Generate-Portability-InvokeVectors.py`, `fixtures/portability-v0.1/invoke-vectors.jsonl`, расширенный standalone consumer; working-tree Linux/Windows runs одной DLL `b62e37…667c`.
+- Последствие: после exact revision run .NET profile закроет полный functional oracle set; генератор и JSONL должны быть проверены conformance на соответствие исходному fixture, чтобы projection не стала независимым недоверенным oracle.
+- Supersede / supersededBy: расширяет K-E06-025 с subset 8 до всех 10+3 owner outcomes.

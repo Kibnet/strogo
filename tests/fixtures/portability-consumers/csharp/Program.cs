@@ -63,6 +63,24 @@ using (var escapedResult = System.Text.Json.JsonDocument.Parse(ModuleApi.Invoke(
 
 Console.WriteLine($"PASS standalone C# consumer cases={cases.Length} transport={requests.Count} additional=1");
 
+if (args.Length == 1)
+{
+    var vectorCount = 0;
+    foreach (var line in File.ReadLines(args[0]))
+    {
+        using var vector = System.Text.Json.JsonDocument.Parse(line);
+        var root = vector.RootElement;
+        var id = root.GetProperty("id").GetString()!;
+        var request = root.GetProperty("request").GetString()!;
+        var expected = root.GetProperty("expected").GetString()!;
+        var actual = ModuleApi.Invoke(request);
+        if (actual != expected) throw new InvalidOperationException($"vector {id}: {actual}");
+        vectorCount++;
+    }
+    if (vectorCount != 13) throw new InvalidOperationException($"expected 13 invoke vectors, actual {vectorCount}");
+    Console.WriteLine($"PASS standalone C# invoke vectors={vectorCount}");
+}
+
 static string Request(string functionId, string argument) => $"{{\"schema\":\"strogo.invoke.v0.1\",\"functionId\":\"{functionId}\",\"arguments\":[{argument}]}}";
 static string RequestWithArguments(IEnumerable<string> arguments) => $"{{\"schema\":\"strogo.invoke.v0.1\",\"functionId\":\"increment\",\"arguments\":[{string.Join(',', arguments)}]}}";
 static string Sequence(IEnumerable<string> items) => $"{{\"kind\":\"sequence\",\"items\":[{string.Join(',', items)}]}}";

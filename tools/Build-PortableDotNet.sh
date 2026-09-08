@@ -39,9 +39,14 @@ adapter="$repo_root/targets/dotnet-managed-v1/ModuleApi.cs"
 project="$repo_root/targets/dotnet-managed-v1/Strogo.Portable.V01.csproj"
 consumer_project="$repo_root/tests/fixtures/portability-consumers/csharp/Consumer.csproj"
 consumer_program="$repo_root/tests/fixtures/portability-consumers/csharp/Program.cs"
-[[ -f "$adapter" && -f "$project" && -f "$consumer_project" && -f "$consumer_program" ]] || { echo 'target inputs unavailable' >&2; exit 69; }
+invoke_vectors="$repo_root/fixtures/portability-v0.1/invoke-vectors.jsonl"
+vector_source="$repo_root/fixtures/portability-v0.1/vectors.json"
+vector_generator="$repo_root/tools/Generate-Portability-InvokeVectors.py"
+[[ -f "$adapter" && -f "$project" && -f "$consumer_project" && -f "$consumer_program" && -f "$invoke_vectors" && -f "$vector_source" && -f "$vector_generator" ]] || { echo 'target inputs unavailable' >&2; exit 69; }
 
 mkdir -p "$run_dir/logs" "$run_dir/artifact"
+python3 "$vector_generator" --input "$vector_source" --output "$run_dir/invoke-vectors.generated.jsonl"
+cmp "$invoke_vectors" "$run_dir/invoke-vectors.generated.jsonl" || { echo 'invoke vector projection drift' >&2; exit 70; }
 for lane_name in a b; do
   lane="$run_dir/$lane_name"
   mkdir -p "$lane"
@@ -63,12 +68,13 @@ consumer="$run_dir/consumer"
 mkdir -p "$consumer"
 cp "$consumer_project" "$consumer/Consumer.csproj"
 cp "$consumer_program" "$consumer/Program.cs"
-"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:PortableAssemblyPath="$run_dir/artifact/strogo.portable.v01.dll" >"$run_dir/logs/consumer-linux.log" 2>&1
+"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:PortableAssemblyPath="$run_dir/artifact/strogo.portable.v01.dll" -- "$invoke_vectors" >"$run_dir/logs/consumer-linux.log" 2>&1
 grep -Fxq 'PASS standalone C# consumer cases=8 transport=24 additional=1' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
+grep -Fxq 'PASS standalone C# invoke vectors=13' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
 
-python3 - "$run_dir" "$repo_root" "$source_file" "$adapter" "$project" "$dafny" "$dotnet" <<'PY'
+python3 - "$run_dir" "$repo_root" "$source_file" "$adapter" "$project" "$dafny" "$dotnet" "$invoke_vectors" "$vector_generator" <<'PY'
 import hashlib, json, pathlib, platform, subprocess, sys
-run, repo, source, adapter, project, dafny, dotnet = map(pathlib.Path, sys.argv[1:])
+run, repo, source, adapter, project, dafny, dotnet, vectors, generator = map(pathlib.Path, sys.argv[1:])
 sha=lambda path: hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
 report={
   'schemaVersion':'strogo.dotnet-build-run.v0.1',
@@ -79,6 +85,8 @@ report={
   'dafnySourceDigest':sha(source),
   'adapterDigest':sha(adapter),
   'projectDigest':sha(project),
+  'invokeVectorsDigest':sha(vectors),
+  'invokeVectorGeneratorDigest':sha(generator),
   'translatedSourceDigest':sha(run/'a/Candidate.cs'),
   'translationRecordDigest':sha(run/'a/translation-record.dtr'),
   'artifactDigest':sha(run/'artifact/strogo.portable.v01.dll'),
@@ -91,4 +99,4 @@ report={
 (run/'report.json').write_text(json.dumps(report,ensure_ascii=True,separators=(',',':'))+'\n',encoding='utf-8',newline='\n')
 PY
 
-echo 'PASS dotnet-managed build translations=byte-equal artifacts=byte-equal consumer=8 transport=24 additional=1'
+echo 'PASS dotnet-managed build translations=byte-equal artifacts=byte-equal consumer=8 transport=24 additional=1 vectors=13'
