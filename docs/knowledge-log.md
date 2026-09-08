@@ -1080,3 +1080,23 @@
 - Evidence: `tools/Test-Modules-Portability-Proof.sh`; pre-commit WSL run `/tmp/strogo-e06-proof-695708bb13b1434fba0fa5890e34da31` — `PASS portability mixed proof strong=32/0x2 weak=31/1`; conformance `checks=51`.
 - Последствие: после implementation commit нужен clean exact-revision rerun и filtered public proof package; затем можно переводить этот source в C#/.NET profile.
 - Supersedes / supersededBy: устраняет `FoldOwnerRequired` gap K-E06-003 для утверждённого mixed workload.
+
+## K-E06-011
+
+- Дата / фаза: 2026-09-08 / mixed lowering external reproduction.
+- Тип / статус: External replication / Confirmed for public commit `6c73dee`.
+- Утверждение: exact public commit `6c73dee77e41aa49d873e4642fbb08f4228bfe84` воспроизведён в отдельном Windows checkout: portability conformance завершился `PASS 51`, Modules regression — `PASS 362`.
+- Scope: managed generation/binding/oracle/reference regressions; внешний участник не запускал Linux proof driver или C#/Java targets.
+- Evidence: commands `dotnet run --project tests/Strogo.Modules.Portability.Conformance -c Release -- --report independent-portability-6c73dee.json` и `dotnet run --project tests/Strogo.Modules.Conformance -c Release -- --report independent-modules-6c73dee.json`, оба exit `0`.
+- Последствие: mixed dispatcher и strengthened fixture воспроизводятся вне исходного checkout на managed boundary; proof evidence остаётся отдельным gate.
+- Supersedes / supersededBy: независимо подтверждает managed часть K-E06-010.
+
+## K-E06-012
+
+- Дата / фаза: 2026-09-08 / Linux proof-driver review.
+- Тип / статус: Reproduction harness defect / Fixed before retained evidence.
+- Утверждение: version probes в первой версии driver использовали command substitution без кавычек вокруг executable variable; абсолютный путь с пробелами прошёл бы `-x`, но разбился бы при `--version`. Основные proof invocations уже заключали переменные в кавычки.
+- Scope: `tools/Test-Modules-Portability-Proof.sh` prerequisite checks; observed no-space local run не меняется.
+- Evidence: внешний source review public commit `6c73dee`; исправлено на `"$("$dafny" --version)"` и `"$("$dotnet" --version)"`.
+- Последствие: retained exact-commit evidence создаётся только после повторного запуска исправленного driver; version checks поддерживают произвольные абсолютные пути.
+- Supersedes / supersededBy: hardening для K-E06-010.

@@ -31,8 +31,8 @@ done
 expected_dafny_sha='e540b4826363afb87c326446239a682d45086905425fa6299c103eca9693846d'
 actual_dafny_sha="$(sha256sum "$dafny" | cut -d' ' -f1)"
 [[ "$actual_dafny_sha" == "$expected_dafny_sha" ]] || { echo "Dafny executable digest mismatch" >&2; exit 70; }
-[[ "$($dafny --version)" == '4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2' ]] || { echo "Dafny version mismatch" >&2; exit 70; }
-[[ "$($dotnet --version)" == '10.0.400' ]] || { echo ".NET SDK version mismatch" >&2; exit 70; }
+[[ "$("$dafny" --version)" == '4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2' ]] || { echo "Dafny version mismatch" >&2; exit 70; }
+[[ "$("$dotnet" --version)" == '10.0.400' ]] || { echo ".NET SDK version mismatch" >&2; exit 70; }
 
 generate() {
   local lane="$1"
