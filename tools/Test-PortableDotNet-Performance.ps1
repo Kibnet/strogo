@@ -79,6 +79,7 @@ $report=[ordered]@{
     schemaVersion='strogo.dotnet-performance-report.v0.1'; status='Passed'; assertionBoundary='DiagnosticOnlyNoG06'
     profileId='dotnet-managed.v1'; os='windows'; arch='x64'; runtimeVendor=$environment.runtimeVendor; runtimeVersion=$environment.runtimeVersion
     runtimeClosureDigest=$environment.runtimeClosureDigest; portabilityManifestDigest=$validation.portabilityManifestDigest; packageDigest=$validation.packageDigest; artifactDigest=$validation.artifactDigest
+    controller=[ordered]@{kind='PowerShell';version=$PSVersionTable.PSVersion.ToString();clock='System.Diagnostics.Stopwatch'}
     commands=[ordered]@{startup='dotnet PerformanceConsumer.dll startup';throughput='dotnet PerformanceConsumer.dll throughput'}
     settings=[ordered]@{coldStartRepeats='5';warmupCalls='5000';throughputRepeats='5';callsPerRepeat='10000';jitDiagnosticOverrides=@()}
     startup=$startup; throughput=$throughput

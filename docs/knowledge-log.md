@@ -1510,3 +1510,13 @@
 - Evidence: conformance `136`; successful local report содержит `5` unique startup PID, `5` positive durations, `5` positive throughput values, positive process-reported peak memory и exact package/runtime identities. Первый вариант PowerShell driver случайно возвращал boolean results `Environment.Remove` в pipeline и тем самым раздувал `startup` до `40` элементов; явное подавление output и обязательная cardinality validation устранили класс ошибки.
 - Последствие: A11 implementation нельзя считать завершённым по одному Windows run. После commit нужен exact Windows rerun, симметричный Linux driver/run и retained filtered evidence; raw числа не входят в semantic digest и не присваивают profile статус `Portable`.
 - Supersedes / supersededBy: развивает K-E06-048/K-E06-052; exact evidence должна заменить working-tree status.
+
+## K-E06-054
+
+- Дата / фаза: 2026-09-08 / Linux .NET performance diagnostic implementation.
+- Тип / статус: A11 two-OS harness behavior / Confirmed on working tree; exact clean-commit evidence pending.
+- Утверждение: Windows и Linux A11 drivers используют один standalone consumer и один package-bound public JSON ABI workload, но честно раскрывают разные controller/clock (`PowerShell` + `System.Diagnostics.Stopwatch`, `CPython` + `time.monotonic_ns`). Linux driver повторяет validation-before-execution, exact runtime closure gate, пять distinct cold processes, отдельный warmup/throughput process, 180-second timeout, пустой stderr, fixed cardinalities и positive-decimal checks. Различие контроллеров остаётся частью diagnostic environment, а raw timing не участвует в semantic verdict.
+- Scope: working-tree Windows x64 и Ubuntu 24.04 WSL2 Linux x64 на одном host; Linux runtime closure `9349ea1375f117bad1c2f43fb14f399a7cbf47c7ce1067dabcf0ac47e5aba8c0`. WSL2 не является независимой Linux machine, а один run не доказывает G06.
+- Evidence: portability conformance `138`; Linux local run: `5` distinct startup PID, `5` positive durations/rates, positive peak working set, manifest/package/artifact identities совпали с Windows и checkpoint `aaf2dc2`; report boundary `DiagnosticOnlyNoG06`.
+- Последствие: A11 behavior реализован для двух обязательных .NET OS rows. Для принятия checkpoint нужны clean commit, повтор обоих drivers на нём и retained reports с hash inventory; сравнительная G06 методика остаётся отдельным этапом.
+- Supersedes / supersededBy: дополняет K-E06-053; exact evidence должна заменить working-tree status обеих записей.
