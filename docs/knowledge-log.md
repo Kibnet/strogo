@@ -1220,3 +1220,23 @@
 - Evidence: внешний source finding + независимое BCL reproduction; новый case `escaped-lone-surrogate` выполнен сверх frozen 24 cases в Linux и Windows на одной working-tree DLL, оба PASS `additional=1`.
 - Последствие: evidence commit `33c106b` не публикуется как successful profile checkpoint; после fix commit нужен новый exact clean build/run. Для Java adapter тот же escaped-surrogate case обязателен заранее.
 - Supersedes / supersededBy: ограничивает K-E06-023 и добавляет различающий test к K-E06-005.
+
+## K-E06-025
+
+- Дата / фаза: 2026-09-08 / exact-revision .NET checkpoint.
+- Тип / статус: Reproducible target execution / Confirmed on clean public commit `405bd0b9eca73b0716eb0b316e054187a93ee85b`; profile completion still open.
+- Утверждение: два clean relative Dafny C# translation/build lanes exact revision создали byte-equal translated source, translation record и `net10.0` DLL. Одна DLL SHA-256 `b62e3742ba9deb633be81a07d12811aebc8538c45dba5f93b37fabbc5e55667c` прошла без пересборки на Linux x64 (.NET 10.0.11 в Ubuntu 24.04 WSL2) и Windows x64 (.NET 10.0.11): 8 exact public outcomes, frozen 24 transport IDs и escaped-surrogate additional case.
+- Scope: deterministic adapter artifact и фактические two-OS consumer runs. Это ещё не итоговый `Portable`: отсутствуют canonical portability manifest/package, runtime closure digests, все 10 owner vectors, четыре mutations и performance/JIT diagnostics.
+- Evidence: `artifacts/e06/dotnet-checkpoint-405bd0b/**`; build report фиксирует `repositoryDirty=false`, shared verified source digest `1a6076…bdcf`, adapter digest `0a5bc2…97e1`, byte-equal lanes; Linux/Windows receipts имеют одинаковый artifact digest; `sha256.txt` покрывает 11 retained files.
+- Последствие: практическая цель «один managed artifact запускается на разных платформах силами зрелого runtime» подтверждена для ограниченного checkpoint; следующий шаг должен закрыть manifest/oracle/mutation gates, не повторять уже доказанную basic portability.
+- Supersedes / supersededBy: завершает exact-commit часть K-E06-023/K-E06-024 и оставляет финальные A-checks открытыми.
+
+## K-E06-026
+
+- Дата / фаза: 2026-09-08 / escaped-surrogate fix external review.
+- Тип / статус: External source inspection / Confirmed for public commit `405bd0b`; no independent rebuilt DLL run.
+- Утверждение: reviewer подтвердил по source, что `reader.GetString()` для каждого `String`/`PropertyName` в bounded syntax pass закрывает ранее найденный exception path до `CanonicalRequestBytes`, а дополнительный consumer case ожидает `MalformedJson`.
+- Scope: адресность source fix; Windows/Linux PASS остаётся нашим exact run, не внешней runtime репликацией.
+- Evidence: coordinated external review commit `405bd0b9eca73b0716eb0b316e054187a93ee85b` после push.
+- Последствие: найденный review defect закрыт двумя линиями evidence — external source inspection и our two-platform execution — с раздельно указанной независимостью.
+- Supersedes / supersededBy: дополняет K-E06-024/K-E06-025.
