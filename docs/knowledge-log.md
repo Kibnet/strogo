@@ -1630,3 +1630,13 @@
 - Evidence: `artifacts/e06/jvm-phase2-d21d969/**`; phase2/adapter/consumer stdout и stderr пустые, all three javac invocations exit `0`, Java run exit `0`; `tests/Strogo.Modules.Portability.Conformance` после tracked baseline binding — `PASS portability contract checks=225 valid=10 refusals=3 transport=24 mutations=4`.
 - Последствие: E06A closed-exclusion build gate принят для exact approved fixture. Следующий отдельный этап — canonical deterministic JAR normalizer/package integration; новый baseline или изменение translator/harness closure потребует новой owner approval.
 - Supersedes / supersededBy: supersedes pending Stage 2 state K-E06-057 and updates E06A Approved baseline snapshot; does not change E06R or production admission boundaries.
+
+## K-E06-066
+
+- Дата / фаза: 2026-09-08 / E06A identity drift boundary.
+- Тип / статус: Reproducibility finding / Confirmed by comparison of approved and current checkouts.
+- Утверждение: после изменений harness в текущем checkout повторный Stage 1 вычисляет другую harness closure и другой candidate identity (`baselineDigest=9bed24…`), поэтому этот результат нельзя автоматически считать продолжением owner-approved `cafa0caa…c0e1`. Phase 2 evidence намеренно привязано к clean approved tree `d21d969` и не переиспользует новый candidate.
+- Scope: drift относится к build identity и approval gate; это не доказательство дефекта generated Java и не изменение tracked baseline.
+- Evidence: `artifacts/e06/jvm-phase2-d21d969/report.json`; tracked baseline `targets/jvm-java17-v1/upstream-warning-baseline.json`; E06A SPEC §6.2.2 и §10.
+- Последствие: любая правка translator, harness, JDK closure или command identity требует нового two-root candidate и отдельного `Baseline подтверждаю`; текущий Phase 2 остаётся действительным только для `cafa0caa…c0e1`.
+- Supersedes / supersededBy: уточняет K-E06-065; production/JAR admission boundaries unchanged.
