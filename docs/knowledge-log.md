@@ -1520,3 +1520,13 @@
 - Evidence: portability conformance `138`; Linux local run: `5` distinct startup PID, `5` positive durations/rates, positive peak working set, manifest/package/artifact identities совпали с Windows и checkpoint `aaf2dc2`; report boundary `DiagnosticOnlyNoG06`.
 - Последствие: A11 behavior реализован для двух обязательных .NET OS rows. Для принятия checkpoint нужны clean commit, повтор обоих drivers на нём и retained reports с hash inventory; сравнительная G06 методика остаётся отдельным этапом.
 - Supersedes / supersededBy: дополняет K-E06-053; exact evidence должна заменить working-tree status обеих записей.
+
+## K-E06-055
+
+- Дата / фаза: 2026-09-08 / exact .NET A11 evidence.
+- Тип / статус: A11 .NET two-OS diagnostic / Confirmed on clean public commit `2c87442`.
+- Утверждение: один canonical package и public JSON ABI workload последовательно выполнены через exact Windows/Linux .NET `10.0.11` runtime closures. Каждая row содержит `5` distinct cold-start processes и отдельный throughput process с `5000` warmup и `5 × 10000` measured calls; exact response проверялся на каждом вызове. Обе rows сохранили controller/clock, positive wall time/rate/peak memory, одинаковые artifact sizes и границу `DiagnosticOnlyNoG06`. Последовательный запуск устранил прямую конкуренцию двух benchmark processes, но не превратил один host/sample в статистическое сравнение.
+- Scope: clean commit `2c874422037ce143b25fb231af4e61a9c62ea528`; Windows x64 и Ubuntu 24.04 WSL2 Linux x64 на одной машине; package из `aaf2dc2`. Это фактическое A11 diagnostic evidence для `dotnet-managed.v1`, не G06, не независимый Linux runner и не JVM profile.
+- Evidence: `artifacts/e06/dotnet-performance-2c87442/**`; conformance `138`; Windows throughput observations `7054,22725,30983,32553,32764` operations/s и peak `52756480` bytes; Linux `9088,26102,35471,31798,27928` и peak `67354624` bytes. Raw reports, environment/package receipts, exact identity и SHA-256 inventory сохранены; physical paths отфильтрованы.
+- Последствие: A11 закрыт для .NET profile как диагностический gate. Числа не следует использовать для cross-OS ranking: controllers/clocks и platform context различаются, WSL2 разделяет host, а series ограничена одним run. Следующий общий E06 gate — JVM profile/HotSpot A12 либо canonical full report, который не должен повышать эти observations до semantic verdict.
+- Supersedes / supersededBy: заменяет working-tree status K-E06-053/K-E06-054; full E06 остаётся открыт.
