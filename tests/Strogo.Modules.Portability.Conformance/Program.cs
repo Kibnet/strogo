@@ -385,6 +385,38 @@ try
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "AmbiguousRuntimeSelection"), "multiple selectable hostfxr versions are unavailable");
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "arm64", "10.0.11"), "UnsupportedArchitecture"), "unsupported runtime architecture is unavailable");
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11", "INVALID"), "InvalidExpectedDigest"), "invalid expected runtime identity is unavailable");
+
+    var windowsOnly = PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile,
+    [
+        PassedRow("windows")
+    ]);
+    Check(windowsOnly.Length == 2 && windowsOnly[0].Os == "linux" && windowsOnly[1].Os == "windows", "matrix rows are complete and ordinal-sorted");
+    Check(windowsOnly[0].Status == "Unavailable" && windowsOnly[0].Synthesized && windowsOnly[0].ReasonCodes.SequenceEqual(new[] { "EnvironmentUnavailable", "RowUnavailable" }, StringComparer.Ordinal), "absent mandatory platform row becomes unavailable");
+    Check(windowsOnly[1].Status == "Passed" && !windowsOnly[1].Synthesized && windowsOnly[1].ReasonCodes.IsEmpty, "provided passing platform row is preserved");
+    var bothRows = PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile,
+    [
+        PassedRow("windows"),
+        PassedRow("linux")
+    ]);
+    Check(bothRows.All(row => row.Status == "Passed" && !row.Synthesized), "complete passing matrix has no synthesized row");
+    var unavailableRow = PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile,
+    [
+        new PortabilityPlatformStatus("linux", "x64", "Unavailable", ["EnvironmentUnavailable"])
+    ])[0];
+    Check(unavailableRow.ReasonCodes.SequenceEqual(new[] { "EnvironmentUnavailable", "RowUnavailable" }, StringComparer.Ordinal), "explicit unavailable row receives aggregate reason");
+    var failedRow = PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile,
+    [
+        new PortabilityPlatformStatus("linux", "x64", "Failed", ["ConsumerFailed"])
+    ])[0];
+    Check(failedRow.ReasonCodes.SequenceEqual(new[] { "ConsumerFailed", "RowFailed" }, StringComparer.Ordinal), "failed row receives aggregate reason");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [PassedRow("windows"), PassedRow("windows")]), "DuplicatePlatformRow"), "duplicate platform row is rejected");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [PassedRow("macos")]), "UnknownPlatformRow"), "unknown platform row is rejected");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Skipped")]), "UnknownRowStatus"), "unknown platform status is rejected");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Passed", ["RowFailed"])]), "PassedRowHasReasons"), "passing row cannot retain failure reasons");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Unavailable")]), "UnavailableRowHasNoEnvironmentReason"), "unavailable row requires an environment reason");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Failed", ["Unknown"])]), "UnknownReasonCode"), "unknown reason code is rejected");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [new PortabilityPlatformStatus("windows", "x64", "Passed")]), "PassedRowEvidenceMissing"), "passing row requires exact evidence identities");
+    Check(RejectsReport(() => PortabilityReportMatrix.Complete(PortabilityVersions.DotNetProfile, [PassedRow("windows"), PassedRow("linux", 'b')]), "PlatformArtifactIdentityMismatch"), "passing rows from different package identities are rejected");
 }
 finally
 {
@@ -490,6 +522,20 @@ static bool RejectsEnvironment(Action action, string reason)
     }
 }
 
+static bool RejectsReport(Action action, string reason)
+{
+    try
+    {
+        action();
+        return false;
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "PortabilityReportRejected")
+    {
+        using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
+        return details.RootElement.GetProperty("reason").GetString() == reason;
+    }
+}
+
 static void CreateFakeDotNetRuntime(string root, string executable)
 {
     Directory.CreateDirectory(Path.Combine(root, "host", "fxr", "10.0.11"));
@@ -498,6 +544,16 @@ static void CreateFakeDotNetRuntime(string root, string executable)
     File.WriteAllText(Path.Combine(root, "host", "fxr", "10.0.11", "hostfxr.bin"), "hostfxr-v1", Encoding.ASCII);
     File.WriteAllText(Path.Combine(root, "shared", "Microsoft.NETCore.App", "10.0.11", "coreclr.bin"), "runtime-v1", Encoding.ASCII);
 }
+
+static PortabilityPlatformStatus PassedRow(string os, char identity = 'a')
+    => new(
+        os,
+        "x64",
+        "Passed",
+        portabilityManifestDigest: new string(identity, 64),
+        packageDigest: new string(identity, 64),
+        artifactDigest: new string(identity, 64),
+        runtimeClosureDigest: new string(os == "windows" ? 'c' : 'd', 64));
 
 static bool EqualTrees(string left, string right)
 {

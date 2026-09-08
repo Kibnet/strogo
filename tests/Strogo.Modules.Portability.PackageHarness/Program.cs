@@ -8,7 +8,7 @@ using Strogo.Modules.Portability;
 
 try
 {
-    if (args.Length == 0) Fail("command is required: build, validate or runtime");
+    if (args.Length == 0) Fail("command is required: build, validate, runtime or matrix");
     var options = ParseOptions(args.Skip(1).ToArray());
     switch (args[0])
     {
@@ -20,6 +20,9 @@ try
             break;
         case "runtime":
             InspectRuntime(options);
+            break;
+        case "matrix":
+            BuildMatrixCheck(options);
             break;
         default:
             Fail($"unknown command: {args[0]}");
@@ -382,6 +385,66 @@ static void WriteEnvironmentReport(string path, object report)
     File.WriteAllBytes(path, CanonicalJson.Encode(report));
 }
 
+static void BuildMatrixCheck(IReadOnlyDictionary<string, string> options)
+{
+    var profileId = Required(options, "--profile-id");
+    var output = FullPath(Required(options, "--output"));
+    if (File.Exists(output) || Directory.Exists(output)) Fail("matrix output path already exists");
+    var rows = new List<PortabilityPlatformStatus>();
+    foreach (var option in new[] { "--linux-report", "--windows-report" })
+        if (options.TryGetValue(option, out var path)) rows.Add(ReadPlatformStatus(FullPath(path), profileId));
+    var completed = PortabilityReportMatrix.Complete(profileId, rows);
+    var reasons = completed.SelectMany(row => row.ReasonCodes).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+    var matrixStatus = completed.All(row => row.Status == "Passed") ? "Passed" : "NotPassed";
+    var identity = completed.FirstOrDefault(row => row.Status == "Passed");
+    Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("matrix output path has no directory"));
+    File.WriteAllBytes(output, CanonicalJson.Encode(new
+    {
+        schemaVersion = "strogo.portability-matrix-check.v0.1",
+        profileId,
+        matrixStatus,
+        portabilityManifestDigest = identity?.PortabilityManifestDigest,
+        packageDigest = identity?.PackageDigest,
+        artifactDigest = identity?.ArtifactDigest,
+        reasonCodes = reasons,
+        platforms = completed.Select(row => new
+        {
+            os = row.Os,
+            arch = row.Arch,
+            status = row.Status,
+            reasonCodes = row.ReasonCodes,
+            portabilityManifestDigest = row.PortabilityManifestDigest,
+            packageDigest = row.PackageDigest,
+            artifactDigest = row.ArtifactDigest,
+            runtimeClosureDigest = row.RuntimeClosureDigest,
+            synthesized = row.Synthesized
+        }).ToArray()
+    }));
+    Console.WriteLine($"PASS portability matrix profile={profileId} status={matrixStatus} rows={completed.Length}");
+}
+
+static PortabilityPlatformStatus ReadPlatformStatus(string path, string profileId)
+{
+    RequireFile(path);
+    using var document = JsonDocument.Parse(File.ReadAllBytes(path));
+    var root = document.RootElement;
+    RequireValue(root, "schemaVersion", "strogo.dotnet-package-platform-run.v0.1");
+    RequireValue(root, "profileId", profileId);
+    var status = String(root, "status");
+    var reasons = root.TryGetProperty("reasonCodes", out var reasonCodes)
+        ? reasonCodes.EnumerateArray().Select(item => item.GetString() ?? throw new InvalidOperationException("reason code must be string")).ToArray()
+        : Array.Empty<string>();
+    return new PortabilityPlatformStatus(
+        String(root, "os"),
+        String(root, "arch"),
+        status,
+        reasons,
+        portabilityManifestDigest: OptionalString(root, "portabilityManifestDigest"),
+        packageDigest: OptionalString(root, "packageDigest"),
+        artifactDigest: OptionalString(root, "artifactDigest"),
+        runtimeClosureDigest: OptionalString(root, "runtimeClosureDigest"));
+}
+
 static Dictionary<string, string> ParseOptions(string[] input)
 {
     if (input.Length % 2 != 0) Fail("options must be name/value pairs");
@@ -418,6 +481,9 @@ static void RequireBoolean(JsonElement element, string property, bool expected)
 
 static string String(JsonElement element, string property)
     => element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString()! : throw new InvalidOperationException($"{property} must be string");
+
+static string? OptionalString(JsonElement element, string property)
+    => element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
 
 static InventoryFile Inventory(string logicalPath, string physicalPath, string role)
     => new(logicalPath, RawDigest(physicalPath), Length(physicalPath), role);

@@ -1450,3 +1450,23 @@
 - Evidence: `artifacts/e06/dotnet-runtime-c254468/**`; conformance `107`; direct consumers `8+24+1+13`; exact manifest `f947db0e3437cb98babe422c6831fa37570b04fd18a8847e12b4620a0119bb8d`, package `4dd1a36f3b430835a0b13241e7bb98a60df451a19befbbbde1801de128d8704e`, artifact set `002c89b04032d9416894f4555ff0bf279be60392ad7ee31b2521ab67840fb08a`.
 - Последствие: runtime-bound часть A5 и missing/corrupt runtime часть A10 для .NET приняты как checkpoint. A10 нельзя закрыть без deterministic report aggregation, где отсутствующая mandatory row становится `Unavailable`; профиль остаётся без статуса `Portable` до A11/A12 и этой проверки.
 - Supersedes / supersededBy: заменяет working-tree status K-E06-046; следующий шаг — canonical .NET profile report с absent-row self-test.
+
+## K-E06-048
+
+- Дата / фаза: 2026-09-08 / public report-semantics review.
+- Тип / статус: OBS versus VERDICT separation / Accepted design clarification after independent reasoning; implementation partial.
+- Утверждение: cross-backend report должен отделять semantic verdict от diagnostic observations. Verdict содержит exact input identity, принадлежность owner domain и canonical result/refusal/termination. Runtime/JIT events, stderr, timing и memory сами по себе не являются семантическим расхождением; они повышаются до нарушения только через явную норму контракта, например lazy `if`, отсутствие effects или resource bound. Поэтому eager crash на невыбранном `seq.get` внутри допустимого `headOrZero([])` нарушает verdict, а порядок вычисления двух total/pure ветвей при одинаковом outcome остаётся observation. Вызов вне `requires` — diagnostic negative, не owner counterexample.
+- Scope: design canonical E06 report/semantic digest. Это не утверждение, что текущий report builder уже реализует всю projection или cross-backend comparison.
+- Evidence: вопрос «Помощника архитектора» в public thread, сообщение `#9977`/`0100483f-7904-41b6-8c10-7f14258366f5`; опубликованный и прочитанный обратно ответ `#9989`/`3007a032-dcd2-480d-ac00-816ba25aebaa`; E06 §6.2.4.
+- Последствие: semantic digest mutation gates обязаны доказать, что diagnostics reorder/change digest не меняет, а domain/outcome mutation меняет. Matrix/status aggregation не должна смешивать эти слои.
+- Supersedes / supersededBy: уточняет report semantics E06 §6.2.4; будущий full report implementation должен сослаться на эту запись.
+
+## K-E06-049
+
+- Дата / фаза: 2026-09-08 / platform matrix completeness implementation.
+- Тип / статус: Absent-row and report-mix-up discrimination / Confirmed on working tree; exact clean-commit evidence pending.
+- Утверждение: mandatory matrix нельзя строить только из присутствующих отчётов или их поля `status`. Отсутствующая `(linux,x64)`/`(windows,x64)` строка детерминированно синтезируется как `Unavailable` с `EnvironmentUnavailable` и `RowUnavailable`; Passed row требует manifest/package/artifact/runtime closure digests; две Passed rows обязаны ссылаться на один manifest/package/artifact triple. Иначе package/report mix-up мог бы дать ложный matrix PASS.
+- Scope: completeness/identity core для обоих managed profile IDs и development `strogo.portability-matrix-check.v0.1`; это ещё не финальный `strogo.portability-report.v0.1`, profile `Portable`, JIT/performance либо JVM evidence.
+- Evidence: working-tree conformance `121`; actual retained Windows-only input дал `NotPassed` и synthesized Linux `Unavailable`; две retained `c254468` rows дали matrix check `Passed`; mutation Linux `packageDigest` дала `PortabilityReportRejected`/`PlatformArtifactIdentityMismatch`, exit `1`, без output.
+- Последствие: absent-row часть A10 реализована fail closed; exact clean-commit run должен заменить working-tree status. Общий report builder может использовать matrix core, но обязан дополнительно учесть JIT, oracle и оба mandatory profiles.
+- Supersedes / supersededBy: развивает K-E06-047 и закрывает найденный в self-review package/report mix-up seam; exact evidence pending.
