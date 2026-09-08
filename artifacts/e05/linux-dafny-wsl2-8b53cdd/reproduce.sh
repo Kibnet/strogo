@@ -2,6 +2,7 @@
 set -euo pipefail
 
 commit=8b53cddb6d143cc1517ba07d6e7597255b876894
+expected_archive_sha256=a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179
 repo_source="${REPO_SOURCE:-$(git rev-parse --show-toplevel)}"
 evidence_dir="${EVIDENCE_DIR:?set EVIDENCE_DIR to an absolute output path}"
 work_dir="$(mktemp -d)"
@@ -14,6 +15,10 @@ curl -fsSL https://api.github.com/repos/dafny-lang/dafny/releases/tags/v4.11.0 -
 asset_url=https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip
 curl -fL "$asset_url" -o "$work_dir/dafny.zip"
 archive_sha256="$(sha256sum "$work_dir/dafny.zip" | cut -d' ' -f1)"
+if [[ "$archive_sha256" != "$expected_archive_sha256" ]]; then
+  echo "Dafny asset digest mismatch: expected=sha256:$expected_archive_sha256 local=sha256:$archive_sha256" >&2
+  exit 1
+fi
 api_digest="$(python3 - "$evidence_dir/dafny-release.json" <<'PY'
 import json, sys
 with open(sys.argv[1], encoding='utf-8') as f:
@@ -79,6 +84,10 @@ run_case() {
     timeout 180 "$dafny" translate cs "$evidence_dir/sources/$file" --include-runtime --enforce-determinism --cores 2 --verification-time-limit 15 --output "$generated" >"$log" 2>&1 || exit_code=$?
   else
     timeout 180 "$dafny" verify "$evidence_dir/sources/$file" --enforce-determinism --cores 2 --verification-time-limit 15 >"$log" 2>&1 || exit_code=$?
+  fi
+  if grep -Eiq 'Prover error:|Model parsing error|Could not parse any models|Unhandled exception|Internal error|Fatal error|ToolError' "$log"; then
+    echo "Operational/model diagnostic in $name" >&2
+    return 1
   fi
   grep -Fxq "$expected_summary" "$log"
   case "$expectation" in

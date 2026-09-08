@@ -22,7 +22,7 @@ export EVIDENCE_DIR="$PWD/artifacts/local-validation/e05/linux-dafny-replay"
 bash artifacts/e05/linux-dafny-wsl2-8b53cdd/reproduce.sh
 ```
 
-[reproduce.sh](reproduce.sh) preserves the executed generation and Dafny command matrix while parameterizing the original absolute repository/output paths. Its reusable refusal oracle is deliberately stricter than the first local driver: each negative case requires exact Dafny exit `4`, its exact completed verifier summary and its expected diagnostic. This prevents a timeout such as exit `124` from being mistaken for an expected refusal after partial output.
+[reproduce.sh](reproduce.sh) preserves the executed generation and Dafny command matrix while parameterizing the original absolute repository/output paths. Its reusable refusal oracle is deliberately stricter than the first local driver: each negative case requires exact Dafny exit `4`, its exact completed verifier summary and its expected diagnostic, while known operational/model-parser markers are forbidden. This prevents a timeout such as exit `124` or a model parsing failure accompanying a proof diagnostic from being mistaken for an expected refusal. The known archive SHA-256 is enforced even if GitHub Releases API omits its optional digest; a nonempty API digest is checked as a second source.
 
 ## Integrity and boundary
 
