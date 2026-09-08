@@ -1330,3 +1330,13 @@
 - Evidence: `tools/Apply-PortableDotNet-Mutation.py`, `tools/Test-PortableDotNet-Mutations.sh`, standalone mutation consumer; ignored working-tree run `artifacts/local-validation/e06/dotnet-mutations-working-tree-4` дал baseline `4`, unchanged-target rejections `4`, compiled mutants `4`, detected mutants `4`.
 - Последствие: mutation gate можно засчитать только после clean-commit rerun; build rejection не подменяет ожидаемый runtime mismatch/crash, а self-test неизменённого target является обязательной защитой от ложного `Detected`.
 - Supersedes / supersededBy: развивает K-E06-034 и закрывает design-часть target mutations; exact execution ещё должен заменить working-tree evidence.
+
+## K-E06-036
+
+- Дата / фаза: 2026-09-08 / exact .NET target mutation execution.
+- Тип / статус: Target mutation discrimination / Confirmed on clean public commit `590d3dd`.
+- Утверждение: baseline DLL SHA-256 `37cb02dc8be37fe005d6515421aaba97b069168e70f52d9e8ba2ab019fe314fc` снова прошла full consumer и четыре mutation probes; четыре negative controls подтвердили, что неизменённая DLL не классифицируется как mutant. Четыре отдельные DLL после exact single-anchor mutations собрались с нулём warnings/errors. Sign, reverse и refusal-code дали exact `BackendSemanticMismatch` на `summarize-mixed`/sum, `summarize-mixed`/echo item 0 и `i64-leading-zero`/code; eager head дал exact `TargetExecutionFailed` на `head-empty`/`function/headOrZero/result` с `System.IndexOutOfRangeException`.
+- Scope: .NET-половина A7 на Linux x64 lane; JVM mutation run, остальные платформенные A-checks и общая гарантия отсутствия дефектов не входят.
+- Evidence: `artifacts/e06/dotnet-mutations-590d3dd/**`; clean report `repositoryDirty:false`, baseline `4`, unchanged-target rejections `4`, compiled/detected mutations `4/4`, exact per-mutation source/artifact digests.
+- Последствие: известные ошибки знака, порядка, lazy branch и adapter refusal не проходят текущий .NET oracle незаметно; следующий различающий .NET gate — canonical validation manifest/package binding либо runtime closure/unavailable cases.
+- Supersedes / supersededBy: заменяет working-tree evidence K-E06-035 точным публичным запуском; весь A7 остаётся открыт до JVM-половины.

@@ -1,0 +1,4 @@
+BASELINE_PASS mutation=flip-sum-sign
+BASELINE_PASS mutation=reverse-input-sequence
+BASELINE_PASS mutation=force-eager-head
+BASELINE_PASS mutation=alter-refusal-code

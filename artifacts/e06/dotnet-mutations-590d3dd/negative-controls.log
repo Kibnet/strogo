@@ -1,0 +1,4 @@
+UNCHANGED_TARGET_REJECTED mutation=alter-refusal-code
+UNCHANGED_TARGET_REJECTED mutation=flip-sum-sign
+UNCHANGED_TARGET_REJECTED mutation=force-eager-head
+UNCHANGED_TARGET_REJECTED mutation=reverse-input-sequence

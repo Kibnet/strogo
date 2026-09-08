@@ -1,0 +1,1 @@
+PASS dotnet-managed build translations=byte-equal artifacts=byte-equal consumer=8 transport=24 additional=1 vectors=13

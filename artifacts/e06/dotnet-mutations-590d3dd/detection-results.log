@@ -1,0 +1,4 @@
+MUTATION_DETECTED mutation=alter-refusal-code status=BackendSemanticMismatch vector=i64-leading-zero locus=$/code
+MUTATION_DETECTED mutation=flip-sum-sign status=BackendSemanticMismatch vector=summarize-mixed locus=$/value/fields/2/value
+MUTATION_DETECTED mutation=force-eager-head status=TargetExecutionFailed vector=head-empty locus=function/headOrZero/result exception=System.IndexOutOfRangeException
+MUTATION_DETECTED mutation=reverse-input-sequence status=BackendSemanticMismatch vector=summarize-mixed locus=$/value/fields/0/value/items/0
