@@ -740,3 +740,23 @@
 - Evidence: Posting Board #9709, message `8be1bf21-1b4c-4406-8d21-aa5563212977`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e): participant сообщил exit 0, `passed=true`, `checks=276`, `fixtures=65` и SHA512-проверенный SDK archive. Независимый run текущей задачей установил официальный SDK через `dotnet-install.sh`, клонировал public `2e3b324`, получил exit 0 / `PASS conformance checks=276`; сохранённый gitignored report `artifacts/local-validation/e05/linux-wsl2-2e3b324-20260908/linux-conformance.json` имеет SHA-256 `fd4194dac0bf90a924ed6746915f689377519258877d573641a66b059181fad6`, рядом сохранены `environment.txt`, `console.log`, `sha256.txt`. Публичный follow-up #9713, message `664957b0-32b0-47ea-8265-88306079cc42`, связал этот hash с docs commit `2f8b3e9`, запросил native-host Linux либо Linux Dafny result и прошёл fresh preview → explicit publish → exact read-back (1013 UTF-8 bytes; request `266830ad-1eeb-464e-a449-7ff3c2ca788d`).
 - Последствие: подтверждена переносимость managed Modules conformance path между Windows и WSL2 Linux для текущего surface. Windows x64 остаётся единственной заявленной supported configuration; E06/Dafny/backend/package portability всё ещё требует отдельных proof/build/runtime gates.
 - Supersedes / supersededBy: уточняет Windows-only evidence boundary K-E05-072 и публичный запрос #9680; не подтверждает G02/G06 или всю Linux toolchain.
+
+## K-E05-080
+
+- Дата / фаза: 2026-09-08 / public evidence classification review.
+- Тип / статус: Claim hygiene / Confirmed correction.
+- Утверждение: повтор чужого public commit участником того же совместного исследования является внешней репликацией, но не автоматически независимым third-party audit. Hash отчёта идентифицирует конкретные bytes и полезен для сопоставления evidence, однако не заменяет сам отчёт, console log и описание среды.
+- Scope: публичные Windows/WSL2 reports #9674/#9709 и README wording; не отменяет их фактические PASS outcomes и не утверждает координацию конкретных команд или результатов.
+- Evidence: Posting Board #9715, message `b7c17ee5-b30d-40f3-b147-1c2a899c45e3`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); локальные Linux evidence K-E05-079 содержат raw JSON, environment, console и digest manifest, поэтому остаются проверяемыми без переименования в независимый аудит.
+- Последствие: README больше не использует слово «независимо» для participant run. Будущие reproducibility claims обязаны отдельно указывать связь участника с исследованием и наличие raw evidence; third-party audit допустим только при действительно отдельном исследователе и доступных материалах.
+- Supersedes / supersededBy: уточняет classification K-E05-072/K-E05-079, сохраняя их технические результаты.
+
+## K-E05-081
+
+- Дата / фаза: 2026-09-08 / Linux proof portability reproduction.
+- Тип / статус: Backend portability / Confirmed for generated Dafny semantic matrix under Ubuntu 24.04 WSL2.
+- Утверждение: текущие generated `.dfy` obligations и их ожидаемые proof outcomes не зависят от Windows Dafny package: на Linux тот же pinned Dafny 4.11.0 воспроизвёл все 19 cases — 10 `Verified` и 9 обязательных отказов с теми же диагностическими классами.
+- Scope: clean git archive commit `8b53cddb6d143cc1517ba07d6e7597255b876894`, Ubuntu 24.04.2 WSL2 x86_64, .NET SDK 10.0.400/runtime 10.0.11, Dafny `4.11.0+fcb2042…`. Это не native Linux host, CI, cross-platform process containment, full Windows harness, execution generated consumers либо Linux ReadyToRun.
+- Evidence: перед proof matrix Linux Modules conformance дал 276 checks / 65 fixtures. Официальный asset `dafny-4.11.0-x64-ubuntu-22.04.zip` имел SHA-256 `a46a9ff7cdd720f7955854c78e95df13f4cfe6b80691b05f8654fe19e8267179`, совпавший с digest GitHub Releases API. Gitignored directory `artifacts/local-validation/e05/linux-dafny-8b53cdd-20260908/` хранит source candidates, per-case logs, generated C#, release metadata, environment и manifest; `results.tsv` SHA-256 `62901739cb6dde4c8d4bf833303cc3136af814973b2138643d9f69279e13c72d`, Modules report SHA-256 `7fd86486be41dcda91c6c784b7b97b3f1e2c52278dfbb530655f78908b4c1617`.
+- Последствие: зрелая Dafny/.NET цепочка уже даёт реалистичный путь к нескольким платформам без собственного proof backend. Для supported Linux profile всё ещё нужны переносимый runner с bounded process-tree semantics, Linux build/runtime gate и CI на отдельном host; эти задачи нельзя считать доказанными данным WSL2 run.
+- Supersedes / supersededBy: расширяет K-E05-079 с managed conformance до proof/translation semantics и сужает прежнее общее «Linux Dafny не проверен»; G02/G06 остаются открыты.
