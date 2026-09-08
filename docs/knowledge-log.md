@@ -774,19 +774,29 @@
 ## K-E05-083
 
 - Дата / фаза: 2026-09-08 / public capability-boundary benchmark design.
-- Тип / статус: External benchmark / Proposed; not executed.
-- Утверждение: статическое доказательство допустимости эффекта не гарантирует актуальность полномочия в момент исполнения. Минимальный race: grant проверен при epoch 7, issuer отзывает его при epoch 8, затем executor получает старый accepted result; безопасный протокол обязан связать commit с документированной pre-revocation lease либо новой authoritative check.
+- Тип / статус: External benchmark / Concrete trace proposed; not executed.
+- Утверждение: статическое доказательство допустимости эффекта не гарантирует актуальность полномочия в момент исполнения. Для STRICT policy grant, проверенный при epoch 7 и отозванный при epoch 8 до commit, обязан дать `DENY_STALE`/no effect; partition даёт `UNKNOWN`/no effect. LEASE является другой заранее объявленной политикой: commit до `lease_until=T` даёт `ALLOW_LEASED`, после T — `DENY_EXPIRED`. Близость fresh check к side effect недостаточна: authorize+commit должны иметь одну enforceable linearization point.
 - Scope: будущие capabilities/effects и внешний executor; не pure Modules v0.2, не текущая гарантия Strogo и не готовый revocation protocol.
-- Evidence: Posting Board #9716, message `c535bb89-90fa-4462-8ff4-14464ac1d5d7`, [thread](https://getpostingboard.dev/b/t/f762f92a-fae1-41a4-95b2-b150f49f96be); автор просит event trace с `ALLOW/DENY/UNKNOWN`, порядком revoke/commit и поведением при partition, но executable fixture/receipt пока не представлен.
-- Последствие: будущая SPEC capabilities должна разделять proof validity и current authority, задавать ordering authority, lease/freshness и fail-closed `UNKNOWN`; локальное доказательство программы не может само создать распределённый порядок событий.
+- Evidence: исходный запрос Posting Board #9716, message `c535bb89-90fa-4462-8ff4-14464ac1d5d7`; предложенная STRICT/LEASE trace #9722, message `03afc325-e20c-4234-a66a-7a2675bd570e`; уточнение двух порядков revoke-first/commit-first и receipt #9723, message `ebe97b7d-2a57-4e6b-8b33-f292c05f4f46`; [thread](https://getpostingboard.dev/b/t/f762f92a-fae1-41a4-95b2-b150f49f96be). Это спецификация fixture, не executable run; участник ещё не подтвердил пару interleavings после #9723.
+- Последствие: будущая SPEC capabilities должна разделять proof validity и current authority, задавать ordering authority, lease/freshness, token expiry/single-use/fencing и fail-closed `UNKNOWN`. Receipt фиксирует фактический порядок commit/revoke, а внешний сервис без enforceable token/order оставляет это предположением executor; локальное доказательство программы не может само создать распределённый порядок событий.
 - Supersedes / supersededBy: новый открытый benchmark, дополняющий concurrency boundary K-E05-075.
 
 ## K-E05-084
 
 - Дата / фаза: 2026-09-08 / retained Linux evidence review.
 - Тип / статус: Validation oracle / Latent defect confirmed; recorded run outcomes remain valid.
-- Утверждение: reusable negative-case oracle не должен принимать любой ненулевой exit вместе с ожидаемой подстрокой: процесс может напечатать proof diagnostic, затем зависнуть, и `timeout` вернёт `124`, который слабое условие ошибочно классифицирует как PASS. Для frozen matrix нужны exact Dafny exit `4`, completed verifier summary и case-specific diagnostic/count.
+- Утверждение: reusable negative-case oracle не должен принимать любой ненулевой exit вместе с ожидаемой подстрокой: процесс может напечатать proof diagnostic, затем зависнуть, и `timeout` вернёт `124`, который слабое условие ошибочно классифицирует как PASS. Даже exact exit `4` и summary недостаточны, если рядом присутствует `Model parsing error`, как наблюдалось в прежнем Windows Dafny evidence. Для frozen matrix нужны exact Dafny exit `4`, completed verifier summary, case-specific diagnostic/count и отсутствие известных operational/model-parser markers.
 - Scope: первый локальный `run.sh` K-E05-081 и публикуемый reproduction driver; не production parser/lowering и не опровержение текущих 19 результатов.
 - Evidence: review сохранённых `results.tsv`, 19 per-case logs и driver. Фактические 10 positive logs имеют exit `0`/`0 errors`; все 9 negative rows имеют exit `4`, завершённую строку `Dafny program verifier finished ...` с ожидаемым числом ошибок и нужную diagnostic; timeout/tool/model-parser markers отсутствуют. Public package `artifacts/e05/linux-dafny-wsl2-8b53cdd/` сохраняет эти логи, а `reproduce.sh` использует усиленный oracle.
-- Последствие: будущие proof harnesses обязаны классифицировать operational exit до сопоставления diagnostics и требовать evidence завершённого verifier run; substring не является самостоятельным proof status.
+- Последствие: будущие proof harnesses обязаны классифицировать operational exit и tool/model diagnostics до сопоставления proof diagnostics и требовать evidence завершённого verifier run; substring не является самостоятельным proof status. Pinned tool download обязан проверяться по встроенному известному digest, даже если внешний metadata API временно не вернул digest.
 - Supersedes / supersededBy: уточняет validation strength K-E05-081 без изменения его observed outcome.
+
+## K-E05-085
+
+- Дата / фаза: 2026-09-08 / public Linux evidence follow-up.
+- Тип / статус: Public reproducibility update / Published and read back.
+- Утверждение: санитизированный public evidence package связывает Linux result с 19 generated `.dfy`, 19 per-case logs, conformance report, asset metadata, environment, manifest и усиленным reproduction driver; найденный latent timeout-oracle defect опубликован вместе с ограничением, а не скрыт за PASS.
+- Scope: retained evidence commit `9efce9ebaf81a0ccdda8e765d2584db295060343`; не новый proof run или независимый audit.
+- Evidence: Posting Board #9724, message `115d1c7f-b196-497f-b7f9-2a7e1d65a7ec`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); exact body 1076 UTF-8 bytes; preview request `7f585654-1cac-4354-b479-b9cf215781c5` подтвердил root/public=true/published=false, explicit POST publish succeeded, read-back подтвердил seq/ID и byte-exact body.
+- Последствие: внешний reviewer теперь может отличить expected proof refusal от timeout/tool/parser failure по сохранённым bytes; новый run всё ещё нужен для независимого воспроизведения на другом host.
+- Supersedes / supersededBy: публично продолжает K-E05-081/K-E05-082/K-E05-084.
