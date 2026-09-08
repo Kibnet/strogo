@@ -40,9 +40,14 @@ public static class ModuleApi
         if (syntax.Values > MaximumValues)
             return RefusalJson("TransportValueLimitExceeded", "$", [("actual", syntax.Values.ToString(CultureInfo.InvariantCulture)), ("max", MaximumValues.ToString(CultureInfo.InvariantCulture))]);
 
-        using var document = JsonDocument.Parse(utf8, new JsonDocumentOptions { AllowTrailingCommas = false, CommentHandling = JsonCommentHandling.Disallow, MaxDepth = MaximumInputBytes });
+        JsonDocument document;
+        try { document = JsonDocument.Parse(utf8, new JsonDocumentOptions { AllowTrailingCommas = false, CommentHandling = JsonCommentHandling.Disallow, MaxDepth = MaximumInputBytes }); }
+        catch (JsonException) { return RefusalJson("MalformedJson", "$", []); }
+        using (document)
+        {
         var findings = new List<Finding>();
-        ValidateRequest(document.RootElement, findings);
+        try { ValidateRequest(document.RootElement, findings); }
+        catch (InvalidOperationException) { return RefusalJson("MalformedJson", "$", []); }
         if (findings.Count > 0)
         {
             var finding = findings.OrderBy(item => Array.IndexOf(RefusalPriority, item.Code)).ThenBy(item => item.Locus, StringComparer.Ordinal).First();
@@ -56,6 +61,7 @@ public static class ModuleApi
         var arguments = root.GetProperty("arguments").EnumerateArray().Select(BuildWireValue).ToArray();
         var outcome = PortableWrapper.__default.Invoke(DafnyText(functionId), Dafny.Sequence<PortableWrapper._IWireValue>.FromArray(arguments));
         return OutcomeJson(outcome);
+        }
     }
 
     private static bool HasOnlyUnicodeScalars(string value)
@@ -81,6 +87,7 @@ public static class ModuleApi
         {
             while (reader.Read())
             {
+                if (reader.TokenType is JsonTokenType.String or JsonTokenType.PropertyName) _ = reader.GetString();
                 if (reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray or JsonTokenType.String or JsonTokenType.Number or JsonTokenType.True or JsonTokenType.False or JsonTokenType.Null)
                 {
                     if (reader.TokenType != JsonTokenType.PropertyName)
@@ -92,7 +99,7 @@ public static class ModuleApi
             }
             return new(values == 0, depth, values);
         }
-        catch (JsonException)
+        catch (Exception exception) when (exception is JsonException or InvalidOperationException)
         {
             return new(true, depth, values);
         }

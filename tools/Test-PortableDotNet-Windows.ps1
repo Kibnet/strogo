@@ -26,7 +26,7 @@ $output = & $DotNetPath run --project (Join-Path $consumer "Consumer.csproj") -c
 $exitCode = $LASTEXITCODE
 [IO.File]::WriteAllLines((Join-Path $run "consumer-windows.log"), [string[]]$output, [Text.UTF8Encoding]::new($false))
 if ($exitCode -ne 0) { throw "consumer exit $exitCode`n$($output -join "`n")" }
-if ($output -notcontains "PASS standalone C# consumer cases=8 transport=24") { throw "consumer PASS marker unavailable" }
+if ($output -notcontains "PASS standalone C# consumer cases=8 transport=24 additional=1") { throw "consumer PASS marker unavailable" }
 
 $report = [ordered]@{
     schemaVersion = "strogo.dotnet-platform-run.v0.1"
@@ -42,4 +42,4 @@ $report = [ordered]@{
     repositoryDirty = [bool](git -C $repo status --porcelain)
 }
 [IO.File]::WriteAllText((Join-Path $run "report.json"), (($report | ConvertTo-Json -Compress) + "`n"), [Text.UTF8Encoding]::new($false))
-Write-Output "PASS dotnet-managed windows artifact=$($report.artifactDigest) consumer=8 transport=24"
+Write-Output "PASS dotnet-managed windows artifact=$($report.artifactDigest) consumer=8 transport=24 additional=1"

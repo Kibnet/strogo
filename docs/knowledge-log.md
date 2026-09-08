@@ -1210,3 +1210,13 @@
 - Evidence: `targets/dotnet-managed-v1/**`, `tools/Build-PortableDotNet.sh`, `tools/Test-PortableDotNet-Windows.ps1`, `tests/fixtures/portability-consumers/csharp/**`; ignored runs `dotnet-build-3` и `windows-run-1`.
 - Последствие: гипотеза о переносимости одной managed DLL получила первый фактический положительный результат на двух ОС; checkpoint нужно закоммитить, повторить на exact revision и упаковать filtered evidence до расширения claim.
 - Supersedes / supersededBy: начинает E06 plan step 3 и развивает feasibility K-E06-018.
+
+## K-E06-024
+
+- Дата / фаза: 2026-09-08 / escaped-surrogate adversarial review.
+- Тип / статус: Totality hypothesis / Refuted on `33c106b`; fixed and reproduced on working tree.
+- Утверждение: проверка surrogate code units только в исходном target string не покрывает ASCII escape `"\\uD800"`: `Utf8JsonReader` может принять токен, после чего декодирование через `GetString()` бросает `InvalidOperationException`. Публичный `ModuleApi.Invoke` на `33c106b` поэтому не был total для всего bounded JSON input. Исправление заставляет syntax pass декодировать каждое string/property token и переводит incomplete decoded UTF-16 в `MalformedJson`; document validation имеет такой же fail-closed guard.
+- Scope: C# adapter JSON decoding; verified logical wrapper и raw lone-surrogate priority `InvalidUnicode` не меняются.
+- Evidence: внешний source finding + независимое BCL reproduction; новый case `escaped-lone-surrogate` выполнен сверх frozen 24 cases в Linux и Windows на одной working-tree DLL, оба PASS `additional=1`.
+- Последствие: evidence commit `33c106b` не публикуется как successful profile checkpoint; после fix commit нужен новый exact clean build/run. Для Java adapter тот же escaped-surrogate case обязателен заранее.
+- Supersedes / supersededBy: ограничивает K-E06-023 и добавляет различающий test к K-E06-005.

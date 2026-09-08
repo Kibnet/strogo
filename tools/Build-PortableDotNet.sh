@@ -64,7 +64,7 @@ mkdir -p "$consumer"
 cp "$consumer_project" "$consumer/Consumer.csproj"
 cp "$consumer_program" "$consumer/Program.cs"
 "$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:PortableAssemblyPath="$run_dir/artifact/strogo.portable.v01.dll" >"$run_dir/logs/consumer-linux.log" 2>&1
-grep -Fxq 'PASS standalone C# consumer cases=8 transport=24' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
+grep -Fxq 'PASS standalone C# consumer cases=8 transport=24 additional=1' "$run_dir/logs/consumer-linux.log" || { cat "$run_dir/logs/consumer-linux.log" >&2; exit 72; }
 
 python3 - "$run_dir" "$repo_root" "$source_file" "$adapter" "$project" "$dafny" "$dotnet" <<'PY'
 import hashlib, json, pathlib, platform, subprocess, sys
@@ -91,4 +91,4 @@ report={
 (run/'report.json').write_text(json.dumps(report,ensure_ascii=True,separators=(',',':'))+'\n',encoding='utf-8',newline='\n')
 PY
 
-echo 'PASS dotnet-managed build translations=byte-equal artifacts=byte-equal consumer=8 transport=24'
+echo 'PASS dotnet-managed build translations=byte-equal artifacts=byte-equal consumer=8 transport=24 additional=1'

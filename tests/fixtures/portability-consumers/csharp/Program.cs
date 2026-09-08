@@ -55,7 +55,13 @@ foreach (var item in requests)
     if (actual != item.Value.Code) throw new InvalidOperationException($"{item.Key}: expected {item.Value.Code}, actual {output}");
 }
 
-Console.WriteLine($"PASS standalone C# consumer cases={cases.Length} transport={requests.Count}");
+var escapedSurrogate = "{\"schema\":\"strogo.invoke.v0.1\",\"functionId\":\"\\uD800\",\"arguments\":[]}";
+using (var escapedResult = System.Text.Json.JsonDocument.Parse(ModuleApi.Invoke(escapedSurrogate)))
+{
+    if (escapedResult.RootElement.GetProperty("code").GetString() != "MalformedJson") throw new InvalidOperationException("escaped-lone-surrogate was not rejected as malformed JSON");
+}
+
+Console.WriteLine($"PASS standalone C# consumer cases={cases.Length} transport={requests.Count} additional=1");
 
 static string Request(string functionId, string argument) => $"{{\"schema\":\"strogo.invoke.v0.1\",\"functionId\":\"{functionId}\",\"arguments\":[{argument}]}}";
 static string RequestWithArguments(IEnumerable<string> arguments) => $"{{\"schema\":\"strogo.invoke.v0.1\",\"functionId\":\"increment\",\"arguments\":[{string.Join(',', arguments)}]}}";
