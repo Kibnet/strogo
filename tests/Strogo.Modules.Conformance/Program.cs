@@ -68,6 +68,9 @@ if (dafnyOwnerGuardedTrueOutOption >= 0 && dafnyOwnerGuardedTrueOutOption + 1 >=
 var dafnyOwnerAppendPartialOutOption = Array.IndexOf(args, "--dafny-owner-append-partial-out");
 if (dafnyOwnerAppendPartialOutOption >= 0 && dafnyOwnerAppendPartialOutOption + 1 >= args.Length)
     throw new ArgumentException("--dafny-owner-append-partial-out requires a path");
+var foldOutputOption = Array.IndexOf(args, "--fold-output");
+if (foldOutputOption >= 0 && foldOutputOption + 1 >= args.Length)
+    throw new ArgumentException("--fold-output requires a path");
 
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
@@ -91,6 +94,9 @@ var dafnyOwnerStrictOrOutPath = dafnyOwnerStrictOrOutOption >= 0 ? Path.GetFullP
 var dafnyOwnerGuardedFalseOutPath = dafnyOwnerGuardedFalseOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerGuardedFalseOutOption + 1], root) : null;
 var dafnyOwnerGuardedTrueOutPath = dafnyOwnerGuardedTrueOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerGuardedTrueOutOption + 1], root) : null;
 var dafnyOwnerAppendPartialOutPath = dafnyOwnerAppendPartialOutOption >= 0 ? Path.GetFullPath(args[dafnyOwnerAppendPartialOutOption + 1], root) : null;
+var foldOutputPath = foldOutputOption >= 0
+    ? Path.GetFullPath(args[foldOutputOption + 1], root)
+    : Path.Combine(root, "artifacts", "local-validation", "e05", "fold-discriminator");
 var reportDir = Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("Report path has no directory");
 Directory.CreateDirectory(reportDir);
 var reports = new List<object>();
@@ -962,8 +968,34 @@ try
     Check(foldEmpty.Value is ModuleI64 { Value: 10 } && foldEmpty.Steps == 1, "empty fold returns the initial accumulator without executing step");
     Check(foldBiased.Value is ModuleI64 { Value: 22 } && foldBiased.Steps == 10, "fold binds ordered explicit environment values on every step");
     Check(foldItems.Items.Select(item => ((ModuleI64)item).Value).SequenceEqual([1L, 2L, 3L]), "fold leaves its immutable sequence input unchanged");
+    Check(ModulesReferenceEvaluator.Invoke(foldIr, "sum", [foldItems, new ModuleI64(10)], new ModuleEvaluationLimits { MaxSteps = 7 }).Value is ModuleI64 { Value: 16 }, "fold accepts an exact inclusive seven-step budget");
+    Check(ModulesReferenceEvaluator.Invoke(foldIr, "sum", [emptyFoldItems, new ModuleI64(10)], new ModuleEvaluationLimits { MaxSteps = 1 }).Value is ModuleI64 { Value: 10 }, "empty fold consumes exactly its dispatch step");
     var foldLimit = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(foldIr, "sum", [foldItems, new ModuleI64(10)], new ModuleEvaluationLimits { MaxSteps = 5 }));
     Check(foldLimit.Code == "EvaluationStepLimitExceeded" && foldLimit.EntityId == "function/sum/body/node/result/iteration/2", "fold shares the evaluation budget and refuses before a partial iteration");
+    var foldOneBelow = CaptureEvaluationReject(() => ModulesReferenceEvaluator.Invoke(foldIr, "sum", [foldItems, new ModuleI64(10)], new ModuleEvaluationLimits { MaxSteps = 6 }));
+    Check(foldOneBelow.Code == "EvaluationStepLimitExceeded" && foldOneBelow.EntityId == "function/sum/body/node/result/step/2/node/next", "fold rejects one below exact cost at the last step node");
+
+    JsonObject FoldWithCapacity(int capacity)
+    {
+        var clone = JsonNode.Parse(foldBytes)!.AsObject();
+        void Rewrite(JsonNode? value)
+        {
+            if (value is JsonObject obj)
+            {
+                if (obj["capacity"] is JsonValue) obj["capacity"] = capacity.ToString(CultureInfo.InvariantCulture);
+                foreach (var property in obj.ToArray()) Rewrite(property.Value);
+            }
+            else if (value is JsonArray array)
+                foreach (var item in array) Rewrite(item);
+        }
+        Rewrite(clone);
+        return clone;
+    }
+    var capacityZeroFold = ModulesCompiler.Compile(ModulesParser.ParseModule(FoldWithCapacity(0).ToJsonString()));
+    Check(ModulesReferenceEvaluator.Invoke(capacityZeroFold, "sum", [new ModuleSequence(new TypeRef("I64"), 0, []), new ModuleI64(0)]).Value is ModuleI64 { Value: 0 }, "fold accepts capacity zero and executes no step");
+    var capacityOneFold = ModulesCompiler.Compile(ModulesParser.ParseModule(FoldWithCapacity(1).ToJsonString()));
+    Check(ModulesReferenceEvaluator.Invoke(capacityOneFold, "sum", [new ModuleSequence(new TypeRef("I64"), 1, [new ModuleI64(long.MinValue)]), new ModuleI64(0)]).Value is ModuleI64 { Value: long.MinValue }, "fold preserves I64.MIN at capacity one");
+    Check(ModulesReferenceEvaluator.Invoke(capacityOneFold, "sum", [new ModuleSequence(new TypeRef("I64"), 1, [new ModuleI64(long.MaxValue)]), new ModuleI64(0)]).Value is ModuleI64 { Value: long.MaxValue }, "fold preserves I64.MAX at capacity one");
 
     JsonObject MutateFold(Action<JsonObject, JsonObject, JsonObject> mutation)
     {
@@ -995,6 +1027,30 @@ try
     Check(RejectFold("fold-prefix-type", (_, _, fold) => fold["invariant"]!["args"]![0]!["args"]![1]!["args"]![1]!["type"] = "Bool").Code == "TypeMismatch", "prefix sum length must be I64");
     var quantifiedFold = MutateFold((_, _, fold) => fold["invariant"] = JsonNode.Parse("{\"op\":\"forall.sequence\",\"type\":\"Bool\",\"binderId\":\"i\",\"sequence\":{\"op\":\"fold.sequence\",\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"4\"}},\"body\":{\"op\":\"eq\",\"type\":\"Bool\",\"args\":[{\"op\":\"proof.bound\",\"type\":\"I64\",\"binderId\":\"i\"},{\"op\":\"proof.bound\",\"type\":\"I64\",\"binderId\":\"i\"}]}}")).ToJsonString();
     Check(ModulesParser.ParseModule(quantifiedFold).Source.Functions.Length == 2, "fold proof supports one bounded sequence quantifier and scoped binder");
+    JsonNode ExpensiveProofLeaf() => JsonNode.Parse("{\"op\":\"math.le\",\"type\":\"Bool\",\"args\":[{\"op\":\"seq.sum_i64\",\"type\":\"MathInt\",\"args\":[{\"op\":\"fold.sequence\",\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"256\"}}]},{\"op\":\"math.const\",\"type\":\"MathInt\",\"value\":\"9223372036854775807\"}]}")!;
+    JsonNode ExpensiveProofTree(int leaves)
+    {
+        if (leaves == 1) return ExpensiveProofLeaf();
+        var left = leaves / 2;
+        return new JsonObject
+        {
+            ["op"] = "bool.and",
+            ["type"] = "Bool",
+            ["args"] = new JsonArray(ExpensiveProofTree(left), ExpensiveProofTree(leaves - left))
+        };
+    }
+    var excessiveProofFold = FoldWithCapacity(256);
+    excessiveProofFold["functions"]![0]!["body"]!["nodes"]![0]!["invariant"] = new JsonObject
+    {
+        ["op"] = "forall.sequence",
+        ["type"] = "Bool",
+        ["binderId"] = "i",
+        ["sequence"] = JsonNode.Parse("{\"op\":\"fold.sequence\",\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"256\"}}"),
+        ["body"] = ExpensiveProofTree(8)
+    };
+    var excessiveProofFailure = CaptureParserReject(excessiveProofFold.ToJsonString());
+    var excessiveProofDetails = JsonNode.Parse(excessiveProofFailure.DetailsJson!)!.AsObject();
+    Check(excessiveProofFailure.Code == "ProofWorstCaseCostExceeded" && excessiveProofDetails["actual"]!.GetValue<string>() == ">262144" && excessiveProofDetails["max"]!.GetValue<string>() == "262144", "candidate parser saturates proof cost above the 262144 hard maximum");
     reports.Add(new { kind = "fold", fixture = "fold-sum-valid.json", sourceDigest = foldParsed.SourceDigest, irDigest = ModulesCodec.IrDigest(foldIr.CanonicalBytes), semanticChecks = 17 });
 
     var ownerFoldBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-fold-sum-valid-v0.4.json"));
@@ -1016,6 +1072,29 @@ try
             == newCanonicalOwner.RootElement.GetProperty("entryContracts")[0].GetProperty("requires").GetRawText(), "v0.3 requires remains byte-identical as a canonical v0.4 subtree");
     var migratedV04Binding = OwnerContractBinderV04.Bind(ir, migratedV04);
     Check(OwnerContractReplayV04.Replay(migratedV04Binding).Status == "Pass" && migratedV04Binding.Entries[0].CandidateFold is null, "migrated non-fold v0.3 owner behavior remains replayable in v0.4");
+    var allLegacyOpsBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-v03-proof-all-ops.json"));
+    var allLegacyOps = OwnerBundleParser.Parse(allLegacyOpsBytes);
+    var allLegacyOpsMigrated = OwnerBundleV04Parser.Parse(OwnerBundleMigrator.MigrateV03ToV04(allLegacyOpsBytes));
+    using (var oldAllOpsDocument = JsonDocument.Parse(allLegacyOps.CanonicalBytes))
+    using (var newAllOpsDocument = JsonDocument.Parse(allLegacyOpsMigrated.CanonicalBytes))
+    {
+        var oldRequires = oldAllOpsDocument.RootElement.GetProperty("entryContracts")[0].GetProperty("requires");
+        var newRequires = newAllOpsDocument.RootElement.GetProperty("entryContracts")[0].GetProperty("requires");
+        Check(oldRequires.GetRawText() == newRequires.GetRawText(), "v0.3 to v0.4 migration preserves the full inherited proof expression subtree byte-for-byte");
+        var inheritedOps = new HashSet<string>(StringComparer.Ordinal);
+        void CollectOps(JsonElement value)
+        {
+            if (value.ValueKind == JsonValueKind.Object)
+            {
+                if (value.TryGetProperty("op", out var op)) inheritedOps.Add(op.GetString()!);
+                foreach (var property in value.EnumerateObject()) CollectOps(property.Value);
+            }
+            else if (value.ValueKind == JsonValueKind.Array)
+                foreach (var item in value.EnumerateArray()) CollectOps(item);
+        }
+        CollectOps(oldRequires);
+        Check(inheritedOps.IsSupersetOf(["param", "i64.const", "bool.const", "i64.add", "i64.sub", "i64.le", "eq", "bool.not", "bool.and", "bool.or", "if", "record.make", "record.get", "seq.empty", "seq.length", "seq.get", "seq.append"]), "migration golden exercises every inherited v0.3 proof opcode");
+    }
 
     var foldBinding = OwnerContractBinderV04.Bind(foldIr, ownerFold);
     Check(foldBinding.Entries.Length == 2 && foldBinding.Entries.All(entry => entry.CandidateFold?.Fold is not null), "owner binder pairs each candidate fold with one owner fold");
@@ -1033,6 +1112,12 @@ try
          new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "4")]);
     var shortEnvironment = new Dictionary<string, ModuleValue> { ["items"] = new ModuleSequence(new TypeRef("I64"), 4, [new ModuleI64(1)]) };
     Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(invalidPrefix, shortEnvironment, Array.Empty<TypeDecl>(), 16)).Code == "ProofPrefixLengthOutOfRange", "proof evaluator rejects prefix lengths beyond the actual sequence");
+    ProofExpression PrefixAt(string length) => new("seq.prefix_sum_i64", new TypeRef("MathInt"),
+        [new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 4), ImmutableArray<ProofExpression>.Empty, ReferenceId: "items"),
+         new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: length)]);
+    Check(OwnerProofEvaluator.Evaluate(PrefixAt("0"), shortEnvironment, Array.Empty<TypeDecl>(), 16) is ProofMathInt { Value: var prefixZero } && prefixZero.IsZero, "prefix sum accepts zero length");
+    Check(OwnerProofEvaluator.Evaluate(PrefixAt("1"), shortEnvironment, Array.Empty<TypeDecl>(), 16) is ProofMathInt { Value: var prefixOne } && prefixOne == 1, "prefix sum accepts exact sequence length");
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(PrefixAt("-1"), shortEnvironment, Array.Empty<TypeDecl>(), 16)).Code == "ProofPrefixLengthOutOfRange", "prefix sum rejects negative length");
     var emptySequenceProof = new ProofExpression("seq.empty", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1), ImmutableArray<ProofExpression>.Empty, ElementType: new TypeRef("I64"), Capacity: 1);
     var outOfRangeItemProof = new ProofExpression("seq.get", new TypeRef("I64"),
         [emptySequenceProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")]);
@@ -1055,6 +1140,28 @@ try
     var strictAppend = new ProofExpression("seq.append", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1),
         [new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1), ImmutableArray<ProofExpression>.Empty, ReferenceId: "full"), outOfRangeItemProof]);
     Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(strictAppend, fullSequenceEnvironment, Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "sequence append evaluates its item before checking capacity");
+    var partialBoolean = new ProofExpression("eq", new TypeRef("Bool"), [outOfRangeItemProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")]);
+    var falseProof = new ProofExpression("bool.const", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty, BoolValue: false);
+    var trueProof = new ProofExpression("bool.const", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty, BoolValue: true);
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(new ProofExpression("bool.and", new TypeRef("Bool"), [falseProof, partialBoolean]), new Dictionary<string, ModuleValue>(), Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "false and partial remains partial in proof evaluation");
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(new ProofExpression("bool.or", new TypeRef("Bool"), [trueProof, partialBoolean]), new Dictionary<string, ModuleValue>(), Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "true or partial remains partial in proof evaluation");
+    Check(OwnerProofEvaluator.EvaluateBoolean(new ProofExpression("if", new TypeRef("Bool"), [falseProof, partialBoolean, trueProof]), new Dictionary<string, ModuleValue>(), Array.Empty<TypeDecl>(), 64), "proof if evaluates only its selected branch");
+    var emptyForAll = new ProofExpression("forall.sequence", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty, BinderId: "i", Sequence: emptySequenceProof, Body: partialBoolean);
+    Check(OwnerProofEvaluator.EvaluateBoolean(emptyForAll, new Dictionary<string, ModuleValue>(), Array.Empty<TypeDecl>(), 64), "empty forall sequence skips its body");
+    ProofExpression BalancedTrue(int leaves)
+    {
+        if (leaves == 1) return trueProof;
+        var left = leaves / 2;
+        return new ProofExpression("bool.and", new TypeRef("Bool"), [BalancedTrue(left), BalancedTrue(leaves - left)]);
+    }
+    var costlyProof = new ProofExpression("forall.sequence", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty,
+        BinderId: "i",
+        Sequence: new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 256), ImmutableArray<ProofExpression>.Empty, ReferenceId: "items"),
+        Body: BalancedTrue(390));
+    var fullProofSequence = new ModuleSequence(new TypeRef("I64"), 256, Enumerable.Range(0, 256).Select(_ => (ModuleValue)new ModuleI64(1)).ToArray());
+    var fullProofEnvironment = new Dictionary<string, ModuleValue> { ["items"] = fullProofSequence };
+    Check(OwnerProofEvaluator.EvaluateBoolean(costlyProof, fullProofEnvironment, Array.Empty<TypeDecl>(), 200000), "first 200000-step proof witness fits its independent budget");
+    Check(OwnerProofEvaluator.EvaluateBoolean(costlyProof, fullProofEnvironment, Array.Empty<TypeDecl>(), 200000), "second 200000-step proof witness receives a reset counter");
 
     JsonObject MutateOwnerFold(Action<JsonObject> mutation)
     {
@@ -1063,11 +1170,125 @@ try
         return node;
     }
     Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["limits"]!["maxProofEvaluationSteps"] = "1").ToJsonString())).Code == "ProofWorstCaseCostExceeded", "owner parser rejects a proof whose static worst-case cost exceeds the approved budget");
+    Check(OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["limits"]!["maxProofEvaluationSteps"] = "35").ToJsonString()).Limits.MaxProofEvaluationSteps == 35, "owner parser accepts the exact worst-case proof cost");
+    var proofCostOneBelow = CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["limits"]!["maxProofEvaluationSteps"] = "34").ToJsonString()));
+    Check(proofCostOneBelow.Code == "ProofWorstCaseCostExceeded" && proofCostOneBelow.DetailsJson?.Contains("\"actual\":\"35\"", StringComparison.Ordinal) == true && proofCostOneBelow.DetailsJson.Contains("\"max\":\"34\"", StringComparison.Ordinal), "proof cost one below returns exact canonical actual and max");
     Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["entryContracts"]![0]!["requires"] = JsonNode.Parse("{\"op\":\"fold.accumulator\",\"type\":\"I64\"}")).ToJsonString())).Code == "UnsupportedProofOpcode", "owner requires cannot reference candidate fold roles");
     Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["models"]![0]!["body"]!["step"]!["body"]!["op"] = "fold").ToJsonString())).Code == "NestedFoldNotSupported", "owner model step cannot contain a nested fold");
     Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["models"]![0]!["body"]!["step"]!["parameters"]![1]!["type"] = "Bool").ToJsonString())).Code == "ContractTypeMismatch", "owner fold step positional types are exact");
     Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["types"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"MathInt\",\"fields\":[]}"))).ToJsonString())).Code == "ReservedTypeId", "MathInt cannot be shadowed by an executable record type");
     reports.Add(new { kind = "owner-v0.4", fixture = "owner-fold-sum-valid-v0.4.json", ownerFold.BundleDigest, entries = foldBinding.Entries.Length, witnesses = foldReplay.CheckedWitnesses });
+
+    var allocationOwner = OwnerBundleV04Parser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-fold-allocation-v0.4.json")));
+    var allocationOwnerRoot = JsonNode.Parse(allocationOwner.CanonicalBytes)!.AsObject();
+    var shuffledAllocationOwnerRoot = new JsonObject();
+    foreach (var property in allocationOwnerRoot.Reverse()) shuffledAllocationOwnerRoot[property.Key] = property.Value?.DeepClone();
+    Check(OwnerBundleV04Parser.Parse(shuffledAllocationOwnerRoot.ToJsonString()).BundleDigest == allocationOwner.BundleDigest, "owner v0.4 digest ignores set-like object property order");
+    var allocationPrimary = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "fold-allocation-primary.json"))));
+    var allocationAlternative = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, "fold-allocation-alternative.json"))));
+    Check(allocationPrimary.SourceDigest != allocationAlternative.SourceDigest, "alternative allocation candidate has a distinct source identity");
+    var allocationPrimaryBinding = OwnerContractBinderV04.Bind(allocationPrimary, allocationOwner);
+    var allocationAlternativeBinding = OwnerContractBinderV04.Bind(allocationAlternative, allocationOwner);
+    Check(OwnerContractReplayV04.Replay(allocationPrimaryBinding).Status == "Pass", "primary allocation candidate matches every owner witness");
+    Check(OwnerContractReplayV04.Replay(allocationAlternativeBinding).Status == "Pass", "alternative allocation candidate matches every owner witness");
+    var allocationRequests = new ModuleSequence(new TypeRef("I64"), 256, [new ModuleI64(4), new ModuleI64(3), new ModuleI64(1)]);
+    foreach (var candidate in new[] { allocationPrimary, allocationAlternative })
+    {
+        var result = ModulesReferenceEvaluator.Invoke(candidate, "allocate", [allocationRequests, new ModuleI64(5)]).Value as ModuleRecord;
+        Check(result?.Fields["remaining"] is ModuleI64 { Value: 0 }
+            && result.Fields["allocations"] is ModuleSequence { Items: var items }
+            && items.Cast<ModuleI64>().Select(item => item.Value).SequenceEqual([4L, 0L, 1L]), "allocation fold preserves exact left-to-right request semantics");
+    }
+    var allocationPrimaryLowering = ModulesDafnyLowerer.Lower(allocationPrimary, allocationOwner);
+    var allocationAlternativeLowering = ModulesDafnyLowerer.Lower(allocationAlternative, allocationOwner);
+    Check(allocationPrimaryLowering.SourceDigest == ModulesDafnyLowerer.Lower(allocationPrimary, allocationOwner).SourceDigest, "allocation lowering is byte-deterministic for one candidate");
+    Check(allocationPrimaryLowering.ProofIdentity != allocationAlternativeLowering.ProofIdentity, "allocation proof identity commits to the alternative step DAG");
+    Directory.CreateDirectory(foldOutputPath);
+    File.WriteAllBytes(Path.Combine(foldOutputPath, "allocation-primary.dfy"), allocationPrimaryLowering.SourceBytes);
+    File.WriteAllBytes(Path.Combine(foldOutputPath, "allocation-alternative.dfy"), allocationAlternativeLowering.SourceBytes);
+    JsonObject MutateAllocation(Action<JsonObject, JsonObject, JsonObject> mutation)
+    {
+        var rootNode = JsonNode.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "fold-allocation-primary.json")))!.AsObject();
+        var body = rootNode["functions"]![0]!["body"]!.AsObject();
+        var foldNode = body["nodes"]!.AsArray().Single(item => item!["id"]!.GetValue<string>() == "result")!.AsObject();
+        mutation(rootNode, body, foldNode);
+        return rootNode;
+    }
+    var wrongBranchAllocation = MutateAllocation((_, _, foldNode) =>
+    {
+        var allocationNode = foldNode["stepRegion"]!["nodes"]!.AsArray().Single(item => item!["id"]!.GetValue<string>() == "allocation")!;
+        allocationNode["thenRegion"]!["result"] = "thenZero";
+    });
+    var wrongBranchIr = ModulesCompiler.Compile(ModulesParser.ParseModule(wrongBranchAllocation.ToJsonString()));
+    var wrongBranchReplay = OwnerContractReplayV04.Replay(OwnerContractBinderV04.Bind(wrongBranchIr, allocationOwner));
+    Check(wrongBranchReplay.Status == "Counterexample" && wrongBranchReplay.Counterexample?.WitnessId == "maximum-v1", "wrong allocation branch is rejected by the first canonical distinguishing owner witness");
+
+    var weakInvariantIr = ModulesCompiler.Compile(ModulesParser.ParseModule(MutateAllocation((_, _, foldNode) => foldNode["invariant"] = JsonNode.Parse("{\"op\":\"bool.const\",\"type\":\"Bool\",\"value\":true}")).ToJsonString()));
+    var weakInvariantLowering = ModulesDafnyLowerer.Lower(weakInvariantIr, allocationOwner);
+    Check(weakInvariantLowering.ProofIdentity != allocationPrimaryLowering.ProofIdentity, "proof identity changes with the allocation invariant subtree");
+    File.WriteAllBytes(Path.Combine(foldOutputPath, "allocation-weak-invariant.dfy"), weakInvariantLowering.SourceBytes);
+
+    ModuleIr InputMutation(int position) => ModulesCompiler.Compile(ModulesParser.ParseModule(MutateAllocation((_, body, foldNode) =>
+    {
+        if (position == 0)
+        {
+            foldNode["args"]![0] = "empty";
+            return;
+        }
+        body["nodes"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"outerZero\",\"op\":\"i64.const\",\"type\":\"I64\",\"args\":[],\"value\":\"0\"}"));
+        if (position == 1)
+        {
+            var initialNode = body["nodes"]!.AsArray().Single(item => item!["id"]!.GetValue<string>() == "initial")!;
+            initialNode["args"]![1] = "outerZero";
+        }
+        else
+            foldNode["args"]![2] = "outerZero";
+    }).ToJsonString()));
+    var inputMutationProofIdentities = new HashSet<string>(StringComparer.Ordinal);
+    for (var position = 0; position < 3; position++)
+    {
+        var mutationLowering = ModulesDafnyLowerer.Lower(InputMutation(position), allocationOwner);
+        inputMutationProofIdentities.Add(mutationLowering.ProofIdentity);
+        Check(mutationLowering.Obligations.Any(obligation => obligation.Id == $"input-equivalence-{position}" && obligation.EntityId.EndsWith($"/input-equivalence/{position}", StringComparison.Ordinal)), $"input mutation {position} has its exact equivalence obligation");
+        File.WriteAllBytes(Path.Combine(foldOutputPath, $"allocation-input-{position}-mutation.dfy"), mutationLowering.SourceBytes);
+        File.WriteAllBytes(Path.Combine(foldOutputPath, $"allocation-input-{position}-mutation.obligations.json"), JsonSerializer.SerializeToUtf8Bytes(new { mutationLowering.ProofIdentity, mutationLowering.Obligations }));
+    }
+    Check(inputMutationProofIdentities.Count == 3 && !inputMutationProofIdentities.Contains(allocationPrimaryLowering.ProofIdentity), "each ordered fold argument mutation changes proof identity");
+    reports.Add(new { kind = "fold-allocation", ownerDigest = allocationOwner.BundleDigest, primarySourceDigest = allocationPrimaryLowering.SourceDigest, alternativeSourceDigest = allocationAlternativeLowering.SourceDigest });
+
+    var discriminatorOwner = OwnerBundleV04Parser.Parse(File.ReadAllBytes(Path.Combine(fixtureDir, "owner-fold-discriminator-v0.4.json")));
+    var discriminatorModules = new Dictionary<string, ModuleIr>(StringComparer.Ordinal);
+    var discriminatorLowerings = new Dictionary<string, DafnyFoldLoweringResult>(StringComparer.Ordinal);
+    var discriminatorOutput = foldOutputPath;
+    Directory.CreateDirectory(discriminatorOutput);
+    foreach (var variant in new[] { "a", "b", "c" })
+    {
+        var module = ModulesCompiler.Compile(ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(fixtureDir, $"fold-discriminator-{variant}.json"))));
+        discriminatorModules[variant] = module;
+        discriminatorLowerings[variant] = ModulesDafnyLowerer.Lower(module, discriminatorOwner);
+        File.WriteAllBytes(Path.Combine(discriminatorOutput, $"candidate-{variant}.dfy"), discriminatorLowerings[variant].SourceBytes);
+        File.WriteAllBytes(Path.Combine(discriminatorOutput, $"candidate-{variant}.normalized.dfy"), discriminatorLowerings[variant].NormalizedSourceBytes);
+        var outcome = ModulesReferenceEvaluator.Invoke(module, "sum", [new ModuleSequence(new TypeRef("I64"), 4, [new ModuleI64(1), new ModuleI64(2), new ModuleI64(3)])]);
+        Check(outcome.Value is ModuleI64 { Value: 6 }, $"fold discriminator {variant} preserves the shared executable outcome");
+    }
+    Check(discriminatorModules.Values.Select(module => module.SourceDigest).Distinct(StringComparer.Ordinal).Count() == 3, "A/B/C candidate identity changes with the invariant subtree");
+    Check(discriminatorLowerings.Values.Select(lowering => lowering.NormalizedSourceDigest).Distinct(StringComparer.Ordinal).Count() == 1, "A/B/C generated Dafny is byte-identical after replacing invariant-dependent spans");
+    Check(discriminatorLowerings.Values.All(lowering => lowering.InvariantSpans.Length == 4), "each discriminator variant identifies every invariant-dependent generated line");
+    Check(discriminatorLowerings.Values.All(lowering => lowering.Obligations.Select(obligation => obligation.Id).ToHashSet(StringComparer.Ordinal).IsSupersetOf([
+        "input-equivalence-0", "input-equivalence-1", "owner-prefix-initial", "owner-prefix-preservation", "candidate-loop-invariant", "candidate-loop-preservation", "candidate-postcondition"])), "fold lowering publishes the stable obligation map");
+    Check(discriminatorLowerings.Values.Select(lowering => lowering.ProofIdentity).Distinct(StringComparer.Ordinal).Count() == 3, "proof identity commits to each candidate while sharing one owner bundle and toolchain");
+    foreach (var loweringPair in discriminatorLowerings)
+    {
+        File.WriteAllBytes(Path.Combine(discriminatorOutput, $"candidate-{loweringPair.Key}.obligations.json"), JsonSerializer.SerializeToUtf8Bytes(new { loweringPair.Value.ProofIdentity, loweringPair.Value.SourceDigest, loweringPair.Value.NormalizedSourceDigest, loweringPair.Value.InvariantSpans, loweringPair.Value.Obligations }));
+    }
+    File.WriteAllBytes(Path.Combine(discriminatorOutput, "manifest.json"), JsonSerializer.SerializeToUtf8Bytes(new
+    {
+        toolchainIdentity = ModulesDafnyLowerer.FoldToolchainIdentity,
+        toolchainDigest = ModulesDafnyLowerer.FoldToolchainDigest,
+        ownerDigest = discriminatorOwner.BundleDigest,
+        variants = discriminatorLowerings.OrderBy(item => item.Key).Select(item => new { variant = item.Key, item.Value.ProofIdentity, item.Value.SourceDigest, item.Value.NormalizedSourceDigest })
+    }));
+    reports.Add(new { kind = "fold-lowering", fixture = "fold-discriminator-a/b/c", toolchainDigest = ModulesDafnyLowerer.FoldToolchainDigest, ownerDigest = discriminatorOwner.BundleDigest, normalizedDigest = discriminatorLowerings["a"].NormalizedSourceDigest });
 
     var importedBranchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")))
         .Replace("\"imports\": []", "\"imports\": [{\"moduleId\":\"external.sample\",\"sourceDigest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"contractDigest\":\"1111111111111111111111111111111111111111111111111111111111111111\"}]", StringComparison.Ordinal);

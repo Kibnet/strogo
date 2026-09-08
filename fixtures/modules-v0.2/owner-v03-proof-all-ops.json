@@ -1,0 +1,444 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.3",
+  "bundleId": "owner.v03.all-proof-ops",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        {
+          "id": "count",
+          "type": "I64"
+        },
+        {
+          "id": "values",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "4"
+          }
+        }
+      ]
+    }
+  ],
+  "entryContracts": [
+    {
+      "id": "makeSummaryContract",
+      "functionRef": "makeSummary",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "Summary",
+      "requires": {
+        "op": "bool.and",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "bool.and",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "bool.and",
+                "type": "Bool",
+                "args": [
+                  {
+                    "op": "eq",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "i64.add",
+                        "type": "I64",
+                        "args": [
+                          {
+                            "op": "param",
+                            "type": "I64",
+                            "id": "x"
+                          },
+                          {
+                            "op": "i64.const",
+                            "type": "I64",
+                            "value": "1"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "i64.sub",
+                        "type": "I64",
+                        "args": [
+                          {
+                            "op": "i64.add",
+                            "type": "I64",
+                            "args": [
+                              {
+                                "op": "param",
+                                "type": "I64",
+                                "id": "x"
+                              },
+                              {
+                                "op": "i64.const",
+                                "type": "I64",
+                                "value": "2"
+                              }
+                            ]
+                          },
+                          {
+                            "op": "i64.const",
+                            "type": "I64",
+                            "value": "1"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "i64.le",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      },
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "x"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "bool.and",
+                "type": "Bool",
+                "args": [
+                  {
+                    "op": "eq",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "record.get",
+                        "type": "I64",
+                        "args": [
+                          {
+                            "op": "record.make",
+                            "type": "Summary",
+                            "args": [
+                              {
+                                "op": "i64.const",
+                                "type": "I64",
+                                "value": "1"
+                              },
+                              {
+                                "op": "seq.append",
+                                "type": {
+                                  "kind": "Seq",
+                                  "elementType": "I64",
+                                  "capacity": "4"
+                                },
+                                "args": [
+                                  {
+                                    "op": "seq.empty",
+                                    "type": {
+                                      "kind": "Seq",
+                                      "elementType": "I64",
+                                      "capacity": "4"
+                                    },
+                                    "args": [],
+                                    "elementType": "I64",
+                                    "capacity": "4"
+                                  },
+                                  {
+                                    "op": "param",
+                                    "type": "I64",
+                                    "id": "x"
+                                  }
+                                ]
+                              }
+                            ],
+                            "recordType": "Summary",
+                            "fieldIds": [
+                              "count",
+                              "values"
+                            ]
+                          }
+                        ],
+                        "fieldId": "count"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "eq",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "seq.get",
+                        "type": "I64",
+                        "args": [
+                          {
+                            "op": "seq.append",
+                            "type": {
+                              "kind": "Seq",
+                              "elementType": "I64",
+                              "capacity": "4"
+                            },
+                            "args": [
+                              {
+                                "op": "seq.empty",
+                                "type": {
+                                  "kind": "Seq",
+                                  "elementType": "I64",
+                                  "capacity": "4"
+                                },
+                                "args": [],
+                                "elementType": "I64",
+                                "capacity": "4"
+                              },
+                              {
+                                "op": "param",
+                                "type": "I64",
+                                "id": "x"
+                              }
+                            ]
+                          },
+                          {
+                            "op": "i64.const",
+                            "type": "I64",
+                            "value": "0"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "x"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "bool.and",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "bool.and",
+                "type": "Bool",
+                "args": [
+                  {
+                    "op": "eq",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "seq.length",
+                        "type": "I64",
+                        "args": [
+                          {
+                            "op": "seq.append",
+                            "type": {
+                              "kind": "Seq",
+                              "elementType": "I64",
+                              "capacity": "4"
+                            },
+                            "args": [
+                              {
+                                "op": "seq.empty",
+                                "type": {
+                                  "kind": "Seq",
+                                  "elementType": "I64",
+                                  "capacity": "4"
+                                },
+                                "args": [],
+                                "elementType": "I64",
+                                "capacity": "4"
+                              },
+                              {
+                                "op": "param",
+                                "type": "I64",
+                                "id": "x"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "bool.not",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "bool.and",
+                "type": "Bool",
+                "args": [
+                  {
+                    "op": "bool.or",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": false
+                      },
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "op": "if",
+                    "type": "Bool",
+                    "args": [
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": true
+                      },
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": true
+                      },
+                      {
+                        "op": "bool.const",
+                        "type": "Bool",
+                        "value": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty-shape-v1",
+          "arguments": [
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "makeSummary.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "makeSummary.model-v1",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "Summary",
+      "body": {
+        "op": "record.make",
+        "type": "Summary",
+        "recordType": "Summary",
+        "fieldIds": [
+          "count",
+          "values"
+        ],
+        "args": [
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "2"
+          },
+          {
+            "op": "seq.append",
+            "type": {
+              "kind": "Seq",
+              "elementType": "I64",
+              "capacity": "4"
+            },
+            "args": [
+              {
+                "op": "seq.append",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "4"
+                },
+                "args": [
+                  {
+                    "op": "seq.empty",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "4"
+                    },
+                    "elementType": "I64",
+                    "capacity": "4",
+                    "args": []
+                  },
+                  {
+                    "op": "param",
+                    "type": "I64",
+                    "id": "x"
+                  }
+                ]
+              },
+              {
+                "op": "i64.add",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "param",
+                    "type": "I64",
+                    "id": "x"
+                  },
+                  {
+                    "op": "i64.const",
+                    "type": "I64",
+                    "value": "1"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "128",
+    "maxExpressionDepth": "16",
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "64"
+  }
+}

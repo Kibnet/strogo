@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "fold.discriminator",
+  "types": [],
+  "imports": [],
+  "functions": [
+    {
+      "id": "sum",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "4"
+          }
+        }
+      ],
+      "returnType": "I64",
+      "contractRef": "sumContract",
+      "body": {
+        "parameters": [
+          "items"
+        ],
+        "nodes": [
+          {
+            "id": "zero",
+            "op": "i64.const",
+            "type": "I64",
+            "args": [],
+            "value": "0"
+          },
+          {
+            "id": "result",
+            "op": "fold",
+            "type": "I64",
+            "args": [
+              "items",
+              "zero"
+            ],
+            "stepRegion": {
+              "parameters": [
+                "index",
+                "element",
+                "accumulator"
+              ],
+              "nodes": [
+                {
+                  "id": "next",
+                  "op": "i64.add",
+                  "type": "I64",
+                  "args": [
+                    "accumulator",
+                    "element"
+                  ]
+                }
+              ],
+              "result": "next"
+            },
+            "invariant": {
+              "op": "bool.const",
+              "type": "Bool",
+              "value": true
+            }
+          }
+        ],
+        "result": "result"
+      }
+    }
+  ],
+  "exports": [
+    "sum"
+  ]
+}

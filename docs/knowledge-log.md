@@ -830,3 +830,53 @@
 - Evidence: fixture `fixtures/modules-v0.2/owner-fold-sum-valid-v0.4.json`; Modules conformance `PASS conformance checks=318`, `passed=true`, 76 report entries; solution Release build — 0 warnings/errors. Replay двух fold witnesses дал `Pass`; owner results `6` и `22` совпали с candidate. Регрессии подтверждают strict evaluation всех quantifier bodies, left-to-right prefix arguments, strict append operands, exact migration subtree, fresh proof counters, cost refusal, reserved `MathInt`, nested-fold/role/type refusals and preservation of migrated v0.3 replay.
 - Последствие: owner intent для fold теперь имеет versioned canonical bytes, independent executable oracle и строгую связь с candidate shape. Статус `Verified` ещё недоступен: нужны compiler-owned loop obligations, obligation map и реальный Dafny A/B/C run.
 - Supersedes / supersededBy: реализует второй checkpoint утверждённой fold SPEC и продолжает K-E05-087; ожидает checkpoint 3.
+
+## K-E05-089
+
+- Дата / фаза: 2026-09-08 / external capability review.
+- Тип / статус: Distributed-effect counterexample / Proposed publicly; not executed.
+- Утверждение: потерянный ответ после фактического внешнего `COMMIT` не позволяет позднему `REVOKE` превратить retry в обычный `DENY/no effect`. Повтор должен быть идемпотентным и возвращать `COMMITTED_BEFORE_REVOKE` по sink receipt либо `UNKNOWN_EFFECT` до reconciliation; иначе возможен второй эффект или ложное утверждение об отсутствии первого.
+- Scope: будущий capability/effect executor и сервис с общей точкой сериализации; не pure fold, не текущий runtime и не реализованная гарантия Strogo. STRICT возможен только при enforceable ordering/idempotency со стороны effecting service; прочие sinks остаются BEST_EFFORT.
+- Evidence: Posting Board #9740, [thread](https://getpostingboard.dev/b/t/f762f92a-fae1-41a4-95b2-b150f49f96be); предложенная trace содержит accepted commit, потерянный response, completed revoke и retry, но executable fixture/receipts ещё не опубликованы.
+- Последствие: будущий receipt должен содержать sink commit/order id, а состояние `UNKNOWN_EFFECT` обязано блокировать слепой повтор до reconciliation. Локальная проверка capability epoch не заменяет идемпотентность и ordering authority внешнего сервиса.
+- Supersedes / supersededBy: дополняет K-E05-083 случаем потерянного ответа после commit.
+
+## K-E05-090
+
+- Дата / фаза: 2026-09-08 / external agent-evaluation design.
+- Тип / статус: Experiment design / Refined publicly; not executed.
+- Утверждение: сравнение стоимости реализации на agent-oriented и human-oriented представлениях должно фиксировать одинаковую семантическую информацию, задачи, model/reasoning/tool budget и frozen held-out oracle; считать нужно все repair attempts, failures, tool output и coordination, а success rate/time показывать отдельно. `NoChangeNeeded`, исправимый defect, `InsufficientEvidence/Unknown` и `ContractConflict` являются разными outcomes: отсутствие наблюдения не доказывает противоречие, а timeout/Unproven не доказывают ни один из них.
+- Scope: будущий G05 experiment, не измерение текущего fold и не evidence экономии токенов.
+- Evidence: Posting Board #9743/#9747/#9775/#9780/#9787/#9788/#9794, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704). Публично предложены одинаковая bugfix-задача с contracts/без них, отдельный видимый repair suite, frozen held-out oracle и negative control против ложного `ContractConflict`; agent run отсутствует. Локальный конечный перебор для минимальных D={0,1} различил неоднозначное наблюдение `y=x` и поточечно несовместимые `y=0 AND y=1`, но не является Strogo/agent eval.
+- Последствие: первый G05 harness должен иметь минимум correct/no-change, repairable, contradictory и observationally-insufficient fixtures, отдельно проверять приложенное свидетельство и учитывать `Unknown` без присвоения успеха.
+- Supersedes / supersededBy: уточняет будущую проверку G05; не меняет текущую fold SPEC.
+
+## K-E05-091
+
+- Дата / фаза: 2026-09-08 / fold checkpoint 2 reproducibility.
+- Тип / статус: External replication / Confirmed for public owner v0.4 checkpoint.
+- Утверждение: public commit `6583814896179dd9d2b8ff9d13eacfcb5539517d` воспроизводится в отдельном clean checkout на Windows: Modules conformance завершился exit 0 и `PASS conformance checks=318`.
+- Scope: parser/codec/evaluator/binder/replay suite checkpoint 2; не audit полноты acceptance matrix, не Dafny proof и не generated consumer.
+- Evidence: внешний локальный прогон `dotnet run --project tests/Strogo.Modules.Conformance -c Release -- --report ...` из отдельного checkout exact commit `6583814`; raw report в текущем repository не импортировался.
+- Последствие: checkpoint 2 доступен и исполним вне исходного worktree, но proof claims начинаются только с checkpoint 3 evidence.
+- Supersedes / supersededBy: независимо подтверждает локальный результат K-E05-088 в его фактической границе.
+
+## K-E05-092
+
+- Дата / фаза: 2026-09-08 / fold v0.1 EXEC, sum discriminator.
+- Тип / статус: Proof experiment / Confirmed under Ubuntu 24.04 WSL2; Windows negative control has a tool limitation.
+- Утверждение: на одной frozen lowering revision `strogo.fold-dafny-lowering.v0.4` sum variants дали A=`Verified` (`21/0`), B=`Verified` (`22/0`) и C=`Unproven(initial)` (`20/1`). A/B/C имеют разные source/proof identities и byte-identical source после замены всех invariant-dependent spans. Результат означает только, что полный B не понадобился для достижения статуса `Verified` на этом fixture; он не измеряет proof cost/stability и не подтверждает G05.
+- Scope: официальный Dafny 4.11.0, Ubuntu 24.04 WSL2 x64, generated checked-I64 sum, один owner bundle и один toolchain digest. Windows package также подтверждает A/B, но C вместе с ожидаемым proof failure печатает `Model parsing error`; строгий oracle поэтому не принимает Windows C как завершённый discriminator.
+- Evidence: `tools/Test-Fold-Discriminator.sh`; gitignored run `artifacts/local-validation/e05/fold-v04-harness-20260908-8/` содержит два byte-equal lowering runs, exact A/B/C logs, obligation maps, tool identity/digest и strict absence of operational markers under Linux. Dafny executable SHA-256 `e540b4826363afb87c326446239a682d45086905425fa6299c103eca9693846d`.
+- Последствие: обязательный A/B/C experiment закрыт допустимым outcome. Optional D остаётся не выполнен и не нужен для этого status-level вывода; любой будущий shared proof change требует полного rerun.
+- Supersedes / supersededBy: исполняет experiment contract K-E05-078 и уточняет исторический v0.3 Linux result тем же outcome на итоговой v0.4 lowering revision.
+
+## K-E05-093
+
+- Дата / фаза: 2026-09-08 / fold v0.1 EXEC, checkpoint 3.
+- Тип / статус: Generic fold proof and runtime / Confirmed locally under Windows and Ubuntu 24.04 WSL2.
+- Утверждение: первая версия fold lowerer была неявно зашита под `I64` sum и конфликтовала generated predicate `R000` с record type `R000`; scalar discriminator этого не обнаруживал. Lowerer исправлен: canonical sum сохраняет отдельный MathInt/range proof path, остальные accumulator types используют exact typed owner prefix, generated names разделены, а record/sequence `AllocationState` доказывается для двух разных candidate DAG.
+- Scope: root-only bounded left fold, same accumulator representation, records и bounded sequences; nested fold, helpers/imports, relational accumulator representation и public admission/runtime facade остаются вне scope.
+- Evidence: fixtures `fold-allocation-primary.json`, `fold-allocation-alternative.json`, `owner-fold-allocation-v0.4.json`; Modules conformance `PASS conformance checks=360`. Linux strict harness: обе allocation candidates `18 verified, 0 errors`; generated .NET consumers для обеих возвращают empty=`5/[]`, ordered=`0/[4,0,1]`, MAX=`0/[I64.MAX]`; weak invariant и три type-correct sequence/initial/environment mutations дают expected Unproven по mapped obligations. Два чистых lowering runs byte-identical.
+- Последствие: общий fold впервые проверен на composite accumulator и реальном исполняемом generated C#, а не только на scalar sum. Обязательный agent invariant имеет наблюдаемую роль для allocation capacity proof, хотя sum A показывает, что нетривиальное содержание не требуется каждому алгоритму.
+- Supersedes / supersededBy: закрывает proof/runtime часть K-E05-087/K-E05-088; полный EXEC ещё требует regressions, public docs/evidence и post-EXEC review.

@@ -1,0 +1,429 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.4",
+  "bundleId": "ordered.exact.allocation.owner-v1",
+  "types": [
+    {
+      "id": "AllocationState",
+      "fields": [
+        {
+          "id": "allocations",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "256"
+          }
+        },
+        {
+          "id": "remaining",
+          "type": "I64"
+        }
+      ]
+    }
+  ],
+  "entryContracts": [
+    {
+      "id": "allocateContract",
+      "functionRef": "allocate",
+      "parameters": [
+        {
+          "id": "requests",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "256"
+          }
+        },
+        {
+          "id": "available",
+          "type": "I64"
+        }
+      ],
+      "returnType": "AllocationState",
+      "requires": {
+        "op": "bool.and",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "i64.le",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              },
+              {
+                "op": "param",
+                "type": "I64",
+                "id": "available"
+              }
+            ]
+          },
+          {
+            "op": "forall.sequence",
+            "type": "Bool",
+            "binderId": "i",
+            "sequence": {
+              "op": "param",
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "256"
+              },
+              "id": "requests"
+            },
+            "body": {
+              "op": "i64.le",
+              "type": "Bool",
+              "args": [
+                {
+                  "op": "i64.const",
+                  "type": "I64",
+                  "value": "1"
+                },
+                {
+                  "op": "seq.get",
+                  "type": "I64",
+                  "args": [
+                    {
+                      "op": "param",
+                      "type": {
+                        "kind": "Seq",
+                        "elementType": "I64",
+                        "capacity": "256"
+                      },
+                      "id": "requests"
+                    },
+                    {
+                      "op": "proof.bound",
+                      "type": "I64",
+                      "binderId": "i"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty-v1",
+          "arguments": [
+            {
+              "parameterId": "requests",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "parameterId": "available",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ordered-v1",
+          "arguments": [
+            {
+              "parameterId": "requests",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "4"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "3"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "parameterId": "available",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        {
+          "id": "maximum-v1",
+          "arguments": [
+            {
+              "parameterId": "requests",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "9223372036854775807"
+                  }
+                ]
+              }
+            },
+            {
+              "parameterId": "available",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775807"
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "allocate.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "allocate.model-v1",
+      "parameters": [
+        {
+          "id": "requests",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "256"
+          }
+        },
+        {
+          "id": "available",
+          "type": "I64"
+        }
+      ],
+      "returnType": "AllocationState",
+      "body": {
+        "op": "fold",
+        "type": "AllocationState",
+        "args": [
+          {
+            "op": "param",
+            "type": {
+              "kind": "Seq",
+              "elementType": "I64",
+              "capacity": "256"
+            },
+            "id": "requests"
+          },
+          {
+            "op": "record.make",
+            "type": "AllocationState",
+            "args": [
+              {
+                "op": "seq.empty",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "args": [],
+                "elementType": "I64",
+                "capacity": "256"
+              },
+              {
+                "op": "param",
+                "type": "I64",
+                "id": "available"
+              }
+            ],
+            "recordType": "AllocationState",
+            "fieldIds": [
+              "allocations",
+              "remaining"
+            ]
+          },
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "available"
+          }
+        ],
+        "step": {
+          "parameters": [
+            {
+              "id": "index",
+              "type": "I64"
+            },
+            {
+              "id": "request",
+              "type": "I64"
+            },
+            {
+              "id": "state",
+              "type": "AllocationState"
+            },
+            {
+              "id": "environmentAvailable",
+              "type": "I64"
+            }
+          ],
+          "body": {
+            "op": "record.make",
+            "type": "AllocationState",
+            "args": [
+              {
+                "op": "seq.append",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "args": [
+                  {
+                    "op": "record.get",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "256"
+                    },
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "AllocationState",
+                        "id": "state"
+                      }
+                    ],
+                    "fieldId": "allocations"
+                  },
+                  {
+                    "op": "if",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "i64.le",
+                        "type": "Bool",
+                        "args": [
+                          {
+                            "op": "param",
+                            "type": "I64",
+                            "id": "request"
+                          },
+                          {
+                            "op": "record.get",
+                            "type": "I64",
+                            "args": [
+                              {
+                                "op": "param",
+                                "type": "AllocationState",
+                                "id": "state"
+                              }
+                            ],
+                            "fieldId": "remaining"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "request"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "i64.sub",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "record.get",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "AllocationState",
+                        "id": "state"
+                      }
+                    ],
+                    "fieldId": "remaining"
+                  },
+                  {
+                    "op": "if",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "i64.le",
+                        "type": "Bool",
+                        "args": [
+                          {
+                            "op": "param",
+                            "type": "I64",
+                            "id": "request"
+                          },
+                          {
+                            "op": "record.get",
+                            "type": "I64",
+                            "args": [
+                              {
+                                "op": "param",
+                                "type": "AllocationState",
+                                "id": "state"
+                              }
+                            ],
+                            "fieldId": "remaining"
+                          }
+                        ]
+                      },
+                      {
+                        "op": "param",
+                        "type": "I64",
+                        "id": "request"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "recordType": "AllocationState",
+            "fieldIds": [
+              "allocations",
+              "remaining"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "512",
+    "maxExpressionDepth": "24",
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "1024",
+    "maxProofEvaluationSteps": "4096"
+  }
+}

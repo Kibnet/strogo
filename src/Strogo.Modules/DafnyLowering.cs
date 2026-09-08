@@ -24,7 +24,7 @@ public sealed class DafnyLoweringResult
     public ImmutableArray<DafnySourceMapEntry> SourceMap { get; }
 }
 
-public static class ModulesDafnyLowerer
+public static partial class ModulesDafnyLowerer
 {
     private const string I64Declaration = "  newtype {:nativeType \"long\"} I64 = x: int | -9223372036854775808 <= x <= 9223372036854775807 witness 0";
 
@@ -428,6 +428,9 @@ public static class ModulesDafnyLowerer
                         yield return item;
                 if (instruction.ElseRegion is not null)
                     foreach (var item in EnumerateRegionTypes(instruction.ElseRegion))
+                        yield return item;
+                if (instruction.Fold is not null)
+                    foreach (var item in EnumerateRegionTypes(instruction.Fold.Step))
                         yield return item;
             }
         }
