@@ -1,9 +1,16 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
 using Strogo.Modules.Portability;
+
+if (args.Length > 0 && args[0] == "--jvm-process-fixture")
+{
+    RunJvmProcessFixture(args.Skip(1).ToArray());
+    return;
+}
 
 var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
 var fixtureDir = Path.Combine(root, "fixtures", "portability-v0.1");
@@ -103,6 +110,128 @@ Check(javaAdapter.Contains("MAXIMUM_INPUT_BYTES = 65536", StringComparison.Ordin
 Check(javaAdapter.Contains("SyntaxInspector.inspect", StringComparison.Ordinal) && javaAdapter.Contains("if (!canonicalRequestJson.equals(canonical))", StringComparison.Ordinal), "Java adapter separates bounded syntax inspection from canonical transport validation");
 Check(!new[] { "com.fasterxml", "org.json", "javax.json", "java.lang.reflect", "ServiceLoader", "System.load" }.Any(javaAdapter.Contains), "Java adapter has no external JSON, reflection, service loading, or JNI dependency");
 Check(javaConsumer.Contains("PASS standalone Java consumer cases=", StringComparison.Ordinal) && javaConsumer.Contains("transport=", StringComparison.Ordinal) && javaConsumer.Contains("expected 13 vectors", StringComparison.Ordinal), "standalone Java consumer covers ABI, transport, and owner vectors");
+
+var jvmIdentity = new JvmWarningBaselineIdentity(new string('1', 64), new string('2', 64), new string('3', 64), new string('4', 64), new string('5', 64), new string('6', 64), new string('7', 64));
+var jvmSources = new[] { (Path: "generated/Generated.java", Bytes: Encoding.ASCII.GetBytes("final class Generated {}\n")) };
+var jvmLf = SyntheticJvmDiagnostics("\n", '/');
+var jvmCrLf = SyntheticJvmDiagnostics("\r\n", '\\');
+var jvmCandidate = JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf));
+var jvmWindowsCandidate = JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmCrLf));
+Check(jvmCandidate.Bytes.SequenceEqual(jvmWindowsCandidate.Bytes) && jvmCandidate.CanonicalDiagnostics.SequenceEqual(jvmWindowsCandidate.CanonicalDiagnostics), "JVM warning baseline normalizes CRLF and relative Windows paths");
+Check(jvmCandidate.Warnings.Length == 106 && jvmCandidate.Warnings.Count(item => item.Category == "cast") == 35 && jvmCandidate.Warnings.Count(item => item.Category == "rawtypes") == 67 && jvmCandidate.Warnings.Count(item => item.Category == "serial") == 1 && jvmCandidate.Warnings.Count(item => item.Category == "varargs") == 3, "JVM warning baseline freezes all 106 categories");
+var jvmWarningKeys = jvmCandidate.Warnings.Select(item => $"{item.Path}\0{item.Line}\0{item.Category}\0{item.Message}\0{item.ContextDigest}").ToArray();
+Check(jvmWarningKeys.SequenceEqual(jvmWarningKeys.Order(StringComparer.Ordinal), StringComparer.Ordinal), "JVM warning entries use canonical ordinal tuple order");
+Check(JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf)).BaselineDigest == jvmCandidate.BaselineDigest, "owner-approved JVM baseline digest validates exact observation");
+foreach (var mutation in new[]
+{
+    (Name: "fixture", Identity: jvmIdentity with { FixtureModuleDigest = new string('8', 64) }),
+    (Name: "Dafny source", Identity: jvmIdentity with { DafnySourceDigest = new string('8', 64) }),
+    (Name: "translator", Identity: jvmIdentity with { TranslatorDigest = new string('8', 64) }),
+    (Name: "javac closure", Identity: jvmIdentity with { JavacClosureDigest = new string('8', 64) }),
+    (Name: "command", Identity: jvmIdentity with { ProbeCommandDigest = new string('8', 64) }),
+    (Name: "validator", Identity: jvmIdentity with { ValidatorDigest = new string('8', 64) }),
+    (Name: "harness", Identity: jvmIdentity with { HarnessDigest = new string('8', 64) })
+})
+    Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, mutation.Identity, jvmSources, Encoding.UTF8.GetBytes(jvmLf)), "UpstreamWarningBaselineMismatch"), $"JVM {mutation.Name} identity drift cannot reuse the approved baseline");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, new string('9', 64), jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf)), "UpstreamWarningBaselineMismatch"), "self-generated JVM baseline digest cannot replace the owner-approved digest");
+var coordinatedIdentity = jvmIdentity with { ValidatorDigest = new string('8', 64), HarnessDigest = new string('9', 64) };
+var coordinatedCandidate = JvmUpstreamWarnings.CreateCandidate(coordinatedIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf));
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(coordinatedCandidate.Bytes, jvmCandidate.BaselineDigest, coordinatedIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf)), "UpstreamWarningBaselineMismatch"), "coordinated baseline and validator/harness rewrite cannot replace the external owner digest");
+var jvmSourceMutation = new[] { (Path: "generated/Generated.java", Bytes: Encoding.ASCII.GetBytes("final class Generated { int changed; }\n")) };
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSourceMutation, Encoding.UTF8.GetBytes(jvmLf)), "UpstreamWarningBaselineMismatch"), "JVM translated source mutation cannot reuse the approved baseline");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("source context 1", "changed context 1", StringComparison.Ordinal))), "UpstreamWarningBaselineMismatch"), "JVM warning context mutation is rejected by the approved baseline");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("warning 1\n", "changed warning 1\n", StringComparison.Ordinal))), "UpstreamWarningBaselineMismatch"), "JVM primary warning mutation is rejected by the approved baseline");
+var jvmDiagnosticLines = jvmLf.Split('\n').ToList();
+jvmDiagnosticLines.RemoveRange(0, 3);
+jvmDiagnosticLines[^2] = "105 warnings";
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(string.Join('\n', jvmDiagnosticLines))), "UpstreamWarningBaselineMismatch"), "removed JVM primary warning is rejected");
+var jvmAddedLines = jvmLf.Split('\n').ToList();
+jvmAddedLines.InsertRange(jvmAddedLines.Count - 2, jvmLf.Split('\n').Take(3));
+jvmAddedLines[^2] = "107 warnings";
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(string.Join('\n', jvmAddedLines))), "UpstreamWarningBaselineMismatch"), "added JVM primary warning is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("106 warnings\n", "105 warnings\n", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "JVM warning summary mismatch is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf + "only showing the first 100 warnings\n")), "UnexpectedUpstreamDiagnostic"), "JVM warning truncation text is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("generated/Generated.java:1", "C:/Generated.java:1", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "absolute JVM diagnostic path is rejected");
+Check(JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(SyntheticJvmDiagnostics("\r", '/'))).Bytes.SequenceEqual(jvmCandidate.Bytes), "standalone CR diagnostics normalize canonically");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("  ^\n", "  ^~~~\n", StringComparison.Ordinal))), "UpstreamWarningBaselineMismatch"), "caret mutation is rejected by the approved JVM baseline");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("  source context 1\n", "  source context 1\n  continuation\n", StringComparison.Ordinal))), "UpstreamWarningBaselineMismatch"), "continuation mutation is rejected by the approved JVM baseline");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes("unconsumed\n" + jvmLf)), "UnexpectedUpstreamDiagnostic"), "unconsumed diagnostic prefix is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("generated/Generated.java:1", "generated/../Generated.java:1", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "parent path segment is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("generated/Generated.java:1", "/generated/Generated.java:1", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "rooted Unix diagnostic path is rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.TrimEnd('\n'))), "UnexpectedUpstreamDiagnostic"), "unterminated diagnostics are rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, [0xff, 0xfe]), "UnexpectedUpstreamDiagnostic"), "invalid UTF-8 diagnostics are rejected");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("106 warnings", new string('9', 128) + " warnings", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "oversized warning count is a typed rejection");
+Check(RejectsTargetBuild(() => JvmUpstreamWarnings.CreateCandidate(jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf.Replace("Generated.java:1:", $"Generated.java:{new string('9', 128)}:", StringComparison.Ordinal))), "UnexpectedUpstreamDiagnostic"), "oversized source line is a typed rejection");
+
+var processExecutable = Environment.ProcessPath ?? throw new InvalidOperationException("process executable unavailable");
+var processRoot = Path.Combine(Path.GetTempPath(), "strogo-jvm-runner-" + Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(processRoot);
+try
+{
+    Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(Path.Combine(processRoot, "missing-javac.exe"), processRoot, [], 1024, 5000)), "JavacProbeFailed"), "JVM runner maps unexpected probe startup failure to the closed stage reason");
+    var stdoutOverflow = CaptureTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(processExecutable, processRoot, ["--jvm-process-fixture", "stdout"], 1024, 5000)));
+    Check(stdoutOverflow.Reason == "JavacOutputLimitExceeded", "JVM runner rejects stdout overflow");
+    var stdoutOverflowDetails = stdoutOverflow.Details;
+    Check(stdoutOverflowDetails.GetProperty("failureDetails").GetProperty("actualAtDetection").GetString() == "1025" && stdoutOverflowDetails.GetProperty("cleanup").GetString() == "Passed", "JVM overflow evidence fixes first excess byte and cleanup result");
+    Check(stdoutOverflowDetails.GetProperty("stdout").GetProperty("bytesRead").GetString() == "2048" && stdoutOverflowDetails.GetProperty("stdout").GetProperty("prefixBytes").GetString() == "1024" && stdoutOverflowDetails.GetProperty("stdout").GetProperty("digest").GetString()!.Length == 64, "JVM overflow evidence retains bounded prefix, byte count, and digest");
+    Check(stdoutOverflowDetails.GetProperty("knownProcessTree").GetArrayLength() >= 1 && stdoutOverflowDetails.GetProperty("liveProcessIds").GetArrayLength() == 0, "JVM overflow evidence records process identity and no live residual");
+    Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(processExecutable, processRoot, ["--jvm-process-fixture", "stderr"], 1024, 5000)), "JavacOutputLimitExceeded"), "JVM runner rejects stderr overflow");
+    var childPidFile = Path.Combine(processRoot, "child.pid");
+    Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(processExecutable, processRoot, ["--jvm-process-fixture", "tree", childPidFile], 4096, 500)), "JavacTimeout"), "JVM runner rejects root and child timeout");
+    var childPid = int.Parse(File.ReadAllText(childPidFile), System.Globalization.CultureInfo.InvariantCulture);
+    Check(!ProcessAlive(childPid), "JVM runner reaps the timeout child process");
+    var floodChildPidFile = Path.Combine(processRoot, "flood-child.pid");
+    Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(processExecutable, processRoot, ["--jvm-process-fixture", "tree-flood", floodChildPidFile], 1024, 5000)), "JavacOutputLimitExceeded"), "JVM runner rejects descendant output overflow");
+    var floodChildPid = int.Parse(File.ReadAllText(floodChildPidFile), System.Globalization.CultureInfo.InvariantCulture);
+    Check(!ProcessAlive(floodChildPid), "JVM runner reaps the overflowing descendant process");
+    var quarantine = Path.Combine(processRoot, "run", "probe");
+    Directory.CreateDirectory(quarantine);
+    File.WriteAllText(Path.Combine(quarantine, "partial.class"), "partial", Encoding.ASCII);
+    var quarantineSibling = Path.Combine(processRoot, "run", "unrelated");
+    Directory.CreateDirectory(quarantineSibling);
+    File.WriteAllText(Path.Combine(quarantineSibling, "keep.txt"), "keep", Encoding.ASCII);
+    JvmQuarantine.Delete(Path.Combine(processRoot, "run"), quarantine);
+    Check(!Directory.Exists(quarantine) && File.Exists(Path.Combine(quarantineSibling, "keep.txt")), "JVM quarantine deletes only the exact contained output target");
+    foreach (var failureReason in new[] { "JavacProbeFailed", "UpstreamWarningBaselineMismatch", "JavacTimeout", "JavacOutputLimitExceeded" })
+    {
+        var failedQuarantine = Path.Combine(processRoot, "run", "failed-" + failureReason);
+        Check(RejectsTargetBuild(() => JvmQuarantine.Execute<bool>(Path.Combine(processRoot, "run"), failedQuarantine, () =>
+        {
+            Directory.CreateDirectory(failedQuarantine);
+            File.WriteAllText(Path.Combine(failedQuarantine, "partial.class"), "partial", Encoding.ASCII);
+            throw new PortabilityContractException("TargetBuildRejected", "$/fixture", new { reason = failureReason });
+        }), failureReason), $"JVM quarantine preserves typed {failureReason} after successful cleanup");
+        Check(!Directory.Exists(failedQuarantine), $"JVM quarantine removes partial output after {failureReason}");
+    }
+    Check(RejectsTargetBuild(() => JvmQuarantine.Delete(Path.Combine(processRoot, "run"), processRoot), "ProbeCleanupFailed"), "JVM quarantine rejects cleanup outside the run root");
+    if (OperatingSystem.IsWindows())
+    {
+        var lockedQuarantine = Path.Combine(processRoot, "run", "locked-probe");
+        Directory.CreateDirectory(lockedQuarantine);
+        var readyFile = Path.Combine(processRoot, "cwd-lock.ready");
+        var lockProcess = StartJvmFixture(processExecutable, lockedQuarantine, "cwd-lock", false, readyFile);
+        try
+        {
+            for (var attempt = 0; attempt < 100 && !File.Exists(readyFile); attempt++) Thread.Sleep(20);
+            Check(File.Exists(readyFile), "JVM cleanup failure fixture entered the quarantine directory");
+            var cleanupFailure = CaptureTargetBuild(() => JvmQuarantine.Execute<bool>(Path.Combine(processRoot, "run"), lockedQuarantine, () => throw new PortabilityContractException("TargetBuildRejected", "$/fixture", new { reason = "JavacTimeout" })));
+            Check(cleanupFailure.Reason == "ProbeCleanupFailed", "JVM quarantine gives cleanup failure priority over the original failure");
+            Check(cleanupFailure.Details.GetProperty("cleanupFailure").GetProperty("residualPath").GetString() == lockedQuarantine && cleanupFailure.Details.GetProperty("originalFailure").GetProperty("details").GetProperty("reason").GetString() == "JavacTimeout", "JVM cleanup failure evidence retains residual path and original reason");
+            Check(Directory.Exists(lockedQuarantine), "JVM quarantine cleanup failure retains the residual path as evidence");
+        }
+        finally
+        {
+            if (!lockProcess.HasExited) lockProcess.Kill(entireProcessTree: true);
+            lockProcess.WaitForExit();
+            lockProcess.Dispose();
+            if (Directory.Exists(lockedQuarantine)) JvmQuarantine.Delete(Path.Combine(processRoot, "run"), lockedQuarantine);
+        }
+    }
+}
+finally
+{
+    if (Directory.Exists(processRoot)) JvmQuarantine.Delete(Path.GetTempPath(), processRoot);
+}
 
 var replay = OwnerContractReplayV04.Replay(binding.OwnerBinding);
 Check(replay.Status == "Pass" && replay.CheckedWitnesses == 8, $"owner witnesses: {replay.Status}/{replay.CheckedWitnesses}");
@@ -645,4 +774,136 @@ static bool EqualTrees(string left, string right)
     var leftFiles = Directory.GetFiles(left, "*", SearchOption.AllDirectories).Select(path => Path.GetRelativePath(left, path).Replace(Path.DirectorySeparatorChar, '/')).Order(StringComparer.Ordinal).ToArray();
     var rightFiles = Directory.GetFiles(right, "*", SearchOption.AllDirectories).Select(path => Path.GetRelativePath(right, path).Replace(Path.DirectorySeparatorChar, '/')).Order(StringComparer.Ordinal).ToArray();
     return leftFiles.SequenceEqual(rightFiles, StringComparer.Ordinal) && leftFiles.All(relative => File.ReadAllBytes(Path.Combine(left, relative.Replace('/', Path.DirectorySeparatorChar))).SequenceEqual(File.ReadAllBytes(Path.Combine(right, relative.Replace('/', Path.DirectorySeparatorChar)))));
+}
+
+static string SyntheticJvmDiagnostics(string newline, char pathSeparator)
+{
+    var path = $"generated{pathSeparator}Generated.java";
+    var categories = Enumerable.Repeat("cast", 35)
+        .Concat(Enumerable.Repeat("rawtypes", 67))
+        .Concat(Enumerable.Repeat("serial", 1))
+        .Concat(Enumerable.Repeat("varargs", 3))
+        .ToArray();
+    var lines = new List<string>();
+    for (var index = 0; index < categories.Length; index++)
+    {
+        var line = index + 1;
+        lines.Add($"{path}:{line}: warning: [{categories[index]}] warning {line}");
+        lines.Add($"  source context {line}");
+        lines.Add("  ^");
+    }
+    lines.Add("106 warnings");
+    return string.Join(newline, lines) + newline;
+}
+
+static JvmProcessRequest ProcessRequest(string executable, string workingDirectory, IReadOnlyList<string> arguments, int outputLimit, int timeoutMilliseconds)
+    => new(
+        executable,
+        workingDirectory,
+        arguments,
+        ["CLASSPATH", "JDK_JAVAC_OPTIONS", "JDK_JAVA_OPTIONS", "JAVA_TOOL_OPTIONS", "_JAVA_OPTIONS"],
+        TimeSpan.FromMilliseconds(timeoutMilliseconds),
+        outputLimit,
+        TimeSpan.FromSeconds(5),
+        JvmProcessKind.JavacProbe);
+
+static void RunJvmProcessFixture(string[] fixtureArgs)
+{
+    if (fixtureArgs.Length == 0) throw new ArgumentException("JVM process fixture mode is required");
+    switch (fixtureArgs[0])
+    {
+        case "stdout":
+            Console.OpenStandardOutput().Write(new byte[2048]);
+            return;
+        case "stderr":
+            Console.OpenStandardError().Write(new byte[2048]);
+            return;
+        case "child":
+            Thread.Sleep(TimeSpan.FromMinutes(1));
+            return;
+        case "cwd-lock" when fixtureArgs.Length == 2:
+            File.WriteAllText(fixtureArgs[1], Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture), Encoding.ASCII);
+            Thread.Sleep(TimeSpan.FromMinutes(1));
+            return;
+        case "flood":
+            while (true)
+            {
+                Console.OpenStandardOutput().Write(new byte[8192]);
+                Thread.Sleep(5);
+            }
+        case "tree" when fixtureArgs.Length == 2:
+            var executable = Environment.ProcessPath ?? throw new InvalidOperationException("process executable unavailable");
+            using (var child = StartJvmFixture(executable, Environment.CurrentDirectory, "child"))
+                File.WriteAllText(fixtureArgs[1], child.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), Encoding.ASCII);
+            Thread.Sleep(TimeSpan.FromMinutes(1));
+            return;
+        case "tree-flood" when fixtureArgs.Length == 2:
+            var floodExecutable = Environment.ProcessPath ?? throw new InvalidOperationException("process executable unavailable");
+            using (var child = StartJvmFixture(floodExecutable, Environment.CurrentDirectory, "flood", redirectStandardOutput: true))
+            {
+                File.WriteAllText(fixtureArgs[1], child.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), Encoding.ASCII);
+                child.StandardOutput.BaseStream.CopyTo(Console.OpenStandardOutput());
+            }
+            return;
+        default:
+            throw new ArgumentException("unknown JVM process fixture mode");
+    }
+}
+
+static Process StartJvmFixture(string executable, string workingDirectory, string mode, bool redirectStandardOutput = false, params string[] extraArguments)
+{
+    var startInfo = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = workingDirectory, RedirectStandardOutput = redirectStandardOutput, RedirectStandardError = redirectStandardOutput };
+    startInfo.ArgumentList.Add("--jvm-process-fixture");
+    startInfo.ArgumentList.Add(mode);
+    foreach (var argument in extraArguments) startInfo.ArgumentList.Add(argument);
+    return Process.Start(startInfo) ?? throw new InvalidOperationException("child process unavailable");
+}
+
+static bool ProcessAlive(int processId)
+{
+    for (var attempt = 0; attempt < 100; attempt++)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            if (process.HasExited) return false;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        Thread.Sleep(20);
+    }
+    return true;
+}
+
+static bool RejectsTargetBuild(Action action, string reason)
+{
+    try
+    {
+        action();
+        return false;
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "TargetBuildRejected")
+    {
+        using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
+        var actual = details.RootElement.GetProperty("reason").GetString();
+        if (actual != reason) Console.Error.WriteLine($"expected TargetBuildRejected/{reason}, observed {actual} at {exception.Locus}");
+        return actual == reason;
+    }
+}
+
+static (string Reason, string Locus, JsonElement Details) CaptureTargetBuild(Action action)
+{
+    try
+    {
+        action();
+        throw new InvalidOperationException("expected TargetBuildRejected");
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "TargetBuildRejected")
+    {
+        using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
+        var clone = details.RootElement.Clone();
+        return (clone.GetProperty("reason").GetString() ?? "", exception.Locus, clone);
+    }
 }
