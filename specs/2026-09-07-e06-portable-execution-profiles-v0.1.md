@@ -432,7 +432,8 @@ Visual planning artifact: текстовая pipeline-схема и platform mat
 Команды после approval уточняются в EXEC без изменения смысла контракта; минимальный ожидаемый набор:
 
 ```powershell
-dotnet build Kernel.slnx --no-restore --locked-mode
+dotnet restore Kernel.slnx --locked-mode
+dotnet build Kernel.slnx --no-restore
 dotnet run --project tests/Strogo.Modules.Conformance --no-build
 pwsh -File tools/Test-Modules-Portability.ps1 -Configuration Release
 git diff --check
@@ -488,7 +489,7 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 - Профиль: `product-system-design`.
 - Выполнено: outcome/Non-Goals, boundaries, logical/target contracts, data/evidence, errors, migration/rollback, performance limits, integration, platform state matrix и test plan заданы.
 - UI/visual: artifact-facing CLI/Markdown; pipeline diagram и matrix являются достаточным planning artifact, video не применимо.
-- Delivery/security: external publication и GitHub delivery исключены; runtime downloads pin/hash; effects/imports запрещены.
+- Delivery/security: external publication и GitHub delivery не являются критериями portability; отдельно разрешены Posting Board consultation и периодический push checkpoint commits. Runtime downloads pin/hash; effects/imports запрещены.
 
 ## 16. Таблица изменений файлов
 
@@ -668,3 +669,4 @@ Harness обязан сам проверить prerequisite versions/hashes и �
 | SPEC | Опубликовать Java packaging evidence и закрыть targeted findings | 0.98 | Внешний counterexample пока не получен | Повторить exact-snapshot review | Нет | Reply `2873a93d-4ca2-4046-b7f6-81290c502997` опубликован/read back; reviewer нашёл physical-path digest и incomplete validator gaps | Публичный вопрос просит falsifying case; spec теперь отделяет semantic inventory от diagnostic paths и закрывает JAR bytes/metadata mutations | Эта SPEC §§2,6.2.2,11,19 |
 | SPEC | Учесть counterexample Помощника архитектора | 0.99 | Реализация normalizer ещё не существует | Добавить raw/final provenance и rejection fixtures | Нет | Posting Board reply `0cb1efdf-babc-44df-beab-83fe60020411` (#9524) прочитан; duplicate-entry behavior отдельно воспроизведён автором ответа | Ordered multiset проверяется до extraction/map; raw/final inventories и normalization recipe получают domain-separated digests | Эта SPEC §§2,6.2.2,6.2.4,11,12,19 |
 | SPEC | Закрыть targeted JVM review и получить решение владельца | 0.99 | E05 owner/fold approvals и EXEC evidence | Зафиксировать checkpoint и продолжить с первой зависимостью | Да | Reviewer дал PASS снимку `ec491346…08ef3`; владелец подтвердил SPEC точной фразой и отдельно разрешил периодические push | Two-phase parser и A9 закрывают найденные обходы; approval не снимает dependency gate | Эта SPEC §§6.2.2,12,19, Approval |
+| EXEC | Зафиксировать E06 logical interface, owner oracle и target-neutral vectors | 0.97 | Target adapters и mixed-entry proof ещё не реализованы | Проверить checkpoint, закоммитить и периодически отправлять подтверждённые commits | Нет | Owner/fold dependencies завершены; владелец повторил exact approval и поручил периодический push | Полный workload сохранён без упрощения; parser/compiler/binder, owner/reference results и closed profile/API metadata проверяются отдельным conformance project | `fixtures/portability-v0.1/**`, `src/Strogo.Modules.Portability/**`, `tests/Strogo.Modules.Portability.Conformance/**` |

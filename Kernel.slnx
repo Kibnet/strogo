@@ -6,10 +6,12 @@
     <Project Path="src/Kernel.Host/Kernel.Host.csproj" />
     <Project Path="src/Kernel.Cli/Kernel.Cli.csproj" />
     <Project Path="src/Strogo.Modules/Strogo.Modules.csproj" />
+    <Project Path="src/Strogo.Modules.Portability/Strogo.Modules.Portability.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Kernel.Conformance/Kernel.Conformance.csproj" />
     <Project Path="tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj" />
     <Project Path="tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj" />
+    <Project Path="tests/Strogo.Modules.Portability.Conformance/Strogo.Modules.Portability.Conformance.csproj" />
   </Folder>
 </Solution>

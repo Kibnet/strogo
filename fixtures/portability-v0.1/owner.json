@@ -1,0 +1,807 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.4",
+  "bundleId": "portable.validation.owner-v01",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        {
+          "id": "sum",
+          "type": "I64"
+        },
+        {
+          "id": "negativeCount",
+          "type": "I64"
+        },
+        {
+          "id": "echo",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          }
+        }
+      ]
+    }
+  ],
+  "entryContracts": [
+    {
+      "id": "summarize.contract-v1",
+      "functionRef": "summarize",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          }
+        }
+      ],
+      "returnType": "Summary",
+      "requires": {
+        "op": "forall.sequence",
+        "type": "Bool",
+        "binderId": "i",
+        "sequence": {
+          "op": "param",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "id": "items"
+        },
+        "body": {
+          "op": "bool.and",
+          "type": "Bool",
+          "args": [
+            {
+              "op": "i64.le",
+              "type": "Bool",
+              "args": [
+                {
+                  "op": "i64.const",
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "op": "seq.get",
+                  "type": "I64",
+                  "args": [
+                    {
+                      "op": "param",
+                      "type": {
+                        "kind": "Seq",
+                        "elementType": "I64",
+                        "capacity": "8"
+                      },
+                      "id": "items"
+                    },
+                    {
+                      "op": "proof.bound",
+                      "type": "I64",
+                      "binderId": "i"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "i64.le",
+              "type": "Bool",
+              "args": [
+                {
+                  "op": "seq.get",
+                  "type": "I64",
+                  "args": [
+                    {
+                      "op": "param",
+                      "type": {
+                        "kind": "Seq",
+                        "elementType": "I64",
+                        "capacity": "8"
+                      },
+                      "id": "items"
+                    },
+                    {
+                      "op": "proof.bound",
+                      "type": "I64",
+                      "binderId": "i"
+                    }
+                  ]
+                },
+                {
+                  "op": "i64.const",
+                  "type": "I64",
+                  "value": "1000000"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "8"
+                },
+                "value": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "mixed",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "8"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "4"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "-3"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "summarize.model-v1"
+    },
+    {
+      "id": "increment.contract-v1",
+      "functionRef": "increment",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "requires": {
+        "op": "i64.le",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "x"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "9223372036854775806"
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "minus-one",
+          "arguments": [
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "-1"
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "increment.model-v1"
+    },
+    {
+      "id": "adjust.contract-v1",
+      "functionRef": "adjust",
+      "parameters": [
+        {
+          "id": "increase",
+          "type": "Bool"
+        },
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "requires": {
+        "op": "bool.or",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "bool.not",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "param",
+                "type": "Bool",
+                "id": "increase"
+              }
+            ]
+          },
+          {
+            "op": "i64.le",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "param",
+                "type": "I64",
+                "id": "x"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "false-max",
+          "arguments": [
+            {
+              "parameterId": "increase",
+              "value": {
+                "type": "Bool",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775807"
+              }
+            }
+          ]
+        },
+        {
+          "id": "true-minus-one",
+          "arguments": [
+            {
+              "parameterId": "increase",
+              "value": {
+                "type": "Bool",
+                "value": true
+              }
+            },
+            {
+              "parameterId": "x",
+              "value": {
+                "type": "I64",
+                "value": "-1"
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "adjust.model-v1"
+    },
+    {
+      "id": "head-or-zero.contract-v1",
+      "functionRef": "headOrZero",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "1"
+          }
+        }
+      ],
+      "returnType": "I64",
+      "requires": {
+        "op": "bool.const",
+        "type": "Bool",
+        "value": true
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "empty",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "1"
+                },
+                "value": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "single",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "1"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "7"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "head-or-zero.model-v1"
+    },
+    {
+      "id": "echo-summary.contract-v1",
+      "functionRef": "echoSummary",
+      "parameters": [
+        {
+          "id": "summary",
+          "type": "Summary"
+        }
+      ],
+      "returnType": "Summary",
+      "requires": {
+        "op": "bool.const",
+        "type": "Bool",
+        "value": true
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "mixed",
+          "arguments": [
+            {
+              "parameterId": "summary",
+              "value": {
+                "type": "Summary",
+                "value": [
+                  {
+                    "fieldId": "sum",
+                    "value": {
+                      "type": "I64",
+                      "value": "2"
+                    }
+                  },
+                  {
+                    "fieldId": "negativeCount",
+                    "value": {
+                      "type": "I64",
+                      "value": "1"
+                    }
+                  },
+                  {
+                    "fieldId": "echo",
+                    "value": {
+                      "type": {
+                        "kind": "Seq",
+                        "elementType": "I64",
+                        "capacity": "8"
+                      },
+                      "value": [
+                        {
+                          "type": "I64",
+                          "value": "4"
+                        },
+                        {
+                          "type": "I64",
+                          "value": "-3"
+                        },
+                        {
+                          "type": "I64",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "modelRef": "echo-summary.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "summarize.model-v1",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          }
+        }
+      ],
+      "returnType": "Summary",
+      "body": {
+        "op": "fold",
+        "type": "Summary",
+        "args": [
+          {
+            "op": "param",
+            "type": {
+              "kind": "Seq",
+              "elementType": "I64",
+              "capacity": "8"
+            },
+            "id": "items"
+          },
+          {
+            "op": "record.make",
+            "type": "Summary",
+            "args": [
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              },
+              {
+                "op": "seq.empty",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "8"
+                },
+                "args": [],
+                "elementType": "I64",
+                "capacity": "8"
+              }
+            ],
+            "recordType": "Summary",
+            "fieldIds": [
+              "sum",
+              "negativeCount",
+              "echo"
+            ]
+          }
+        ],
+        "step": {
+          "parameters": [
+            {
+              "id": "index",
+              "type": "I64"
+            },
+            {
+              "id": "item",
+              "type": "I64"
+            },
+            {
+              "id": "accumulator",
+              "type": "Summary"
+            }
+          ],
+          "body": {
+            "op": "record.make",
+            "type": "Summary",
+            "args": [
+              {
+                "op": "i64.add",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "record.get",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "Summary",
+                        "id": "accumulator"
+                      }
+                    ],
+                    "fieldId": "sum"
+                  },
+                  {
+                    "op": "param",
+                    "type": "I64",
+                    "id": "item"
+                  }
+                ]
+              },
+              {
+                "op": "i64.add",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "record.get",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "Summary",
+                        "id": "accumulator"
+                      }
+                    ],
+                    "fieldId": "negativeCount"
+                  },
+                  {
+                    "op": "if",
+                    "type": "I64",
+                    "args": [
+                      {
+                        "op": "bool.not",
+                        "type": "Bool",
+                        "args": [
+                          {
+                            "op": "i64.le",
+                            "type": "Bool",
+                            "args": [
+                              {
+                                "op": "i64.const",
+                                "type": "I64",
+                                "value": "0"
+                              },
+                              {
+                                "op": "param",
+                                "type": "I64",
+                                "id": "item"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "1"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "seq.append",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "8"
+                },
+                "args": [
+                  {
+                    "op": "record.get",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "8"
+                    },
+                    "args": [
+                      {
+                        "op": "param",
+                        "type": "Summary",
+                        "id": "accumulator"
+                      }
+                    ],
+                    "fieldId": "echo"
+                  },
+                  {
+                    "op": "param",
+                    "type": "I64",
+                    "id": "item"
+                  }
+                ]
+              }
+            ],
+            "recordType": "Summary",
+            "fieldIds": [
+              "sum",
+              "negativeCount",
+              "echo"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "increment.model-v1",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "body": {
+        "op": "i64.add",
+        "type": "I64",
+        "args": [
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "x"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "adjust.model-v1",
+      "parameters": [
+        {
+          "id": "increase",
+          "type": "Bool"
+        },
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "body": {
+        "op": "if",
+        "type": "I64",
+        "args": [
+          {
+            "op": "param",
+            "type": "Bool",
+            "id": "increase"
+          },
+          {
+            "op": "i64.add",
+            "type": "I64",
+            "args": [
+              {
+                "op": "param",
+                "type": "I64",
+                "id": "x"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "1"
+              }
+            ]
+          },
+          {
+            "op": "param",
+            "type": "I64",
+            "id": "x"
+          }
+        ]
+      }
+    },
+    {
+      "id": "head-or-zero.model-v1",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "1"
+          }
+        }
+      ],
+      "returnType": "I64",
+      "body": {
+        "op": "if",
+        "type": "I64",
+        "args": [
+          {
+            "op": "eq",
+            "type": "Bool",
+            "args": [
+              {
+                "op": "seq.length",
+                "type": "I64",
+                "args": [
+                  {
+                    "op": "param",
+                    "type": {
+                      "kind": "Seq",
+                      "elementType": "I64",
+                      "capacity": "1"
+                    },
+                    "id": "items"
+                  }
+                ]
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              }
+            ]
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "0"
+          },
+          {
+            "op": "seq.get",
+            "type": "I64",
+            "args": [
+              {
+                "op": "param",
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "1"
+                },
+                "id": "items"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "echo-summary.model-v1",
+      "parameters": [
+        {
+          "id": "summary",
+          "type": "Summary"
+        }
+      ],
+      "returnType": "Summary",
+      "body": {
+        "op": "param",
+        "type": "Summary",
+        "id": "summary"
+      }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "512",
+    "maxExpressionDepth": "24",
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "1024",
+    "maxProofEvaluationSteps": "4096"
+  }
+}

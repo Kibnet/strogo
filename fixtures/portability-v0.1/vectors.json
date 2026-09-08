@@ -1,0 +1,620 @@
+{
+  "schemaVersion": "strogo.portability-vectors.v0.1",
+  "moduleId": "portable.validation.v01",
+  "ownerBundleId": "portable.validation.owner-v01",
+  "valid": [
+    {
+      "id": "summarize-empty",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": []
+        }
+      ],
+      "expected": {
+        "type": "Summary",
+        "value": [
+          {
+            "fieldId": "sum",
+            "value": {
+              "type": "I64",
+              "value": "0"
+            }
+          },
+          {
+            "fieldId": "negativeCount",
+            "value": {
+              "type": "I64",
+              "value": "0"
+            }
+          },
+          {
+            "fieldId": "echo",
+            "value": {
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "8"
+              },
+              "value": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "summarize-mixed",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "4"
+            },
+            {
+              "type": "I64",
+              "value": "-3"
+            },
+            {
+              "type": "I64",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "type": "Summary",
+        "value": [
+          {
+            "fieldId": "sum",
+            "value": {
+              "type": "I64",
+              "value": "2"
+            }
+          },
+          {
+            "fieldId": "negativeCount",
+            "value": {
+              "type": "I64",
+              "value": "1"
+            }
+          },
+          {
+            "fieldId": "echo",
+            "value": {
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "8"
+              },
+              "value": [
+                {
+                  "type": "I64",
+                  "value": "4"
+                },
+                {
+                  "type": "I64",
+                  "value": "-3"
+                },
+                {
+                  "type": "I64",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "summarize-max-eight",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            },
+            {
+              "type": "I64",
+              "value": "1000000"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "type": "Summary",
+        "value": [
+          {
+            "fieldId": "sum",
+            "value": {
+              "type": "I64",
+              "value": "8000000"
+            }
+          },
+          {
+            "fieldId": "negativeCount",
+            "value": {
+              "type": "I64",
+              "value": "0"
+            }
+          },
+          {
+            "fieldId": "echo",
+            "value": {
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "8"
+              },
+              "value": [
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "1000000"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "summarize-min-eight",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            },
+            {
+              "type": "I64",
+              "value": "-1000000"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "type": "Summary",
+        "value": [
+          {
+            "fieldId": "sum",
+            "value": {
+              "type": "I64",
+              "value": "-8000000"
+            }
+          },
+          {
+            "fieldId": "negativeCount",
+            "value": {
+              "type": "I64",
+              "value": "8"
+            }
+          },
+          {
+            "fieldId": "echo",
+            "value": {
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "8"
+              },
+              "value": [
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                },
+                {
+                  "type": "I64",
+                  "value": "-1000000"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "adjust-false-max",
+      "functionId": "adjust",
+      "arguments": [
+        {
+          "type": "Bool",
+          "value": false
+        },
+        {
+          "type": "I64",
+          "value": "9223372036854775807"
+        }
+      ],
+      "expected": {
+        "type": "I64",
+        "value": "9223372036854775807"
+      }
+    },
+    {
+      "id": "adjust-true-minus-one",
+      "functionId": "adjust",
+      "arguments": [
+        {
+          "type": "Bool",
+          "value": true
+        },
+        {
+          "type": "I64",
+          "value": "-1"
+        }
+      ],
+      "expected": {
+        "type": "I64",
+        "value": "0"
+      }
+    },
+    {
+      "id": "adjust-true-max-minus-one",
+      "functionId": "adjust",
+      "arguments": [
+        {
+          "type": "Bool",
+          "value": true
+        },
+        {
+          "type": "I64",
+          "value": "9223372036854775806"
+        }
+      ],
+      "expected": {
+        "type": "I64",
+        "value": "9223372036854775807"
+      }
+    },
+    {
+      "id": "head-empty",
+      "functionId": "headOrZero",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "1"
+          },
+          "value": []
+        }
+      ],
+      "expected": {
+        "type": "I64",
+        "value": "0"
+      }
+    },
+    {
+      "id": "head-single",
+      "functionId": "headOrZero",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "1"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "7"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "type": "I64",
+        "value": "7"
+      }
+    },
+    {
+      "id": "echo-summary",
+      "functionId": "echoSummary",
+      "arguments": [
+        {
+          "type": "Summary",
+          "value": [
+            {
+              "fieldId": "sum",
+              "value": {
+                "type": "I64",
+                "value": "2"
+              }
+            },
+            {
+              "fieldId": "negativeCount",
+              "value": {
+                "type": "I64",
+                "value": "1"
+              }
+            },
+            {
+              "fieldId": "echo",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "8"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "4"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "-3"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "type": "Summary",
+        "value": [
+          {
+            "fieldId": "sum",
+            "value": {
+              "type": "I64",
+              "value": "2"
+            }
+          },
+          {
+            "fieldId": "negativeCount",
+            "value": {
+              "type": "I64",
+              "value": "1"
+            }
+          },
+          {
+            "fieldId": "echo",
+            "value": {
+              "type": {
+                "kind": "Seq",
+                "elementType": "I64",
+                "capacity": "8"
+              },
+              "value": [
+                {
+                  "type": "I64",
+                  "value": "4"
+                },
+                {
+                  "type": "I64",
+                  "value": "-3"
+                },
+                {
+                  "type": "I64",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "ownerRefusals": [
+    {
+      "id": "summarize-over-upper",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "1000001"
+            }
+          ]
+        }
+      ],
+      "code": "OwnerPreconditionFailed",
+      "locus": "function/summarize/requires"
+    },
+    {
+      "id": "summarize-under-lower",
+      "functionId": "summarize",
+      "arguments": [
+        {
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          "value": [
+            {
+              "type": "I64",
+              "value": "-1000001"
+            }
+          ]
+        }
+      ],
+      "code": "OwnerPreconditionFailed",
+      "locus": "function/summarize/requires"
+    },
+    {
+      "id": "adjust-true-max",
+      "functionId": "adjust",
+      "arguments": [
+        {
+          "type": "Bool",
+          "value": true
+        },
+        {
+          "type": "I64",
+          "value": "9223372036854775807"
+        }
+      ],
+      "code": "OwnerPreconditionFailed",
+      "locus": "function/adjust/requires"
+    }
+  ],
+  "transportCaseIds": [
+    "wrong-parameter-type",
+    "missing-record-field",
+    "extra-record-field",
+    "reordered-record-fields",
+    "over-capacity-sequence",
+    "null-input",
+    "malformed-json",
+    "duplicate-property",
+    "unknown-property",
+    "missing-property",
+    "wrong-schema",
+    "array-root",
+    "unknown-wire-kind",
+    "i64-leading-zero",
+    "i64-invalid",
+    "noncanonical-property-order",
+    "utf8-65536",
+    "utf8-65537",
+    "depth-32",
+    "depth-33",
+    "nodes-2048",
+    "nodes-2049",
+    "lone-surrogate",
+    "lone-surrogate-over-limit"
+  ],
+  "mutationIds": [
+    "sum-sign",
+    "reverse-fold-input",
+    "eager-head-branch",
+    "refusal-code"
+  ]
+}

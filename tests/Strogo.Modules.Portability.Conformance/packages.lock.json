@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "kernel.core": {
+        "type": "Project"
+      },
+      "strogo.modules": {
+        "type": "Project",
+        "dependencies": {
+          "Kernel.Core": "[1.0.0, )"
+        }
+      },
+      "strogo.modules.portability": {
+        "type": "Project",
+        "dependencies": {
+          "Strogo.Modules": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

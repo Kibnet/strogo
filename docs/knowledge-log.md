@@ -960,3 +960,93 @@
 - Evidence: Posting Board #9810, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); запрошены конкретный protocol и 2–3 injected bugs.
 - Последствие: до запуска нужно заранее определить target-class null criterion: проигрыш вне целевого класса не опровергает выигрыш внутри, а отсутствие выигрыша должно иметь фиксированный threshold/decision rule. Stateful scope нельзя молча приписывать текущему языку.
 - Supersedes / supersededBy: развивает K-E05-090/K-E05-095; ожидает конкретный fixture и отдельную SPEC.
+
+## K-E05-102
+
+- Дата / фаза: 2026-09-08 / fold public evidence review.
+- Тип / статус: External evidence inspection / Confirmed for retained files; no independent Linux rerun.
+- Утверждение: внешний участник проверил все 37 записей SHA-256 и 13 retained logs публичного fold package на commit `d9fbc682cadce07b4c49c3b681e2fb21a7bff7d5`: сохранённые outcomes и provenance fields согласованы с manifest. Проверка содержимого опубликованного evidence не является новым proof run или сторонним аудитом toolchain.
+- Scope: только tracked `artifacts/e05/fold-v0.1-134856f`; не WSL execution, solver correctness или независимое воспроизведение.
+- Evidence: Posting Board #9819, message `66f4ad84-32a2-4c7c-8ba6-615898290495`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e).
+- Последствие: retained package имеет внешнюю проверку внутренней целостности; дальнейший прирост evidence требует фактического Linux rerun либо нового контрпримера.
+- Supersedes / supersededBy: дополняет K-E05-097/K-E05-099, не расширяя их runtime claims.
+
+## K-E05-103
+
+- Дата / фаза: 2026-09-08 / G05 experiment economics.
+- Тип / статус: Metric clarification / Accepted publicly; not executed.
+- Утверждение: USD, elapsed time и success rate должны публиковаться отдельно при одинаковых tariffs, semantic inputs, oracle access и budget. Чтобы не получить survivor bias, дополнительно нужен `total spend / solved count`; при `solved=0` показатель undefined, а не zero. Stop rule и correctness oracle фиксируются до запуска.
+- Scope: будущий сравнительный agent experiment; иллюстрация `$10/solution` против `$2/solution` не является измерением Strogo.
+- Evidence: Posting Board #9826/#9829, messages `ced309ac-ebd1-4bdf-a6de-76d5b1cac166` и `8181cdcd-9186-403b-83bf-cf0854ee3e1d`, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704).
+- Последствие: G05 protocol обязан сохранять все failed-attempt costs и задавать обработку zero-solved до вскрытия результатов; конкретный stateful protocol и injected bugs всё ещё не предложены.
+- Supersedes / supersededBy: уточняет K-E05-101 и защищает будущий verdict от выборочного учёта успешных попыток.
+
+## K-E06-001
+
+- Дата / фаза: 2026-09-08 / portability EXEC start.
+- Тип / статус: Governance and dependency state / Confirmed.
+- Утверждение: owner-composite и bounded fold v0.1 dependencies утверждённой E06 SPEC завершены; повторная точная фраза владельца «Спеку подтверждаю» сохраняет EXEC authorization, а прямое поручение разрешает периодический push checkpoint commits.
+- Scope: E06 validation-only execution profiles; production admission, merge, release, Wasm/NativeAOT остаются за пределами этого approval.
+- Evidence: E06 Approval и action journal; public repository HEAD `d9fbc682cadce07b4c49c3b681e2fb21a7bff7d5` содержит fold completion evidence.
+- Последствие: dependency gate E06 снят; изменения выполняются по checkpoints с отдельными commits и push.
+- Supersedes / supersededBy: переводит E06 из dependency-gated SPEC в EXEC.
+
+## K-E06-002
+
+- Дата / фаза: 2026-09-08 / portability checkpoint 1.
+- Тип / статус: Workload expressivity and oracle / Confirmed locally on Windows x64.
+- Утверждение: неизменённый E06 workload из пяти public functions выражается `strogo.module.v0.2` и `strogo.owner-bundle.v0.4`: parser/compiler/owner binder принимают его, 8 owner witnesses replay проходят, а 10 обязательных valid vectors дают одинаковые результаты independent owner model и candidate reference evaluator. Три fixed false-requires inputs возвращают `OwnerPreconditionFailed` до candidate evaluation.
+- Scope: target-neutral source/owner/reference semantics; C#/Java translation, Dafny proof, target adapters и platform execution ещё не проверены.
+- Evidence: `fixtures/portability-v0.1/{module,owner,vectors,public-api}.json`; retained `artifacts/e06/contract-v0.1/{report.json,sha256.txt}`; `Strogo.Modules.Portability.Conformance` — `PASS portability contract checks=44 valid=10 refusals=3 transport=24 mutations=4`.
+- Последствие: workload нельзя считать слишком выразительным для текущего source/owner слоя; следующий барьер находится в proof lowering и target ABI.
+- Supersedes / supersededBy: исполняет шаг 2 E06 §13 в пределах source/interface/oracle contract.
+
+## K-E06-003
+
+- Дата / фаза: 2026-09-08 / portability proof-boundary analysis.
+- Тип / статус: Implementation gap / Confirmed by source inspection; unresolved at checkpoint 1.
+- Утверждение: текущий `ModulesDafnyLowerer.Lower(ModuleIr, OwnerBundleV04)` требует, чтобы каждая owner entry содержала fold, тогда как E06 workload намеренно смешивает один root fold, scalar entries, lazy `if` и `adjust → increment`. Упрощение workload нарушило бы утверждённую SPEC.
+- Scope: existing fold lowerer dispatch/binding; это не опровержение выразимости module/owner semantics и не backend mismatch.
+- Evidence: `src/Strogo.Modules/DafnyFoldLowering.cs` проверяет `binding.Entries.Any(entry => entry.CandidateFold is null)` и возвращает `FoldOwnerRequired`; E06 fixture имеет fold только в `summarize`.
+- Последствие: следующий checkpoint должен обобщить owner-aware lowering на mixed entries, topological call proof и общий verified wrapper, сохранив прежние fold/scalar regressions.
+- Supersedes / supersededBy: конкретизирует предусмотренный E06 §14 stop condition; выполнение продолжается через утверждённое additive lowering изменение.
+
+## K-E06-004
+
+- Дата / фаза: 2026-09-08 / external E06 consultation.
+- Тип / статус: Public request / Published and read back; awaiting counterexamples.
+- Утверждение: опубликован falsifiable запрос на минимальное C#/Java semantic divergence либо ZIP/path-normalization bypass в точных границах frozen E06 workload; публичные примеры заранее классифицированы как development fixtures, а не held-out evidence.
+- Scope: Posting Board consultation; публикация не является implementation или validation evidence.
+- Evidence: Posting Board #9830, message `89f89172-8404-4764-b0fb-e41e000e9ce4`, exact body 881 UTF-8 bytes, preview request `d14dd972-6fc8-408e-b5ea-afcce080ac74`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e). Preview подтвердил root/public=true/published=false; POST succeeded; thread read-back подтвердил seq/ID/body.
+- Последствие: рациональный конкретный counterexample должен быть сохранён, воспроизведён и учтён до финального portability verdict; отсутствие ответа не считается подтверждением дизайна.
+- Supersedes / supersededBy: продолжает внешний review contract E06 SPEC.
+
+## K-E06-005
+
+- Дата / фаза: 2026-09-08 / E06 adversarial fixture design.
+- Тип / статус: External test proposal / Accepted as development cases; not executed.
+- Утверждение: lazy control flow следует различать парой, где невыбранная ветвь не определена, но backend не должен вычислять её eagerly. `headOrZero([])` уже покрывает sequence-boundary вариант; дополнительный checked-overflow variant полезен как internal lowering test. Вызов target candidate вне owner `requires` остаётся diagnostic negative и не считается semantic counterexample. Raw JAR duplicates после path/case-fold validation должны отклоняться до extraction/map независимо от entry order и равенства bytes.
+- Scope: будущие lowering и A9 normalization tests; public E06 ABI и fixed five-function workload не меняются.
+- Evidence: Posting Board #9831/#9833, messages `74313173-9bd9-4790-9fe9-1538de996c0e` и `32c2e66b-186c-435e-a299-e3d9d27208e5`, [thread](https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e); reply preview request `62e9e2b3-abc4-48a9-8116-07c4218bb532`, exact body 816 UTF-8 bytes, published and read back.
+- Последствие: добавить overflow-lazy negative/positive pair без новой public function; A9 duplicate fixtures должны переставлять обе записи и пересчитывать outer hashes, но всё равно получать `CanonicalJarRejected`.
+- Supersedes / supersededBy: уточняет K-E06-004 и тест-план E06 A7/A9.
+
+## K-E06-006
+
+- Дата / фаза: 2026-09-08 / E06 managed validation runbook.
+- Тип / статус: Procedure correction / Confirmed locally.
+- Утверждение: для .NET SDK 10 lock-file gate выполняется как `dotnet restore Kernel.slnx --locked-mode`, затем `dotnet build Kernel.slnx --no-restore`; передача `--locked-mode` непосредственно `dotnet build` попадает в MSBuild и завершается `MSB1001: неизвестный ключ`.
+- Scope: E06 validation command syntax; package lock content и language semantics не меняются.
+- Evidence: локальный exit failure exact command из прежнего §11; исправленный двухшаговый command выполняется перед checkpoint commit.
+- Последствие: все последующие E06 harnesses должны разделять locked restore и no-restore build, чтобы ошибка команды не была принята за дефект проекта.
+- Supersedes / supersededBy: исправляет пример команд E06 §11.
+
+## K-E06-007
+
+- Дата / фаза: 2026-09-08 / checkpoint 1 regression execution.
+- Тип / статус: Validation instability / Qualified.
+- Утверждение: одновременный запуск четырёх managed conformance executables дал `Kernel.Graph.Conformance` отказ `ProofNotEstablished` в начальном CLI compile; немедленный отдельный последовательный запуск того же binary/revision завершился `PASS all: 141`. Причина не локализована; resource/solver contention является гипотезой, а не подтверждённым диагнозом.
+- Scope: orchestration тестов на текущем Windows host; portability contract и Graph implementation не имеют project reference друг на друга.
+- Evidence: первый parallel run — Graph exit `1`, затем sequential `dotnet run --project tests/Kernel.Graph.Conformance -c Release --no-build` — exit `0`, `PASS all: 141`.
+- Последствие: checkpoint evidence перечисляет initial failure и sequential pass; полные solver-backed suites далее запускаются последовательно, пока отдельный experiment не подтвердит безопасность parallel orchestration.
+- Supersedes / supersededBy: ограничивает validation claim checkpoint 1; не опровергает прежний TaskGraph baseline.
