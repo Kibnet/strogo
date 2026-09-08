@@ -33,7 +33,7 @@ New-Item -ItemType Directory -Path $consumer | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo "tests\fixtures\portability-consumers\csharp\Consumer.csproj") -Destination (Join-Path $consumer "Consumer.csproj")
 Copy-Item -LiteralPath (Join-Path $repo "tests\fixtures\portability-consumers\csharp\Program.cs") -Destination (Join-Path $consumer "Program.cs")
 $vectors = Join-Path $repo "fixtures\portability-v0.1\invoke-vectors.jsonl"
-$consumerOutput = & $DotNetPath run --project (Join-Path $consumer "Consumer.csproj") -c Release "-p:PortableAssemblyPath=$staged" -- $vectors 2>&1
+$consumerOutput = & $DotNetPath run --project (Join-Path $consumer "Consumer.csproj") -c Release "-p:ImportDirectoryBuildProps=false" "-p:ImportDirectoryBuildTargets=false" "-p:PortableAssemblyPath=$staged" -- $vectors 2>&1
 [IO.File]::WriteAllLines((Join-Path $run "consumer.log"), [string[]]$consumerOutput, [Text.UTF8Encoding]::new($false))
 if ($LASTEXITCODE -ne 0) { throw "consumer failed`n$($consumerOutput -join "`n")" }
 if ($consumerOutput -notcontains "PASS standalone C# consumer cases=8 transport=24 additional=1") { throw "consumer PASS marker unavailable" }

@@ -344,6 +344,10 @@ try
     Check(dotnetTargetProject.Contains("<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>", StringComparison.Ordinal), "dotnet target pins overflow checks independently of ancestor props");
     var dotnetBuildDriver = File.ReadAllText(Path.Combine(root, "tools", "Build-PortableDotNet.sh"));
     Check(dotnetBuildDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false", StringComparison.Ordinal), "dotnet build excludes ancestor Directory.Build imports");
+    var dotnetLinuxPackageDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Package.sh"));
+    Check(dotnetLinuxPackageDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:PortableAssemblyPath=", StringComparison.Ordinal), "linux package consumer excludes ancestor Directory.Build imports");
+    var dotnetWindowsPackageDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Package.ps1"));
+    Check(dotnetWindowsPackageDriver.Contains("\"-p:ImportDirectoryBuildProps=false\" \"-p:ImportDirectoryBuildTargets=false\" \"-p:PortableAssemblyPath=", StringComparison.Ordinal), "windows package consumer excludes ancestor Directory.Build imports");
     var portabilitySources = Directory.GetFiles(Path.Combine(root, "src", "Strogo.Modules.Portability"), "*.cs", SearchOption.AllDirectories).SelectMany(File.ReadAllLines).ToArray();
     Check(!portabilitySources.Any(line => line.Contains("TrustedModuleRuntime", StringComparison.Ordinal)), "portability project does not reference production runtime");
 }

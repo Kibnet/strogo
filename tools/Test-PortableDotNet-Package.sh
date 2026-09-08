@@ -42,7 +42,7 @@ consumer="$run_dir/consumer"
 mkdir -p "$consumer"
 cp "$repo_root/tests/fixtures/portability-consumers/csharp/Consumer.csproj" "$consumer/Consumer.csproj"
 cp "$repo_root/tests/fixtures/portability-consumers/csharp/Program.cs" "$consumer/Program.cs"
-"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:PortableAssemblyPath="$staged" -- "$repo_root/fixtures/portability-v0.1/invoke-vectors.jsonl" >"$run_dir/consumer.log" 2>&1
+"$dotnet" run --project "$consumer/Consumer.csproj" -c Release -p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:PortableAssemblyPath="$staged" -- "$repo_root/fixtures/portability-v0.1/invoke-vectors.jsonl" >"$run_dir/consumer.log" 2>&1
 grep -Fxq 'PASS standalone C# consumer cases=8 transport=24 additional=1' "$run_dir/consumer.log"
 grep -Fxq 'PASS standalone C# invoke vectors=13' "$run_dir/consumer.log"
 
