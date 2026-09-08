@@ -1,0 +1,2 @@
+PASS standalone Java consumer cases=8 transport=24 additional=1
+PASS standalone Java invoke vectors=13

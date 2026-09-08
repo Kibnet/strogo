@@ -1620,3 +1620,13 @@
 - Evidence: `PortabilityReportV01.cs`, `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `dotnet build Kernel.slnx -c Release --no-restore` — 0 warnings/errors; portability conformance — `PASS portability contract checks=224 valid=10 refusals=3 transport=24 mutations=4`.
 - Последствие: A10 writer injection seam закрыт для текущего synthetic report checkpoint; следующий distinguishing gate — same-revision real .NET receipt integration либо отдельный owner-approved E06A JVM baseline.
 - Supersedes / supersededBy: уточняет K-E06-062 и закрывает его оставшийся writer-failure gap; E06R/E06A approval rules unchanged.
+
+## K-E06-065
+
+- Дата / фаза: 2026-09-08 / E06A Stage 2 JVM baseline approval and compile.
+- Тип / статус: Owner-approved upstream lint baseline and Phase 2 execution / Confirmed on exact approved candidate tree.
+- Утверждение: владелец подтвердил `Baseline подтверждаю` для exact `baselineDigest=cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1`. Baseline promoted в `targets/jvm-java17-v1/upstream-warning-baseline.json`; closed upstream exclusions `{cast,rawtypes,varargs,serial}` дали zero-diagnostic javac compile с `109` class files, strict Java adapter — `16`, strict consumer — `3`; Java consumer выполнил `8` exact cases, `24` transport cases, `1` additional surrogate case и `13` owner vectors.
+- Scope: exact source tree digest `3d49fd994bee96529ee9dae2ed9536809f8cfb9821d865b4066dd2c156947eed`, approved baseline `cafa0caa…c0e1`, Windows checkout `d21d969ee4f0cdfcc942e741be04b2fb6e13011b`; это validation-only Phase 2, не JAR normalizer, runtime closure, HotSpot A12, production admission или независимое Linux execution.
+- Evidence: `artifacts/e06/jvm-phase2-d21d969/**`; phase2/adapter/consumer stdout и stderr пустые, all three javac invocations exit `0`, Java run exit `0`; `tests/Strogo.Modules.Portability.Conformance` после tracked baseline binding — `PASS portability contract checks=225 valid=10 refusals=3 transport=24 mutations=4`.
+- Последствие: E06A closed-exclusion build gate принят для exact approved fixture. Следующий отдельный этап — canonical deterministic JAR normalizer/package integration; новый baseline или изменение translator/harness closure потребует новой owner approval.
+- Supersedes / supersededBy: supersedes pending Stage 2 state K-E06-057 and updates E06A Approved baseline snapshot; does not change E06R or production admission boundaries.

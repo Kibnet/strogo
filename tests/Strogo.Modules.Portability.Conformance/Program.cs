@@ -124,6 +124,9 @@ Check(jvmCandidate.Warnings.Length == 106 && jvmCandidate.Warnings.Count(item =>
 var jvmWarningKeys = jvmCandidate.Warnings.Select(item => $"{item.Path}\0{item.Line}\0{item.Category}\0{item.Message}\0{item.ContextDigest}").ToArray();
 Check(jvmWarningKeys.SequenceEqual(jvmWarningKeys.Order(StringComparer.Ordinal), StringComparer.Ordinal), "JVM warning entries use canonical ordinal tuple order");
 Check(JvmUpstreamWarnings.Validate(jvmCandidate.Bytes, jvmCandidate.BaselineDigest, jvmIdentity, jvmSources, Encoding.UTF8.GetBytes(jvmLf)).BaselineDigest == jvmCandidate.BaselineDigest, "owner-approved JVM baseline digest validates exact observation");
+var approvedBaselinePath = Path.Combine(root, "targets", "jvm-java17-v1", "upstream-warning-baseline.json");
+var approvedBaselineBytes = File.ReadAllBytes(approvedBaselinePath);
+Check(PortabilityContract.DomainHash($"{JvmUpstreamWarnings.SchemaVersion}/artifact", approvedBaselineBytes) == "cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1", "tracked JVM baseline is bound to the owner-approved digest");
 foreach (var mutation in new[]
 {
     (Name: "fixture", Identity: jvmIdentity with { FixtureModuleDigest = new string('8', 64) }),

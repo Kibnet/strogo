@@ -423,18 +423,19 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 ### Post-EXEC Review
 
 - Stage 1 implementation: **PASS**, открытых `BLOCKER/HIGH/MEDIUM` нет. Reviewer проверил exact warnings/categories, two-lane equality, ordinal ordering, owner digest gate, coordinated rewrite, exact quarantine cleanup, bounded process tree, .NET runtime/binary identity, duration receipts и закрытый `JavacProbeFailed` outcome.
-- Evidence boundary: review выполнен процедурно read-only, но effective sandbox был writable; reviewer не повторял команды. Agent-run validation: solution build `0/0`, portability conformance `198`, Modules `362`, Graph `141`, Reserve `29/29` и `10904` assertions.
-- Stage 2 post-EXEC review: не выполнялся и остаётся заблокирован owner baseline approval.
+- Stage 2 implementation: **PASS для exact approved baseline**, открытых `BLOCKER/HIGH/MEDIUM` нет. Проверены closed upstream exclusions, zero-diagnostic generated compilation, strict adapter/consumer compilation и Java execution `8+24+1+13`.
+- Evidence boundary: review выполнен процедурно read-only, effective sandbox был writable; reviewer не повторял команды. Stage 2 agent-run использовал exact approved baseline `cafa0caa…c0e1` и source tree `3d49fd…7eed`, но запуск выполнен в отдельном Windows checkout `d21d969`, не является независимым Linux execution и не закрывает JAR/runtime/HotSpot.
+- Validation evidence: solution build `0/0`, portability conformance `225` (включая tracked baseline digest binding), Modules `362`, Graph `141`, Reserve `29/29` и `10904` assertions.
 
 ## Approval
 
-Владелец подтвердил SPEC фразой **«Спеку подтверждаю»** 2026-09-08; это разрешает только EXEC stage 1: validator/runner и построение two-root baseline candidate. Подтверждение не разрешает tracked baseline, phase 2, JAR или portability admission. Добавленный после первого probe `-Xmaxwarns 10000` закрывает обнаруженную truncation и не расширяет разрешённый outcome.
+Владелец подтвердил SPEC фразой **«Спеку подтверждаю»** 2026-09-08; затем фразой **«Baseline подтверждаю»** 2026-09-08 для exact candidate digest `cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1`. Это переводит snapshot в `APPROVED`, разрешает tracked baseline и Phase 2 closed-exclusion build. Подтверждение не разрешает JAR normalizer, runtime closure, HotSpot или portability admission. Добавленный после первого probe `-Xmaxwarns 10000` закрывает обнаруженную truncation и не расширяет разрешённый outcome.
 
 После stage 1 агент заполняет следующий snapshot и показывает evidence владельцу:
 
 ### Approved baseline snapshot
 
-- Status: `CANDIDATE_READY`; approval всё ещё `PENDING`.
+- Status: `APPROVED`; Phase 2 разрешён для exact identity ниже.
 - Clean public revision: `d21d969ee4f0cdfcc942e741be04b2fb6e13011b`.
 - Candidate `baselineDigest`: `cafa0caad40e22d1d2ff3803ea350dea95f01c99f099ada75b16ef228035c0e1`.
 - `normalizedDiagnosticsDigest`: `c18b3cf91a4d2a47f022738a8b807a30463c5548847c1f6e7eed87571f369d2c`.
@@ -443,7 +444,7 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 - Command/validator/harness identities: command `941eb81e1e2b31e687d5d74968487b197823ba8a337b58bffed41b37e9e7dedb`; validator `94e86850fb5e1e206da5b4974b7ede4a3f36bac8c6688162d39fe87d8cfa3402`; harness `2bf8736f8422e9a5936b68c657f99455a14bf8ad0caf8db37cd40f5e25ec296a`.
 - Two-root receipts: `artifacts/e06/jvm-baseline-candidate-d21d969/lane-a-receipt.json` SHA-256 `2140d304e1d9b107e44b5d8f989a90c1a95fdff26f9a2f680dbeed948f158006`; `lane-b-receipt.json` SHA-256 `99a80035180a33abe28d56c9b45430b67bd4df0ebfebf5b2a81c40500cffef97`; retained report SHA-256 `9fc5f25ac95f4f8583d5ec62686fda5d1869a25904e271c860a9111b9221d373`.
 - Exact candidate bytes: local untracked `artifacts/local-validation/e06/jvm-baseline-d21d969/baseline-candidate.json`, SHA-256 `5fd98abbbd75d3a38bca9ce3b3b205e0239d0b26ec6a9e44a239a700fcfe0007`; tracked baseline path отсутствует.
-- Owner decision: ожидается фраза **«Baseline подтверждаю»** именно для candidate digest `cafa0caa…c0e1`; только она меняет status на `APPROVED` и разрешает EXEC stage 2.
+- Owner decision: фраза **«Baseline подтверждаю»** получена 2026-09-08 именно для candidate digest `cafa0caa…c0e1`; Phase 2 выполнен с этим внешним expected digest.
 
 ## 20. Журнал действий агента
 
@@ -451,4 +452,5 @@ Standalone consumer запускается pinned `java 17.0.19` из той ж�
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Исправить опровергнутую upstream lint норму без blind suppression | 0.99 | Exact owner-approved baseline ещё не существует | После approval выполнить только EXEC stage 1 и показать candidate digest | Да, после stage 1 | Procedural adversarial reviewer: первоначально 2 BLOCKER + 3 HIGH + 2 MEDIUM, затем 4 MEDIUM; final snapshot `eb1c7842` PASS | Exact unsuppressed baseline с внешним owner anchor сохраняет strictness сильнее простого exclusion; writable reviewer sandbox раскрыт как residual risk | Эта SPEC, K-E06-056 |
 | EXEC→SPEC | Исключить скрытое обрезание full-lint diagnostics | 0.999 | Повторный review exact flag | Закрепить `-Xmaxwarns 10000`, exact `106` counts и truncation negative | Нет | Первый full probe exit `0`, но javac показал `only showing the first 100 warnings, of 106 total`; повтор с `-Xmaxwarns 10000` дал `35 cast + 67 rawtypes + 1 serial + 3 varargs`, terminal `106 warnings` | Без max override baseline не был бы исчерпывающим; flag является command identity и сужает blind spot | Local inspect receipts; future knowledge-log entry |
-| EXEC Stage 1 | Построить approval-gated full-lint candidate на точном публичном commit | 0.999 | Решение владельца по exact digest | Показать candidate/receipts; не начинать phase 2 | Да | Clean `d21d969`: two lanes byte-equal, `106` warnings, baseline `cafa0caa…c0e1`, cleanup PASS; post-EXEC reviewer PASS | Candidate связан с source/tool/command/.NET/JDK/validator/harness identities; tracked baseline и phase 2 отсутствуют | `artifacts/e06/jvm-baseline-candidate-d21d969/**`, K-E06-057 |
+| EXEC Stage 1 | Построить approval-gated full-lint candidate на точном публичном commit | 0.999 | Решение владельца по exact digest | Показать candidate/receipts; не начинать phase 2 | Да | Clean `d21d969`: two lanes byte-equal, `106` warnings, baseline `cafa0caa…c0e1`, cleanup PASS; post-EXEC reviewer PASS | Candidate связан с source/tool/command/.NET/JDK/validator/harness identities | `artifacts/e06/jvm-baseline-candidate-d21d969/**`, K-E06-057 |
+| EXEC Stage 2 | Выполнить closed-exclusion compile после owner baseline approval | 0.999 | JAR/runtime/HotSpot implementation | Сохранить exact phase-2 receipts и перейти к JAR SPEC | Да | Owner подтвердил `Baseline подтверждаю`; exact generated `109` classes, strict adapter `16`, consumer `3`, Java run `8+24+1+13`, stdout/stderr empty | Phase 2 использует только approved `cafa0caa…c0e1`; JAR, runtime closure и HotSpot не входят в этот checkpoint | `artifacts/e06/jvm-phase2-d21d969/**`, K-E06-065 |

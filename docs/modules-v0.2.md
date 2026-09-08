@@ -257,6 +257,6 @@ Binder требует точного совпадения exports, `contractRef`
 
 Canonical JSON имеет boundary-поля `purpose=validation-only`, `contractStatus=validation-fixture` и `admissionStatus=NotAdmittable`. `semanticDigest` включает нормативные identities, gate summaries и owner outcomes, но не включает timestamps, PID, raw logs, stderr или performance attachments. Markdown генерируется из той же модели и явно сохраняет границу fixed workload без production admission и без вывода G05/G06.
 
-`PortabilityReportWriter.WriteNewDirectory` повторно валидирует report, пишет receipts в закрытую структуру, создаёт `sha256.txt` последним и выполняет no-overwrite rename. JVM receipts до отдельного E06A approval не создаются; synthetic report fixture не является фактическим cross-platform verdict.
+`PortabilityReportWriter.WriteNewDirectory` повторно валидирует report, пишет receipts в закрытую структуру, создаёт `sha256.txt` последним и выполняет no-overwrite rename. E06A baseline теперь owner-approved для exact digest `cafa0caa…c0e1`; JVM Phase 2 прошёл на exact approved source tree, но JAR normalizer, runtime closure и HotSpot A12 ещё не реализованы.
 
 Writer также имеет явный тестовый fault seam `PortabilityReportWriterFaultPlan`: отказ записи, read-back, хеширования и cleanup моделируется до публикации. Ошибка возвращает bounded stage/staging diagnostic; при успешной очистке final directory и `sha256.txt` отсутствуют, а при отказе cleanup staging сохраняется только как локальный диагностический остаток.
