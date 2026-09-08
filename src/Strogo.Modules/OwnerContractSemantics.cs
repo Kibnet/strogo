@@ -110,7 +110,7 @@ internal static class OwnerContractSemantics
             throw ModulesExceptionFactory.Error("owner-parse", "OwnerTypeClosureExtraneous", extraneous[0], new { types = extraneous });
     }
 
-    private static TypeRef ValidateExpression(
+    internal static TypeRef ValidateExpression(
         OwnerExpression expression,
         IReadOnlyDictionary<string, TypeRef> parameters,
         IReadOnlyDictionary<string, TypeDecl> types,

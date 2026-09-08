@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Numerics;
 
 namespace Strogo.Modules;
 
@@ -6,6 +7,7 @@ public static class OwnerBundleVersions
 {
     public const string SchemaVersion = "strogo.owner-bundle.v0.3";
     public const string PreviousSchemaVersion = "strogo.owner-bundle.v0.2";
+    public const string SchemaVersionV04 = "strogo.owner-bundle.v0.4";
 }
 
 public sealed record OwnerBundleLimits(
@@ -30,7 +32,12 @@ public sealed record OwnerExpression(
     string? RecordType = null,
     ImmutableArray<string> FieldIds = default,
     TypeRef? ElementType = null,
-    int? Capacity = null);
+    int? Capacity = null,
+    OwnerFoldStep? FoldStep = null);
+
+public sealed record OwnerFoldStep(
+    ImmutableArray<FunctionParameter> Parameters,
+    OwnerExpression Body);
 
 public sealed record OwnerModel(
     string Id,
@@ -114,3 +121,90 @@ public sealed record OwnerWitnessReplayResult(
     int CheckedWitnesses,
     OwnerWitnessCounterexample? Counterexample,
     string? FailureCode = null);
+
+public sealed record OwnerBundleLimitsV04(
+    int MaxExpressionNodes,
+    int MaxExpressionDepth,
+    int MaxWitnessesPerEntry,
+    int MaxWitnessValueNodes,
+    int MaxProofEvaluationSteps)
+{
+    public const int ProofEvaluationStepsHardMaximum = 262144;
+}
+
+public sealed record OwnerModelV04(
+    string Id,
+    ImmutableArray<FunctionParameter> Parameters,
+    TypeRef ReturnType,
+    OwnerExpression Body);
+
+public sealed record OwnerEntryContractV04(
+    string Id,
+    string FunctionRef,
+    ImmutableArray<FunctionParameter> Parameters,
+    TypeRef ReturnType,
+    ProofExpression Requires,
+    ImmutableArray<string> Effects,
+    ImmutableArray<OwnerWitness> Witnesses,
+    string ModelRef);
+
+public sealed class OwnerBundleV04
+{
+    private readonly byte[] canonicalBytes;
+
+    internal OwnerBundleV04(
+        string bundleId,
+        ImmutableArray<TypeDecl> types,
+        ImmutableArray<OwnerEntryContractV04> entryContracts,
+        ImmutableArray<OwnerModelV04> models,
+        OwnerBundleLimitsV04 limits,
+        byte[] canonicalBytes)
+    {
+        BundleId = bundleId;
+        Types = types;
+        EntryContracts = entryContracts;
+        Models = models;
+        Limits = limits;
+        this.canonicalBytes = canonicalBytes.ToArray();
+        BundleDigest = OwnerBundleV04Codec.BundleDigest(this.canonicalBytes);
+    }
+
+    public string SchemaVersion => OwnerBundleVersions.SchemaVersionV04;
+    public string BundleId { get; }
+    public ImmutableArray<TypeDecl> Types { get; }
+    public ImmutableArray<OwnerEntryContractV04> EntryContracts { get; }
+    public ImmutableArray<OwnerModelV04> Models { get; }
+    public OwnerBundleLimitsV04 Limits { get; }
+    public byte[] CanonicalBytes => canonicalBytes.ToArray();
+    public string BundleDigest { get; }
+}
+
+public abstract record ProofValue;
+public sealed record ProofI64(long Value) : ProofValue;
+public sealed record ProofBool(bool Value) : ProofValue;
+public sealed record ProofMathInt(BigInteger Value) : ProofValue;
+public sealed record ProofModuleValue(ModuleValue Value) : ProofValue;
+
+public sealed record FoldProofContext(
+    long PrefixLength,
+    ModuleSequence Sequence,
+    ModuleValue InitialAccumulator,
+    ModuleValue Accumulator,
+    ImmutableArray<ModuleValue> Environment);
+
+public sealed record EvaluatedOwnerWitnessV04(
+    string Id,
+    ImmutableArray<OwnerWitnessArgument> Arguments,
+    ModuleValue ModelResult);
+
+public sealed record BoundOwnerEntryV04(
+    FunctionIr Function,
+    OwnerEntryContractV04 Contract,
+    OwnerModelV04 Model,
+    IrInstruction? CandidateFold,
+    ImmutableArray<EvaluatedOwnerWitnessV04> Witnesses);
+
+public sealed record OwnerContractBindingV04(
+    ModuleIr Module,
+    OwnerBundleV04 Bundle,
+    ImmutableArray<BoundOwnerEntryV04> Entries);

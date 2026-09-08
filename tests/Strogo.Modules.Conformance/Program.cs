@@ -997,6 +997,78 @@ try
     Check(ModulesParser.ParseModule(quantifiedFold).Source.Functions.Length == 2, "fold proof supports one bounded sequence quantifier and scoped binder");
     reports.Add(new { kind = "fold", fixture = "fold-sum-valid.json", sourceDigest = foldParsed.SourceDigest, irDigest = ModulesCodec.IrDigest(foldIr.CanonicalBytes), semanticChecks = 17 });
 
+    var ownerFoldBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner-fold-sum-valid-v0.4.json"));
+    var ownerFold = OwnerBundleV04Parser.Parse(ownerFoldBytes);
+    Check(ownerFold.SchemaVersion == "strogo.owner-bundle.v0.4" && ownerFold.Limits.MaxProofEvaluationSteps == 128, "owner v0.4 parses the explicit proof budget");
+    Check(OwnerBundleV04Parser.Parse(ownerFold.CanonicalBytes).BundleDigest == ownerFold.BundleDigest, "owner v0.4 canonical bytes roundtrip to the same digest");
+    Check(CaptureOwnerReject(() => OwnerBundleParser.Parse(ownerFoldBytes)).Code == "SchemaVersionMismatch", "owner v0.3 parser rejects v0.4 bytes");
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(ownerBytes)).Code == "OwnerBundleMigrationRequired", "owner v0.4 parser requires explicit migration from v0.3");
+    var migratedV04Bytes = OwnerBundleMigrator.MigrateV03ToV04(ownerBytes);
+    var migratedV04 = OwnerBundleV04Parser.Parse(migratedV04Bytes);
+    Check(migratedV04.Limits.MaxExpressionNodes == owner.Limits.MaxExpressionNodes
+        && migratedV04.Limits.MaxExpressionDepth == owner.Limits.MaxExpressionDepth
+        && migratedV04.Limits.MaxWitnessesPerEntry == owner.Limits.MaxWitnessesPerEntry
+        && migratedV04.Limits.MaxWitnessValueNodes == owner.Limits.MaxWitnessValueNodes
+        && migratedV04.Limits.MaxProofEvaluationSteps == OwnerBundleLimitsV04.ProofEvaluationStepsHardMaximum, "v0.3 to v0.4 migration preserves old limits and adds the hard proof budget");
+    using (var oldCanonicalOwner = JsonDocument.Parse(owner.CanonicalBytes))
+    using (var newCanonicalOwner = JsonDocument.Parse(migratedV04.CanonicalBytes))
+        Check(oldCanonicalOwner.RootElement.GetProperty("entryContracts")[0].GetProperty("requires").GetRawText()
+            == newCanonicalOwner.RootElement.GetProperty("entryContracts")[0].GetProperty("requires").GetRawText(), "v0.3 requires remains byte-identical as a canonical v0.4 subtree");
+    var migratedV04Binding = OwnerContractBinderV04.Bind(ir, migratedV04);
+    Check(OwnerContractReplayV04.Replay(migratedV04Binding).Status == "Pass" && migratedV04Binding.Entries[0].CandidateFold is null, "migrated non-fold v0.3 owner behavior remains replayable in v0.4");
+
+    var foldBinding = OwnerContractBinderV04.Bind(foldIr, ownerFold);
+    Check(foldBinding.Entries.Length == 2 && foldBinding.Entries.All(entry => entry.CandidateFold?.Fold is not null), "owner binder pairs each candidate fold with one owner fold");
+    var foldReplay = OwnerContractReplayV04.Replay(foldBinding);
+    Check(foldReplay.Status == "Pass" && foldReplay.CheckedWitnesses == 2, "owner v0.4 witness replay matches candidate fold outcomes");
+    Check(foldBinding.Entries.Single(entry => entry.Contract.Id == "sumContract").Witnesses[0].ModelResult is ModuleI64 { Value: 6 }, "owner fold model executes the exact left sum");
+    Check(foldBinding.Entries.Single(entry => entry.Contract.Id == "sumWithBiasContract").Witnesses[0].ModelResult is ModuleI64 { Value: 22 }, "owner fold model binds ordered environment values");
+    var sumEntry = ownerFold.EntryContracts.Single(entry => entry.Id == "sumContract");
+    var sumEnvironment = sumEntry.Witnesses[0].Arguments.ToImmutableDictionary(argument => argument.ParameterId, argument => argument.Value, StringComparer.Ordinal);
+    Check(OwnerProofEvaluator.EvaluateBoolean(sumEntry.Requires, sumEnvironment, ownerFold.Types, ownerFold.Limits.MaxProofEvaluationSteps), "owner proof evaluator handles bounded quantification and unbounded sum");
+    Check(OwnerProofEvaluator.EvaluateBoolean(sumEntry.Requires, sumEnvironment, ownerFold.Types, ownerFold.Limits.MaxProofEvaluationSteps), "each proof evaluation receives a fresh independent step counter");
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.EvaluateBoolean(sumEntry.Requires, sumEnvironment, ownerFold.Types, 1)).Code == "ProofEvaluationStepLimitExceeded", "proof evaluator fails closed at its own explicit step budget");
+    var invalidPrefix = new ProofExpression("seq.prefix_sum_i64", new TypeRef("MathInt"),
+        [new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 4), ImmutableArray<ProofExpression>.Empty, ReferenceId: "items"),
+         new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "4")]);
+    var shortEnvironment = new Dictionary<string, ModuleValue> { ["items"] = new ModuleSequence(new TypeRef("I64"), 4, [new ModuleI64(1)]) };
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(invalidPrefix, shortEnvironment, Array.Empty<TypeDecl>(), 16)).Code == "ProofPrefixLengthOutOfRange", "proof evaluator rejects prefix lengths beyond the actual sequence");
+    var emptySequenceProof = new ProofExpression("seq.empty", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1), ImmutableArray<ProofExpression>.Empty, ElementType: new TypeRef("I64"), Capacity: 1);
+    var outOfRangeItemProof = new ProofExpression("seq.get", new TypeRef("I64"),
+        [emptySequenceProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")]);
+    var boundProof = new ProofExpression("proof.bound", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, BinderId: "i");
+    var latePartialBody = new ProofExpression("if", new TypeRef("Bool"),
+        [new ProofExpression("eq", new TypeRef("Bool"), [boundProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")]),
+         new ProofExpression("bool.const", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty, BoolValue: false),
+         new ProofExpression("eq", new TypeRef("Bool"), [outOfRangeItemProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")])]);
+    var strictForAll = new ProofExpression("forall.sequence", new TypeRef("Bool"), ImmutableArray<ProofExpression>.Empty,
+        BinderId: "i",
+        Sequence: new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 4), ImmutableArray<ProofExpression>.Empty, ReferenceId: "items"),
+        Body: latePartialBody);
+    var twoItemEnvironment = new Dictionary<string, ModuleValue> { ["items"] = new ModuleSequence(new TypeRef("I64"), 4, [new ModuleI64(1), new ModuleI64(2)]) };
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(strictForAll, twoItemEnvironment, Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "forall evaluates every body instance to preserve totality after an earlier false result");
+    var prefixOrderProof = new ProofExpression("seq.prefix_sum_i64", new TypeRef("MathInt"),
+        [new ProofExpression("seq.get", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1), [emptySequenceProof, new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "0")]),
+         new ProofExpression("i64.add", new TypeRef("I64"), [new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: long.MaxValue.ToString(CultureInfo.InvariantCulture)), new ProofExpression("i64.const", new TypeRef("I64"), ImmutableArray<ProofExpression>.Empty, NumberValue: "1")])]);
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(prefixOrderProof, new Dictionary<string, ModuleValue>(), Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "prefix sum evaluates sequence before prefix length");
+    var fullSequenceEnvironment = new Dictionary<string, ModuleValue> { ["full"] = new ModuleSequence(new TypeRef("I64"), 1, [new ModuleI64(1)]) };
+    var strictAppend = new ProofExpression("seq.append", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1),
+        [new ProofExpression("param", new TypeRef("Seq", Element: new TypeRef("I64"), Capacity: 1), ImmutableArray<ProofExpression>.Empty, ReferenceId: "full"), outOfRangeItemProof]);
+    Check(CaptureOwnerReject(() => OwnerProofEvaluator.Evaluate(strictAppend, fullSequenceEnvironment, Array.Empty<TypeDecl>(), 64)).Code == "SequenceIndexOutOfRange", "sequence append evaluates its item before checking capacity");
+
+    JsonObject MutateOwnerFold(Action<JsonObject> mutation)
+    {
+        var node = JsonNode.Parse(ownerFoldBytes)!.AsObject();
+        mutation(node);
+        return node;
+    }
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["limits"]!["maxProofEvaluationSteps"] = "1").ToJsonString())).Code == "ProofWorstCaseCostExceeded", "owner parser rejects a proof whose static worst-case cost exceeds the approved budget");
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["entryContracts"]![0]!["requires"] = JsonNode.Parse("{\"op\":\"fold.accumulator\",\"type\":\"I64\"}")).ToJsonString())).Code == "UnsupportedProofOpcode", "owner requires cannot reference candidate fold roles");
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["models"]![0]!["body"]!["step"]!["body"]!["op"] = "fold").ToJsonString())).Code == "NestedFoldNotSupported", "owner model step cannot contain a nested fold");
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["models"]![0]!["body"]!["step"]!["parameters"]![1]!["type"] = "Bool").ToJsonString())).Code == "ContractTypeMismatch", "owner fold step positional types are exact");
+    Check(CaptureOwnerReject(() => OwnerBundleV04Parser.Parse(MutateOwnerFold(node => node["types"]!.AsArray().Add(JsonNode.Parse("{\"id\":\"MathInt\",\"fields\":[]}"))).ToJsonString())).Code == "ReservedTypeId", "MathInt cannot be shadowed by an executable record type");
+    reports.Add(new { kind = "owner-v0.4", fixture = "owner-fold-sum-valid-v0.4.json", ownerFold.BundleDigest, entries = foldBinding.Entries.Length, witnesses = foldReplay.CheckedWitnesses });
+
     var importedBranchingText = Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(fixtureDir, "if-valid.json")))
         .Replace("\"imports\": []", "\"imports\": [{\"moduleId\":\"external.sample\",\"sourceDigest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"contractDigest\":\"1111111111111111111111111111111111111111111111111111111111111111\"}]", StringComparison.Ordinal);
     var importedBranching = ModulesCompiler.Compile(ModulesParser.ParseModule(Encoding.UTF8.GetBytes(importedBranchingText)));

@@ -81,7 +81,7 @@ public static class OwnerBundleParser
             RequireBoundedUnsigned(value.GetProperty("maxWitnessValueNodes"), "maxWitnessValueNodes", 1, OwnerBundleLimits.WitnessValueNodesHardMaximum));
     }
 
-    private static ImmutableArray<TypeDecl> ParseTypes(JsonElement value)
+    internal static ImmutableArray<TypeDecl> ParseTypes(JsonElement value)
     {
         var items = RequireArray(value, "types").ToArray();
         if (items.Length > StrogoLimits.TypesHardMaximum)
@@ -155,7 +155,7 @@ public static class OwnerBundleParser
         return result.ToImmutable();
     }
 
-    private static ImmutableArray<FunctionParameter> ParseParameters(JsonElement value, string locus)
+    internal static ImmutableArray<FunctionParameter> ParseParameters(JsonElement value, string locus)
     {
         var items = RequireArray(value, locus).ToArray();
         if (items.Length > StrogoLimits.NodesPerFunctionHardMaximum)
@@ -166,7 +166,7 @@ public static class OwnerBundleParser
             ParseType(item.GetProperty("type"), 1, locus))).ToImmutableArray();
     }
 
-    private static ImmutableArray<OwnerWitness> ParseWitnesses(
+    internal static ImmutableArray<OwnerWitness> ParseWitnesses(
         JsonElement value,
         ImmutableArray<FunctionParameter> parameters,
         ImmutableArray<TypeDecl> types,
@@ -379,12 +379,12 @@ public static class OwnerBundleParser
             throw ModulesExceptionFactory.Error("owner-parse", "SchemaInvalid", locus, new { expected, actual });
     }
 
-    private static string RequireString(JsonElement value)
+    internal static string RequireString(JsonElement value)
         => value.ValueKind == JsonValueKind.String
             ? value.GetString()!
             : throw ModulesExceptionFactory.Error("owner-parse", "SchemaInvalid", details: new { expected = "string" });
 
-    private static string RequireId(JsonElement value)
+    internal static string RequireId(JsonElement value)
     {
         var id = RequireString(value);
         if (!IdPattern.IsMatch(id))
@@ -392,12 +392,12 @@ public static class OwnerBundleParser
         return id;
     }
 
-    private static JsonElement.ArrayEnumerator RequireArray(JsonElement value, string locus)
+    internal static JsonElement.ArrayEnumerator RequireArray(JsonElement value, string locus)
         => value.ValueKind == JsonValueKind.Array
             ? value.EnumerateArray()
             : throw ModulesExceptionFactory.Error("owner-parse", "SchemaInvalid", locus, new { expected = "array" });
 
-    private static int RequireBoundedUnsigned(JsonElement value, string field, int minimum, int maximum)
+    internal static int RequireBoundedUnsigned(JsonElement value, string field, int minimum, int maximum)
     {
         var text = RequireString(value);
         if (!CanonicalUnsignedPattern.IsMatch(text) || !int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) || parsed < minimum || parsed > maximum)
@@ -405,7 +405,7 @@ public static class OwnerBundleParser
         return parsed;
     }
 
-    private static long RequireI64(JsonElement value, string locus)
+    internal static long RequireI64(JsonElement value, string locus)
     {
         var text = RequireString(value);
         if (!CanonicalI64Pattern.IsMatch(text) || !long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var parsed))
@@ -413,14 +413,14 @@ public static class OwnerBundleParser
         return parsed;
     }
 
-    private static bool RequireBool(JsonElement value, string locus) => value.ValueKind switch
+    internal static bool RequireBool(JsonElement value, string locus) => value.ValueKind switch
     {
         JsonValueKind.True => true,
         JsonValueKind.False => false,
         _ => throw ModulesExceptionFactory.Error("owner-parse", "SchemaInvalid", locus, new { expected = "bool" })
     };
 
-    private static void PreflightNamedItems(
+    internal static void PreflightNamedItems(
         JsonElement[] items,
         string locus,
         string idField,
@@ -438,7 +438,7 @@ public static class OwnerBundleParser
         }
     }
 
-    private static IEnumerable<JsonElement> OrderById(IEnumerable<JsonElement> items)
+    internal static IEnumerable<JsonElement> OrderById(IEnumerable<JsonElement> items)
         => items.OrderBy(item => item.GetProperty("id").GetString(), StringComparer.Ordinal);
 
     private static string StructuralSortKey(JsonElement value)
@@ -485,6 +485,41 @@ public static class OwnerBundleParser
 
 public static class OwnerBundleMigrator
 {
+    public static byte[] MigrateV03ToV04(ReadOnlySpan<byte> source)
+    {
+        var legacy = OwnerBundleParser.Parse(source.ToArray());
+        ProofExpression ConvertProof(OwnerExpression expression) => new(
+            expression.Op,
+            expression.Type,
+            expression.Args.Select(ConvertProof).ToImmutableArray(),
+            ReferenceId: expression.ReferenceId,
+            NumberValue: expression.I64Value?.ToString(CultureInfo.InvariantCulture),
+            BoolValue: expression.BoolValue,
+            RecordType: expression.RecordType,
+            FieldIds: expression.FieldIds,
+            ElementType: expression.ElementType,
+            Capacity: expression.Capacity);
+
+        var entries = legacy.EntryContracts.Select(entry => new OwnerEntryContractV04(
+            entry.Id,
+            entry.FunctionRef,
+            entry.Parameters,
+            entry.ReturnType,
+            ConvertProof(entry.Requires),
+            entry.Effects,
+            entry.Witnesses,
+            entry.ModelRef)).ToImmutableArray();
+        var models = legacy.Models.Select(model => new OwnerModelV04(model.Id, model.Parameters, model.ReturnType, model.Body)).ToImmutableArray();
+        var limits = new OwnerBundleLimitsV04(
+            legacy.Limits.MaxExpressionNodes,
+            legacy.Limits.MaxExpressionDepth,
+            legacy.Limits.MaxWitnessesPerEntry,
+            legacy.Limits.MaxWitnessValueNodes,
+            OwnerBundleLimitsV04.ProofEvaluationStepsHardMaximum);
+        var canonical = OwnerBundleV04Codec.Canonicalize(legacy.BundleId, legacy.Types, entries, models, limits);
+        return OwnerBundleV04Parser.Parse(canonical).CanonicalBytes;
+    }
+
     public static byte[] MigrateV02ToV03(ReadOnlySpan<byte> source)
     {
         try

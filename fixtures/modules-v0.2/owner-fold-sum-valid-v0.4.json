@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "strogo.owner-bundle.v0.4",
+  "bundleId": "fold.sum.owner-v1",
+  "types": [],
+  "entryContracts": [
+    {
+      "id": "sumContract",
+      "functionRef": "sum",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "requires": {
+        "op": "bool.and",
+        "type": "Bool",
+        "args": [
+          {
+            "op": "forall.sequence",
+            "type": "Bool",
+            "binderId": "i",
+            "sequence": { "op": "param", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "id": "items" },
+            "body": {
+              "op": "i64.le",
+              "type": "Bool",
+              "args": [
+                { "op": "i64.const", "type": "I64", "value": "0" },
+                {
+                  "op": "seq.get",
+                  "type": "I64",
+                  "args": [
+                    { "op": "param", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "id": "items" },
+                    { "op": "proof.bound", "type": "I64", "binderId": "i" }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "op": "math.le",
+            "type": "Bool",
+            "args": [
+              { "op": "seq.sum_i64", "type": "MathInt", "args": [{ "op": "param", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "id": "items" }] },
+              { "op": "math.const", "type": "MathInt", "value": "9223372036854775807" }
+            ]
+          }
+        ]
+      },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "three-values-v1",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" },
+                "value": [
+                  { "type": "I64", "value": "1" },
+                  { "type": "I64", "value": "2" },
+                  { "type": "I64", "value": "3" }
+                ]
+              }
+            },
+            { "parameterId": "initial", "value": { "type": "I64", "value": "0" } }
+          ]
+        }
+      ],
+      "modelRef": "sum.model-v1"
+    },
+    {
+      "id": "sumWithBiasContract",
+      "functionRef": "sumWithBias",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" },
+        { "id": "bias", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "requires": { "op": "bool.const", "type": "Bool", "value": true },
+      "effects": [],
+      "witnesses": [
+        {
+          "id": "ordered-environment-v1",
+          "arguments": [
+            {
+              "parameterId": "items",
+              "value": {
+                "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" },
+                "value": [
+                  { "type": "I64", "value": "1" },
+                  { "type": "I64", "value": "2" },
+                  { "type": "I64", "value": "3" }
+                ]
+              }
+            },
+            { "parameterId": "initial", "value": { "type": "I64", "value": "10" } },
+            { "parameterId": "bias", "value": { "type": "I64", "value": "2" } }
+          ]
+        }
+      ],
+      "modelRef": "sumWithBias.model-v1"
+    }
+  ],
+  "models": [
+    {
+      "id": "sum.model-v1",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "body": {
+        "op": "fold",
+        "type": "I64",
+        "args": [
+          { "op": "param", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "id": "items" },
+          { "op": "param", "type": "I64", "id": "initial" }
+        ],
+        "step": {
+          "parameters": [
+            { "id": "index", "type": "I64" },
+            { "id": "element", "type": "I64" },
+            { "id": "accumulator", "type": "I64" }
+          ],
+          "body": { "op": "i64.add", "type": "I64", "args": [{ "op": "param", "type": "I64", "id": "accumulator" }, { "op": "param", "type": "I64", "id": "element" }] }
+        }
+      }
+    },
+    {
+      "id": "sumWithBias.model-v1",
+      "parameters": [
+        { "id": "items", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" } },
+        { "id": "initial", "type": "I64" },
+        { "id": "bias", "type": "I64" }
+      ],
+      "returnType": "I64",
+      "body": {
+        "op": "fold",
+        "type": "I64",
+        "args": [
+          { "op": "param", "type": { "kind": "Seq", "elementType": "I64", "capacity": "4" }, "id": "items" },
+          { "op": "param", "type": "I64", "id": "initial" },
+          { "op": "param", "type": "I64", "id": "bias" }
+        ],
+        "step": {
+          "parameters": [
+            { "id": "index", "type": "I64" },
+            { "id": "element", "type": "I64" },
+            { "id": "accumulator", "type": "I64" },
+            { "id": "environmentBias", "type": "I64" }
+          ],
+          "body": {
+            "op": "i64.add",
+            "type": "I64",
+            "args": [
+              { "op": "i64.add", "type": "I64", "args": [{ "op": "param", "type": "I64", "id": "accumulator" }, { "op": "param", "type": "I64", "id": "element" }] },
+              { "op": "param", "type": "I64", "id": "environmentBias" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "limits": {
+    "maxExpressionNodes": "128",
+    "maxExpressionDepth": "16",
+    "maxWitnessesPerEntry": "8",
+    "maxWitnessValueNodes": "64",
+    "maxProofEvaluationSteps": "128"
+  }
+}
