@@ -8,7 +8,7 @@ using Strogo.Modules.Portability;
 
 try
 {
-    if (args.Length == 0) Fail("command is required: build or validate");
+    if (args.Length == 0) Fail("command is required: build, validate or runtime");
     var options = ParseOptions(args.Skip(1).ToArray());
     switch (args[0])
     {
@@ -17,6 +17,9 @@ try
             break;
         case "validate":
             ValidatePackage(options);
+            break;
+        case "runtime":
+            InspectRuntime(options);
             break;
         default:
             Fail($"unknown command: {args[0]}");
@@ -315,6 +318,70 @@ static void ValidatePackage(IReadOnlyDictionary<string, string> options)
     Console.WriteLine($"PASS package validation manifest={receipt.PortabilityManifestDigest} staged={entry.Sha256}");
 }
 
+static void InspectRuntime(IReadOnlyDictionary<string, string> options)
+{
+    var dotnet = FullPath(Required(options, "--dotnet-executable"));
+    var os = Required(options, "--os");
+    var arch = Required(options, "--arch");
+    var runtimeVersion = Required(options, "--runtime-version");
+    var inventoryPath = FullPath(Required(options, "--inventory"));
+    var reportPath = FullPath(Required(options, "--report"));
+    var expected = options.TryGetValue("--expected-runtime-closure-digest", out var expectedValue) ? expectedValue : null;
+    if (File.Exists(inventoryPath) || Directory.Exists(inventoryPath)) Fail("runtime inventory path already exists");
+    if (File.Exists(reportPath) || Directory.Exists(reportPath)) Fail("environment report path already exists");
+
+    try
+    {
+        var runtimes = RunEnvironment(dotnet, "--list-runtimes");
+        if (!runtimes.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(line => line.StartsWith($"Microsoft.NETCore.App {runtimeVersion} [", StringComparison.Ordinal)))
+            throw new PortabilityContractException("EnvironmentUnavailable", "$/runtimeVersion", new { reason = "RuntimeVersionUnavailable", runtimeVersion });
+        var receipt = DotNetRuntimeClosure.Capture(dotnet, os, arch, runtimeVersion, expected);
+        Directory.CreateDirectory(Path.GetDirectoryName(inventoryPath) ?? throw new InvalidOperationException("runtime inventory path has no directory"));
+        File.WriteAllBytes(inventoryPath, receipt.InventoryBytes);
+        WriteEnvironmentReport(reportPath, new
+        {
+            schemaVersion = "strogo.environment-report.v0.1",
+            status = "Passed",
+            reasonCode = "None",
+            profileId = PortabilityVersions.DotNetProfile,
+            os,
+            arch,
+            runtimeVendor = "Microsoft",
+            runtimeVersion,
+            runtimeClosureDigest = receipt.RuntimeClosureDigest,
+            launcherDigest = receipt.LauncherDigest,
+            harnessDigest = RawDigest(typeof(Program).Assembly.Location),
+            runtimeFiles = receipt.Files.Length.ToString(CultureInfo.InvariantCulture)
+        });
+        Console.WriteLine($"PASS dotnet runtime closure os={os} arch={arch} files={receipt.Files.Length} digest={receipt.RuntimeClosureDigest}");
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "EnvironmentUnavailable")
+    {
+        WriteEnvironmentReport(reportPath, new
+        {
+            schemaVersion = "strogo.environment-report.v0.1",
+            status = "Unavailable",
+            reasonCode = exception.Code,
+            profileId = PortabilityVersions.DotNetProfile,
+            os,
+            arch,
+            runtimeVendor = "Microsoft",
+            runtimeVersion,
+            locus = exception.Locus,
+            details = exception.Details,
+            harnessDigest = RawDigest(typeof(Program).Assembly.Location)
+        });
+        throw;
+    }
+}
+
+static void WriteEnvironmentReport(string path, object report)
+{
+    Directory.CreateDirectory(Path.GetDirectoryName(path) ?? throw new InvalidOperationException("environment report path has no directory"));
+    File.WriteAllBytes(path, CanonicalJson.Encode(report));
+}
+
 static Dictionary<string, string> ParseOptions(string[] input)
 {
     if (input.Length % 2 != 0) Fail("options must be name/value pairs");
@@ -416,6 +483,37 @@ static string Run(string executable, string workingDirectory, params string[] ar
     process.WaitForExit();
     if (process.ExitCode != 0) Fail($"{executable} failed: {error}");
     return output.Trim();
+}
+
+static string RunEnvironment(string executable, params string[] arguments)
+{
+    try
+    {
+        var startInfo = new ProcessStartInfo(executable)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
+        using var process = Process.Start(startInfo);
+        if (process is null) throw new InvalidOperationException("runtime probe did not start");
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+            throw new PortabilityContractException("EnvironmentUnavailable", "$/launcher", new { reason = "RuntimeProbeFailed", exitCode = process.ExitCode.ToString(CultureInfo.InvariantCulture), stderrDigest = CanonicalJson.RawDigest(Encoding.UTF8.GetBytes(error)) });
+        return output.Trim();
+    }
+    catch (PortabilityContractException)
+    {
+        throw;
+    }
+    catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or IOException or InvalidOperationException)
+    {
+        throw new PortabilityContractException("EnvironmentUnavailable", "$/launcher", new { reason = "RuntimeProbeFailed", exception = exception.GetType().FullName });
+    }
 }
 
 [System.Diagnostics.CodeAnalysis.DoesNotReturn]

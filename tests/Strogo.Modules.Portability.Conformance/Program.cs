@@ -346,13 +346,43 @@ try
     Check(dotnetBuildDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false", StringComparison.Ordinal), "dotnet build excludes ancestor Directory.Build imports");
     var dotnetLinuxPackageDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Package.sh"));
     Check(dotnetLinuxPackageDriver.Contains("-p:ImportDirectoryBuildProps=false -p:ImportDirectoryBuildTargets=false -p:PortableAssemblyPath=", StringComparison.Ordinal), "linux package consumer excludes ancestor Directory.Build imports");
+    Check(dotnetLinuxPackageDriver.Contains("--expected-runtime-closure-digest", StringComparison.Ordinal) && dotnetLinuxPackageDriver.Contains("'runtimeClosureDigest':environment['runtimeClosureDigest']", StringComparison.Ordinal), "linux package row binds the expected runtime closure");
+    Check(dotnetLinuxPackageDriver.Contains("\"$dotnet\" \"$consumer_dll\"", StringComparison.Ordinal) && !dotnetLinuxPackageDriver.Contains("\"$dotnet\" run --project \"$consumer/Consumer.csproj\"", StringComparison.Ordinal), "linux target runtime executes the built consumer without the SDK run command");
     var dotnetWindowsPackageDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Package.ps1"));
     Check(dotnetWindowsPackageDriver.Contains("\"-p:ImportDirectoryBuildProps=false\" \"-p:ImportDirectoryBuildTargets=false\" \"-p:PortableAssemblyPath=", StringComparison.Ordinal), "windows package consumer excludes ancestor Directory.Build imports");
+    Check(dotnetWindowsPackageDriver.Contains("--expected-runtime-closure-digest", StringComparison.Ordinal) && dotnetWindowsPackageDriver.Contains("runtimeClosureDigest = $environment.runtimeClosureDigest", StringComparison.Ordinal), "windows package row binds the expected runtime closure");
+    Check(dotnetWindowsPackageDriver.Contains("& $targetDotNet $consumerDll $vectors", StringComparison.Ordinal) && !dotnetWindowsPackageDriver.Contains("& $targetDotNet run --project", StringComparison.Ordinal), "windows target runtime executes the built consumer without the SDK run command");
     var packageHarnessSource = File.ReadAllText(Path.Combine(root, "tests", "Strogo.Modules.Portability.PackageHarness", "Program.cs"));
     Check(packageHarnessSource.Contains("Path.GetDirectoryName(dafny), Path.TrimEndingDirectorySeparator(dafnyRoot)", StringComparison.Ordinal), "package harness fixes the proof closure root at the Dafny executable parent");
     Check(packageHarnessSource.Contains("code = \"PackageHarnessRejected\"", StringComparison.Ordinal) && packageHarnessSource.Contains("throw new PackageHarnessException(message)", StringComparison.Ordinal), "package harness preflight failures are structured");
     var portabilitySources = Directory.GetFiles(Path.Combine(root, "src", "Strogo.Modules.Portability"), "*.cs", SearchOption.AllDirectories).SelectMany(File.ReadAllLines).ToArray();
     Check(!portabilitySources.Any(line => line.Contains("TrustedModuleRuntime", StringComparison.Ordinal)), "portability project does not reference production runtime");
+
+    var runtimeOs = OperatingSystem.IsWindows() ? "windows" : "linux";
+    var runtimeExecutable = OperatingSystem.IsWindows() ? "dotnet.exe" : "dotnet";
+    var runtimeA = Path.Combine(packageTemp, "runtime-a");
+    var runtimeB = Path.Combine(packageTemp, "runtime-b", "unrelated");
+    CreateFakeDotNetRuntime(runtimeA, runtimeExecutable);
+    CreateFakeDotNetRuntime(runtimeB, runtimeExecutable);
+    var runtimeReceiptA = DotNetRuntimeClosure.Capture(Path.Combine(runtimeA, runtimeExecutable), runtimeOs, "x64", "10.0.11");
+    var runtimeReceiptB = DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11", runtimeReceiptA.RuntimeClosureDigest);
+    Check(runtimeReceiptA.RuntimeClosureDigest == runtimeReceiptB.RuntimeClosureDigest && runtimeReceiptA.InventoryBytes.SequenceEqual(runtimeReceiptB.InventoryBytes), "runtime closure identity excludes physical root");
+    Check(runtimeReceiptA.Files.Length == 3 && runtimeReceiptA.Files.Select(file => file.Path).SequenceEqual(runtimeReceiptA.Files.Select(file => file.Path).Order(StringComparer.Ordinal), StringComparer.Ordinal), "runtime closure has a complete ordered fake inventory");
+    using (var runtimeInventory = JsonDocument.Parse(runtimeReceiptA.InventoryBytes))
+        Fields(runtimeInventory.RootElement, "schemaVersion", "profileId", "os", "arch", "files", "versions");
+    var mutableRuntimeInventory = runtimeReceiptA.InventoryBytes;
+    mutableRuntimeInventory[0] ^= 0xff;
+    Check(runtimeReceiptA.InventoryBytes[0] != mutableRuntimeInventory[0], "runtime inventory bytes are defensively copied");
+
+    File.AppendAllText(Path.Combine(runtimeB, "shared", "Microsoft.NETCore.App", "10.0.11", "coreclr.bin"), "corrupt", Encoding.ASCII);
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11", runtimeReceiptA.RuntimeClosureDigest), "RuntimeClosureDigestMismatch"), "corrupt runtime closure is unavailable against expected identity");
+    File.Delete(Path.Combine(runtimeA, "host", "fxr", "10.0.11", "hostfxr.bin"));
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeA, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "MissingRuntimeComponent"), "missing runtime component is unavailable");
+    Directory.CreateDirectory(Path.Combine(runtimeB, "host", "fxr", "10.0.12"));
+    File.WriteAllText(Path.Combine(runtimeB, "host", "fxr", "10.0.12", "hostfxr.bin"), "hostfxr-v2", Encoding.ASCII);
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "AmbiguousRuntimeSelection"), "multiple selectable hostfxr versions are unavailable");
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "arm64", "10.0.11"), "UnsupportedArchitecture"), "unsupported runtime architecture is unavailable");
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11", "INVALID"), "InvalidExpectedDigest"), "invalid expected runtime identity is unavailable");
 }
 finally
 {
@@ -442,6 +472,29 @@ static bool RejectsPackage(Action action)
     {
         return exception.Code == "PortabilityPackageRejected";
     }
+}
+
+static bool RejectsEnvironment(Action action, string reason)
+{
+    try
+    {
+        action();
+        return false;
+    }
+    catch (PortabilityContractException exception) when (exception.Code == "EnvironmentUnavailable")
+    {
+        using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
+        return details.RootElement.GetProperty("reason").GetString() == reason;
+    }
+}
+
+static void CreateFakeDotNetRuntime(string root, string executable)
+{
+    Directory.CreateDirectory(Path.Combine(root, "host", "fxr", "10.0.11"));
+    Directory.CreateDirectory(Path.Combine(root, "shared", "Microsoft.NETCore.App", "10.0.11"));
+    File.WriteAllText(Path.Combine(root, executable), "launcher-v1", Encoding.ASCII);
+    File.WriteAllText(Path.Combine(root, "host", "fxr", "10.0.11", "hostfxr.bin"), "hostfxr-v1", Encoding.ASCII);
+    File.WriteAllText(Path.Combine(root, "shared", "Microsoft.NETCore.App", "10.0.11", "coreclr.bin"), "runtime-v1", Encoding.ASCII);
 }
 
 static bool EqualTrees(string left, string right)
