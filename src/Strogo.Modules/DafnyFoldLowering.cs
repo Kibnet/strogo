@@ -53,7 +53,7 @@ public static partial class ModulesDafnyLowerer
         ArgumentNullException.ThrowIfNull(ownerBundle);
         var binding = OwnerContractBinderV04.Bind(module, ownerBundle);
         if (binding.Entries.Any(entry => entry.CandidateFold is null))
-            throw ModulesExceptionFactory.Error("lowering", "FoldOwnerRequired");
+            return LowerMixedOwnerBundle(module, ownerBundle, binding);
 
         var typeSymbols = new TypeLoweringSymbols(module, null);
         var functions = module.Functions.OrderBy(function => function.Id, StringComparer.Ordinal).ToArray();
@@ -359,6 +359,8 @@ public static partial class ModulesDafnyLowerer
                 }
                 writer.Add($"{indent}var {variable}: {typeSymbols.DafnyType(instruction.Type)} := {Expression(instruction, operands, operandTypes, locus, functionSymbols, typeSymbols)};");
                 map.Add(new DafnySourceMapEntry(locus, variable, line));
+                if (instruction.Op == "call")
+                    obligations.Add(new DafnyProofObligation($"call-{entry.Function.Id}-{instruction.OriginNodeId}", $"{locus}/contract", "call-contract", line));
             }
             values[instruction.DestinationIndex] = variable;
         }

@@ -282,9 +282,228 @@
                       "type": "Bool",
                       "args": [
                         {
-                          "op": "i64.const",
+                          "op": "i64.sub",
                           "type": "I64",
-                          "value": "-8000000"
+                          "args": [
+                            {
+                              "op": "i64.const",
+                              "type": "I64",
+                              "value": "0"
+                            },
+                            {
+                              "op": "if",
+                              "type": "I64",
+                              "args": [
+                                {
+                                  "op": "i64.le",
+                                  "type": "Bool",
+                                  "args": [
+                                    {
+                                      "op": "fold.prefixLength",
+                                      "type": "I64"
+                                    },
+                                    {
+                                      "op": "i64.const",
+                                      "type": "I64",
+                                      "value": "0"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "i64.const",
+                                  "type": "I64",
+                                  "value": "0"
+                                },
+                                {
+                                  "op": "if",
+                                  "type": "I64",
+                                  "args": [
+                                    {
+                                      "op": "i64.le",
+                                      "type": "Bool",
+                                      "args": [
+                                        {
+                                          "op": "fold.prefixLength",
+                                          "type": "I64"
+                                        },
+                                        {
+                                          "op": "i64.const",
+                                          "type": "I64",
+                                          "value": "1"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "op": "i64.const",
+                                      "type": "I64",
+                                      "value": "1000000"
+                                    },
+                                    {
+                                      "op": "if",
+                                      "type": "I64",
+                                      "args": [
+                                        {
+                                          "op": "i64.le",
+                                          "type": "Bool",
+                                          "args": [
+                                            {
+                                              "op": "fold.prefixLength",
+                                              "type": "I64"
+                                            },
+                                            {
+                                              "op": "i64.const",
+                                              "type": "I64",
+                                              "value": "2"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "op": "i64.const",
+                                          "type": "I64",
+                                          "value": "2000000"
+                                        },
+                                        {
+                                          "op": "if",
+                                          "type": "I64",
+                                          "args": [
+                                            {
+                                              "op": "i64.le",
+                                              "type": "Bool",
+                                              "args": [
+                                                {
+                                                  "op": "fold.prefixLength",
+                                                  "type": "I64"
+                                                },
+                                                {
+                                                  "op": "i64.const",
+                                                  "type": "I64",
+                                                  "value": "3"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "op": "i64.const",
+                                              "type": "I64",
+                                              "value": "3000000"
+                                            },
+                                            {
+                                              "op": "if",
+                                              "type": "I64",
+                                              "args": [
+                                                {
+                                                  "op": "i64.le",
+                                                  "type": "Bool",
+                                                  "args": [
+                                                    {
+                                                      "op": "fold.prefixLength",
+                                                      "type": "I64"
+                                                    },
+                                                    {
+                                                      "op": "i64.const",
+                                                      "type": "I64",
+                                                      "value": "4"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "op": "i64.const",
+                                                  "type": "I64",
+                                                  "value": "4000000"
+                                                },
+                                                {
+                                                  "op": "if",
+                                                  "type": "I64",
+                                                  "args": [
+                                                    {
+                                                      "op": "i64.le",
+                                                      "type": "Bool",
+                                                      "args": [
+                                                        {
+                                                          "op": "fold.prefixLength",
+                                                          "type": "I64"
+                                                        },
+                                                        {
+                                                          "op": "i64.const",
+                                                          "type": "I64",
+                                                          "value": "5"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "op": "i64.const",
+                                                      "type": "I64",
+                                                      "value": "5000000"
+                                                    },
+                                                    {
+                                                      "op": "if",
+                                                      "type": "I64",
+                                                      "args": [
+                                                        {
+                                                          "op": "i64.le",
+                                                          "type": "Bool",
+                                                          "args": [
+                                                            {
+                                                              "op": "fold.prefixLength",
+                                                              "type": "I64"
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "6"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "op": "i64.const",
+                                                          "type": "I64",
+                                                          "value": "6000000"
+                                                        },
+                                                        {
+                                                          "op": "if",
+                                                          "type": "I64",
+                                                          "args": [
+                                                            {
+                                                              "op": "i64.le",
+                                                              "type": "Bool",
+                                                              "args": [
+                                                                {
+                                                                  "op": "fold.prefixLength",
+                                                                  "type": "I64"
+                                                                },
+                                                                {
+                                                                  "op": "i64.const",
+                                                                  "type": "I64",
+                                                                  "value": "7"
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "7000000"
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "8000000"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "op": "record.get",
@@ -319,9 +538,217 @@
                               "fieldId": "sum"
                             },
                             {
-                              "op": "i64.const",
+                              "op": "if",
                               "type": "I64",
-                              "value": "8000000"
+                              "args": [
+                                {
+                                  "op": "i64.le",
+                                  "type": "Bool",
+                                  "args": [
+                                    {
+                                      "op": "fold.prefixLength",
+                                      "type": "I64"
+                                    },
+                                    {
+                                      "op": "i64.const",
+                                      "type": "I64",
+                                      "value": "0"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "op": "i64.const",
+                                  "type": "I64",
+                                  "value": "0"
+                                },
+                                {
+                                  "op": "if",
+                                  "type": "I64",
+                                  "args": [
+                                    {
+                                      "op": "i64.le",
+                                      "type": "Bool",
+                                      "args": [
+                                        {
+                                          "op": "fold.prefixLength",
+                                          "type": "I64"
+                                        },
+                                        {
+                                          "op": "i64.const",
+                                          "type": "I64",
+                                          "value": "1"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "op": "i64.const",
+                                      "type": "I64",
+                                      "value": "1000000"
+                                    },
+                                    {
+                                      "op": "if",
+                                      "type": "I64",
+                                      "args": [
+                                        {
+                                          "op": "i64.le",
+                                          "type": "Bool",
+                                          "args": [
+                                            {
+                                              "op": "fold.prefixLength",
+                                              "type": "I64"
+                                            },
+                                            {
+                                              "op": "i64.const",
+                                              "type": "I64",
+                                              "value": "2"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "op": "i64.const",
+                                          "type": "I64",
+                                          "value": "2000000"
+                                        },
+                                        {
+                                          "op": "if",
+                                          "type": "I64",
+                                          "args": [
+                                            {
+                                              "op": "i64.le",
+                                              "type": "Bool",
+                                              "args": [
+                                                {
+                                                  "op": "fold.prefixLength",
+                                                  "type": "I64"
+                                                },
+                                                {
+                                                  "op": "i64.const",
+                                                  "type": "I64",
+                                                  "value": "3"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "op": "i64.const",
+                                              "type": "I64",
+                                              "value": "3000000"
+                                            },
+                                            {
+                                              "op": "if",
+                                              "type": "I64",
+                                              "args": [
+                                                {
+                                                  "op": "i64.le",
+                                                  "type": "Bool",
+                                                  "args": [
+                                                    {
+                                                      "op": "fold.prefixLength",
+                                                      "type": "I64"
+                                                    },
+                                                    {
+                                                      "op": "i64.const",
+                                                      "type": "I64",
+                                                      "value": "4"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "op": "i64.const",
+                                                  "type": "I64",
+                                                  "value": "4000000"
+                                                },
+                                                {
+                                                  "op": "if",
+                                                  "type": "I64",
+                                                  "args": [
+                                                    {
+                                                      "op": "i64.le",
+                                                      "type": "Bool",
+                                                      "args": [
+                                                        {
+                                                          "op": "fold.prefixLength",
+                                                          "type": "I64"
+                                                        },
+                                                        {
+                                                          "op": "i64.const",
+                                                          "type": "I64",
+                                                          "value": "5"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "op": "i64.const",
+                                                      "type": "I64",
+                                                      "value": "5000000"
+                                                    },
+                                                    {
+                                                      "op": "if",
+                                                      "type": "I64",
+                                                      "args": [
+                                                        {
+                                                          "op": "i64.le",
+                                                          "type": "Bool",
+                                                          "args": [
+                                                            {
+                                                              "op": "fold.prefixLength",
+                                                              "type": "I64"
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "6"
+                                                            }
+                                                          ]
+                                                        },
+                                                        {
+                                                          "op": "i64.const",
+                                                          "type": "I64",
+                                                          "value": "6000000"
+                                                        },
+                                                        {
+                                                          "op": "if",
+                                                          "type": "I64",
+                                                          "args": [
+                                                            {
+                                                              "op": "i64.le",
+                                                              "type": "Bool",
+                                                              "args": [
+                                                                {
+                                                                  "op": "fold.prefixLength",
+                                                                  "type": "I64"
+                                                                },
+                                                                {
+                                                                  "op": "i64.const",
+                                                                  "type": "I64",
+                                                                  "value": "7"
+                                                                }
+                                                              ]
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "7000000"
+                                                            },
+                                                            {
+                                                              "op": "i64.const",
+                                                              "type": "I64",
+                                                              "value": "8000000"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
                             }
                           ]
                         },

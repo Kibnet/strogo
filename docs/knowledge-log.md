@@ -1050,3 +1050,33 @@
 - Evidence: первый parallel run — Graph exit `1`, затем sequential `dotnet run --project tests/Kernel.Graph.Conformance -c Release --no-build` — exit `0`, `PASS all: 141`.
 - Последствие: checkpoint evidence перечисляет initial failure и sequential pass; полные solver-backed suites далее запускаются последовательно, пока отдельный experiment не подтвердит безопасность parallel orchestration.
 - Supersedes / supersededBy: ограничивает validation claim checkpoint 1; не опровергает прежний TaskGraph baseline.
+
+## K-E06-008
+
+- Дата / фаза: 2026-09-08 / checkpoint 1 external reproduction.
+- Тип / статус: External replication / Confirmed for public commit `c240758`.
+- Утверждение: public checkpoint `c240758cb97403ecbb7b9820a11c68a9c43ce4d4` воспроизведён в отдельном Windows checkout: `Strogo.Modules.Portability.Conformance` завершился exit `0` и `PASS ... checks=44 valid=10 refusals=3 transport=24 mutations=4`.
+- Scope: binding, owner/reference oracle и frozen contract metadata на exact commit; не Dafny proof, C#/Java translation или platform matrix.
+- Evidence: внешний coordinated run с report `artifacts/local-validation/e06/contract-v0.1.json` в isolated checkout; сообщение доставлено после public push.
+- Последствие: checkpoint 1 воспроизводим вне исходного рабочего дерева; последующее усиление invariant меняет module/proof identity и требует нового exact-commit run.
+- Supersedes / supersededBy: независимо подтверждает K-E06-002 для commit `c240758`.
+
+## K-E06-009
+
+- Дата / фаза: 2026-09-08 / mixed-entry proof experiment.
+- Тип / статус: Invariant-strength hypothesis / Refuted for weak variant; confirmed for strengthened variant.
+- Утверждение: истинная для полного результата граница `-8000000 <= sum <= 8000000` недостаточна как inductive fold invariant: Dafny не может сохранить ту же границу после шага из предположений `sum<=8000000` и `item<=1000000`. Инвариант с границей, зависящей от `prefixLength` (`±1000000*n`, выраженной закрытым каскадом для `n=0..8`), сохраняется и доказывает тот же workload.
+- Scope: frozen summarize semantics, sequence capacity 8 и item range ±1000000; вывод не означает, что всем функциям нужен сложный invariant.
+- Evidence: Ubuntu 24.04 WSL2, Dafny 4.11.0 executable SHA-256 `e540b482…93846d`: weak source — exit `4`, `31 verified, 1 error` на owner-prefix postcondition; strengthened source — exit `0`, `32 verified, 0 errors`. Windows strengthened source также дал `32/0`; Windows weak diagnostic имеет известный `Model parsing error` и не используется как strict negative oracle.
+- Последствие: «обязательное описание всех инвариантов» должно требовать machine-checked inductiveness/sufficiency, а не только наличие истинной глобальной формулы. Weak variant сохранён отдельным development fixture.
+- Supersedes / supersededBy: конкретизирует исходный вопрос владельца об обязательных инвариантах и развивает K-E06-003.
+
+## K-E06-010
+
+- Дата / фаза: 2026-09-08 / mixed owner lowering implementation.
+- Тип / статус: Proof implementation / Confirmed on working tree; exact-commit evidence pending.
+- Утверждение: additive lowering `strogo.owner-dafny-lowering.v0.5` сохраняет прежний byte path для all-fold bundles, а mixed bundle генерирует owner predicates/models для scalar entries, prefix proof для fold entry, candidate methods и явную `call-contract` obligation для `adjust → increment`. Два clean generation roots дали одинаковые full output sets; два strong proof replay дали `32/0`.
+- Scope: owner-aware Dafny source и proof obligations; total wire wrapper, target adapters, translation/package и runtime matrix ещё не реализованы.
+- Evidence: `tools/Test-Modules-Portability-Proof.sh`; pre-commit WSL run `/tmp/strogo-e06-proof-695708bb13b1434fba0fa5890e34da31` — `PASS portability mixed proof strong=32/0x2 weak=31/1`; conformance `checks=51`.
+- Последствие: после implementation commit нужен clean exact-revision rerun и filtered public proof package; затем можно переводить этот source в C#/.NET profile.
+- Supersedes / supersededBy: устраняет `FoldOwnerRequired` gap K-E06-003 для утверждённого mixed workload.

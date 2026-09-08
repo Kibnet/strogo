@@ -1,0 +1,589 @@
+{
+  "schemaVersion": "strogo.module.v0.2",
+  "moduleId": "portable.validation.v01",
+  "types": [
+    {
+      "id": "Summary",
+      "fields": [
+        {
+          "id": "sum",
+          "type": "I64"
+        },
+        {
+          "id": "negativeCount",
+          "type": "I64"
+        },
+        {
+          "id": "echo",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          }
+        }
+      ]
+    }
+  ],
+  "imports": [],
+  "functions": [
+    {
+      "id": "summarize",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "8"
+          }
+        }
+      ],
+      "returnType": "Summary",
+      "contractRef": "summarize.contract-v1",
+      "body": {
+        "parameters": [
+          "items"
+        ],
+        "nodes": [
+          {
+            "id": "zero.sum",
+            "op": "i64.const",
+            "type": "I64",
+            "args": [],
+            "value": "0"
+          },
+          {
+            "id": "zero.negative-count",
+            "op": "i64.const",
+            "type": "I64",
+            "args": [],
+            "value": "0"
+          },
+          {
+            "id": "empty.echo",
+            "op": "seq.empty",
+            "type": {
+              "kind": "Seq",
+              "elementType": "I64",
+              "capacity": "8"
+            },
+            "args": [],
+            "elementType": "I64",
+            "capacity": "8"
+          },
+          {
+            "id": "initial.summary",
+            "op": "record.make",
+            "type": "Summary",
+            "args": [
+              "zero.sum",
+              "zero.negative-count",
+              "empty.echo"
+            ],
+            "recordType": "Summary",
+            "fieldIds": [
+              "sum",
+              "negativeCount",
+              "echo"
+            ]
+          },
+          {
+            "id": "summary.fold",
+            "op": "fold",
+            "type": "Summary",
+            "args": [
+              "items",
+              "initial.summary"
+            ],
+            "stepRegion": {
+              "parameters": [
+                "index",
+                "item",
+                "accumulator"
+              ],
+              "nodes": [
+                {
+                  "id": "current.sum",
+                  "op": "record.get",
+                  "type": "I64",
+                  "args": [
+                    "accumulator"
+                  ],
+                  "fieldId": "sum"
+                },
+                {
+                  "id": "next.sum",
+                  "op": "i64.add",
+                  "type": "I64",
+                  "args": [
+                    "current.sum",
+                    "item"
+                  ]
+                },
+                {
+                  "id": "current.negative-count",
+                  "op": "record.get",
+                  "type": "I64",
+                  "args": [
+                    "accumulator"
+                  ],
+                  "fieldId": "negativeCount"
+                },
+                {
+                  "id": "zero.step",
+                  "op": "i64.const",
+                  "type": "I64",
+                  "args": [],
+                  "value": "0"
+                },
+                {
+                  "id": "nonnegative",
+                  "op": "i64.le",
+                  "type": "Bool",
+                  "args": [
+                    "zero.step",
+                    "item"
+                  ]
+                },
+                {
+                  "id": "negative",
+                  "op": "bool.not",
+                  "type": "Bool",
+                  "args": [
+                    "nonnegative"
+                  ]
+                },
+                {
+                  "id": "negative.increment",
+                  "op": "if",
+                  "type": "I64",
+                  "args": [
+                    "negative",
+                    "current.negative-count"
+                  ],
+                  "thenRegion": {
+                    "parameters": [
+                      "count"
+                    ],
+                    "nodes": [
+                      {
+                        "id": "one",
+                        "op": "i64.const",
+                        "type": "I64",
+                        "args": [],
+                        "value": "1"
+                      },
+                      {
+                        "id": "incremented",
+                        "op": "i64.add",
+                        "type": "I64",
+                        "args": [
+                          "count",
+                          "one"
+                        ]
+                      }
+                    ],
+                    "result": "incremented"
+                  },
+                  "elseRegion": {
+                    "parameters": [
+                      "count"
+                    ],
+                    "nodes": [],
+                    "result": "count"
+                  }
+                },
+                {
+                  "id": "current.echo",
+                  "op": "record.get",
+                  "type": {
+                    "kind": "Seq",
+                    "elementType": "I64",
+                    "capacity": "8"
+                  },
+                  "args": [
+                    "accumulator"
+                  ],
+                  "fieldId": "echo"
+                },
+                {
+                  "id": "next.echo",
+                  "op": "seq.append",
+                  "type": {
+                    "kind": "Seq",
+                    "elementType": "I64",
+                    "capacity": "8"
+                  },
+                  "args": [
+                    "current.echo",
+                    "item"
+                  ]
+                },
+                {
+                  "id": "next.summary",
+                  "op": "record.make",
+                  "type": "Summary",
+                  "args": [
+                    "next.sum",
+                    "negative.increment",
+                    "next.echo"
+                  ],
+                  "recordType": "Summary",
+                  "fieldIds": [
+                    "sum",
+                    "negativeCount",
+                    "echo"
+                  ]
+                }
+              ],
+              "result": "next.summary"
+            },
+            "invariant": {
+              "op": "bool.and",
+              "type": "Bool",
+              "args": [
+                {
+                  "op": "eq",
+                  "type": "Bool",
+                  "args": [
+                    {
+                      "op": "seq.length",
+                      "type": "I64",
+                      "args": [
+                        {
+                          "op": "record.get",
+                          "type": {
+                            "kind": "Seq",
+                            "elementType": "I64",
+                            "capacity": "8"
+                          },
+                          "args": [
+                            {
+                              "op": "fold.accumulator",
+                              "type": "Summary"
+                            }
+                          ],
+                          "fieldId": "echo"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "fold.prefixLength",
+                      "type": "I64"
+                    }
+                  ]
+                },
+                {
+                  "op": "bool.and",
+                  "type": "Bool",
+                  "args": [
+                    {
+                      "op": "i64.le",
+                      "type": "Bool",
+                      "args": [
+                        {
+                          "op": "i64.const",
+                          "type": "I64",
+                          "value": "-8000000"
+                        },
+                        {
+                          "op": "record.get",
+                          "type": "I64",
+                          "args": [
+                            {
+                              "op": "fold.accumulator",
+                              "type": "Summary"
+                            }
+                          ],
+                          "fieldId": "sum"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "bool.and",
+                      "type": "Bool",
+                      "args": [
+                        {
+                          "op": "i64.le",
+                          "type": "Bool",
+                          "args": [
+                            {
+                              "op": "record.get",
+                              "type": "I64",
+                              "args": [
+                                {
+                                  "op": "fold.accumulator",
+                                  "type": "Summary"
+                                }
+                              ],
+                              "fieldId": "sum"
+                            },
+                            {
+                              "op": "i64.const",
+                              "type": "I64",
+                              "value": "8000000"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "bool.and",
+                          "type": "Bool",
+                          "args": [
+                            {
+                              "op": "i64.le",
+                              "type": "Bool",
+                              "args": [
+                                {
+                                  "op": "i64.const",
+                                  "type": "I64",
+                                  "value": "0"
+                                },
+                                {
+                                  "op": "record.get",
+                                  "type": "I64",
+                                  "args": [
+                                    {
+                                      "op": "fold.accumulator",
+                                      "type": "Summary"
+                                    }
+                                  ],
+                                  "fieldId": "negativeCount"
+                                }
+                              ]
+                            },
+                            {
+                              "op": "i64.le",
+                              "type": "Bool",
+                              "args": [
+                                {
+                                  "op": "record.get",
+                                  "type": "I64",
+                                  "args": [
+                                    {
+                                      "op": "fold.accumulator",
+                                      "type": "Summary"
+                                    }
+                                  ],
+                                  "fieldId": "negativeCount"
+                                },
+                                {
+                                  "op": "fold.prefixLength",
+                                  "type": "I64"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "result": "summary.fold"
+      }
+    },
+    {
+      "id": "increment",
+      "parameters": [
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "contractRef": "increment.contract-v1",
+      "body": {
+        "parameters": [
+          "x"
+        ],
+        "nodes": [
+          {
+            "id": "one",
+            "op": "i64.const",
+            "type": "I64",
+            "args": [],
+            "value": "1"
+          },
+          {
+            "id": "result",
+            "op": "i64.add",
+            "type": "I64",
+            "args": [
+              "x",
+              "one"
+            ]
+          }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "adjust",
+      "parameters": [
+        {
+          "id": "increase",
+          "type": "Bool"
+        },
+        {
+          "id": "x",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64",
+      "contractRef": "adjust.contract-v1",
+      "body": {
+        "parameters": [
+          "increase",
+          "x"
+        ],
+        "nodes": [
+          {
+            "id": "result",
+            "op": "if",
+            "type": "I64",
+            "args": [
+              "increase",
+              "x"
+            ],
+            "thenRegion": {
+              "parameters": [
+                "value"
+              ],
+              "nodes": [
+                {
+                  "id": "incremented",
+                  "op": "call",
+                  "type": "I64",
+                  "args": [
+                    "value"
+                  ],
+                  "functionRef": "increment"
+                }
+              ],
+              "result": "incremented"
+            },
+            "elseRegion": {
+              "parameters": [
+                "value"
+              ],
+              "nodes": [],
+              "result": "value"
+            }
+          }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "headOrZero",
+      "parameters": [
+        {
+          "id": "items",
+          "type": {
+            "kind": "Seq",
+            "elementType": "I64",
+            "capacity": "1"
+          }
+        }
+      ],
+      "returnType": "I64",
+      "contractRef": "head-or-zero.contract-v1",
+      "body": {
+        "parameters": [
+          "items"
+        ],
+        "nodes": [
+          {
+            "id": "length",
+            "op": "seq.length",
+            "type": "I64",
+            "args": [
+              "items"
+            ]
+          },
+          {
+            "id": "zero",
+            "op": "i64.const",
+            "type": "I64",
+            "args": [],
+            "value": "0"
+          },
+          {
+            "id": "empty",
+            "op": "i64.eq",
+            "type": "Bool",
+            "args": [
+              "length",
+              "zero"
+            ]
+          },
+          {
+            "id": "result",
+            "op": "if",
+            "type": "I64",
+            "args": [
+              "empty",
+              "items",
+              "zero"
+            ],
+            "thenRegion": {
+              "parameters": [
+                "branch.items",
+                "branch.zero"
+              ],
+              "nodes": [],
+              "result": "branch.zero"
+            },
+            "elseRegion": {
+              "parameters": [
+                "branch.items",
+                "branch.zero"
+              ],
+              "nodes": [
+                {
+                  "id": "head",
+                  "op": "seq.get",
+                  "type": "I64",
+                  "args": [
+                    "branch.items",
+                    "branch.zero"
+                  ]
+                }
+              ],
+              "result": "head"
+            }
+          }
+        ],
+        "result": "result"
+      }
+    },
+    {
+      "id": "echoSummary",
+      "parameters": [
+        {
+          "id": "summary",
+          "type": "Summary"
+        }
+      ],
+      "returnType": "Summary",
+      "contractRef": "echo-summary.contract-v1",
+      "body": {
+        "parameters": [
+          "summary"
+        ],
+        "nodes": [],
+        "result": "summary"
+      }
+    }
+  ],
+  "exports": [
+    "summarize",
+    "increment",
+    "adjust",
+    "headOrZero",
+    "echoSummary"
+  ]
+}

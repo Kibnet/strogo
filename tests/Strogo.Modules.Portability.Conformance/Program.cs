@@ -10,6 +10,10 @@ var reportOption = Array.IndexOf(args, "--report");
 if (reportOption >= 0 && reportOption + 1 >= args.Length) throw new ArgumentException("--report requires a path");
 var publicApiOption = Array.IndexOf(args, "--public-api-out");
 if (publicApiOption >= 0 && publicApiOption + 1 >= args.Length) throw new ArgumentException("--public-api-out requires a path");
+var dafnyOption = Array.IndexOf(args, "--dafny-out");
+if (dafnyOption >= 0 && dafnyOption + 1 >= args.Length) throw new ArgumentException("--dafny-out requires a path");
+var weakDafnyOption = Array.IndexOf(args, "--weak-dafny-out");
+if (weakDafnyOption >= 0 && weakDafnyOption + 1 >= args.Length) throw new ArgumentException("--weak-dafny-out requires a path");
 var reportPath = reportOption >= 0
     ? Path.GetFullPath(args[reportOption + 1], root)
     : Path.Combine(root, "artifacts", "local-validation", "e06", "contract-v0.1.json");
@@ -22,11 +26,16 @@ void Check(bool condition, string message)
 
 var moduleBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "module.json"));
 var ownerBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "owner.json"));
+var weakModuleBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "module-weak-invariant.json"));
 var parsed = ModulesParser.ParseModule(moduleBytes);
 var module = ModulesCompiler.Compile(parsed);
 var owner = OwnerBundleV04Parser.Parse(ownerBytes);
 var binding = PortabilityContract.Bind(module, owner);
 var repeated = PortabilityContract.Bind(ModulesCompiler.Compile(ModulesParser.ParseModule(moduleBytes)), OwnerBundleV04Parser.Parse(ownerBytes));
+var lowering = ModulesDafnyLowerer.Lower(module, owner);
+var repeatedLowering = ModulesDafnyLowerer.Lower(repeated.Module, repeated.OwnerBundle);
+var weakBinding = PortabilityContract.Bind(ModulesCompiler.Compile(ModulesParser.ParseModule(weakModuleBytes)), OwnerBundleV04Parser.Parse(ownerBytes));
+var weakLowering = ModulesDafnyLowerer.Lower(weakBinding.Module, weakBinding.OwnerBundle);
 if (publicApiOption >= 0)
 {
     var output = Path.GetFullPath(args[publicApiOption + 1], root);
@@ -34,6 +43,22 @@ if (publicApiOption >= 0)
     File.WriteAllBytes(output, binding.PublicApiBytes);
 }
 var expectedPublicApi = File.ReadAllBytes(Path.Combine(fixtureDir, "public-api.json"));
+if (dafnyOption >= 0)
+{
+    var output = Path.GetFullPath(args[dafnyOption + 1], root);
+    Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("Dafny output path has no directory"));
+    File.WriteAllBytes(output, lowering.SourceBytes);
+    File.WriteAllBytes(Path.ChangeExtension(output, ".source-map.json"), CanonicalJson.Encode(lowering.SourceMap));
+    File.WriteAllBytes(Path.ChangeExtension(output, ".obligations.json"), CanonicalJson.Encode(lowering.Obligations));
+}
+if (weakDafnyOption >= 0)
+{
+    var output = Path.GetFullPath(args[weakDafnyOption + 1], root);
+    Directory.CreateDirectory(Path.GetDirectoryName(output) ?? throw new InvalidOperationException("weak Dafny output path has no directory"));
+    File.WriteAllBytes(output, weakLowering.SourceBytes);
+    File.WriteAllBytes(Path.ChangeExtension(output, ".source-map.json"), CanonicalJson.Encode(weakLowering.SourceMap));
+    File.WriteAllBytes(Path.ChangeExtension(output, ".obligations.json"), CanonicalJson.Encode(weakLowering.Obligations));
+}
 
 Check(binding.Module.SourceDigest == repeated.Module.SourceDigest, "module digest is deterministic");
 Check(binding.OwnerBundle.BundleDigest == repeated.OwnerBundle.BundleDigest, "owner digest is deterministic");
@@ -42,6 +67,13 @@ Check(binding.PublicApiBytes.SequenceEqual(expectedPublicApi), "public API bytes
 var mutableApiCopy = binding.PublicApiBytes;
 mutableApiCopy[0] ^= 0xff;
 Check(binding.PublicApiBytes.SequenceEqual(expectedPublicApi), "public API bytes are defensively copied");
+Check(ModulesDafnyLowerer.MixedOwnerToolchainIdentity == "strogo.owner-dafny-lowering.v0.5", "mixed owner lowering version is fixed");
+Check(lowering.SourceBytes.SequenceEqual(repeatedLowering.SourceBytes) && lowering.SourceDigest == repeatedLowering.SourceDigest, "mixed owner lowering is deterministic");
+Check(lowering.ProofIdentity == repeatedLowering.ProofIdentity, "mixed owner proof identity is deterministic");
+Check(lowering.SourceDigest != weakLowering.SourceDigest && binding.Module.SourceDigest != weakBinding.Module.SourceDigest, "strong and weak invariant identities differ");
+Check(binding.PublicApiBytes.SequenceEqual(weakBinding.PublicApiBytes), "invariant strength does not change the public ABI");
+Check(lowering.Obligations.Any(obligation => obligation.Kind == "call-contract" && obligation.Id == "call-adjust-incremented"), "adjust to increment call contract is an explicit obligation");
+Check(lowering.SourceMap.Any(item => item.EntityId == "function/adjust/body/node/result/then/node/incremented"), "call source map entry is retained");
 Check(PortabilityContract.IsExecutionProfile(PortabilityVersions.DotNetProfile), "dotnet profile is closed");
 Check(PortabilityContract.IsExecutionProfile(PortabilityVersions.JvmProfile), "JVM profile is closed");
 Check(!PortabilityContract.IsExecutionProfile("native"), "unknown profile is rejected");
@@ -112,7 +144,11 @@ var report = CanonicalJson.Encode(new
     mutations = mutationIds.Length,
     moduleDigest = binding.Module.SourceDigest,
     ownerBundleDigest = binding.OwnerBundle.BundleDigest,
-    publicApiDigest = binding.PublicApiDigest
+    publicApiDigest = binding.PublicApiDigest,
+    dafnySourceDigest = lowering.SourceDigest,
+    proofIdentity = lowering.ProofIdentity,
+    proofObligations = lowering.Obligations.Length,
+    weakDafnySourceDigest = weakLowering.SourceDigest
 });
 File.WriteAllBytes(reportPath, report);
 Console.WriteLine($"PASS portability contract checks={checks} valid={validCount} refusals={refusalCount} transport={transportIds.Length} mutations={mutationIds.Length}");
