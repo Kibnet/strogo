@@ -1190,3 +1190,23 @@
 - Evidence: coordinated external run на `9f0b2e39e9a09d778b107287ed8ae1656c5ad1b8`, report `independent-portability-9f0b2e3.json` во внешнем checkout.
 - Последствие: wrapper generation и boundary checks воспроизводятся вне рабочего дерева; target translator/runtime остаётся отдельным TCB и validation gate.
 - Supersedes / supersededBy: независимо подтверждает managed часть K-E06-017 и ограничивает claim K-E06-020.
+
+## K-E06-022
+
+- Дата / фаза: 2026-09-08 / deterministic C# translation experiment.
+- Тип / статус: Reproducible-build hypothesis / Refuted for absolute invocation; confirmed for relative isolated invocation.
+- Утверждение: два вызова Dafny `translate cs` с разными абсолютными `--output`/translation-record paths создали разные `Candidate.cs` и DLL, потому что Dafny встраивает полную command line в `DafnySourceAttribute`. Когда каждый lane получает одинаковые relative inputs и запускает exact command из собственного working directory (`candidate.dfy`, `Candidate.cs`, `translation-record.dtr`), translated source, translation record и deterministic DLL становятся byte-equal. Roslyn `PathMap=<lane>=/_/`, disabled debug symbols и fixed project properties устраняют оставшуюся physical build-root identity.
+- Scope: pinned Dafny 4.11.0 и .NET SDK 10.0.400; это не общее обещание для других translator versions.
+- Evidence: initial local prototype дал разные DLL SHA-256 `c82f1f…b0a3`/`a7332f…106`; corrected two-lane prototype дал одинаковые generated source `789337…344e`, translation record `d4fe37…8ced` и DLL.
+- Последствие: build harness обязан копировать exact proof source в isolated lane и вызывать translator только относительными logical paths; физические пути остаются diagnostic receipt и не входят в artifact identity.
+- Supersedes / supersededBy: реализует physical-path exclusion E06 §6.2.2 для C# lane.
+
+## K-E06-023
+
+- Дата / фаза: 2026-09-08 / first .NET target execution.
+- Тип / статус: Implementation and platform evidence / Confirmed on working tree; exact clean-commit evidence pending.
+- Утверждение: transport-only C# `ModuleApi.Invoke(string)` собирается вместе с exact verified Dafny source в byte-equal `net10.0` DLL из двух clean Linux lanes. Одна DLL с SHA-256 `f890f8a5e550ec2ed288f5f3b1bc47227af78f12608f008dccd990b42e339020` фактически прошла standalone consumer в Linux WSL2 и Windows x64: 8 exact success/refusal cases и все 24 frozen transport boundary IDs.
+- Scope: public adapter, deterministic library и two-OS execution на текущем working tree. Portability manifest/package closure, runtime closure digests, full 10-vector oracle report, mutations и exact-commit retention ещё не выполнены, поэтому profile пока не получает итоговый `Portable`.
+- Evidence: `targets/dotnet-managed-v1/**`, `tools/Build-PortableDotNet.sh`, `tools/Test-PortableDotNet-Windows.ps1`, `tests/fixtures/portability-consumers/csharp/**`; ignored runs `dotnet-build-3` и `windows-run-1`.
+- Последствие: гипотеза о переносимости одной managed DLL получила первый фактический положительный результат на двух ОС; checkpoint нужно закоммитить, повторить на exact revision и упаковать filtered evidence до расширения claim.
+- Supersedes / supersededBy: начинает E06 plan step 3 и развивает feasibility K-E06-018.
