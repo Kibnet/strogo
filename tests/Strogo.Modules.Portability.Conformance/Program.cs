@@ -651,6 +651,11 @@ try
     Check(crossOsMismatch.ComparisonStatus == "NotPortable" && crossOsMismatch.Profiles.All(profile => profile.ReasonCodes.Contains("OracleMismatch")), "cross-OS vector mismatch becomes a typed OracleMismatch");
     var crossProfileMismatch = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", changeJvmVector: true), reportTimestamp);
     Check(crossProfileMismatch.ComparisonStatus == "NotPortable" && crossProfileMismatch.Profiles.All(profile => profile.ReasonCodes.Contains("OracleMismatch")), $"cross-profile vector mismatch marks both profiles OracleMismatch (status={crossProfileMismatch.ComparisonStatus}; profiles={string.Join("|", crossProfileMismatch.Profiles.Select(profile => profile.ProfileId + ":" + profile.Status + ":" + string.Join(',', profile.ReasonCodes) + ":" + profile.CommonVectorSetDigest))})");
+    var twoVectorEvidence = CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true);
+    var twoVectorReport = PortabilityReportV01.Build(twoVectorEvidence, reportTimestamp);
+    var permutedTwoVectorReport = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true, permuteOutcomes: true), reportTimestamp);
+    Check(permutedTwoVectorReport.CanonicalJsonBytes().SequenceEqual(twoVectorReport.CanonicalJsonBytes()), "whole outcome-row permutation is canonicalized without changing the report");
+    Check(RejectsReport(() => PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true, swapOutcomeDigest: true), reportTimestamp), "OutcomeCoverageMismatch", "$/outcomes/v-001"), "swapped digest across two vectors is rejected at the vector outcome locus");
     var unavailableReport = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", omitLinux: true), reportTimestamp);
     Check(unavailableReport.Profiles.All(profile => profile.Platforms[0].Status == "Unavailable" && profile.Platforms[0].ReasonCodes.SequenceEqual(new[] { "EnvironmentUnavailable", "RowUnavailable" })), "missing mandatory OS row is synthesized as unavailable");
     var tamperedReportBytes = portabilityReport.CanonicalJsonBytes();
@@ -813,7 +818,7 @@ static bool RejectsEnvironment(Action action, string reason)
     }
 }
 
-static bool RejectsReport(Action action, string reason)
+static bool RejectsReport(Action action, string reason, string? locus = null)
 {
     try
     {
@@ -823,7 +828,7 @@ static bool RejectsReport(Action action, string reason)
     catch (PortabilityContractException exception) when (exception.Code == "PortabilityReportRejected")
     {
         using var details = JsonDocument.Parse(CanonicalJson.Encode(exception.Details));
-        return details.RootElement.GetProperty("reason").GetString() == reason;
+        return details.RootElement.GetProperty("reason").GetString() == reason && (locus is null || exception.Locus == locus);
     }
 }
 
@@ -862,38 +867,54 @@ static void CreateFakeDotNetRuntime(string root, string executable)
     File.WriteAllText(Path.Combine(root, "shared", "Microsoft.NETCore.App", "10.0.11", "coreclr.bin"), "runtime-v1", Encoding.ASCII);
 }
 
-static PortabilityReportEvidenceSet CreateReportEvidence(string sourceRevision, string rawMarker = "receipt-a", bool changeOutcome = false, bool omitJvm = false, bool omitOutcome = false, bool changeWindowsVector = false, bool changeJvmVector = false, string? mixedReceiptRevision = null, bool omitLinux = false)
+static PortabilityReportEvidenceSet CreateReportEvidence(string sourceRevision, string rawMarker = "receipt-a", bool changeOutcome = false, bool omitJvm = false, bool omitOutcome = false, bool changeWindowsVector = false, bool changeJvmVector = false, string? mixedReceiptRevision = null, bool omitLinux = false, bool twoVectors = false, bool swapOutcomeDigest = false, bool permuteOutcomes = false)
 {
     var digest = new string('a', 64);
     var profiles = new List<PortabilityReportProfileEvidence>
     {
-        CreateReportProfile(PortabilityVersions.DotNetProfile, sourceRevision, digest, null, null, rawMarker, changeOutcome, omitOutcome, changeWindowsVector, false, mixedReceiptRevision, omitLinux)
+        CreateReportProfile(PortabilityVersions.DotNetProfile, sourceRevision, digest, null, null, rawMarker, changeOutcome, omitOutcome, changeWindowsVector, false, mixedReceiptRevision, omitLinux, twoVectors, swapOutcomeDigest, permuteOutcomes)
     };
     if (!omitJvm)
-        profiles.Add(CreateReportProfile(PortabilityVersions.JvmProfile, sourceRevision, digest, new string('b', 64), new string('c', 64), rawMarker, changeOutcome, omitOutcome, changeWindowsVector, changeJvmVector, mixedReceiptRevision, omitLinux));
+        profiles.Add(CreateReportProfile(PortabilityVersions.JvmProfile, sourceRevision, digest, new string('b', 64), new string('c', 64), rawMarker, changeOutcome, omitOutcome, changeWindowsVector, changeJvmVector, mixedReceiptRevision, omitLinux, twoVectors, swapOutcomeDigest, permuteOutcomes));
     return new PortabilityReportEvidenceSet(sourceRevision, digest, new string('d', 64), new string('e', 64), new string('f', 64), profiles);
 }
 
-static PortabilityReportProfileEvidence CreateReportProfile(string profileId, string sourceRevision, string digest, string? baseline, string? approval, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeWindowsVector, bool changeAllVectors = false, string? mixedReceiptRevision = null, bool omitLinux = false)
+static PortabilityReportProfileEvidence CreateReportProfile(string profileId, string sourceRevision, string digest, string? baseline, string? approval, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeWindowsVector, bool changeAllVectors = false, string? mixedReceiptRevision = null, bool omitLinux = false, bool twoVectors = false, bool swapOutcomeDigest = false, bool permuteOutcomes = false)
 {
     var receiptRevision = mixedReceiptRevision ?? sourceRevision;
     var build = new PortabilityReportBuildEvidence("Passed", [], CanonicalJson.Encode(new { sourceRevision = receiptRevision, kind = "build", marker = rawMarker }), digest, digest, digest, digest, digest, digest);
     var platforms = new List<PortabilityReportPlatformEvidence>();
-    if (!omitLinux) platforms.Add(CreateReportPlatform("linux", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeAllVectors));
-    platforms.Add(CreateReportPlatform("windows", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeWindowsVector || changeAllVectors));
+    if (!omitLinux) platforms.Add(CreateReportPlatform("linux", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeAllVectors, twoVectors, swapOutcomeDigest, permuteOutcomes));
+    platforms.Add(CreateReportPlatform("windows", receiptRevision, digest, rawMarker, changeOutcome, omitOutcome, changeWindowsVector || changeAllVectors, twoVectors, swapOutcomeDigest, permuteOutcomes));
     return new PortabilityReportProfileEvidence(profileId, digest, digest, digest, baseline, approval, build, platforms);
 }
 
-static PortabilityReportPlatformEvidence CreateReportPlatform(string os, string sourceRevision, string digest, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeVector)
+static PortabilityReportPlatformEvidence CreateReportPlatform(string os, string sourceRevision, string digest, string rawMarker, bool changeOutcome, bool omitOutcome, bool changeVector, bool twoVectors = false, bool swapOutcomeDigest = false, bool permuteOutcomes = false)
 {
     var vectorId = changeVector ? "v-002" : "v-001";
-    var vector = new PortabilityReportVector(vectorId, digest);
+    var vectors = twoVectors
+        ? new[] { new PortabilityReportVector("v-001", digest), new PortabilityReportVector("v-002", new string('b', 64)) }
+        : new[] { new PortabilityReportVector(vectorId, digest) };
     var outcome = PortabilityReportOutcome.FromJson("success", new { type = "I64", value = changeOutcome ? "8" : "7" }, null, null, null);
-    var outcomes = omitOutcome ? Array.Empty<PortabilityReportOutcomeRow>() : new[] { new PortabilityReportOutcomeRow(vectorId, digest, "OwnerInDomain", digest, "Returned", outcome) };
+    var outcomes = omitOutcome
+        ? Array.Empty<PortabilityReportOutcomeRow>()
+        : twoVectors
+            ? (permuteOutcomes
+                ? new[]
+                {
+                    new PortabilityReportOutcomeRow("v-002", new string('b', 64), "OwnerInDomain", digest, "Returned", outcome),
+                    new PortabilityReportOutcomeRow("v-001", swapOutcomeDigest ? new string('b', 64) : digest, "OwnerInDomain", digest, "Returned", outcome)
+                }
+                : new[]
+                {
+                    new PortabilityReportOutcomeRow("v-001", swapOutcomeDigest ? new string('b', 64) : digest, "OwnerInDomain", digest, "Returned", outcome),
+                    new PortabilityReportOutcomeRow("v-002", new string('b', 64), "OwnerInDomain", digest, "Returned", outcome)
+                })
+            : new[] { new PortabilityReportOutcomeRow(vectorId, digest, "OwnerInDomain", digest, "Returned", outcome) };
     var consumer = new PortabilityReportGateEvidence("consumer", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "consumer", os, marker = rawMarker }), digest, null, null, null, [], null);
     var jit = new PortabilityReportGateEvidence("jit", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "jit", os, marker = rawMarker }), null, "entry", "candidate", "50000", ["FullOpts"], null);
     var oracle = new PortabilityReportGateEvidence("oracle", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "oracle", os, marker = rawMarker }), null, null, null, null, [], digest);
-    return new PortabilityReportPlatformEvidence(os, "x64", $"{os}-identity", $"{os}-kernel", "fixture", "1", digest, digest, digest, digest, digest, digest, consumer, jit, oracle, null, [vector], outcomes);
+    return new PortabilityReportPlatformEvidence(os, "x64", $"{os}-identity", $"{os}-kernel", "fixture", "1", digest, digest, digest, digest, digest, digest, consumer, jit, oracle, null, vectors, outcomes);
 }
 
 static PortabilityPlatformStatus PassedRow(string os, char identity = 'a')

@@ -1680,3 +1680,13 @@
 - Evidence: `src/Strogo.Modules.Portability/PortabilityReportV01.cs` internal evidence constructors and outcome coverage checks; E06R SPEC §6.2.
 - Последствие: будущий two-vector swap test должен фиксировать external anchor и различать row permutation от swapped digest на boundary validator/driver.
 - Supersedes / supersededBy: уточняет K-E06-069; E06R/JVM approval boundaries unchanged.
+
+## K-E06-071
+
+- Дата / фаза: 2026-09-08 / E06R conformance regression.
+- Тип / статус: Implemented and locally validated.
+- Утверждение: добавлен двухвекторный positive/permutation/swap regression. Перестановка целых outcome rows даёт те же canonical bytes; подмена `v-001` input digest на digest `v-002` отклоняется как `OutcomeCoverageMismatch` с locus `$/outcomes/v-001`.
+- Scope: regression проверяет public `PortabilityReportV01.Build` boundary через validated evidence constructors; она не расширяет claim до external frozen trust anchor или end-to-end profile driver.
+- Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `dotnet run --project tests/Strogo.Modules.Portability.Conformance -c Release --no-build` — `PASS portability contract checks=227 valid=10 refusals=3 transport=24 mutations=4`; independent reflection probe ранее подтвердил тот же semantic distinction.
+- Последствие: E06R теперь явно различает canonical row permutation и cross-vector digest swap; следующий отдельный checkpoint должен добавить external-anchor validator/driver test.
+- Supersedes / supersededBy: supersedes open test-gap K-E06-069; E06B baseline/JAR boundaries unchanged.
