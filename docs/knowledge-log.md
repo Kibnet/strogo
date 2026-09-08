@@ -1439,4 +1439,14 @@
 - Scope: `dotnet-managed.v1`, Windows/Linux x64, runtime `10.0.11`; это ещё не exact clean-revision evidence, absent-row aggregation, JIT, performance или JVM runtime closure.
 - Evidence: working-tree conformance `107` checks; isolated Windows runtime и WSL2 Linux package runs с отдельно исполняемым consumer; runtime closures по `191` files: Windows `9db719dc1268bb7ae99fef88ba65591ba058ccbd8865493ff486298d2ea2cac8`, Linux `9349ea1375f117bad1c2f43fb14f399a7cbf47c7ce1067dabcf0ac47e5aba8c0`; corrupted Windows/Linux copies дали `EnvironmentUnavailable`/`RuntimeClosureDigestMismatch` до inventory/consumer output; Windows system root с несколькими hostfxr versions дал `EnvironmentUnavailable`/`AmbiguousRuntimeSelection`; exact `ac0b4ec` probe показал слишком общий reason для пустого selector, после чего пустой selector отделён как `MissingRuntimeComponent`.
 - Последствие: A10 можно закрывать только после exact clean-commit rerun и отдельной проверки absent platform row. Runtime closure не включает ambient OS native libraries; эта TCB boundary остаётся явной.
-- Supersedes / supersededBy: уточняет оставшийся runtime gate K-E06-045; exact evidence должно заменить working-tree status.
+- Supersedes / supersededBy: уточняет оставшийся runtime gate K-E06-045; exact evidence сохранено в K-E06-047.
+
+## K-E06-047
+
+- Дата / фаза: 2026-09-08 / exact .NET runtime closure evidence.
+- Тип / статус: Runtime-bound platform execution and A10 negative rows / Confirmed on clean public commit `c254468`; A10 partial until absent-row aggregation.
+- Утверждение: один manifest/package/artifact triple прошёл validation и direct runtime execution на Windows/Linux x64 после обязательного сравнения с заранее выбранными OS-specific closure digests. Обе runtime closures содержат по `191` files; Windows digest `9db719dc1268bb7ae99fef88ba65591ba058ccbd8865493ff486298d2ea2cac8`, Linux digest `9349ea1375f117bad1c2f43fb14f399a7cbf47c7ce1067dabcf0ac47e5aba8c0`. Corrupt runtime, отсутствующая runtime version и multiversion selector дали `EnvironmentUnavailable` с различимыми причинами до inventory/consumer output.
+- Scope: exact `dotnet-managed.v1` package из `aaf2dc2`, harness code `c254468`, runtime `10.0.11`, SDK build `10.0.400`, Windows x64 и WSL2 Linux x64 на одном host. Не включает absent platform row, OS native-library closure, JIT/performance или JVM.
+- Evidence: `artifacts/e06/dotnet-runtime-c254468/**`; conformance `107`; direct consumers `8+24+1+13`; exact manifest `f947db0e3437cb98babe422c6831fa37570b04fd18a8847e12b4620a0119bb8d`, package `4dd1a36f3b430835a0b13241e7bb98a60df451a19befbbbde1801de128d8704e`, artifact set `002c89b04032d9416894f4555ff0bf279be60392ad7ee31b2521ab67840fb08a`.
+- Последствие: runtime-bound часть A5 и missing/corrupt runtime часть A10 для .NET приняты как checkpoint. A10 нельзя закрыть без deterministic report aggregation, где отсутствующая mandatory row становится `Unavailable`; профиль остаётся без статуса `Portable` до A11/A12 и этой проверки.
+- Supersedes / supersededBy: заменяет working-tree status K-E06-046; следующий шаг — canonical .NET profile report с absent-row self-test.
