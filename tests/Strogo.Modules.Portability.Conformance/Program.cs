@@ -84,6 +84,15 @@ Check(PortabilityContract.IsExecutionProfile(PortabilityVersions.DotNetProfile),
 Check(PortabilityContract.IsExecutionProfile(PortabilityVersions.JvmProfile), "JVM profile is closed");
 Check(!PortabilityContract.IsExecutionProfile("native"), "unknown profile is rejected");
 
+var performanceProject = File.ReadAllText(Path.Combine(root, "tests", "fixtures", "portability-consumers", "csharp-performance", "PerformanceConsumer.csproj"));
+var performanceProgram = File.ReadAllText(Path.Combine(root, "tests", "fixtures", "portability-consumers", "csharp-performance", "Program.cs"));
+var performanceDriver = File.ReadAllText(Path.Combine(root, "tools", "Test-PortableDotNet-Performance.ps1"));
+Check(performanceProject.Contains("<Reference Include=\"Strogo.Portable.V01\">", StringComparison.Ordinal) && !performanceProject.Contains("ProjectReference", StringComparison.Ordinal), "performance consumer uses only the public packaged assembly");
+Check(performanceProgram.Contains("const int warmupCalls = 5_000;", StringComparison.Ordinal) && performanceProgram.Contains("const int repeats = 5;", StringComparison.Ordinal) && performanceProgram.Contains("const int callsPerRepeat = 10_000;", StringComparison.Ordinal), "performance workload fixes warmup, repetitions, and calls");
+Check(performanceProgram.Contains("ModuleApi.Invoke(request)", StringComparison.Ordinal) && performanceProgram.Contains("operationsPerSecond", StringComparison.Ordinal), "performance workload measures the public JSON ABI and reports throughput");
+Check(performanceDriver.Contains("WaitForExit(180000)", StringComparison.Ordinal) && performanceDriver.Contains("assertionBoundary='DiagnosticOnlyNoG06'", StringComparison.Ordinal), "performance process is bounded and cannot assert G06");
+Check(performanceDriver.Contains("$null=$startInfo.Environment.Remove($name)", StringComparison.Ordinal) && performanceDriver.Contains("-expected-runtime-closure-digest $ExpectedRuntimeClosureDigest", StringComparison.OrdinalIgnoreCase), "performance driver clears diagnostic JIT overrides and verifies the exact runtime closure");
+
 var replay = OwnerContractReplayV04.Replay(binding.OwnerBinding);
 Check(replay.Status == "Pass" && replay.CheckedWitnesses == 8, $"owner witnesses: {replay.Status}/{replay.CheckedWitnesses}");
 

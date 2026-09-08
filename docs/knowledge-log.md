@@ -1500,3 +1500,13 @@
 - Evidence: `artifacts/e06/dotnet-jit-ca5ae50/**`; conformance `131`; JIT logs `29520`/`28614` bytes при limit 1 MiB; manifest/package/artifact triple совпадает, runtime closure digests различаются по OS.
 - Последствие: A12 закрыт для .NET profile и может быть подключён к будущему canonical profile report. Следующий .NET gate — A11 performance; общий A12 закроется только после HotSpot receipts.
 - Supersedes / supersededBy: заменяет working-tree status K-E06-051; full E06 остаётся открыт.
+
+## K-E06-053
+
+- Дата / фаза: 2026-09-08 / .NET performance diagnostic implementation.
+- Тип / статус: A11 .NET behavior / Confirmed on working tree; exact clean-commit and Linux evidence pending.
+- Утверждение: диагностический benchmark должен измерять тот же публичный путь, который доступен внешней программе: `ModuleApi.Invoke` вместе с JSON transport и проверкой exact response. Отдельный замер generated candidate мог бы быть полезен только как явно названная дополнительная диагностика, но не заменяет A11 public-ABI observation. Driver сначала проверяет canonical package и заранее известный runtime closure, затем запускает пять отдельных cold-start процессов и отдельный throughput process с `5000` warmup calls и `5 × 10000` measured calls; JIT diagnostic overrides удаляются из окружения. Report сохраняет wall-clock startup, per-repeat duration/operations per second, process-observed peak working set и размеры entry assembly/artifact set/package tree с границей `DiagnosticOnlyNoG06`.
+- Scope: working-tree Windows x64, exact .NET `10.0.11` closure `9db719dc1268bb7ae99fef88ba65591ba058ccbd8865493ff486298d2ea2cac8`, package из `aaf2dc2`. Это один диагностический sample, не Linux row, не сравнительный baseline и не доказательство G06.
+- Evidence: conformance `136`; successful local report содержит `5` unique startup PID, `5` positive durations, `5` positive throughput values, positive process-reported peak memory и exact package/runtime identities. Первый вариант PowerShell driver случайно возвращал boolean results `Environment.Remove` в pipeline и тем самым раздувал `startup` до `40` элементов; явное подавление output и обязательная cardinality validation устранили класс ошибки.
+- Последствие: A11 implementation нельзя считать завершённым по одному Windows run. После commit нужен exact Windows rerun, симметричный Linux driver/run и retained filtered evidence; raw числа не входят в semantic digest и не присваивают profile статус `Portable`.
+- Supersedes / supersededBy: развивает K-E06-048/K-E06-052; exact evidence должна заменить working-tree status.
