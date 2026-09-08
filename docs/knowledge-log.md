@@ -1310,3 +1310,13 @@
 - Evidence: coordinated review public commit `30cffa8`.
 - Последствие: следующий docs-only commit используется как controlled no-op revision для повторной сборки и сравнения exact DLL SHA-256.
 - Supersedes / supersededBy: уточняет незакрытую часть K-E06-030/K-E06-031.
+
+## K-E06-034
+
+- Дата / фаза: 2026-09-08 / controlled cross-revision .NET build.
+- Тип / статус: Artifact identity / Confirmed across clean revisions `30cffa8` and `ce291ca`.
+- Утверждение: после fixed assembly metadata два clean builds при разных repository HEAD, но одинаковых verified source, adapter, project, translated source и translation-record digests, создали byte-equal DLL SHA-256 `37cb02dc8be37fe005d6515421aaba97b069168e70f52d9e8ba2ab019fe314fc`. На втором revision та же DLL повторно прошла Linux и Windows full consumer: 8 public cases, 24 transport, 1 escaped-surrogate и 13 owner vectors.
+- Scope: cross-revision content identity и functional two-platform evidence. Не закрывает mutations, canonical portability package/manifest, runtime closure digests или performance/JIT.
+- Evidence: `artifacts/e06/dotnet-full-vectors-ce291ca/**`; two build reports, explicit cross-revision report, Linux/Windows receipts/logs, DLL и 13-entry SHA manifest.
+- Последствие: найденные physical path, Git revision, escaped Unicode и inherited MSBuild sources of nondeterminism/false confidence закрыты для текущего .NET checkpoint; следующий различающий gate — mutations либо canonical package binding.
+- Supersedes / supersededBy: завершает K-E06-030/K-E06-033 и заменяет более узкий artifact checkpoint K-E06-025 для дальнейших .NET claims.
