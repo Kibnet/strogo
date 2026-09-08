@@ -96,6 +96,14 @@ Check(performanceDriver.Contains("$null=$startInfo.Environment.Remove($name)", S
 Check(performanceLinuxDriver.Contains("environment.pop(name, None)", StringComparison.Ordinal) && performanceLinuxDriver.Contains("--expected-runtime-closure-digest \"$expected_runtime\"", StringComparison.Ordinal), "Linux performance driver clears diagnostic JIT overrides and verifies the exact runtime closure");
 Check(performanceLinuxDriver.Contains("time.monotonic_ns()", StringComparison.Ordinal) && performanceLinuxDriver.Contains("communicate(timeout=180)", StringComparison.Ordinal) && performanceLinuxDriver.Contains("DiagnosticOnlyNoG06", StringComparison.Ordinal), "Linux performance process is measured, bounded, and cannot assert G06");
 
+var javaAdapter = File.ReadAllText(Path.Combine(root, "targets", "jvm-java17-v1", "strogo", "portable", "v01", "ModuleApi.java"));
+var javaConsumer = File.ReadAllText(Path.Combine(root, "tests", "fixtures", "portability-consumers", "java", "Consumer.java"));
+Check(javaAdapter.Contains("public static String invoke(String canonicalRequestJson)", StringComparison.Ordinal) && javaAdapter.Contains("PortableWrapper.__default.Invoke", StringComparison.Ordinal), "Java public ABI delegates to the verified total wrapper");
+Check(javaAdapter.Contains("MAXIMUM_INPUT_BYTES = 65536", StringComparison.Ordinal) && javaAdapter.Contains("MAXIMUM_DEPTH = 32", StringComparison.Ordinal) && javaAdapter.Contains("MAXIMUM_VALUES = 2048", StringComparison.Ordinal), "Java adapter fixes all transport resource limits");
+Check(javaAdapter.Contains("SyntaxInspector.inspect", StringComparison.Ordinal) && javaAdapter.Contains("if (!canonicalRequestJson.equals(canonical))", StringComparison.Ordinal), "Java adapter separates bounded syntax inspection from canonical transport validation");
+Check(!new[] { "com.fasterxml", "org.json", "javax.json", "java.lang.reflect", "ServiceLoader", "System.load" }.Any(javaAdapter.Contains), "Java adapter has no external JSON, reflection, service loading, or JNI dependency");
+Check(javaConsumer.Contains("PASS standalone Java consumer cases=", StringComparison.Ordinal) && javaConsumer.Contains("transport=", StringComparison.Ordinal) && javaConsumer.Contains("expected 13 vectors", StringComparison.Ordinal), "standalone Java consumer covers ABI, transport, and owner vectors");
+
 var replay = OwnerContractReplayV04.Replay(binding.OwnerBinding);
 Check(replay.Status == "Pass" && replay.CheckedWitnesses == 8, $"owner witnesses: {replay.Status}/{replay.CheckedWitnesses}");
 
