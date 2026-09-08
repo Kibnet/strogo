@@ -1320,3 +1320,13 @@
 - Evidence: `artifacts/e06/dotnet-full-vectors-ce291ca/**`; two build reports, explicit cross-revision report, Linux/Windows receipts/logs, DLL и 13-entry SHA manifest.
 - Последствие: найденные physical path, Git revision, escaped Unicode и inherited MSBuild sources of nondeterminism/false confidence закрыты для текущего .NET checkpoint; следующий различающий gate — mutations либо canonical package binding.
 - Supersedes / supersededBy: завершает K-E06-030/K-E06-033 и заменяет более узкий artifact checkpoint K-E06-025 для дальнейших .NET claims.
+
+## K-E06-035
+
+- Дата / фаза: 2026-09-08 / .NET target mutation harness.
+- Тип / статус: Validation-harness insight / Confirmed and fixed on working tree; exact clean-commit rerun pending.
+- Утверждение: мутация eager branch, записанная как literal `false`, была отвергнута компилятором из-за `CS0162` при warnings-as-errors и потому не создавала требуемый runtime-различитель. После замены на runtime-условие, ложное для любой допустимой длины, мутант собирается и обращение к element `0` пустой sequence даёт `System.IndexOutOfRangeException`. Отдельно найден ложноположительный путь probe: общий `catch` мог принять собственное исключение `mutation survived comparison` за target crash. Probe теперь ловит только исключение самого `ModuleApi.Invoke`, а четыре negative controls требуют, чтобы неизменённая DLL не считалась мутантом.
+- Scope: четыре обязательные .NET target mutations E06 §6.2.5 и корректность mutation probe; это не manifest/package, runtime closure, Java или performance evidence.
+- Evidence: `tools/Apply-PortableDotNet-Mutation.py`, `tools/Test-PortableDotNet-Mutations.sh`, standalone mutation consumer; ignored working-tree run `artifacts/local-validation/e06/dotnet-mutations-working-tree-4` дал baseline `4`, unchanged-target rejections `4`, compiled mutants `4`, detected mutants `4`.
+- Последствие: mutation gate можно засчитать только после clean-commit rerun; build rejection не подменяет ожидаемый runtime mismatch/crash, а self-test неизменённого target является обязательной защитой от ложного `Detected`.
+- Supersedes / supersededBy: развивает K-E06-034 и закрывает design-часть target mutations; exact execution ещё должен заменить working-tree evidence.
