@@ -189,6 +189,7 @@ public static class DotNetRuntimeClosure
             UnavailableComponent("$/files", "RuntimeEntryUnreadable", component);
             throw;
         }
+        if (entries.Length == 0) UnavailableComponent("$/files", "MissingRuntimeComponent", component);
         if (entries.Length != 1 || !string.Equals(Path.GetFileName(entries[0]), runtimeVersion, StringComparison.Ordinal) || !Directory.Exists(entries[0]))
             UnavailableComponent("$/files", "AmbiguousRuntimeSelection", component);
     }

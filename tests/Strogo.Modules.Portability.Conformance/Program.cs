@@ -378,6 +378,8 @@ try
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11", runtimeReceiptA.RuntimeClosureDigest), "RuntimeClosureDigestMismatch"), "corrupt runtime closure is unavailable against expected identity");
     File.Delete(Path.Combine(runtimeA, "host", "fxr", "10.0.11", "hostfxr.bin"));
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeA, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "MissingRuntimeComponent"), "missing runtime component is unavailable");
+    Directory.Delete(Path.Combine(runtimeA, "host", "fxr", "10.0.11"));
+    Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeA, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "MissingRuntimeComponent"), "missing runtime version is unavailable");
     Directory.CreateDirectory(Path.Combine(runtimeB, "host", "fxr", "10.0.12"));
     File.WriteAllText(Path.Combine(runtimeB, "host", "fxr", "10.0.12", "hostfxr.bin"), "hostfxr-v2", Encoding.ASCII);
     Check(RejectsEnvironment(() => DotNetRuntimeClosure.Capture(Path.Combine(runtimeB, runtimeExecutable), runtimeOs, "x64", "10.0.11"), "AmbiguousRuntimeSelection"), "multiple selectable hostfxr versions are unavailable");
