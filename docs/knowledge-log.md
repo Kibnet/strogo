@@ -1469,4 +1469,14 @@
 - Scope: completeness/identity core для обоих managed profile IDs и development `strogo.portability-matrix-check.v0.1`; это ещё не финальный `strogo.portability-report.v0.1`, profile `Portable`, JIT/performance либо JVM evidence.
 - Evidence: working-tree conformance `121`; actual retained Windows-only input дал `NotPassed` и synthesized Linux `Unavailable`; две retained `c254468` rows дали matrix check `Passed`; mutation Linux `packageDigest` дала `PortabilityReportRejected`/`PlatformArtifactIdentityMismatch`, exit `1`, без output.
 - Последствие: absent-row часть A10 реализована fail closed; exact clean-commit run должен заменить working-tree status. Общий report builder может использовать matrix core, но обязан дополнительно учесть JIT, oracle и оба mandatory profiles.
-- Supersedes / supersededBy: развивает K-E06-047 и закрывает найденный в self-review package/report mix-up seam; exact evidence pending.
+- Supersedes / supersededBy: развивает K-E06-047 и закрывает найденный в self-review package/report mix-up seam; exact evidence сохранено в K-E06-050.
+
+## K-E06-050
+
+- Дата / фаза: 2026-09-08 / exact platform matrix completeness evidence.
+- Тип / статус: A10 absent-row and report identity gate / Confirmed on clean public commit `e222523`.
+- Утверждение: при единственной Windows Passed row обязательная Linux row детерминированно присутствует в projection как `Unavailable`, `synthesized=true`, reasons `EnvironmentUnavailable`/`RowUnavailable`, а matrix имеет `NotPassed`. Две retained runtime-bound rows дают matrix check `Passed` только при одном manifest/package/artifact triple. Изменение Linux `packageDigest` при сохранённом status `Passed` отвергается как `PortabilityReportRejected`/`PlatformArtifactIdentityMismatch` до output.
+- Scope: A10 и completeness/identity core будущего report для `dotnet-managed.v1`. `strogo.portability-matrix-check.v0.1` не является полным `strogo.portability-report.v0.1`, не проверяет JIT/oracle/JVM и не присваивает статус `Portable`.
+- Evidence: `artifacts/e06/dotnet-matrix-e222523/**`; conformance `121`; absent/complete/mismatched-package cases на exact revision.
+- Последствие: A10 закрыт для .NET checkpoint: missing/corrupt runtime подтверждены K-E06-047, absent mandatory row и report mix-up — этой записью. Следующий .NET gate — A11 performance либо A12 JIT; общий report строится после появления нужных receipts.
+- Supersedes / supersededBy: заменяет working-tree status K-E06-049 и завершает A10 .NET behavior; full E06 остаётся открыт.
