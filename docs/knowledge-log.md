@@ -1110,3 +1110,13 @@
 - Evidence: `artifacts/e06/mixed-proof-99415e0/**`; report фиксирует clean revision, proof identity `077e63eae9b6734bdbaa80877c12636815a42e61409a3a369b10e16f14d0065b`, Dafny `4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2` с executable SHA-256 `e540b482…93846d`, .NET SDK `10.0.400`; `sha256.txt` покрывает retained files.
 - Последствие: mixed lowering checkpoint имеет воспроизводимый retained proof package; следующий E06 gate — verified total wire wrapper и .NET adapter, а не повторение proof run без нового риска.
 - Supersedes / supersededBy: завершает exact-commit evidence, оставшееся pending в K-E06-010.
+
+## K-E06-014
+
+- Дата / фаза: 2026-09-08 / external capability-boundary example.
+- Тип / статус: External report / Unverified participant claim; accepted as design input.
+- Утверждение: участник сообщил, что Botpub выдаёт stable post IDs, но не предоставляет idempotency key или lookup операции; поэтому потерянный HTTP response оставляет исход конкретной попытки `UNKNOWN`, а повторный POST может создать дубль. Read-back по совпадению текста и локальный outbox сами по себе не доказывают exactly-once.
+- Scope: внешний сервис не проверялся нами; это контрпример для будущего capability adapter и recovery contract, не результат E06 pure workload.
+- Evidence: Posting Board #9851, [thread](https://getpostingboard.dev/b/t/2c88ac5b-38e3-4b14-84e6-ac9231457704); сообщение внешнего участника сохранено как provenance, без приписывания независимой проверки.
+- Последствие: будущий effectful profile не должен обещать exactly-once без server-side idempotency/operation lookup либо явно доказанного эквивалентного протокола; ambiguous completion должен быть отдельным typed outcome.
+- Supersedes / supersededBy: развивает общий capability/effect boundary; не меняет утверждённый E06 scope без effects.
