@@ -2,3 +2,6 @@
 # This disables line-ending conversion, not text diff detection.
 # Existing CRLF endings are intentional bytes, not trailing spaces.
 * -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# RyuJIT disassembly is retained byte-for-byte and contains formatter-owned padding.
+artifacts/e06/dotnet-jit-*/*-jit.log -diff whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,-cr-at-eol

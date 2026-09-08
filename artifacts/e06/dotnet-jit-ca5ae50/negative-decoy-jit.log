@@ -1,0 +1,739 @@
+; Assembly listing for method Strogo.Portable.V01.ModuleApi:Invoke(System.String):System.String (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rbp based frame
+; fully interruptible
+; No PGO data
+; BEGIN METHOD Strogo.Portable.V01.ModuleApi:Invoke(System.String):System.String
+
+G_M000_IG01:
+       push     rbp
+       push     r14
+       push     rdi
+       push     rsi
+       push     rbx
+       sub      rsp, 352
+       lea      rbp, [rsp+0x180]
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqa  xmmword ptr [rbp-0x150], xmm4
+       mov      rax, -288
+       vmovdqa  xmmword ptr [rbp+rax-0x20], xmm4
+       vmovdqa  xmmword ptr [rbp+rax-0x10], xmm4
+       vmovdqa  xmmword ptr [rax+rbp], xmm4
+       add      rax, 48
+       jne      SHORT  -5 instr
+       mov      rsi, rcx
+ 
+G_M000_IG02:
+       test     rsi, rsi
+       je       G_M000_IG27
+       mov      rcx, rsi
+       call     [Strogo.Portable.V01.ModuleApi:HasOnlyUnicodeScalars(System.String):bool]
+       test     eax, eax
+       je       G_M000_IG26
+       test     byte  ptr [(reloc)], 1
+       je       G_M000_IG30
+ 
+G_M000_IG03:
+       mov      rcx, 0xD1FFAB1E
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, rsi
+       mov      rax, qword ptr [rcx]
+       mov      rax, qword ptr [rax+0x50]
+       call     [rax+0x18]System.Text.Encoding:GetByteCount(System.String):int:this
+       mov      dword ptr [rbp-0x28], eax
+       cmp      dword ptr [rbp-0x28], 0x10000
+       jg       G_M000_IG25
+       mov      rcx, 0xD1FFAB1E
+       mov      rcx, gword ptr [rcx]
+       mov      rdx, rsi
+       mov      rax, qword ptr [rcx]
+       mov      rax, qword ptr [rax+0x58]
+       call     [rax+0x10]System.Text.Encoding:GetBytes(System.String):byte[]:this
+       mov      rsi, rax
+       lea      rcx, [rbp-0x78]
+       mov      rdx, rsi
+       call     [System.ReadOnlySpan`1[byte]:op_Implicit(byte[]):System.ReadOnlySpan`1[byte]]
+       lea      rcx, [rbp-0x38]
+       lea      rdx, [rbp-0x78]
+       call     [Strogo.Portable.V01.ModuleApi:InspectSyntax(System.ReadOnlySpan`1[byte]):Strogo.Portable.V01.ModuleApi+SyntaxInspection]
+       lea      rcx, [rbp-0x38]
+       call     [Strogo.Portable.V01.ModuleApi+SyntaxInspection:get_Malformed():bool:this]
+       test     eax, eax
+       jne      G_M000_IG24
+       lea      rcx, [rbp-0x38]
+       call     [Strogo.Portable.V01.ModuleApi+SyntaxInspection:get_Depth():int:this]
+       cmp      eax, 32
+       jg       G_M000_IG23
+       lea      rcx, [rbp-0x38]
+       call     [Strogo.Portable.V01.ModuleApi+SyntaxInspection:get_Values():int:this]
+       cmp      eax, 0x800
+       jg       G_M000_IG22
+ 
+G_M000_IG04:
+       lea      rcx, [rbp-0x88]
+       mov      rdx, rsi
+       call     [System.ReadOnlyMemory`1[byte]:op_Implicit(byte[]):System.ReadOnlyMemory`1[byte]]
+       xor      ecx, ecx
+       mov      qword ptr [rbp-0x48], rcx
+       lea      rcx, [rbp-0x48]
+       xor      edx, edx
+       call     [System.Text.Json.JsonDocumentOptions:set_AllowTrailingCommas(bool):this]
+       lea      rcx, [rbp-0x48]
+       xor      edx, edx
+       call     [System.Text.Json.JsonDocumentOptions:set_CommentHandling(byte):this]
+       lea      rcx, [rbp-0x48]
+       mov      edx, 0x10000
+       call     [System.Text.Json.JsonDocumentOptions:set_MaxDepth(int):this]
+       lea      rcx, [rbp-0x88]
+       mov      rdx, qword ptr [rbp-0x48]
+       call     [System.Text.Json.JsonDocument:Parse(System.ReadOnlyMemory`1[byte],System.Text.Json.JsonDocumentOptions):System.Text.Json.JsonDocument]
+       mov      rdi, rax
+ 
+G_M000_IG05:
+       mov      gword ptr [rbp-0x160], rdi
+ 
+G_M000_IG06:
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rbx, rax
+       mov      rcx, rbx
+       call     [System.Collections.Generic.List`1[System.__Canon]:.ctor():this]
+       nop      
+ 
+G_M000_IG07:
+       lea      rdx, [rbp-0x98]
+       mov      rcx, rdi
+       cmp      dword ptr [rcx], ecx
+       call     [System.Text.Json.JsonDocument:get_RootElement():System.Text.Json.JsonElement:this]
+       lea      rcx, [rbp-0x98]
+       mov      rdx, rbx
+       call     [Strogo.Portable.V01.ModuleApi:ValidateRequest(System.Text.Json.JsonElement,System.Collections.Generic.List`1[Strogo.Portable.V01.ModuleApi+Finding])]
+       nop      
+ 
+G_M000_IG08:
+       mov      rcx, rbx
+       call     [System.Collections.Generic.List`1[System.__Canon]:get_Count():int:this]
+       test     eax, eax
+       jg       G_M000_IG14
+       lea      rdx, [rbp-0x58]
+       mov      rcx, rdi
+       call     [System.Text.Json.JsonDocument:get_RootElement():System.Text.Json.JsonElement:this]
+ 
+G_M000_IG09:
+       vmovdqu  xmm0, xmmword ptr [rbp-0x58]
+       vmovdqu  xmmword ptr [rbp-0x150], xmm0
+ 
+G_M000_IG10:
+       lea      rcx, [rbp-0x150]
+       call     [Strogo.Portable.V01.ModuleApi:CanonicalRequestBytes(System.Text.Json.JsonElement):byte[]]
+       mov      rdi, rax
+       lea      rcx, [rbp-0xA8]
+       mov      rdx, rsi
+       call     [System.MemoryExtensions:AsSpan[byte](byte[]):System.Span`1[byte]]
+       lea      rcx, [rbp-0xB8]
+       lea      rdx, [rbp-0xA8]
+       call     [System.Span`1[byte]:op_Implicit(System.Span`1[byte]):System.ReadOnlySpan`1[byte]]
+       lea      rcx, [rbp-0xC8]
+       mov      rdx, rdi
+       call     [System.ReadOnlySpan`1[byte]:op_Implicit(byte[]):System.ReadOnlySpan`1[byte]]
+       lea      rcx, [rbp-0xB8]
+       lea      rdx, [rbp-0xC8]
+       call     [System.MemoryExtensions:SequenceEqual[byte](System.ReadOnlySpan`1[byte],System.ReadOnlySpan`1[byte]):bool]
+       test     eax, eax
+       je       G_M000_IG13
+       lea      rcx, [rbp-0x58]
+       lea      rdx, [rbp-0x68]
+       mov      r8, 0xD1FFAB1E
+       call     [System.Text.Json.JsonElement:GetProperty(System.String):System.Text.Json.JsonElement:this]
+       lea      rcx, [rbp-0x68]
+       call     [System.Text.Json.JsonElement:GetString():System.String:this]
+       mov      rbx, rax
+       lea      rcx, [rbp-0x58]
+       lea      rdx, [rbp-0x68]
+       mov      r8, 0xD1FFAB1E
+       call     [System.Text.Json.JsonElement:GetProperty(System.String):System.Text.Json.JsonElement:this]
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      r14, rax
+       lea      rcx, [rbp-0x68]
+       lea      rdx, [rbp-0xE0]
+       call     [System.Text.Json.JsonElement:EnumerateArray():System.Text.Json.JsonElement+ArrayEnumerator:this]
+       lea      rdi, bword ptr [r14+0x08]
+ 
+G_M000_IG11:
+       lea      rsi, bword ptr [rbp-0xE0]
+       movsq    
+       call     CORINFO_HELP_ASSIGN_BYREF
+       movsq    
+       mov      rcx, 0xD1FFAB1E
+       mov      r8, gword ptr [rcx]
+       test     r8, r8
+       jne      SHORT G_M000_IG12
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rcx, rsi
+       xor      rdx, rdx
+       mov      r8, 0xD1FFAB1E
+       mov      r9, 0xD1FFAB1E
+       call     [System.MulticastDelegate:CtorOpened(System.Object,nint,nint):this]
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      r8, rsi
+ 
+G_M000_IG12:
+       mov      rdx, r14
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Linq.Enumerable:Select[System.Text.Json.JsonElement,System.__Canon](System.Collections.Generic.IEnumerable`1[System.Text.Json.JsonElement],System.Func`2[System.Text.Json.JsonElement,System.__Canon]):System.Collections.Generic.IEnumerable`1[System.__Canon]]
+       mov      rdx, rax
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Linq.Enumerable:ToArray[System.__Canon](System.Collections.Generic.IEnumerable`1[System.__Canon]):System.__Canon[]]
+       mov      rsi, rax
+       mov      rcx, rbx
+       call     [Strogo.Portable.V01.ModuleApi:DafnyText(System.String):Dafny.ISequence`1[Dafny.Rune]]
+       mov      rbx, rax
+       mov      rdx, rsi
+       mov      rcx, 0xD1FFAB1E
+       call     [Dafny.Sequence`1[System.__Canon]:FromArray(System.__Canon[]):Dafny.ISequence`1[System.__Canon]]
+       mov      rdx, rax
+       mov      rcx, rbx
+       call     [PortableWrapper.__default:Invoke(Dafny.ISequence`1[Dafny.Rune],Dafny.ISequence`1[PortableWrapper._IWireValue]):PortableWrapper._IWireOutcome]
+       mov      rcx, rax
+       call     [Strogo.Portable.V01.ModuleApi:OutcomeJson(PortableWrapper._IWireOutcome):System.String]
+       mov      gword ptr [rbp-0x158], rax
+       jmp      G_M000_IG20
+ 
+G_M000_IG13:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       mov      gword ptr [rbp-0x158], rax
+       jmp      G_M000_IG20
+ 
+G_M000_IG14:
+       test     byte  ptr [(reloc)], 1
+       je       G_M000_IG19
+ 
+G_M000_IG15:
+       mov      rcx, 0xD1FFAB1E
+       mov      r8, gword ptr [rcx]
+       test     r8, r8
+       jne      SHORT G_M000_IG16
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rdx, 0xD1FFAB1E
+       mov      rdx, gword ptr [rdx]
+       mov      rcx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.MulticastDelegate:CtorClosed(System.Object,nint):this]
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      r8, rsi
+ 
+G_M000_IG16:
+       mov      rdx, rbx
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Linq.Enumerable:OrderBy[System.__Canon,int](System.Collections.Generic.IEnumerable`1[System.__Canon],System.Func`2[System.__Canon,int]):System.Linq.IOrderedEnumerable`1[System.__Canon]]
+       mov      rbx, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rsi, gword ptr [rcx]
+       test     rsi, rsi
+       jne      SHORT G_M000_IG17
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rdx, 0xD1FFAB1E
+       mov      rdx, gword ptr [rdx]
+       mov      rcx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.MulticastDelegate:CtorClosed(System.Object,nint):this]
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+ 
+G_M000_IG17:
+       call     [System.StringComparer:get_Ordinal():System.StringComparer]
+       mov      r9, rax
+       mov      rdx, rbx
+       mov      r8, rsi
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Linq.Enumerable:ThenBy[System.__Canon,System.__Canon](System.Linq.IOrderedEnumerable`1[System.__Canon],System.Func`2[System.__Canon,System.__Canon],System.Collections.Generic.IComparer`1[System.__Canon]):System.Linq.IOrderedEnumerable`1[System.__Canon]]
+       mov      rdx, rax
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Linq.Enumerable:First[System.__Canon](System.Collections.Generic.IEnumerable`1[System.__Canon]):System.__Canon]
+       mov      rbx, rax
+       mov      rcx, rbx
+       cmp      dword ptr [rcx], ecx
+       call     [Strogo.Portable.V01.ModuleApi+Finding:get_Code():System.String:this]
+       mov      rsi, rax
+       mov      rcx, rbx
+       call     [Strogo.Portable.V01.ModuleApi+Finding:get_Locus():System.String:this]
+       mov      rdi, rax
+       mov      rcx, rbx
+       call     [Strogo.Portable.V01.ModuleApi+Finding:get_Details():System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]:this]
+       mov      r8, rax
+       mov      rcx, rsi
+       mov      rdx, rdi
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       mov      gword ptr [rbp-0x158], rax
+       jmp      SHORT G_M000_IG20
+ 
+G_M000_IG18:
+       nop      
+       jmp      SHORT G_M000_IG20
+ 
+G_M000_IG19:
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_GET_GCSTATIC_BASE
+       jmp      G_M000_IG15
+ 
+G_M000_IG20:
+       cmp      gword ptr [rbp-0x160], 0
+       je       SHORT G_M000_IG21
+       mov      rcx, gword ptr [rbp-0x160]
+       call     [System.Text.Json.JsonDocument:Dispose():this]
+ 
+G_M000_IG21:
+       mov      rax, gword ptr [rbp-0x158]
+       jmp      G_M000_IG28
+ 
+G_M000_IG22:
+       mov      rcx, 0xD1FFAB1E
+       mov      edx, 2
+       call     CORINFO_HELP_NEWARR_1_VC
+       mov      rbx, rax
+       lea      rcx, [rbp-0x38]
+       call     [Strogo.Portable.V01.ModuleApi+SyntaxInspection:get_Values():int:this]
+       mov      dword ptr [rbp-0x40], eax
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x40]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0xF0]
+       mov      rsi, 0xD1FFAB1E
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rdi, bword ptr [rbx+0x10]
+       mov      rdx, gword ptr [rbp-0xF0]
+       mov      rcx, rdi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rdi+0x08]
+       mov      rdx, gword ptr [rbp-0xE8]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      dword ptr [rbp-0x40], 0x800
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x40]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0x100]
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rsi, bword ptr [rbx+0x20]
+       mov      rdx, gword ptr [rbp-0x100]
+       mov      rcx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rsi+0x08]
+       mov      rdx, gword ptr [rbp-0xF8]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rcx, rsi
+       mov      rdx, rbx
+       call     [<>z__ReadOnlyArray`1[System.ValueTuple`2[System.__Canon,System.__Canon]]:.ctor(System.ValueTuple`2[System.__Canon,System.__Canon][]):this]
+       mov      r8, rsi
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       jmp      G_M000_IG28
+ 
+G_M000_IG23:
+       mov      rcx, 0xD1FFAB1E
+       mov      edx, 2
+       call     CORINFO_HELP_NEWARR_1_VC
+       mov      rbx, rax
+       lea      rcx, [rbp-0x38]
+       call     [Strogo.Portable.V01.ModuleApi+SyntaxInspection:get_Depth():int:this]
+       mov      dword ptr [rbp-0x40], eax
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x40]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0x110]
+       mov      rsi, 0xD1FFAB1E
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rdi, bword ptr [rbx+0x10]
+       mov      rdx, gword ptr [rbp-0x110]
+       mov      rcx, rdi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rdi+0x08]
+       mov      rdx, gword ptr [rbp-0x108]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      dword ptr [rbp-0x40], 32
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x40]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0x120]
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rsi, bword ptr [rbx+0x20]
+       mov      rdx, gword ptr [rbp-0x120]
+       mov      rcx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rsi+0x08]
+       mov      rdx, gword ptr [rbp-0x118]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rcx, rsi
+       mov      rdx, rbx
+       call     [<>z__ReadOnlyArray`1[System.ValueTuple`2[System.__Canon,System.__Canon]]:.ctor(System.ValueTuple`2[System.__Canon,System.__Canon][]):this]
+       mov      r8, rsi
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       jmp      G_M000_IG28
+ 
+G_M000_IG24:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       jmp      G_M000_IG28
+ 
+G_M000_IG25:
+       mov      rcx, 0xD1FFAB1E
+       mov      edx, 2
+       call     CORINFO_HELP_NEWARR_1_VC
+       mov      rbx, rax
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x28]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0x130]
+       mov      rsi, 0xD1FFAB1E
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rdi, bword ptr [rbx+0x10]
+       mov      rdx, gword ptr [rbp-0x130]
+       mov      rcx, rdi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rdi+0x08]
+       mov      rdx, gword ptr [rbp-0x128]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      dword ptr [rbp-0x40], 0x10000
+       call     [System.Globalization.CultureInfo:get_InvariantCulture():System.Globalization.CultureInfo]
+       mov      rdx, rax
+       lea      rcx, [rbp-0x40]
+       call     [System.Int32:ToString(System.IFormatProvider):System.String:this]
+       mov      r9, rax
+       lea      rcx, [rbp-0x140]
+       mov      rdx, rsi
+       mov      r8, 0xD1FFAB1E
+       call     [System.ValueTuple`2[System.__Canon,System.__Canon]:.ctor(System.__Canon,System.__Canon):this]
+       lea      rsi, bword ptr [rbx+0x20]
+       mov      rdx, gword ptr [rbp-0x140]
+       mov      rcx, rsi
+       call     CORINFO_HELP_ASSIGN_REF
+       lea      rcx, bword ptr [rsi+0x08]
+       mov      rdx, gword ptr [rbp-0x138]
+       call     CORINFO_HELP_ASSIGN_REF
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_NEWSFAST
+       mov      rsi, rax
+       mov      rcx, rsi
+       mov      rdx, rbx
+       call     [<>z__ReadOnlyArray`1[System.ValueTuple`2[System.__Canon,System.__Canon]]:.ctor(System.ValueTuple`2[System.__Canon,System.__Canon][]):this]
+       mov      r8, rsi
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       jmp      SHORT G_M000_IG28
+ 
+G_M000_IG26:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       jmp      SHORT G_M000_IG28
+ 
+G_M000_IG27:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+ 
+G_M000_IG28:
+       nop      
+ 
+G_M000_IG29:
+       add      rsp, 352
+       pop      rbx
+       pop      rsi
+       pop      rdi
+       pop      r14
+       pop      rbp
+       ret      
+ 
+G_M000_IG30:
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_GET_GCSTATIC_BASE
+       jmp      G_M000_IG03
+ 
+G_M000_IG31:
+       sub      rsp, 40
+ 
+G_M000_IG32:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       mov      gword ptr [rbp-0x158], rax
+       lea      rax, G_M000_IG21
+ 
+G_M000_IG33:
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG34:
+       sub      rsp, 40
+ 
+G_M000_IG35:
+       mov      rcx, 0xD1FFAB1E
+       call     [System.Array:Empty[System.ValueTuple`2[System.__Canon,System.__Canon]]():System.ValueTuple`2[System.__Canon,System.__Canon][]]
+       mov      r8, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      rdx, 0xD1FFAB1E
+       call     [Strogo.Portable.V01.ModuleApi:RefusalJson(System.String,System.String,System.Collections.Generic.IReadOnlyList`1[System.ValueTuple`2[System.String,System.String]]):System.String]
+       mov      gword ptr [rbp-0x158], rax
+       lea      rax, G_M000_IG18
+ 
+G_M000_IG36:
+       add      rsp, 40
+       ret      
+ 
+G_M000_IG37:
+       sub      rsp, 40
+ 
+G_M000_IG38:
+       cmp      gword ptr [rbp-0x160], 0
+       je       SHORT G_M000_IG39
+       mov      rcx, gword ptr [rbp-0x160]
+       call     [System.Text.Json.JsonDocument:Dispose():this]
+ 
+G_M000_IG39:
+       nop      
+ 
+G_M000_IG40:
+       add      rsp, 40
+       ret      
+ ; END METHOD Strogo.Portable.V01.ModuleApi:Invoke(System.String):System.String
+
+; Total bytes of code 2479
+
+; Assembly listing for method Candidate.__default:F004Decoy(Dafny.ISequence`1[long]):Candidate._IR000 (FullOpts)
+; Emitting BLENDED_CODE for generic X64 + VEX on Windows
+; FullOpts code
+; optimized code
+; rsp based frame
+; partially interruptible
+; No PGO data
+; BEGIN METHOD Candidate.__default:F004Decoy(Dafny.ISequence`1[long]):Candidate._IR000
+
+G_M000_IG01:
+       push     r14
+       push     rdi
+       push     rsi
+       push     rbp
+       push     rbx
+       sub      rsp, 112
+       vxorps   xmm4, xmm4, xmm4
+       vmovdqu  ymmword ptr [rsp+0x20], ymm4
+       vmovdqu  ymmword ptr [rsp+0x40], ymm4
+       vmovdqa  xmmword ptr [rsp+0x60], xmm4
+       mov      rbx, rcx
+ 
+G_M000_IG02:
+       call     [Candidate.R000:Default():Candidate._IR000]
+       call     [System.Array:Empty[long]():long[]]
+       mov      rcx, rax
+       call     [Dafny.Sequence`1[long]:FromElements(long[]):Dafny.ISequence`1[long]]
+       mov      rcx, rax
+       xor      edx, edx
+       xor      r8d, r8d
+       call     [Candidate.R000:create(Dafny.ISequence`1[long],long,long):Candidate._IR000]
+       mov      rsi, rax
+       lea      rcx, [rsp+0x60]
+       call     [System.Numerics.BigInteger:get_Zero():System.Numerics.BigInteger]
+       jmp      SHORT G_M000_IG07
+ 
+G_M000_IG03:
+       mov      rdx, rbp
+ 
+G_M000_IG04:
+       mov      rcx, rdi
+       mov      r8, rsi
+       call     [Candidate.R000:create(Dafny.ISequence`1[long],long,long):Candidate._IR000]
+       mov      rsi, rax
+       lea      rcx, [rsp+0x40]
+       call     [System.Numerics.BigInteger:get_One():System.Numerics.BigInteger]
+ 
+G_M000_IG05:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x60]
+       vmovdqu  xmmword ptr [rsp+0x30], xmm0
+ 
+G_M000_IG06:
+       lea      rdx, [rsp+0x30]
+       lea      rcx, [rsp+0x60]
+       lea      r8, [rsp+0x40]
+       call     [System.Numerics.BigInteger:op_Addition(System.Numerics.BigInteger,System.Numerics.BigInteger):System.Numerics.BigInteger]
+ 
+G_M000_IG07:
+       vxorps   xmm0, xmm0, xmm0
+       vmovdqu  xmmword ptr [rsp+0x50], xmm0
+       mov      rcx, rbx
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Dafny.ISequence`1[long]:get_Count():int:this
+       mov      edx, eax
+       lea      rcx, [rsp+0x50]
+       call     [System.Numerics.BigInteger:.ctor(int):this]
+ 
+G_M000_IG08:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x60]
+       vmovdqu  xmmword ptr [rsp+0x30], xmm0
+ 
+G_M000_IG09:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x50]
+       vmovdqu  xmmword ptr [rsp+0x20], xmm0
+ 
+G_M000_IG10:
+       lea      rcx, [rsp+0x30]
+       lea      rdx, [rsp+0x20]
+       call     [System.Numerics.BigInteger:op_LessThan(System.Numerics.BigInteger,System.Numerics.BigInteger):bool]
+       test     eax, eax
+       je       G_M000_IG20
+ 
+G_M000_IG11:
+       mov      rcx, rsi
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Candidate._IR000:get_dtor_R000F000():Dafny.ISequence`1[long]:this
+       mov      rdi, rax
+       mov      rcx, rsi
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Candidate._IR000:get_dtor_R000F001():long:this
+       mov      rbp, rax
+       mov      rcx, rsi
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Candidate._IR000:get_dtor_R000F002():long:this
+       mov      rsi, rax
+       mov      rcx, 0xD1FFAB1E
+       mov      edx, 1
+       call     CORINFO_HELP_NEWARR_1_PTR
+       mov      r14, rax
+ 
+G_M000_IG12:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x60]
+       vmovdqu  xmmword ptr [rsp+0x30], xmm0
+ 
+G_M000_IG13:
+       lea      rdx, [rsp+0x30]
+       mov      rcx, rbx
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Dafny.ISequence`1[long]:Select(System.Numerics.BigInteger):long:this
+       mov      qword ptr [r14+0x10], rax
+       mov      rcx, r14
+       call     [Dafny.Sequence`1[long]:FromElements(long[]):Dafny.ISequence`1[long]]
+       mov      rdx, rax
+       mov      rcx, rdi
+       call     [Dafny.Sequence`1[long]:Concat(Dafny.ISequence`1[long],Dafny.ISequence`1[long]):Dafny.ISequence`1[long]]
+       mov      rdi, rax
+ 
+G_M000_IG14:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x60]
+       vmovdqu  xmmword ptr [rsp+0x30], xmm0
+ 
+G_M000_IG15:
+       lea      rdx, [rsp+0x30]
+       mov      rcx, rbx
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Dafny.ISequence`1[long]:Select(System.Numerics.BigInteger):long:this
+       add      rsi, rax
+       jo       SHORT G_M000_IG23
+ 
+G_M000_IG16:
+       vmovdqu  xmm0, xmmword ptr [rsp+0x60]
+       vmovdqu  xmmword ptr [rsp+0x30], xmm0
+ 
+G_M000_IG17:
+       lea      rdx, [rsp+0x30]
+       mov      rcx, rbx
+       mov      r11, 0xD1FFAB1E
+       call     [r11]Dafny.ISequence`1[long]:Select(System.Numerics.BigInteger):long:this
+       mov      r14, rax
+       shr      r14, 63
+       test     byte  ptr [(reloc)], 1
+       je       SHORT G_M000_IG22
+ 
+G_M000_IG18:
+       test     r14d, r14d
+       je       G_M000_IG03
+ 
+G_M000_IG19:
+       mov      rdx, rbp
+       add      rdx, 1
+       jo       SHORT G_M000_IG23
+       jmp      G_M000_IG04
+ 
+G_M000_IG20:
+       mov      rax, rsi
+ 
+G_M000_IG21:
+       add      rsp, 112
+       pop      rbx
+       pop      rbp
+       pop      rsi
+       pop      rdi
+       pop      r14
+       ret      
+ 
+G_M000_IG22:
+       mov      rcx, 0xD1FFAB1E
+       call     CORINFO_HELP_GET_NONGCSTATIC_BASE
+       jmp      SHORT G_M000_IG18
+ 
+G_M000_IG23:
+       call     CORINFO_HELP_OVERFLOW
+       int3     
+ ; END METHOD Candidate.__default:F004Decoy(Dafny.ISequence`1[long]):Candidate._IR000
+
+; Total bytes of code 523
+

@@ -1,0 +1,1 @@
+PASS dotnet JIT diagnostic pid=694 calls=50000

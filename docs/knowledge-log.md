@@ -1489,4 +1489,14 @@
 - Scope: диагностическое подтверждение факта JIT compilation для .NET validation profile; не correctness/byte stability машинного кода, не performance и не независимая Linux machine.
 - Evidence: working-tree conformance `131`; local Windows/Linux JIT receipts and bounded disassembly logs; official CoreCLR `viewing-jit-dumps.md` и `jitconfigvalues.h` для shipped method filter/output/no-inline flags. Первый Windows запуск через системный `dotnet` после появления дополнительного `hostfxr` корректно завершился `EnvironmentUnavailable/AmbiguousRuntimeSelection`; тот же run через isolated exact closure прошёл.
 - Последствие: runtime launcher из `PATH` не является стабильной execution identity даже при наличии нужной runtime patch. A12 runner обязан сначала закрыть exact runtime closure, затем построить symbol plan из проверенного package и лишь после этого запускать diagnostic process.
-- Supersedes / supersededBy: развивает K-E06-047 и K-E06-048; exact clean-commit evidence должно заменить working-tree status.
+- Supersedes / supersededBy: развивает K-E06-047 и K-E06-048; exact clean-commit status сохранён в K-E06-052.
+
+## K-E06-052
+
+- Дата / фаза: 2026-09-08 / exact .NET JIT evidence.
+- Тип / статус: A12 .NET half / Confirmed on clean public commit `ca5ae50`.
+- Утверждение: один package triple и exact Windows/Linux .NET `10.0.11` runtime closures выполнили по `50000` вызовов `summarize([4,-3,1])`; каждый process-bound receipt содержит два `FullOpts` event для заранее связанных `ModuleApi:Invoke` и source-map-derived `Candidate.__default:F004`. Actual-log decoy и missing-candidate mutations отвергнуты как `JitEvidenceMissing` без output receipt.
+- Scope: Windows x64 и Linux x64 под WSL2 для `dotnet-managed.v1`; compilation-event observation, не JIT correctness, performance или независимый Linux runner. JVM-половина A12 отсутствует.
+- Evidence: `artifacts/e06/dotnet-jit-ca5ae50/**`; conformance `131`; JIT logs `29520`/`28614` bytes при limit 1 MiB; manifest/package/artifact triple совпадает, runtime closure digests различаются по OS.
+- Последствие: A12 закрыт для .NET profile и может быть подключён к будущему canonical profile report. Следующий .NET gate — A11 performance; общий A12 закроется только после HotSpot receipts.
+- Supersedes / supersededBy: заменяет working-tree status K-E06-051; full E06 остаётся открыт.
