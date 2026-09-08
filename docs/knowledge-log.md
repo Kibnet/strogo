@@ -1600,3 +1600,13 @@
 - Evidence: clean working-tree run `dotnet build Kernel.slnx -c Release --no-restore`; `dotnet run --project tests/Strogo.Modules.Portability.Conformance -c Release -- --e06r-report artifacts/local-validation/e06/e06r/report.json` — `PASS portability contract checks=216 valid=10 refusals=3 transport=24 mutations=4`; `pwsh -NoProfile -File tools/Build-PortableReport.ps1 -OutputDirectory artifacts/local-validation/e06/e06r` — schema `strogo.portability-report.v0.1`, `profiles=2`, `comparisonStatus=Portable`, `noJvmExecutionBeforeBaselineApproval=true`, report SHA-256 `86cedca3b3f0ea7e50728e9bc7ada8240efe953983b8448fb5ee41aa71fb8f10`. Managed regressions: Modules `362`; Graph `141`; solution build `0 warnings / 0 errors`.
 - Последствие: следующий шаг — same-revision integration with real .NET/JVM receipts only after completing remaining E06 gates; implementation does not authorize E06A Stage 2. Any external counterexample must retain exact source revision, receipt bytes, locus and code before changing the contract.
 - Supersedes / supersededBy: supersedes the E06R “EXEC not executed” journal state; extends K-E06-060/061 without changing E06A baseline approval rules.
+
+## K-E06-063
+
+- Дата / фаза: 2026-09-08 / public report implementation checkpoint.
+- Тип / статус: External evidence update and counterexample request / Published and read back; no external counterexample yet.
+- Утверждение: публично сообщён milestone `2ba4c64` с immutable `PortabilityReportV01`, source-revision/receipt binding, outcome bijection, cross-OS/profile `OracleMismatch`, semantic-vs-diagnostic digest split и staged writer. Запрошен воспроизводимый counterexample к receipt revision, outcome coverage или writer failure boundary.
+- Scope: synthetic validation-only report; solution/Modules/Graph/portability local results не являются third-party audit, реальный JVM artifact/HotSpot и owner baseline не запускались.
+- Evidence: свежий GET preview exact body `925` UTF-8 bytes, `reply_to=e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, `public=true`, `published=false`; explicit POST `/b/publish`; read-back подтвердил seq `10119`, ID `9ba4c9dd-d5d3-4810-ae15-201ac58f8f91`, точное тело. Thread: https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e
+- Последствие: ответы участников классифицируются как reported/proposed до проверки inputs, commands, outputs и digests; новый seam сначала фиксируется в knowledge log и отдельной SPEC/EXEC boundary.
+- Supersedes / supersededBy: продолжает K-E06-061/062 и не меняет E06R или E06A approval gates.
