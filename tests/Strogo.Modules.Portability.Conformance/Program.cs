@@ -653,9 +653,13 @@ try
     Check(crossProfileMismatch.ComparisonStatus == "NotPortable" && crossProfileMismatch.Profiles.All(profile => profile.ReasonCodes.Contains("OracleMismatch")), $"cross-profile vector mismatch marks both profiles OracleMismatch (status={crossProfileMismatch.ComparisonStatus}; profiles={string.Join("|", crossProfileMismatch.Profiles.Select(profile => profile.ProfileId + ":" + profile.Status + ":" + string.Join(',', profile.ReasonCodes) + ":" + profile.CommonVectorSetDigest))})");
     var twoVectorEvidence = CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true);
     var twoVectorReport = PortabilityReportV01.Build(twoVectorEvidence, reportTimestamp);
+    var swappedTwoVectorEvidence = CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true, swapOutcomeDigest: true);
+    var baselineRows = twoVectorEvidence.Profiles[0].Platforms[0].Outcomes;
+    var swappedRows = swappedTwoVectorEvidence.Profiles[0].Platforms[0].Outcomes;
+    Check(baselineRows.Length == swappedRows.Length && baselineRows.Select(row => row.InputDigest).Order(StringComparer.Ordinal).SequenceEqual(swappedRows.Select(row => row.InputDigest).Order(StringComparer.Ordinal), StringComparer.Ordinal) && baselineRows.Zip(swappedRows).Any(pair => pair.First.InputDigest != pair.Second.InputDigest), "swap fixture preserves vector count and digest multiset while changing the mapping");
     var permutedTwoVectorReport = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true, permuteOutcomes: true), reportTimestamp);
     Check(permutedTwoVectorReport.CanonicalJsonBytes().SequenceEqual(twoVectorReport.CanonicalJsonBytes()), "whole outcome-row permutation is canonicalized without changing the report");
-    Check(RejectsReport(() => PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", twoVectors: true, swapOutcomeDigest: true), reportTimestamp), "OutcomeCoverageMismatch", "$/outcomes/v-001"), "swapped digest across two vectors is rejected at the vector outcome locus");
+    Check(RejectsReport(() => PortabilityReportV01.Build(swappedTwoVectorEvidence, reportTimestamp), "OutcomeCoverageMismatch", "$/outcomes/v-001"), "swapped digest across two vectors is rejected at the vector outcome locus");
     var unavailableReport = PortabilityReportV01.Build(CreateReportEvidence("0123456789abcdef0123456789abcdef01234567", omitLinux: true), reportTimestamp);
     Check(unavailableReport.Profiles.All(profile => profile.Platforms[0].Status == "Unavailable" && profile.Platforms[0].ReasonCodes.SequenceEqual(new[] { "EnvironmentUnavailable", "RowUnavailable" })), "missing mandatory OS row is synthesized as unavailable");
     var tamperedReportBytes = portabilityReport.CanonicalJsonBytes();
@@ -908,7 +912,7 @@ static PortabilityReportPlatformEvidence CreateReportPlatform(string os, string 
                 : new[]
                 {
                     new PortabilityReportOutcomeRow("v-001", swapOutcomeDigest ? new string('b', 64) : digest, "OwnerInDomain", digest, "Returned", outcome),
-                    new PortabilityReportOutcomeRow("v-002", new string('b', 64), "OwnerInDomain", digest, "Returned", outcome)
+                    new PortabilityReportOutcomeRow("v-002", swapOutcomeDigest ? digest : new string('b', 64), "OwnerInDomain", digest, "Returned", outcome)
                 })
             : new[] { new PortabilityReportOutcomeRow(vectorId, digest, "OwnerInDomain", digest, "Returned", outcome) };
     var consumer = new PortabilityReportGateEvidence("consumer", "Passed", [], CanonicalJson.Encode(new { sourceRevision, kind = "consumer", os, marker = rawMarker }), digest, null, null, null, [], null);
