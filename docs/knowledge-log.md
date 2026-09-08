@@ -1340,3 +1340,13 @@
 - Evidence: `artifacts/e06/dotnet-mutations-590d3dd/**`; clean report `repositoryDirty:false`, baseline `4`, unchanged-target rejections `4`, compiled/detected mutations `4/4`, exact per-mutation source/artifact digests.
 - Последствие: известные ошибки знака, порядка, lazy branch и adapter refusal не проходят текущий .NET oracle незаметно; следующий различающий .NET gate — canonical validation manifest/package binding либо runtime closure/unavailable cases.
 - Supersedes / supersededBy: заменяет working-tree evidence K-E06-035 точным публичным запуском; весь A7 остаётся открыт до JVM-половины.
+
+## K-E06-037
+
+- Дата / фаза: 2026-09-08 / canonical portability package implementation.
+- Тип / статус: Package identity and tree validation / Confirmed on working tree with synthetic entry artifact; exact real-DLL package pending.
+- Утверждение: внутренне самосогласованный manifest не является достаточной load identity: изменённый adapter можно упаковать с корректно пересчитанными file/artifact/package/manifest digests. Поэтому публичный `Validate` теперь обязательно принимает ожидаемый `portabilityManifestDigest` из доверенной report/matrix связи и отклоняет такой пакет как `ArtifactIdentityMismatch`. Builder/validator также требует exact validation-only schema/status, один profile-specific entry artifact, canonical public API/runtime requirement и tool inventories, уникальные module/bundle/proof/proof-source/source-map/adapter roles с их разными нормативными digest algorithms, полный sorted content inventory, domain-separated digests, lowercase path grammar, отсутствие extra root/empty directory/traversal/duplicates/device/reparse paths и не следует symlink до чтения bytes.
+- Scope: общий E06 package format и .NET runtime requirement; conformance использовал synthetic entry artifact и не доказывает actual DLL package, runtime closure, loader/JIT или JVM JAR normalization.
+- Evidence: `PortabilityPackage.cs`, frozen `dotnet-runtime-requirement.json`; working-tree Windows `83` checks, Linux `84` checks с фактическим symlink rejection; `Kernel.slnx` build `0 warnings / 0 errors`.
+- Последствие: actual package harness должен строить definition только из exact proof/build receipts и retained DLL, сохранять ожидаемый manifest identity вне package и перед любым target invocation вызывать `Validate(package, expectedDigest)`.
+- Supersedes / supersededBy: реализует format/load-gate часть E06 §6.2.4/A4; exact artifact/package evidence должно заменить synthetic checkpoint.

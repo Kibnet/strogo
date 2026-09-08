@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
@@ -137,6 +138,143 @@ using (var api = JsonDocument.Parse(binding.PublicApiBytes))
     Check(api.RootElement.GetProperty("functions").GetArrayLength() == 5, "public API contains five functions");
 }
 
+var runtimeRequirementBytes = File.ReadAllBytes(Path.Combine(fixtureDir, "dotnet-runtime-requirement.json"));
+var runtimeRequirementDigest = PortabilityContract.DomainHash($"strogo.portability.v0.1/runtime-requirement/{PortabilityVersions.DotNetProfile}", runtimeRequirementBytes);
+var translatorInventoryBytes = CanonicalJson.Encode(new
+{
+    schemaVersion = "strogo.tool-inventory.v0.1",
+    profileId = PortabilityVersions.DotNetProfile,
+    files = new[] { new { path = "tools/dafny", sha256 = new string('a', 64), length = "1", role = "executable" } },
+    versions = new[] { new { component = "dafny", version = "4.11.0" } }
+});
+var buildToolchainInventoryBytes = CanonicalJson.Encode(new
+{
+    schemaVersion = "strogo.tool-inventory.v0.1",
+    profileId = PortabilityVersions.DotNetProfile,
+    files = new[] { new { path = "tools/dotnet", sha256 = new string('b', 64), length = "1", role = "executable" } },
+    versions = new[] { new { component = "dotnet-sdk", version = "10.0.400" } }
+});
+var canonicalModuleBytes = parsed.CanonicalSource;
+var canonicalOwnerBytes = OwnerBundleV04Codec.Canonicalize(owner.BundleId, owner.Types, owner.EntryContracts, owner.Models, owner.Limits);
+var packageContent = new List<PortabilityPackageContent>
+{
+    new("content/module.json", "module", canonicalModuleBytes),
+    new("content/owner.json", "bundle", canonicalOwnerBytes),
+    new("content/proof.json", "proof", CanonicalJson.Encode(new { schemaVersion = "strogo.validation-proof.v0.1", proofIdentity = lowering.ProofIdentity })),
+    new("content/candidate.dfy", "proof-source", lowering.SourceBytes),
+    new("content/source-map.json", "source-map", CanonicalJson.Encode(lowering.SourceMap)),
+    new("content/strogo.portable.v01.dll", "entry-artifact", Encoding.ASCII.GetBytes("deterministic-test-assembly")),
+    new("content/module-api.cs", "adapter", Encoding.ASCII.GetBytes("namespace Strogo.Portable.V01;")),
+    new("content/public-api.json", "metadata", binding.PublicApiBytes),
+    new("content/runtime-requirement.json", "metadata", runtimeRequirementBytes),
+    new("content/translator-inventory.json", "metadata", translatorInventoryBytes),
+    new("content/build-toolchain-inventory.json", "metadata", buildToolchainInventoryBytes)
+};
+var packageDefinition = new PortabilityPackageDefinition(
+    PortabilityVersions.DotNetProfile,
+    binding.Module.SourceDigest,
+    binding.OwnerBundle.BundleDigest,
+    lowering.ProofIdentity,
+    lowering.SourceDigest,
+    PortabilityContract.DomainHash($"strogo.portability.v0.1/translator/{PortabilityVersions.DotNetProfile}", translatorInventoryBytes),
+    PortabilityContract.DomainHash($"strogo.portability.v0.1/build-toolchain/{PortabilityVersions.DotNetProfile}", buildToolchainInventoryBytes),
+    runtimeRequirementDigest,
+    binding.PublicApiDigest,
+    "content/strogo.portable.v01.dll",
+    packageContent);
+var contentCopy = packageContent[0].Bytes;
+contentCopy[0] ^= 0xff;
+Check(packageContent[0].Bytes.SequenceEqual(canonicalModuleBytes), "package content bytes are defensively copied");
+var packageTemp = Path.Combine(Path.GetTempPath(), "strogo-portability-package-" + Guid.NewGuid().ToString("N"));
+try
+{
+    var packageA = Path.Combine(packageTemp, "root-a", "package");
+    var packageB = Path.Combine(packageTemp, "root-b", "unrelated", "package");
+    var receiptA = PortabilityPackage.Build(packageA, packageDefinition);
+    var receiptB = PortabilityPackage.Build(packageB, packageDefinition);
+    var validatedA = PortabilityPackage.Validate(packageA, receiptA.PortabilityManifestDigest);
+    Check(receiptA.ProfileId == validatedA.ProfileId && receiptA.ArtifactDigest == validatedA.ArtifactDigest && receiptA.PackageDigest == validatedA.PackageDigest && receiptA.PortabilityManifestDigest == validatedA.PortabilityManifestDigest && receiptA.Files.SequenceEqual(validatedA.Files), "package validation receipt is stable");
+    Check(receiptA.ArtifactDigest == receiptB.ArtifactDigest && receiptA.PackageDigest == receiptB.PackageDigest && receiptA.PortabilityManifestDigest == receiptB.PortabilityManifestDigest, "package digests exclude physical root");
+    Check(EqualTrees(packageA, packageB), "package trees are byte equal across physical roots");
+    Check(Directory.EnumerateFileSystemEntries(packageA).Select(Path.GetFileName).Order(StringComparer.Ordinal).SequenceEqual(new[] { "content", "portability-manifest.json" }, StringComparer.Ordinal), "package root is closed");
+
+    var entryArtifact = Path.Combine(packageA, "content", "strogo.portable.v01.dll");
+    var entryBytes = File.ReadAllBytes(entryArtifact);
+    File.WriteAllBytes(entryArtifact, [.. entryBytes, (byte)0]);
+    Check(RejectsPackage(() => PortabilityPackage.Validate(packageA, receiptA.PortabilityManifestDigest)), "entry artifact tamper is rejected");
+    File.WriteAllBytes(entryArtifact, entryBytes);
+
+    var extraRoot = Path.Combine(packageA, "admission.json");
+    File.WriteAllText(extraRoot, "{}", Encoding.ASCII);
+    Check(RejectsPackage(() => PortabilityPackage.Validate(packageA, receiptA.PortabilityManifestDigest)), "extra root file is rejected");
+    File.Delete(extraRoot);
+
+    var emptyDirectory = Path.Combine(packageA, "content", "unexpected");
+    Directory.CreateDirectory(emptyDirectory);
+    Check(RejectsPackage(() => PortabilityPackage.Validate(packageA, receiptA.PortabilityManifestDigest)), "unlisted directory is rejected");
+    Directory.Delete(emptyDirectory);
+
+    if (!OperatingSystem.IsWindows())
+    {
+        var symbolicLink = Path.Combine(packageA, "content", "linked-artifact.dll");
+        File.CreateSymbolicLink(symbolicLink, entryArtifact);
+        Check(RejectsPackage(() => PortabilityPackage.Validate(packageA, receiptA.PortabilityManifestDigest)), "symbolic link is rejected before content read");
+        File.Delete(symbolicLink);
+    }
+
+    var badProfile = packageDefinition with { ProfileId = PortabilityVersions.JvmProfile };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "bad-profile"), badProfile)), "profile and entry artifact swap is rejected");
+    var traversal = packageDefinition with { Content = [.. packageContent, new PortabilityPackageContent("content/../escape", "metadata", [])] };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "traversal"), traversal)), "path traversal is rejected before write");
+    var duplicate = packageDefinition with { Content = [.. packageContent, new PortabilityPackageContent("content/module.json", "metadata", [])] };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "duplicate"), duplicate)), "duplicate path is rejected before write");
+    var uppercase = packageDefinition with { Content = [.. packageContent.Where(file => file.Path != "content/module-api.cs"), new PortabilityPackageContent("content/Module-Api.cs", "adapter", [])] };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "uppercase"), uppercase)), "non-lowercase path is rejected before write");
+    var missingSourceMap = packageDefinition with { Content = packageContent.Where(file => file.Role != "source-map").ToArray() };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "missing-source-map"), missingSourceMap)), "missing required role is rejected before write");
+    var unknownRole = packageDefinition with { Content = packageContent.Select(file => file.Role == "adapter" ? new PortabilityPackageContent(file.Path, "candidate-code", file.Bytes) : file).ToArray() };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "unknown-role"), unknownRole)), "unknown content role is rejected before write");
+
+    var wrongDigest = new string('0', 64);
+    var identityMutations = new (string Id, PortabilityPackageDefinition Definition)[]
+    {
+        ("module", packageDefinition with { ModuleDigest = wrongDigest }),
+        ("owner", packageDefinition with { OwnerBundleDigest = wrongDigest }),
+        ("proof", packageDefinition with { ProofDigest = wrongDigest }),
+        ("dafny", packageDefinition with { DafnySourceDigest = wrongDigest }),
+        ("translator", packageDefinition with { TranslatorDigest = wrongDigest }),
+        ("build-toolchain", packageDefinition with { BuildToolchainDigest = wrongDigest }),
+        ("runtime-requirement", packageDefinition with { RuntimeRequirementDigest = wrongDigest }),
+        ("public-api", packageDefinition with { PublicApiDigest = wrongDigest })
+    };
+    foreach (var identityMutation in identityMutations)
+        Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "wrong-" + identityMutation.Id), identityMutation.Definition)), $"{identityMutation.Id} identity mismatch is rejected before write");
+
+    var changedAdapterContent = packageContent.Select(file => file.Path == "content/module-api.cs" ? new PortabilityPackageContent(file.Path, file.Role, Encoding.ASCII.GetBytes("namespace Strogo.Portable.Mutated;")) : file).ToArray();
+    var changedAdapterPackage = Path.Combine(packageTemp, "changed-adapter");
+    var changedAdapterReceipt = PortabilityPackage.Build(changedAdapterPackage, packageDefinition with { Content = changedAdapterContent });
+    Check(changedAdapterReceipt.PortabilityManifestDigest != receiptA.PortabilityManifestDigest && PortabilityPackage.Validate(changedAdapterPackage, changedAdapterReceipt.PortabilityManifestDigest).PortabilityManifestDigest == changedAdapterReceipt.PortabilityManifestDigest, "self-consistent changed package has a distinct identity");
+    Check(RejectsPackage(() => PortabilityPackage.Validate(changedAdapterPackage, receiptA.PortabilityManifestDigest)), "changed package is rejected against expected manifest identity");
+
+    var wrongRuntimeBytes = CanonicalJson.Encode(new { schemaVersion = PortabilityPackageVersions.RuntimeRequirementSchema, profileId = PortabilityVersions.JvmProfile, vmFamily = "java", vmMajor = "17", dynamicFeatures = new[] { "jit" }, nativeFeatures = Array.Empty<string>() });
+    var wrongRuntimeContent = packageContent.Select(file => file.Path == "content/runtime-requirement.json" ? new PortabilityPackageContent(file.Path, file.Role, wrongRuntimeBytes) : file).ToArray();
+    var wrongRuntime = packageDefinition with
+    {
+        RuntimeRequirementDigest = PortabilityContract.DomainHash($"strogo.portability.v0.1/runtime-requirement/{PortabilityVersions.DotNetProfile}", wrongRuntimeBytes),
+        Content = wrongRuntimeContent
+    };
+    Check(RejectsPackage(() => PortabilityPackage.Build(Path.Combine(packageTemp, "wrong-runtime"), wrongRuntime)), "runtime requirement profile swap is rejected");
+
+    var packageMethods = typeof(PortabilityPackage).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly).Select(method => method.Name).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+    Check(packageMethods.SequenceEqual(new[] { "Build", "Validate" }, StringComparer.Ordinal), "package API exposes only build and validation operations");
+    var portabilitySources = Directory.GetFiles(Path.Combine(root, "src", "Strogo.Modules.Portability"), "*.cs", SearchOption.AllDirectories).SelectMany(File.ReadAllLines).ToArray();
+    Check(!portabilitySources.Any(line => line.Contains("TrustedModuleRuntime", StringComparison.Ordinal)), "portability project does not reference production runtime");
+}
+finally
+{
+    if (Directory.Exists(packageTemp)) Directory.Delete(packageTemp, recursive: true);
+}
+
 Directory.CreateDirectory(Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("report path has no directory"));
 var report = CanonicalJson.Encode(new
 {
@@ -208,3 +346,23 @@ static bool Equal(ModuleValue left, ModuleValue right) => (left, right) switch
     (ModuleRecord a, ModuleRecord b) => a.RecordTypeId == b.RecordTypeId && a.Fields.Count == b.Fields.Count && a.Fields.All(pair => b.Fields.TryGetValue(pair.Key, out var value) && Equal(pair.Value, value)),
     _ => false
 };
+
+static bool RejectsPackage(Action action)
+{
+    try
+    {
+        action();
+        return false;
+    }
+    catch (PortabilityContractException exception)
+    {
+        return exception.Code == "PortabilityPackageRejected";
+    }
+}
+
+static bool EqualTrees(string left, string right)
+{
+    var leftFiles = Directory.GetFiles(left, "*", SearchOption.AllDirectories).Select(path => Path.GetRelativePath(left, path).Replace(Path.DirectorySeparatorChar, '/')).Order(StringComparer.Ordinal).ToArray();
+    var rightFiles = Directory.GetFiles(right, "*", SearchOption.AllDirectories).Select(path => Path.GetRelativePath(right, path).Replace(Path.DirectorySeparatorChar, '/')).Order(StringComparer.Ordinal).ToArray();
+    return leftFiles.SequenceEqual(rightFiles, StringComparer.Ordinal) && leftFiles.All(relative => File.ReadAllBytes(Path.Combine(left, relative.Replace('/', Path.DirectorySeparatorChar))).SequenceEqual(File.ReadAllBytes(Path.Combine(right, relative.Replace('/', Path.DirectorySeparatorChar)))));
+}
