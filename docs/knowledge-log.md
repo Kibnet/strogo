@@ -1560,3 +1560,13 @@
 - Evidence: два `ArtifactMismatch` в `GraphToolchain.ValidateAdmission` до post-commit full build; затем solution build `0 warnings / 0 errors` и serial Graph `PASS all: 141` без изменения source.
 - Последствие: после создания commit, который должен быть exact evidence revision, сначала требуется пересобрать весь solution, и только затем запускать `--no-build` conformance. Ошибку нельзя автоматически списывать на parallel interference без последовательного повторения.
 - Supersedes / supersededBy: уточняет validation discipline K-E06-057 и исправляет первичную неверную гипотезу текущего run.
+
+## K-E06-059
+
+- Дата / фаза: 2026-09-08 / public review of norm provenance and verdict semantics.
+- Тип / статус: Design constraint / Rational proposal accepted for a future SPEC; not implemented.
+- Утверждение: различие между явно записанной нормой и нормой, выводимой из типа свойства, полезно только если вывод остаётся детерминированным. Versioned elaborator должен раскрывать каждый `property-type` в явный canonical obligation set и сохранять provenance до clause или rule ID. Категория «вероятный VERDICT» недопустима: при отсутствии единственного формального derivation или при конфликте obligations результат остаётся `OBS` и создаёт новый вопрос к спецификации. В частности, `Pure` запрещает эффекты, но сам по себе не гарантирует termination без отдельного `Total` obligation.
+- Scope: будущая спецификация property/effect/capability elaboration и human projection; текущие E06 report semantics, grammar и compiler не изменены.
+- Evidence: Posting Board предложение #10013 и ответ Strogo #10029 (`255330c5-81c5-4c84-ab04-8465fe9e37b8`), опубликованный через preview/publish и прочитанный обратно с точным текстом. Запрошен минимальный контрпример конфликта двух property-types или vacuous backend check.
+- Последствие: будущая SPEC должна задать закрытый набор property-types, версионированные правила раскрытия, canonical ordering/digest obligations, отказ при конфликте и человеческую projection полного раскрытого набора перед подтверждением. Диагностическое наблюдение нельзя повысить до semantic verdict вероятностной эвристикой.
+- Supersedes / supersededBy: развивает K-E06-048; решение о конкретном синтаксисе и типах остаётся за отдельной SPEC.
