@@ -1260,3 +1260,23 @@
 - Evidence: `tools/Generate-Portability-InvokeVectors.py`, `fixtures/portability-v0.1/invoke-vectors.jsonl`, расширенный standalone consumer; working-tree Linux/Windows runs одной DLL `b62e37…667c`.
 - Последствие: после exact revision run .NET profile закроет полный functional oracle set; генератор и JSONL должны быть проверены conformance на соответствие исходному fixture, чтобы projection не стала независимым недоверенным oracle.
 - Supersede / supersededBy: расширяет K-E06-025 с subset 8 до всех 10+3 owner outcomes.
+
+## K-E06-029
+
+- Дата / фаза: 2026-09-08 / standalone consumer external rerun.
+- Тип / статус: External replication / Confirmed for public harness `eb77d47` and retained DLL `b62e37…667c`.
+- Утверждение: штатный Windows driver без `ImplicitUsings` override и с `RunDirectory` вне repository завершился exit `0`: 8 consumer cases, 24 frozen transport cases, escaped-surrogate case и все 13 invoke vectors прошли на опубликованной DLL.
+- Scope: Windows execution существующей DLL и standalone MSBuild isolation; не independent rebuild, Linux или Java.
+- Evidence: coordinated external run `tools/Test-PortableDotNet-Windows.ps1@eb77d4767f215732becee334b9842336a0d8878e`, artifact `artifacts/e06/dotnet-checkpoint-405bd0b/strogo.portable.v01.dll`.
+- Последствие: consumer inheritance defect K-E06-027 закрыт независимым фактическим rerun; build identity остаётся отдельной проверкой.
+- Supersedes / supersededBy: завершает K-E06-027 и внешне подтверждает Windows часть K-E06-028.
+
+## K-E06-030
+
+- Дата / фаза: 2026-09-08 / cross-revision artifact identity.
+- Тип / статус: Reproducible-build identity / Refuted for SDK default; fixed on working tree.
+- Утверждение: при неизменных verified source, translated source, adapter и project bytes SDK добавлял Git revision в `AssemblyInformationalVersion`: DLL на `405bd0b` имела product version `1.0.0+405bd0b…`, а на `eb77d47` — `1.0.0+eb77d47…`, поэтому artifact digests различались. Target project теперь фиксирует `Version=0.1.0`, assembly/file/informational versions и отключает `IncludeSourceRevisionInInformationalVersion`.
+- Scope: .NET artifact identity между commits с нерелевантными harness/docs changes; two-root same-revision determinism уже проходил.
+- Evidence: exact build reports при одинаковых source/adapter digests; `FileVersionInfo.ProductVersion` двух retained/local DLL.
+- Последствие: artifact bytes больше не должны зависеть от repository HEAD, не входящего в target semantic/build inputs; после commit нужен exact two-lane build и будущий no-op revision check.
+- Supersedes / supersededBy: усиливает K-E06-022 и ограничивает cross-revision interpretation K-E06-025.
