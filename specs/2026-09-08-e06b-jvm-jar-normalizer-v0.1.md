@@ -80,12 +80,11 @@ Automatic-Module-Name: strogo.portable.v01\r\n
 \r\n
 ```
 
-The driver writes an argfile whose first line is `META-INF/MANIFEST.MF`, followed by each remaining entry exactly once in ordinal path order. The argfile contains only relative paths and no `-C` or physical paths. На pinned `jar 17.0.19` проверено, что `--no-manifest` подавляет автоматическое создание manifest, а явный `--manifest META-INF/MANIFEST.MF` при этом принимается и добавляет ровно переданный файл. The pinned invocation is:
+The driver writes an argfile whose first line is `META-INF/MANIFEST.MF`, followed by each remaining entry exactly once in ordinal path order. The argfile contains only relative paths and no `-C` or physical paths. На pinned `jar 17.0.19` control probe показал: `--no-manifest` вместе с manifest в argfile сохраняет exact provided bytes; `--manifest` при одновременном `--no-manifest` не добавляет файл, если его нет в argfile; `--manifest` без `--no-manifest` создаёт дополнительный `META-INF/` и переписывает manifest. Поэтому canonical command намеренно использует только `--no-manifest`, а manifest входит как первый обычный argfile entry. The pinned invocation is:
 
 ```text
 jar --create --file <quarantined-output> --no-compress \
   --date=1980-01-01T00:00:02Z --no-manifest \
-  --manifest <staging>/META-INF/MANIFEST.MF \
   @entries.argfile
 ```
 

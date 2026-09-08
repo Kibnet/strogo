@@ -1655,9 +1655,9 @@
 
 - Дата / фаза: 2026-09-08 / E06B SPEC review.
 - Тип / статус: Independent review finding / Incorporated in draft.
-- Утверждение: на pinned `jar 17.0.19` комбинация `--no-manifest --manifest META-INF/MANIFEST.MF` успешно создаёт JAR с явным manifest; это закреплено как tested command fact в E06B. ZIP validator дополнительно обязан сверять local headers с central-directory records, CRC/sizes/offsets, non-overlap и отсутствие trailing bytes.
+- Утверждение: control probe pinned `jar 17.0.19` показал, что deterministic вариант — `--no-manifest` и manifest как первый обычный argfile entry: он сохраняет exact bytes без directory entry. `--manifest` без `--no-manifest` добавляет `META-INF/` и переписывает manifest, а при совместном `--no-manifest` не добавляет отсутствующий entry. Это закреплено как tested command fact в E06B. ZIP validator дополнительно обязан сверять local headers с central-directory records, CRC/sizes/offsets, non-overlap и отсутствие trailing bytes.
 - Scope: локальный probe создал `out.jar` с exit `0` и manifest-first inventory; baseline и Phase 2 evidence не изменялись.
-- Evidence: pinned JDK `jar 17.0.19` probe в рабочей сессии; E06B SPEC §6.2.
+- Evidence: pinned JDK `jar 17.0.19` control probe в рабочей сессии; E06B SPEC §6.2.
 - Последствие: implementation должна валидировать raw ZIP structure без extraction и не полагаться только на высокоуровневый ZIP reader.
 - Supersedes / supersededBy: уточняет K-E06-067; owner approval gate unchanged.
 
@@ -1670,3 +1670,13 @@
 - Evidence: `src/Strogo.Modules.Portability/PortabilityReportV01.cs` outcome coverage checks; `tests/Strogo.Modules.Portability.Conformance/Program.cs` existing fixtures.
 - Последствие: добавить отдельную двухвекторную regression перед следующим E06R integration checkpoint, сохранив distinction между row permutation и swapped digest.
 - Supersedes / supersededBy: уточняет K-E06-068 review queue; E06B baseline/JAR boundaries unchanged.
+
+## K-E06-070
+
+- Дата / фаза: 2026-09-08 / E06R trust-boundary review.
+- Тип / статус: Source review clarification / Confirmed.
+- Утверждение: `PortabilityReportV01` принимает outcomes только через уже validated internal `EvidenceSet`/`PlatformEvidence` construction; ELLIS-согласованная подмена vectors/outcomes должна проверяться на будущем profile-validator/driver boundary с immutable external frozen anchor. Это не доказанная дыра public report API.
+- Scope: текущие constructors и validator не менялись; finding определяет место будущего regression и не превращает synthetic PASS225 в admission evidence.
+- Evidence: `src/Strogo.Modules.Portability/PortabilityReportV01.cs` internal evidence constructors and outcome coverage checks; E06R SPEC §6.2.
+- Последствие: будущий two-vector swap test должен фиксировать external anchor и различать row permutation от swapped digest на boundary validator/driver.
+- Supersedes / supersededBy: уточняет K-E06-069; E06R/JVM approval boundaries unchanged.
