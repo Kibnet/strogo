@@ -1350,3 +1350,13 @@
 - Evidence: `PortabilityPackage.cs`, frozen `dotnet-runtime-requirement.json`; working-tree Windows `83` checks, Linux `84` checks с фактическим symlink rejection; `Kernel.slnx` build `0 warnings / 0 errors`.
 - Последствие: actual package harness должен строить definition только из exact proof/build receipts и retained DLL, сохранять ожидаемый manifest identity вне package и перед любым target invocation вызывать `Validate(package, expectedDigest)`.
 - Supersedes / supersededBy: реализует format/load-gate часть E06 §6.2.4/A4; exact artifact/package evidence должно заменить synthetic checkpoint.
+
+## K-E06-038
+
+- Дата / фаза: 2026-09-08 / exact package-validator conformance.
+- Тип / статус: Cross-platform package validation / Confirmed on clean public commit `6a67a11` with synthetic entry artifact.
+- Утверждение: один и тот же package builder/validator прошёл на Windows x64 `83` проверки и на Linux x64 `84`; дополнительная Linux-проверка создала настоящий symlink внутри `content/` и получила отказ до чтения target bytes. Две разные physical roots дали byte-equal trees и одинаковые artifact/package/manifest identities; full solution собрался с `0 warnings / 0 errors`.
+- Scope: реализация package format/path/identity rules. Реальная DLL, exact translator/build inventories, runtime closure, invocation через validated package и JVM ещё не проверены.
+- Evidence: ignored reports `artifacts/local-validation/e06/package-windows-6a67a11.json` и `package-linux-6a67a11.json`; clean Git status до запусков, `Kernel.slnx` Release build.
+- Последствие: package-format implementation checkpoint воспроизводим на двух ОС; следующий run должен заменить synthetic entry bytes реальной retained DLL и сохранить сам package/receipt как public evidence.
+- Supersedes / supersededBy: подтверждает K-E06-037 на exact public revision; A4 остаётся частичным до actual target package/API scan.
