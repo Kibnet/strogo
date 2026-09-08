@@ -1690,3 +1690,13 @@
 - Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `dotnet run --project tests/Strogo.Modules.Portability.Conformance -c Release --no-build` — `PASS portability contract checks=227 valid=10 refusals=3 transport=24 mutations=4`; independent reflection probe ранее подтвердил тот же semantic distinction.
 - Последствие: E06R теперь явно различает canonical row permutation и cross-vector digest swap; следующий отдельный checkpoint должен добавить external-anchor validator/driver test.
 - Supersedes / supersededBy: supersedes open test-gap K-E06-069; E06B baseline/JAR boundaries unchanged.
+
+## K-E06-072
+
+- Дата / фаза: 2026-09-08 / E06R regression review correction.
+- Тип / статус: Test-fixture correction / Implemented and revalidated.
+- Утверждение: initial two-vector negative fixture менял только digest `v-001`, оставляя `v-002` прежним; это не моделировало полный ELLIS swap. Fixture исправлен на `(v-001,hb),(v-002,ha)`, сохраняя IDs, count и исходное множество digest.
+- Scope: production validator и approved baseline не менялись; исправление усиливает только conformance negative control.
+- Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; rebuilt conformance run — `PASS portability contract checks=227 valid=10 refusals=3 transport=24 mutations=4`.
+- Последствие: regression теперь отличает set-only acceptance от корректного vector-to-input binding; reason/locus assertion сохраняется.
+- Supersedes / supersededBy: уточняет K-E06-071; external-anchor boundary unchanged.

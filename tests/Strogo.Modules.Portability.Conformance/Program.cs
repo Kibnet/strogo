@@ -902,7 +902,7 @@ static PortabilityReportPlatformEvidence CreateReportPlatform(string os, string 
             ? (permuteOutcomes
                 ? new[]
                 {
-                    new PortabilityReportOutcomeRow("v-002", new string('b', 64), "OwnerInDomain", digest, "Returned", outcome),
+                    new PortabilityReportOutcomeRow("v-002", swapOutcomeDigest ? digest : new string('b', 64), "OwnerInDomain", digest, "Returned", outcome),
                     new PortabilityReportOutcomeRow("v-001", swapOutcomeDigest ? new string('b', 64) : digest, "OwnerInDomain", digest, "Returned", outcome)
                 }
                 : new[]
