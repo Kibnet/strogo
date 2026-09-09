@@ -1750,3 +1750,13 @@
 - Evidence: E06 profile SPEC §2/§6.2.2 (`105` feasibility entries); E06A Phase 2 report (`109`/`16`); E06B SPEC §6.2.
 - Последствие: mismatch exact inventory, включая count, является rejection; новая inventory revision требует отдельной identity/approval.
 - Supersedes / supersededBy: уточняет K-E06-076; baseline and E06R boundaries unchanged.
+
+## K-E06-078
+
+- Дата / фаза: 2026-09-09 / E06B feasibility control.
+- Тип / статус: Reproducibility observation / Confirmed, non-admission.
+- Утверждение: временная упаковка exact E06A Phase 2 generated/adapter class outputs штатным `jar 17.0.19` с canonical manifest-first argfile, `--no-compress`, `--no-manifest` и timestamp `1980-01-01T00:00:02Z` дала `126` записей: manifest и `125` class-файлов. Два независимых запуска получили один и тот же JAR SHA-256 `7c86cbc9813477d44bb28e7f803abb3430f9af0dc7a053759f0602d9bdcd4a77`.
+- Scope: probe использовал exact approved Phase 2 outputs во временной staging-директории; typed normalizer, raw ZIP validator, package receipt и platform admission не реализованы.
+- Evidence: temporary roots `strogo-jvm-jar-feasibility-258bddc88ffb443fb7108f3f481aaae9` и `strogo-jvm-jar-feasibility-93dcef29b8fa48669dfce8ab6772cc13`; оба `zip_count=126`, `compress_types=[0]`, timestamp `(1980,1,1,0,0,2)`, exact manifest bytes.
+- Последствие: текущая feasibility подтверждает, что E06B должен связывать count и ordered inventory с конкретным approved E06A input, а не с историческим числом `105`; draft SPEC и approval boundary не меняются.
+- Supersedes / supersededBy: уточняет K-E06-077; E06B implementation and admission remain pending owner approval.
