@@ -1820,3 +1820,13 @@
 - Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; повторный результат `PASS portability contract checks=251 valid=10 refusals=3 transport=24 mutations=4`.
 - Последствие: A5 теперь опирается на конкретную mutation matrix, а не только на положительный archive run; A6 process/cleanup и full E06A integration остаются отдельными gates.
 - Supersedes / supersededBy: уточняет K-E06-083; post-EXEC final audit remains open until final sequential suite review.
+
+## K-E06-085
+
+- Дата / фаза: 2026-09-09 / E06B A6 conformance.
+- Тип / статус: Process-kind coverage / Implemented and revalidated.
+- Утверждение: существующий bounded `JvmProcessRunner` теперь отдельно проверяется для `JarPackaging`: missing executable даёт typed `JarInvocationFailed`; timeout, stdout/stderr overflow, descendant cleanup и cleanup-failure cases остаются покрыты тем же runner/quarantine harness.
+- Scope: это проверка process/cleanup seam, не доказательство успешного JDK JAR на другой ОС или runtime closure.
+- Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `PASS portability contract checks=252`; core conformance `29/29 cases; 10904 assertions`.
+- Последствие: A6 имеет явный packaging process-kind regression и общий bounded fault matrix; cross-platform E06A integration остаётся отдельным residual.
+- Supersedes / supersededBy: уточняет K-E06-084; финальный post-EXEC audit выполняется после commit.

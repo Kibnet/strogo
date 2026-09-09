@@ -176,6 +176,7 @@ Directory.CreateDirectory(processRoot);
 try
 {
     Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(Path.Combine(processRoot, "missing-javac.exe"), processRoot, [], 1024, 5000)), "JavacProbeFailed"), "JVM runner maps unexpected probe startup failure to the closed stage reason");
+    Check(RejectsTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(Path.Combine(processRoot, "missing-jar.exe"), processRoot, [], 1024, 5000, JvmProcessKind.JarPackaging)), "JarInvocationFailed"), "JVM runner maps JAR startup failure to the closed packaging reason");
     var stdoutOverflow = CaptureTargetBuild(() => JvmProcessRunner.Run(ProcessRequest(processExecutable, processRoot, ["--jvm-process-fixture", "stdout"], 1024, 5000)));
     Check(stdoutOverflow.Reason == "JavacOutputLimitExceeded", "JVM runner rejects stdout overflow");
     var stdoutOverflowDetails = stdoutOverflow.Details;
@@ -962,7 +963,7 @@ static string SyntheticJvmDiagnostics(string newline, char pathSeparator)
     return string.Join(newline, lines) + newline;
 }
 
-static JvmProcessRequest ProcessRequest(string executable, string workingDirectory, IReadOnlyList<string> arguments, int outputLimit, int timeoutMilliseconds)
+static JvmProcessRequest ProcessRequest(string executable, string workingDirectory, IReadOnlyList<string> arguments, int outputLimit, int timeoutMilliseconds, JvmProcessKind kind = JvmProcessKind.JavacProbe)
     => new(
         executable,
         workingDirectory,
@@ -971,7 +972,7 @@ static JvmProcessRequest ProcessRequest(string executable, string workingDirecto
         TimeSpan.FromMilliseconds(timeoutMilliseconds),
         outputLimit,
         TimeSpan.FromSeconds(5),
-        JvmProcessKind.JavacProbe);
+        kind);
 
 static void RunJvmProcessFixture(string[] fixtureArgs)
 {
