@@ -1810,3 +1810,13 @@
 - Evidence: `JvmJarNormalizer.Normalize`, повторный conformance `PASS portability contract checks=242`, Release build `0 warnings / 0 errors`.
 - Последствие: no-overwrite/quarantine contract сохраняет fail-closed поведение во всех ветках до promotion; checkpoint review обновлён с повторным re-review.
 - Supersedes / supersededBy: уточняет K-E06-082; A6 process faults and full E06A integration remain residual.
+
+## K-E06-084
+
+- Дата / фаза: 2026-09-09 / E06B A5 conformance expansion.
+- Тип / статус: Negative-matrix coverage / Implemented and revalidated.
+- Утверждение: conformance теперь явно мутирует central compression/timestamp/flags/manifest extra/offset/ZIP64, local CRC/size, trailing bytes, malformed input, exact и case-fold duplicates, traversal path и existing final output; каждая мутация проверяет typed rejection.
+- Scope: тесты проверяют raw validator boundary на synthetic valid JAR и не являются JVM runtime или cross-platform admission.
+- Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; повторный результат `PASS portability contract checks=251 valid=10 refusals=3 transport=24 mutations=4`.
+- Последствие: A5 теперь опирается на конкретную mutation matrix, а не только на положительный archive run; A6 process/cleanup и full E06A integration остаются отдельными gates.
+- Supersedes / supersededBy: уточняет K-E06-083; post-EXEC final audit remains open until final sequential suite review.

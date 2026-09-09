@@ -1158,13 +1158,41 @@ static int RunJvmJarNormalizerChecks(PortabilityPackageDefinition baseDefinition
         var crcMutation = File.ReadAllBytes(finalA);
         var eocdOffset = crcMutation.Length - 22;
         var centralOffset = BitConverter.ToUInt32(crcMutation, eocdOffset + 16);
-        var firstLocalOffset = BitConverter.ToUInt32(crcMutation, checked((int)centralOffset + 42));
+        var centralStart = checked((int)centralOffset);
+        var centralNameLength = BitConverter.ToUInt16(crcMutation, centralStart + 28);
+        var firstLocalOffset = BitConverter.ToUInt32(crcMutation, centralStart + 42);
         crcMutation[checked((int)firstLocalOffset + 14)] ^= 0x01;
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(crcMutation, expected), "ZipLocalMetadataMismatch"), "local CRC mismatch is rejected");
+        var compressedMutation = File.ReadAllBytes(finalA);
+        WriteUInt16(compressedMutation, centralStart + 10, 8);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(compressedMutation, expected), "ZipMetadataMismatch"), "unexpected compression method is rejected");
+        var timestampMutation = File.ReadAllBytes(finalA);
+        WriteUInt16(timestampMutation, centralStart + 12, 0);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(timestampMutation, expected), "ZipMetadataMismatch"), "non-canonical central timestamp is rejected");
+        var encryptionMutation = File.ReadAllBytes(finalA);
+        WriteUInt16(encryptionMutation, centralStart + 8, 0x0801);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(encryptionMutation, expected), "ZipMetadataMismatch"), "encrypted or descriptor flags are rejected");
+        var extraMutation = File.ReadAllBytes(finalA);
+        extraMutation[centralStart + 46 + centralNameLength] ^= 0x01;
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(extraMutation, expected), "ManifestExtraFieldMismatch"), "unexpected manifest extra field is rejected");
+        var offsetMutation = File.ReadAllBytes(finalA);
+        WriteUInt32(offsetMutation, centralStart + 42, firstLocalOffset + 1);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(offsetMutation, expected), "ZipLocalHeaderInvalid"), "invalid local-header offset is rejected");
+        var sizeMutation = File.ReadAllBytes(finalA);
+        WriteUInt32(sizeMutation, checked((int)firstLocalOffset + 18), 6);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(sizeMutation, expected), "ZipLocalMetadataMismatch"), "local size mismatch is rejected");
+        var zip64Mutation = File.ReadAllBytes(finalA);
+        WriteUInt32(zip64Mutation, centralStart + 20, uint.MaxValue);
+        WriteUInt32(zip64Mutation, centralStart + 24, uint.MaxValue);
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(zip64Mutation, expected), "ZipMetadataMismatch"), "ZIP64-sized entries are rejected");
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar([0x01, 0x02, 0x03], expected), "ZipEndRecordInvalid"), "truncated archive is rejected with a typed reason");
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.Normalize(requestA with { RunRoot = Path.Combine(root, "run-mismatch"), FinalPath = finalA }), "FinalPathExists"), "existing final path is never overwritten");
         var duplicate = expected.Concat([expected[0] with { Path = expected[0].Path.ToLowerInvariant() }]).ToArray();
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), duplicate), "CaseFoldDuplicateEntry"), "case-fold duplicate input is rejected");
+        var exactDuplicate = expected.Concat([expected[0]]).ToArray();
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), exactDuplicate), "DuplicateEntry"), "exact duplicate input is rejected");
+        var unsafePath = expected.Concat([expected[0] with { Path = "../escape.class" }]).ToArray();
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), unsafePath), "UnsafePath"), "traversal input path is rejected");
         return checks;
     }
     finally
@@ -1172,6 +1200,12 @@ static int RunJvmJarNormalizerChecks(PortabilityPackageDefinition baseDefinition
         if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
     }
 }
+
+static void WriteUInt16(byte[] bytes, int offset, ushort value)
+    => BitConverter.GetBytes(value).CopyTo(bytes, offset);
+
+static void WriteUInt32(byte[] bytes, int offset, uint value)
+    => BitConverter.GetBytes(value).CopyTo(bytes, offset);
 
 static byte[] RewriteInventoryProfile(ReadOnlySpan<byte> bytes)
 {
