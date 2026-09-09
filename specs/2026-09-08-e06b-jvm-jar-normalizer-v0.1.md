@@ -253,7 +253,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 - Raw ZIP writer: deterministic, but adds archive-format implementation risk; rejected for v0.1.
 - Unpack/repack: familiar, but can hide duplicates and metadata; rejected.
 - Direct `jar` output: simple, but timestamps/order drift; rejected.
-- Chosen pinned `jar` with explicit argfile, manifest and validator: keeps platform ownership in JDK while controlling the semantic input boundary.
+- Chosen pinned `jar` with explicit argfile (manifest as its first ordinary entry) and validator: keeps platform ownership in JDK while controlling the semantic input boundary.
 
 ## 19. Результат quality gate и review
 
@@ -265,7 +265,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 | B. Качество дизайна | 6-10 | PASS | Потоки, identity и rollback описаны |
 | C. Безопасность изменений | 11-13 | PASS | Negative gates и no-overwrite заданы |
 | D. Проверяемость | 14-16 | PASS | AC связаны с evidence |
-| E. Готовность к автономной реализации | 17-19 | PASS | Остался только runtime dependency decision |
+| E. Готовность к автономной реализации | 17-19 | PASS | Все v0.1 решения зафиксированы; owner approval остаётся единственным gate |
 | F. Соответствие профилю | 20 | PASS | Product-system-design применён |
 
 Итог: **ГОТОВО к owner review**
@@ -283,7 +283,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 ### Post-SPEC Review
 
 - Статус / stop decision: **PASS, ожидается owner approval**.
-- Findings: нет; runtime dependency set зафиксирован в этой SPEC и не расширяется без новой identity.
+- Findings: нет; runtime dependency set и packaging inputs зафиксированы в этой SPEC и не расширяются без новой identity.
 - Manual-review challenge: подтвердить, что фиксированный manifest и `STORED` приемлемы для v0.1.
 
 ## Approval
