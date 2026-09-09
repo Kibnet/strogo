@@ -282,16 +282,17 @@ The receipt records schema version, profile, source/revision identity, candidate
 
 ### Post-SPEC Review
 
-- Статус / stop decision: **PASS, ожидается owner approval**.
+- Статус / stop decision: **PASS; owner approval получено, EXEC продолжается**.
 - Findings: нет; runtime dependency set и packaging inputs зафиксированы в этой SPEC и не расширяются без новой identity.
 - Manual-review challenge: подтвердить, что фиксированный manifest и `STORED` приемлемы для v0.1.
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»**
+Owner approval: **«Спеку подтверждаю»** получено 2026-09-09. Это разрешает только E06B EXEC в границах этой SPEC; runtime closure, HotSpot и portability admission остаются отдельными gate.
 
 ## 20. Журнал действий агента
 
 | Фаза (SPEC/EXEC) | Тип намерения/сценария | Уверенность в решении (0.0-1.0) | Каких данных не хватает | Следующее действие | Нужна ли передача управления/решения человеку | Было ли фактическое обращение к человеку / решение человека | Короткое объяснение выбора | Затронутые артефакты/файлы |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Сформировать отдельный deterministic JAR gate после E06A Phase 2 | 0.95 | Нет для v0.1; external dependencies запрещены | Показать SPEC владельцу; ждать `Спеку подтверждаю` | Да | Нет | JDK остаётся ответственным за archive encoding, а Strogo контролирует inputs и validation | Этот файл |
+| EXEC | Реализовать typed inventory, pinned `jar`, raw ZIP validator, quarantine/promotion и conformance mutations | 0.93 | Полная E06A integration и cross-platform JDK run остаются отдельными evidence | Провести post-EXEC review и обновить acceptance evidence | Нет | Да: «Спеку подтверждаю» 2026-09-09 | Implementation ограничена approved E06B; no-overwrite и raw local/central checks закрывают основные ambiguity seams | `JvmJarNormalizer.cs`, `JvmProcessRunner.cs`, portability conformance |

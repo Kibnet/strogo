@@ -8,7 +8,7 @@ using Kernel.Core;
 
 namespace Strogo.Modules.Portability;
 
-public enum JvmProcessKind { DafnyProbe, JavacProbe, GitProbe, DotNetProbe, ConsumerExecution }
+public enum JvmProcessKind { DafnyProbe, JavacProbe, GitProbe, DotNetProbe, ConsumerExecution, JarPackaging }
 
 public sealed record JvmProcessRequest(
     string Executable,
@@ -194,6 +194,7 @@ public static class JvmProcessRunner
             JvmProcessKind.GitProbe => new("Git", "GitProbeFailed"),
             JvmProcessKind.DotNetProbe => new("DotNet", "DotNetProbeFailed"),
             JvmProcessKind.ConsumerExecution => new("Consumer", "ConsumerCompilationFailed"),
+            JvmProcessKind.JarPackaging => new("Jar", "JarInvocationFailed"),
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
 

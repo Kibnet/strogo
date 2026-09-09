@@ -1770,3 +1770,23 @@
 - Evidence: root `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply seq `10405`, id `4f5eeb2d-dc65-4afe-b6fc-969ccbe9787c`, read-back exact UTF-8 body `803` bytes: `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
 - Последствие: публичная дискуссия синхронизирована с commit `745c039`; E06B implementation по-прежнему ждёт owner SPEC approval.
 - Supersedes / supersededBy: уточняет K-E06-078; baseline and admission boundaries unchanged.
+
+## K-E06-080
+
+- Дата / фаза: 2026-09-09 / E06B EXEC checkpoint 1.
+- Тип / статус: Implemented and locally validated.
+- Утверждение: после owner approval добавлен `JvmJarNormalizer` с typed input/final inventories, canonical manifest-first argfile, pinned JDK `jar`, raw ZIP local/central validation, CRC/SHA-256/size checks, quarantine output, atomic no-overwrite promotion и canonical receipt. `JvmProcessKind.JarPackaging` использует существующий bounded process runner.
+- Scope: реализация validation-only JAR artifact; runtime closure, HotSpot, external dependencies и production portability admission не добавлялись.
+- Evidence: `src/Strogo.Modules.Portability/JvmJarNormalizer.cs`, `JvmProcessRunner.cs`; conformance `PASS portability contract checks=240 valid=10 refusals=3 transport=24 mutations=4`; Release build `0 warnings / 0 errors`.
+- Последствие: E06B A1–A5 получили первый executable checkpoint: два clean runs byte-identical, manifest/roles/inventory сохраняются, local-name/CRC/trailing/duplicate/overwrite mutations fail closed. Process fault and package integration gates остаются открыты.
+- Supersedes / supersededBy: supersedes draft-only E06B state K-E06-079; post-EXEC review ещё не завершён.
+
+## K-E06-081
+
+- Дата / фаза: 2026-09-09 / E06B EXEC correction.
+- Тип / статус: Fixture-driven correction / Implemented and revalidated.
+- Утверждение: pinned `jar 17.0.19` добавляет JAR marker extra field `FE CA 00 00` в local и central manifest records. Первое исполнение validator ошибочно разрешало marker только в central record; правило исправлено на symmetric manifest local/central check, остальные entries по-прежнему требуют zero extra fields.
+- Scope: correction ограничена ZIP metadata validator; generated JAR, baseline и E06A source не менялись.
+- Evidence: temporary JAR debug probe на `jar 17.0.19`; conformance повторно `PASS ... checks=240`; solution build `0/0`.
+- Последствие: validator соответствует фактическому pinned JDK output и сохраняет строгий запрет на неожиданные extra fields.
+- Supersedes / supersededBy: уточняет K-E06-080; remaining A6/A7 and post-EXEC review open.

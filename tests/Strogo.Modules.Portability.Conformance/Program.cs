@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Kernel.Core;
@@ -723,6 +725,8 @@ finally
     if (Directory.Exists(packageTemp)) Directory.Delete(packageTemp, recursive: true);
 }
 
+checks += RunJvmJarNormalizerChecks();
+
 Directory.CreateDirectory(Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("report path has no directory"));
 var report = CanonicalJson.Encode(new
 {
@@ -1052,6 +1056,86 @@ static bool RejectsTargetBuild(Action action, string reason)
         var actual = details.RootElement.GetProperty("reason").GetString();
         if (actual != reason) Console.Error.WriteLine($"expected TargetBuildRejected/{reason}, observed {actual} at {exception.Locus}");
         return actual == reason;
+    }
+}
+
+static int RunJvmJarNormalizerChecks()
+{
+    var checks = 0;
+    void Assert(bool condition, string message)
+    {
+        checks++;
+        if (!condition) throw new InvalidOperationException(message);
+    }
+
+    var jar = new[]
+    {
+        Environment.GetEnvironmentVariable("JAVA_HOME") is { Length: > 0 } javaHome ? Path.Combine(javaHome, "bin", OperatingSystem.IsWindows() ? "jar.exe" : "jar") : "",
+        OperatingSystem.IsWindows() ? @"C:\Program Files\Zulu\zulu-17\bin\jar.exe" : "/usr/lib/jvm/java-17-openjdk/bin/jar",
+        "jar"
+    }.FirstOrDefault(candidate => Path.IsPathFullyQualified(candidate) && File.Exists(candidate));
+    if (jar is null)
+    {
+        Console.WriteLine("SKIP JVM JAR normalizer integration: pinned jar executable unavailable");
+        return 0;
+    }
+
+    var root = Path.Combine(Path.GetTempPath(), "strogo-jvm-jar-conformance-" + Guid.NewGuid().ToString("N"));
+    var input = Path.Combine(root, "input");
+    var runA = Path.Combine(root, "run-a");
+    var runB = Path.Combine(root, "run-b");
+    var finalA = Path.Combine(root, "out-a.jar");
+    var finalB = Path.Combine(root, "out-b.jar");
+    Directory.CreateDirectory(Path.Combine(input, "adapter"));
+    File.WriteAllBytes(Path.Combine(input, "A.class"), [0xca, 0xfe, 0xba, 0xbe, 0x01]);
+    File.WriteAllBytes(Path.Combine(input, "adapter", "Adapter.class"), [0xca, 0xfe, 0xba, 0xbe, 0x02]);
+    var expected = Directory.EnumerateFiles(input, "*", SearchOption.AllDirectories)
+        .Select(path =>
+        {
+            var bytes = File.ReadAllBytes(path);
+            var relative = Path.GetRelativePath(input, path).Replace('\\', '/');
+            var role = relative.StartsWith("adapter/", StringComparison.Ordinal) ? "adapter" : "class";
+            return new JvmJarExpectedEntry(relative, role, Convert.ToHexStringLower(SHA256.HashData(bytes)), bytes.LongLength.ToString(CultureInfo.InvariantCulture));
+        }).OrderBy(entry => entry.Path, StringComparer.Ordinal).ToArray();
+    try
+    {
+        var requestA = new JvmJarNormalizationRequest(input, runA, finalA, jar, PortabilityVersions.JvmProfile, new string('a', 40), "jdk-17.0.19/jar", expected, TimeSpan.FromSeconds(30), 64 * 1024, TimeSpan.FromSeconds(5));
+        var receiptA = JvmJarNormalizer.Normalize(requestA);
+        Assert(File.Exists(finalA), "normalizer promotes validated JAR to the new final path");
+        Assert(receiptA.Inventory.Entries.Length == 3 && receiptA.Inventory.Entries[0].Path == JvmJarNormalizer.ManifestPath, "receipt contains manifest-first canonical inventory");
+        Assert(receiptA.Inventory.Entries[1].Role == "class" && receiptA.Inventory.Entries[2].Role == "adapter", "receipt preserves input roles");
+        Assert(receiptA.InputInventory.Entries.Length == 2 && receiptA.InputInventory.Entries.All(entry => entry.Path != JvmJarNormalizer.ManifestPath), "receipt retains the pre-normalization input inventory separately");
+        Assert(File.Exists(Path.Combine(runA, "receipt.json")) && !Directory.Exists(Path.Combine(runA, "staging")), "successful run retains receipt and removes staging");
+
+        var requestB = requestA with { RunRoot = runB, FinalPath = finalB };
+        var receiptB = JvmJarNormalizer.Normalize(requestB);
+        Assert(File.ReadAllBytes(finalA).SequenceEqual(File.ReadAllBytes(finalB)) && receiptA.JarDigest == receiptB.JarDigest, "identical clean runs produce byte-identical JARs");
+
+        var mutated = File.ReadAllBytes(finalA);
+        var localName = Encoding.ASCII.GetBytes("A.class");
+        var localIndex = mutated.AsSpan().IndexOf(localName);
+        Assert(localIndex >= 0, "positive JAR contains the fixture local name");
+        mutated[localIndex] = (byte)'B';
+        var mutation = CaptureTargetBuild(() => JvmJarNormalizer.ValidateJar(mutated, expected));
+        Assert(mutation.Reason == "LocalCentralNameMismatch" && mutation.Locus.Contains("/name", StringComparison.Ordinal), "local/central filename mismatch is rejected before admission");
+        var trailing = File.ReadAllBytes(finalA);
+        Array.Resize(ref trailing, trailing.Length + 1);
+        trailing[^1] = 0x7f;
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(trailing, expected), "ZipEndRecordInvalid"), "trailing bytes after EOCD are rejected");
+        var crcMutation = File.ReadAllBytes(finalA);
+        var eocdOffset = crcMutation.Length - 22;
+        var centralOffset = BitConverter.ToUInt32(crcMutation, eocdOffset + 16);
+        var firstLocalOffset = BitConverter.ToUInt32(crcMutation, checked((int)centralOffset + 42));
+        crcMutation[checked((int)firstLocalOffset + 14)] ^= 0x01;
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(crcMutation, expected), "ZipLocalMetadataMismatch"), "local CRC mismatch is rejected");
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.Normalize(requestA with { RunRoot = Path.Combine(root, "run-mismatch"), FinalPath = finalA }), "FinalPathExists"), "existing final path is never overwritten");
+        var duplicate = expected.Concat([expected[0] with { Path = expected[0].Path.ToLowerInvariant() }]).ToArray();
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), duplicate), "CaseFoldDuplicateEntry"), "case-fold duplicate input is rejected");
+        return checks;
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
     }
 }
 
