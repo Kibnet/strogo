@@ -1800,3 +1800,13 @@
 - Evidence: `JvmJarNormalizer.cs`, portability conformance; повторный `PASS portability contract checks=242 valid=10`; Release solution build `0 warnings / 0 errors`; E06B SPEC checkpoint review.
 - Последствие: checkpoint A1–A5 получил post-EXEC PASS с явными residual A6 process/cleanup fixtures и full E06A integration; финальное E06B completion ещё не объявляется.
 - Supersedes / supersededBy: уточняет K-E06-080/K-E06-081; residual gates остаются открыты.
+
+## K-E06-083
+
+- Дата / фаза: 2026-09-09 / E06B post-EXEC adversarial review.
+- Тип / статус: Cleanup ordering correction / Implemented and revalidated.
+- Утверждение: review обнаружил риск исключения в `finally` после уже выполненной promotion. Нормализатор теперь удаляет и проверяет staging до atomic move; после promotion не выполняется операция, способная превратить успешный финальный JAR в неtyped failure.
+- Scope: изменён только порядок cleanup в E06B normalizer; existing final output по-прежнему не перезаписывается.
+- Evidence: `JvmJarNormalizer.Normalize`, повторный conformance `PASS portability contract checks=242`, Release build `0 warnings / 0 errors`.
+- Последствие: no-overwrite/quarantine contract сохраняет fail-closed поведение во всех ветках до promotion; checkpoint review обновлён с повторным re-review.
+- Supersedes / supersededBy: уточняет K-E06-082; A6 process faults and full E06A integration remain residual.

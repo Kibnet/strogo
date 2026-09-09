@@ -183,6 +183,8 @@ public static class JvmJarNormalizer
                 new(inventory));
             File.WriteAllBytes(receiptPath, receipt.CanonicalBytes());
 
+            DeleteContained(staging, runRoot);
+            if (Directory.Exists(staging)) throw new IOException("staging cleanup left residual directory");
             if (File.Exists(finalPath) || Directory.Exists(finalPath)) Reject("FinalPathExists", "$/finalPath");
             Directory.CreateDirectory(Path.GetDirectoryName(finalPath) ?? throw new InvalidOperationException("final path has no parent"));
             File.Move(quarantine, finalPath, false);
@@ -191,17 +193,13 @@ public static class JvmJarNormalizer
         }
         catch (PortabilityContractException)
         {
-            CleanupFailure(runRoot, staging, quarantine, promoted, request.CleanupTimeout);
+            CleanupFailure(runRoot, staging, quarantine, promoted);
             throw;
         }
         catch (Exception exception)
         {
-            CleanupFailure(runRoot, staging, quarantine, promoted, request.CleanupTimeout);
+            CleanupFailure(runRoot, staging, quarantine, promoted);
             throw new PortabilityContractException("TargetBuildRejected", "$/jar", new { reason = "NormalizerFailure", failure = exception.GetType().Name, message = exception.Message });
-        }
-        finally
-        {
-            if (promoted) CleanupSuccess(runRoot, staging, quarantine);
         }
     }
 
@@ -398,7 +396,7 @@ public static class JvmJarNormalizer
         return result.MoveToImmutable();
     }
 
-    private static void CleanupFailure(string runRoot, string staging, string quarantine, bool promoted, TimeSpan timeout)
+    private static void CleanupFailure(string runRoot, string staging, string quarantine, bool promoted)
     {
         if (promoted) return;
         try
@@ -412,12 +410,6 @@ public static class JvmJarNormalizer
         {
             throw new PortabilityContractException("TargetBuildRejected", "$/cleanup", new { reason = "CleanupFailed", failure = exception.GetType().Name, message = exception.Message, runRoot });
         }
-    }
-
-    private static void CleanupSuccess(string runRoot, string staging, string quarantine)
-    {
-        DeleteContained(quarantine, runRoot);
-        DeleteContained(staging, runRoot);
     }
 
     private static void DeleteContained(string path, string root)
