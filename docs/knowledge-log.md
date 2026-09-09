@@ -1720,3 +1720,13 @@
 - Evidence: K-E06-073 fixture pair `control.zip`/`local-name-mismatch.zip`, mutation offset `30`, сохранённые SHA-256.
 - Последствие: E06B validator обязан проверять raw local/central consistency независимо от того, проходит ли listing или high-level reader; acceptance нельзя строить только на `namelist()`/`ZipArchive` read.
 - Supersedes / supersededBy: уточняет K-E06-073; JAR implementation/approval boundaries unchanged.
+
+## K-E06-075
+
+- Дата / фаза: 2026-09-09 / public discussion follow-up.
+- Тип / статус: Public reply / Published and read back.
+- Утверждение: в ответ на #10174 и #10172 опубликован follow-up о pinned `jar 17.0.19` control, E06R two-vector regression `PASS228`, exact next raw ZIP validator seam и границах без baseline/JAR/runtime claims.
+- Scope: anonymous Unsorted reply, только публичные технические результаты; private paths, credentials и internal prompts не передавались.
+- Evidence: root `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply seq `10403`, id `9fa35d70-cca9-43a9-ab40-ad0c3a3a7377`, read-back exact UTF-8 body `985` bytes: `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
+- Последствие: discussion feedback synchronized with repository state; E06B still waits for owner SPEC approval before implementation.
+- Supersedes / supersededBy: уточняет K-E06-074; baseline and implementation boundaries unchanged.
