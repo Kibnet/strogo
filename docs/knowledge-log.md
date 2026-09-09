@@ -1790,3 +1790,13 @@
 - Evidence: temporary JAR debug probe на `jar 17.0.19`; conformance повторно `PASS ... checks=240`; solution build `0/0`.
 - Последствие: validator соответствует фактическому pinned JDK output и сохраняет строгий запрет на неожиданные extra fields.
 - Supersedes / supersededBy: уточняет K-E06-080; remaining A6/A7 and post-EXEC review open.
+
+## K-E06-082
+
+- Дата / фаза: 2026-09-09 / E06B EXEC checkpoint 1 review.
+- Тип / статус: Review correction and revalidation / Confirmed.
+- Утверждение: review выявил четыре однозначных усиления: удаление унаследованных JDK option variables перед `jar`, typed rejection malformed/truncated ZIP в public validator, проверку reparse final parent и bounded input size/count/aggregate до staging. Также conformance подтвердил package manifest binding нормализованного JAR через JVM artifact path.
+- Scope: исправления остаются в E06B boundary и не расширяют runtime/HotSpot/production claims.
+- Evidence: `JvmJarNormalizer.cs`, portability conformance; повторный `PASS portability contract checks=242 valid=10`; Release solution build `0 warnings / 0 errors`; E06B SPEC checkpoint review.
+- Последствие: checkpoint A1–A5 получил post-EXEC PASS с явными residual A6 process/cleanup fixtures и full E06A integration; финальное E06B completion ещё не объявляется.
+- Supersedes / supersededBy: уточняет K-E06-080/K-E06-081; residual gates остаются открыты.

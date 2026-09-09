@@ -296,3 +296,14 @@ Owner approval: **«Спеку подтверждаю»** получено 2026-
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Сформировать отдельный deterministic JAR gate после E06A Phase 2 | 0.95 | Нет для v0.1; external dependencies запрещены | Показать SPEC владельцу; ждать `Спеку подтверждаю` | Да | Нет | JDK остаётся ответственным за archive encoding, а Strogo контролирует inputs и validation | Этот файл |
 | EXEC | Реализовать typed inventory, pinned `jar`, raw ZIP validator, quarantine/promotion и conformance mutations | 0.93 | Полная E06A integration и cross-platform JDK run остаются отдельными evidence | Провести post-EXEC review и обновить acceptance evidence | Нет | Да: «Спеку подтверждаю» 2026-09-09 | Implementation ограничена approved E06B; no-overwrite и raw local/central checks закрывают основные ambiguity seams | `JvmJarNormalizer.cs`, `JvmProcessRunner.cs`, portability conformance |
+
+### Post-EXEC Review: checkpoint 1
+
+- Статус: **PASS для реализованного checkpoint; финальное A6/A7 закрытие ещё не заявляется**.
+- Scope/Evidence pass: просмотрены эта approved SPEC, `JvmJarNormalizer.cs`, `JvmProcessRunner.cs`, portability conformance diff, `git status`, Release build и запуск conformance.
+- Contract pass: A1–A5 покрыты двух-run identity, exact manifest/metadata, input/final inventory, raw local/central checks, package entry-artifact binding и fail-closed mutations; Non-Goals сохранены.
+- Adversarial risk pass: исправлены typed malformed ZIP boundary, очистка JDK option environment, final-parent reparse check, local manifest JAR marker и input size/count/aggregate limits. Повторная conformance проверка прошла.
+- Role-Based pass: Tester/validation и Developer/architect применимы и пройдены; Delivery/operations/security проверены для quarantine/no-overwrite/reparse; UX не применим (artifact-only); business workflow не меняется.
+- Fix and re-review: выполнено после первичного запуска и после package integration; затронутые build/conformance checks повторены.
+- Findings: нет открытых BLOCKER/HIGH/MEDIUM. Residual: A6 process/cleanup fault fixtures, full E06A integration и cross-platform evidence ещё требуют отдельного checkpoint.
+- Validation evidence: `dotnet build tests/Strogo.Modules.Portability.Conformance/Strogo.Modules.Portability.Conformance.csproj -c Release --no-restore` — `0/0`; `dotnet run ... --no-build` — `PASS portability contract checks=242 valid=10 refusals=3 transport=24 mutations=4`; full solution Release build — `0/0`.

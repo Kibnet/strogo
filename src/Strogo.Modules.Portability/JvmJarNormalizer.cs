@@ -111,7 +111,19 @@ public static class JvmJarNormalizer
         var expectedArchive = new[] { new JvmJarExpectedEntry(ManifestPath, "metadata", Digest(ManifestBytes), Decimal(ManifestBytes.Length)) }
             .Concat(expectedEntries.OrderBy(entry => entry.Path, StringComparer.Ordinal))
             .ToArray();
-        return new(ValidateArchive(bytes.ToArray(), expectedArchive));
+        try
+        {
+            return new(ValidateArchive(bytes.ToArray(), expectedArchive));
+        }
+        catch (PortabilityContractException)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            Reject("ZipMalformed", "$/jar", new { failure = exception.GetType().Name });
+            throw;
+        }
     }
 
     public static JvmJarBuildReceipt Normalize(JvmJarNormalizationRequest request)
@@ -142,7 +154,7 @@ public static class JvmJarNormalizer
                 request.JarExecutable,
                 staging,
                 ["--create", "--file", quarantine, "--no-compress", $"--date={FixedTimestamp}", "--no-manifest", "@entries.argfile"],
-                [],
+                ["CLASSPATH", "JDK_JAVAC_OPTIONS", "JDK_JAVA_OPTIONS", "JAVA_TOOL_OPTIONS", "_JAVA_OPTIONS"],
                 request.Timeout,
                 request.OutputByteLimit,
                 request.CleanupTimeout,
@@ -205,6 +217,9 @@ public static class JvmJarNormalizer
         if (request.Timeout <= TimeSpan.Zero || request.CleanupTimeout <= TimeSpan.Zero || request.OutputByteLimit <= 0) Reject("ProcessLimitsInvalid", "$/limits");
         if (request.ExpectedEntries is null || request.ExpectedEntries.Count == 0 || request.ExpectedEntries.Count + 1 > MaximumEntries) Reject("EntryCountExceeded", "$/entries");
         if (PathStartsWithin(request.FinalPath, request.RunRoot)) Reject("FinalPathInsideRunRoot", "$/finalPath");
+        var finalParent = Path.GetDirectoryName(Path.GetFullPath(request.FinalPath));
+        if (finalParent is null || !Directory.Exists(finalParent)) Reject("FinalParentMissing", "$/finalPath");
+        RejectReparse(finalParent!, "$/finalPath/parent");
         ValidateExpectedEntries(request.ExpectedEntries!);
     }
 
@@ -232,17 +247,21 @@ public static class JvmJarNormalizer
             RejectReparse(directory, "$/inputRoot");
             if (!Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Any()) Reject("EmptyDirectory", "$/inputRoot");
         }
-        var actual = Directory.EnumerateFiles(inputRoot, "*", SearchOption.AllDirectories)
-            .Select(path =>
-            {
-                RejectReparse(path, "$/inputRoot");
-                var relative = Path.GetRelativePath(inputRoot, path).Replace('\\', '/');
-                ValidateLogicalPath(relative, "$/inputRoot/path");
-                var bytes = File.ReadAllBytes(path);
-                return new InputEntry(new JvmJarExpectedEntry(relative, "class", Digest(bytes), Decimal(bytes.LongLength)), bytes);
-            })
-            .OrderBy(entry => entry.Expected.Path, StringComparer.Ordinal)
-            .ToArray();
+        var actualBuilder = new List<InputEntry>();
+        long aggregate = 0;
+        foreach (var path in Directory.EnumerateFiles(inputRoot, "*", SearchOption.AllDirectories))
+        {
+            if (actualBuilder.Count + 1 > MaximumEntries) Reject("EntryCountExceeded", "$/inputRoot");
+            RejectReparse(path, "$/inputRoot");
+            var relative = Path.GetRelativePath(inputRoot, path).Replace('\\', '/');
+            ValidateLogicalPath(relative, "$/inputRoot/path");
+            var bytes = File.ReadAllBytes(path);
+            if (bytes.LongLength > MaximumEntryBytes) Reject("EntrySizeLimitExceeded", $"$/inputRoot/{relative}");
+            aggregate = checked(aggregate + bytes.LongLength);
+            if (aggregate > MaximumAggregateBytes) Reject("AggregateEntryLimitExceeded", "$/inputRoot");
+            actualBuilder.Add(new InputEntry(new JvmJarExpectedEntry(relative, "class", Digest(bytes), Decimal(bytes.LongLength)), bytes));
+        }
+        var actual = actualBuilder.OrderBy(entry => entry.Expected.Path, StringComparer.Ordinal).ToArray();
         var expectedByPath = expected.ToDictionary(entry => entry.Path, StringComparer.Ordinal);
         if (actual.Length != expected.Count || actual.Any(item => !expectedByPath.TryGetValue(item.Expected.Path, out var wanted) || wanted.Sha256 != item.Expected.Sha256 || wanted.Length != item.Expected.Length))
             Reject("InputInventoryMismatch", "$/entries");

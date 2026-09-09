@@ -725,7 +725,7 @@ finally
     if (Directory.Exists(packageTemp)) Directory.Delete(packageTemp, recursive: true);
 }
 
-checks += RunJvmJarNormalizerChecks();
+checks += RunJvmJarNormalizerChecks(packageDefinition);
 
 Directory.CreateDirectory(Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("report path has no directory"));
 var report = CanonicalJson.Encode(new
@@ -1059,7 +1059,7 @@ static bool RejectsTargetBuild(Action action, string reason)
     }
 }
 
-static int RunJvmJarNormalizerChecks()
+static int RunJvmJarNormalizerChecks(PortabilityPackageDefinition baseDefinition)
 {
     var checks = 0;
     void Assert(bool condition, string message)
@@ -1111,6 +1111,39 @@ static int RunJvmJarNormalizerChecks()
         var receiptB = JvmJarNormalizer.Normalize(requestB);
         Assert(File.ReadAllBytes(finalA).SequenceEqual(File.ReadAllBytes(finalB)) && receiptA.JarDigest == receiptB.JarDigest, "identical clean runs produce byte-identical JARs");
 
+        var jarPackageRoot = Path.Combine(root, "package");
+        var jvmRuntime = CanonicalJson.Encode(new
+        {
+            schemaVersion = PortabilityPackageVersions.RuntimeRequirementSchema,
+            profileId = PortabilityVersions.JvmProfile,
+            vmFamily = "java",
+            vmMajor = "17",
+            dynamicFeatures = new[] { "class-loader", "jit" },
+            nativeFeatures = Array.Empty<string>()
+        });
+        var jvmContent = baseDefinition.Content.Select(file => file.Path switch
+        {
+            "content/strogo.portable.v01.dll" => new PortabilityPackageContent("content/strogo-portable-v01.jar", "entry-artifact", File.ReadAllBytes(finalA)),
+            "content/runtime-requirement.json" => new PortabilityPackageContent(file.Path, file.Role, jvmRuntime),
+            "content/translator-inventory.json" => new PortabilityPackageContent(file.Path, file.Role, RewriteInventoryProfile(file.Bytes)),
+            "content/build-toolchain-inventory.json" => new PortabilityPackageContent(file.Path, file.Role, RewriteInventoryProfile(file.Bytes)),
+            _ => file
+        }).ToArray();
+        var jarDefinition = baseDefinition with
+        {
+            ProfileId = PortabilityVersions.JvmProfile,
+            EntryArtifactPath = "content/strogo-portable-v01.jar",
+            RuntimeRequirementDigest = PortabilityContract.DomainHash($"strogo.portability.v0.1/runtime-requirement/{PortabilityVersions.JvmProfile}", jvmRuntime),
+            TranslatorDigest = PortabilityContract.DomainHash($"strogo.portability.v0.1/translator/{PortabilityVersions.JvmProfile}", jvmContent.Single(file => file.Path == "content/translator-inventory.json").Bytes),
+            BuildToolchainDigest = PortabilityContract.DomainHash($"strogo.portability.v0.1/build-toolchain/{PortabilityVersions.JvmProfile}", jvmContent.Single(file => file.Path == "content/build-toolchain-inventory.json").Bytes),
+            Content = jvmContent
+        };
+        var jarPackage = PortabilityPackage.Build(jarPackageRoot, jarDefinition);
+        var validatedJarPackage = PortabilityPackage.Validate(jarPackageRoot, jarPackage.PortabilityManifestDigest);
+        Assert(jarPackage.Files.Single(file => file.Path == "content/strogo-portable-v01.jar").Sha256 == receiptA.JarDigest
+            && validatedJarPackage.Files.Single(file => file.Path == "content/strogo-portable-v01.jar").Sha256 == receiptA.JarDigest,
+            "package manifest binds the normalized JAR as entry-artifact");
+
         var mutated = File.ReadAllBytes(finalA);
         var localName = Encoding.ASCII.GetBytes("A.class");
         var localIndex = mutated.AsSpan().IndexOf(localName);
@@ -1128,6 +1161,7 @@ static int RunJvmJarNormalizerChecks()
         var firstLocalOffset = BitConverter.ToUInt32(crcMutation, checked((int)centralOffset + 42));
         crcMutation[checked((int)firstLocalOffset + 14)] ^= 0x01;
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(crcMutation, expected), "ZipLocalMetadataMismatch"), "local CRC mismatch is rejected");
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar([0x01, 0x02, 0x03], expected), "ZipEndRecordInvalid"), "truncated archive is rejected with a typed reason");
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.Normalize(requestA with { RunRoot = Path.Combine(root, "run-mismatch"), FinalPath = finalA }), "FinalPathExists"), "existing final path is never overwritten");
         var duplicate = expected.Concat([expected[0] with { Path = expected[0].Path.ToLowerInvariant() }]).ToArray();
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), duplicate), "CaseFoldDuplicateEntry"), "case-fold duplicate input is rejected");
@@ -1137,6 +1171,19 @@ static int RunJvmJarNormalizerChecks()
     {
         if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
     }
+}
+
+static byte[] RewriteInventoryProfile(ReadOnlySpan<byte> bytes)
+{
+    using var document = JsonDocument.Parse(bytes.ToArray());
+    var root = document.RootElement;
+    return CanonicalJson.Encode(new
+    {
+        schemaVersion = root.GetProperty("schemaVersion"),
+        profileId = PortabilityVersions.JvmProfile,
+        files = root.GetProperty("files"),
+        versions = root.GetProperty("versions")
+    });
 }
 
 static (string Reason, string Locus, JsonElement Details) CaptureTargetBuild(Action action)
