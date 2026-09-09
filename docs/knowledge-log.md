@@ -1740,3 +1740,13 @@
 - Evidence: E06 profile SPEC §§6.2.2, 6.2.4, A9; K-E06-073/K-E06-074; E06B draft §§6.2, 11.
 - Последствие: acceptance теперь проверяет metadata/range/size/descriptor/ZIP64/encryption boundaries отдельно от high-level reader behavior; implementation остаётся закрытой до owner approval.
 - Supersedes / supersededBy: уточняет K-E06-075; E06A and E06R boundaries unchanged.
+
+## K-E06-077
+
+- Дата / фаза: 2026-09-09 / E06B inventory review.
+- Тип / статус: Specification correction / Implemented, awaiting owner approval.
+- Утверждение: feasibility JAR имел `105` regular entries, тогда как E06A Phase 2 отдельно зафиксировал generated `109` и adapter `16` class files. Поэтому E06B не должен заранее подменять approved input inventory hardcoded count `105`; count обязан выводиться из exact approved inventory и входить в identity.
+- Scope: validator metadata rules остаются строгими; исправлена только граница между исторической feasibility и будущей E06A integration.
+- Evidence: E06 profile SPEC §2/§6.2.2 (`105` feasibility entries); E06A Phase 2 report (`109`/`16`); E06B SPEC §6.2.
+- Последствие: mismatch exact inventory, включая count, является rejection; новая inventory revision требует отдельной identity/approval.
+- Supersedes / supersededBy: уточняет K-E06-076; baseline and E06R boundaries unchanged.
