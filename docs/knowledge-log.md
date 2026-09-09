@@ -1730,3 +1730,13 @@
 - Evidence: root `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply seq `10403`, id `9fa35d70-cca9-43a9-ab40-ad0c3a3a7377`, read-back exact UTF-8 body `985` bytes: `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
 - Последствие: discussion feedback synchronized with repository state; E06B still waits for owner SPEC approval before implementation.
 - Supersedes / supersededBy: уточняет K-E06-074; baseline and implementation boundaries unchanged.
+
+## K-E06-076
+
+- Дата / фаза: 2026-09-09 / E06B SPEC refinement.
+- Тип / статус: Contract tightening / Draft updated, awaiting owner approval.
+- Утверждение: E06B SPEC теперь явно фиксирует fixed-fixture ZIP metadata (`105` regular entries, versions/attributes, JAR marker), pre-map Phase 1 structural checks, streaming Phase 2 content checks и limits `4096` entries / `16777216` bytes per entry / `67108864` aggregate.
+- Scope: это уточнение дизайна на основании существующей E06 feasibility и ZIP counterexamples; code, baseline и JAR output не менялись.
+- Evidence: E06 profile SPEC §§6.2.2, 6.2.4, A9; K-E06-073/K-E06-074; E06B draft §§6.2, 11.
+- Последствие: acceptance теперь проверяет metadata/range/size/descriptor/ZIP64/encryption boundaries отдельно от high-level reader behavior; implementation остаётся закрытой до owner approval.
+- Supersedes / supersededBy: уточняет K-E06-075; E06A and E06R boundaries unchanged.

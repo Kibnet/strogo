@@ -96,7 +96,9 @@ The exact executable, JDK closure digest, logical flags, manifest bytes digest a
 - Exit `0`, empty stdout/stderr, clean process tree and exact expected inventory are required.
 - Validator opens the JAR as a ZIP reader without extraction and checks one central-directory entry per logical path, method `STORED`, fixed timestamp, UTF-8 flag, manifest-first ordering and exact bytes.
 - Для каждого central-directory record validator сверяет соответствующий local-file header: name, flags, method, timestamp fields, CRC-32, compressed/uncompressed sizes and data offset. Проверяются границы `local header + data`, отсутствие overlapping records, корректные central-directory offset/size и отсутствие trailing bytes после end record.
+- Для fixed E06 fixture validator также требует `105` regular entries, `version made by=10`, `version needed=10`, `create system=0`, zero volume/internal/external attributes, no archive/entry comments, no data descriptors, encryption or ZIP64; единственный extra field — JAR marker `FE CA 00 00` у manifest, остальные extra fields запрещены.
 - The validator rejects duplicate raw ZIP names, duplicate case-fold names, directory entries, unexpected compression, extra metadata, unsafe paths and a mismatch between raw input inventory and final inventory.
+- Phase 1 проверяет headers, multiplicity, ranges and limits before any map/extraction; phase 2 streams each raw entry from its verified local range and recomputes exact content digest/length/CRC. Entry count above `4096`, entry bytes above `16777216` or aggregate bytes above `67108864` are typed rejections.
 - After successful validation, the JAR is atomically renamed to a new absent final path. Existing final paths are never overwritten.
 - Failure removes quarantine with containment and absence checks. Cleanup failure preserves bounded residual evidence and blocks promotion.
 
@@ -169,10 +171,10 @@ The receipt records schema version, profile, source/revision identity, candidate
 ## 11. Тестирование и критерии приёмки
 
 - **A1:** two clean runs with identical logical inputs produce byte-identical JAR and digest.
-- **A2:** manifest, argfile, timestamp, ordering and compression are exact and reproducible.
+- **A2:** manifest, argfile, timestamp, ordering, compression, ZIP versions/attributes and extra-field policy are exact and reproducible.
 - **A3:** final JAR opens without extraction, has consistent local/central ZIP records and matches ordered input inventory byte-for-byte.
 - **A4:** package manifest binds the normalized JAR digest and standalone consumer reads it.
-- **A5:** duplicate, case-fold, traversal, absolute, directory, compression, timestamp, extra-entry and overwrite mutations fail closed with no promoted output.
+- **A5:** duplicate, case-fold, traversal, absolute, directory, compression, timestamp, extra-entry, local/central name/size/CRC/offset, ZIP64, descriptor, encryption and overwrite mutations fail closed with no promoted output.
 - **A6:** timeout, stdout/stderr overflow, nonzero `jar` and cleanup failure preserve typed bounded evidence and never promote output.
 - **A7:** solution, portability, Modules and Graph conformance remain green; knowledge log records the result and boundaries.
 
