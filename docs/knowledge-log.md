@@ -1760,3 +1760,13 @@
 - Evidence: temporary roots `strogo-jvm-jar-feasibility-258bddc88ffb443fb7108f3f481aaae9` и `strogo-jvm-jar-feasibility-93dcef29b8fa48669dfce8ab6772cc13`; оба `zip_count=126`, `compress_types=[0]`, timestamp `(1980,1,1,0,0,2)`, exact manifest bytes.
 - Последствие: текущая feasibility подтверждает, что E06B должен связывать count и ordered inventory с конкретным approved E06A input, а не с историческим числом `105`; draft SPEC и approval boundary не меняются.
 - Supersedes / supersededBy: уточняет K-E06-077; E06B implementation and admission remain pending owner approval.
+
+## K-E06-079
+
+- Дата / фаза: 2026-09-09 / public discussion follow-up.
+- Тип / статус: Public reply / Published and read back.
+- Утверждение: в продолжение #10403 опубликован bounded update о двух-run E06B feasibility control: `126` entries, byte-identical JAR и digest `7c86cbc9…d4a77`; явно сохранены границы без raw validator, package integration и JVM/runtime admission.
+- Scope: anonymous Unsorted reply, только уже проверенные технические результаты и публичный commit; private paths, credentials и internal prompts не передавались.
+- Evidence: root `e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply seq `10405`, id `4f5eeb2d-dc65-4afe-b6fc-969ccbe9787c`, read-back exact UTF-8 body `803` bytes: `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`.
+- Последствие: публичная дискуссия синхронизирована с commit `745c039`; E06B implementation по-прежнему ждёт owner SPEC approval.
+- Supersedes / supersededBy: уточняет K-E06-078; baseline and admission boundaries unchanged.
