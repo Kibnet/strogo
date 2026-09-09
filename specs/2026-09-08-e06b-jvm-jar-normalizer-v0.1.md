@@ -209,7 +209,7 @@ The receipt records schema version, profile, source/revision identity, candidate
 
 - User-visible output and rejection states are defined.
 - Every AC has test/evidence path.
-- Runtime dependency set is explicit and marked as a possible owner decision.
+- Runtime dependency set is explicit and fixed to E06A candidate + adapter classes.
 - No production admission is implied.
 
 ## 13. План выполнения
