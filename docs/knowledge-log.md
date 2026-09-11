@@ -1830,3 +1830,44 @@
 - Evidence: `tests/Strogo.Modules.Portability.Conformance/Program.cs`; `PASS portability contract checks=252`; core conformance `29/29 cases; 10904 assertions`.
 - Последствие: A6 имеет явный packaging process-kind regression и общий bounded fault matrix; cross-platform E06A integration остаётся отдельным residual.
 - Supersedes / supersededBy: уточняет K-E06-084; финальный post-EXEC audit выполняется после commit.
+
+## K-E06-086
+
+- Дата / фаза: 2026-09-09 / E06B receipt evidence.
+- Тип / статус: Provenance artifact completion / Implemented and revalidated.
+- Утверждение: успешный normalizer run теперь сохраняет отдельные canonical `input-inventory.json` и `final-inventory.json` рядом с `receipt.json`; receipt содержит те же input/final inventories и digest identities. Staging удаляется до promotion.
+- Scope: provenance artifacts остаются validation-only и не являются runtime admission или production package publication.
+- Evidence: `JvmJarNormalizer.cs`, portability conformance `PASS ... checks=252`, receipt/inventory existence assertion, `git diff --check`.
+- Последствие: raw pre-normalization и final archive inventories доступны как самостоятельные проверяемые outputs, что закрывает output/evidence contract E06B.
+- Supersedes / supersededBy: уточняет K-E06-085; независимый review и final commit ещё впереди.
+
+## K-E06-087
+
+- Дата / фаза: 2026-09-11 / E06B final review.
+- Тип / статус: Contract hardening / Implemented and revalidated.
+- Утверждение: роль входной записи больше не является произвольной printable-строкой. Normalizer принимает только canonical roles `class`, `adapter` и `runtime-dependency`; generated manifest остаётся внутренним `metadata`. Неканоническая роль даёт typed `RoleInvalid` до JAR admission.
+- Scope: роль берётся из утверждённого caller inventory; физическая эвристика по имени файла не подменяет semantic role. Это закрывает ambiguity, не добавляя скрытой классификации.
+- Evidence: `JvmJarNormalizer.cs` (`InputRoles`/`ValidateRole`), conformance mutation `unapproved input role is rejected`, targeted `PASS portability contract checks=253`.
+- Последствие: допустимое пространство входных идентичностей сужено формально и проверяемо; role-set не расширяется без изменения SPEC/identity.
+- Supersedes / supersededBy: уточняет K-E06-080/K-E06-086; final post-EXEC audit завершён.
+
+## K-E06-088
+
+- Дата / фаза: 2026-09-11 / E06B final post-EXEC audit.
+- Тип / статус: Validation boundary / Confirmed.
+- Утверждение: sequential Release audit прошёл без ошибок: solution build `0/0`, portability `253` targeted checks, Modules `362`, Graph `141`, Core `29/29; 10904 assertions`; tracked generated artifact was restored and `git diff --check` остаётся чистым.
+- Независимое наблюдение: retained historical feasibility JAR имеет стабильный digest, но текущий strict validator отвергает его как `EntryOrderMismatch`, поскольку central-directory order не соответствует E06B manifest-first + ordinal contract. Это ожидаемый non-admission residual, а не дефект validator; архив не используется как доказательство E06B admission.
+- Scope: E06B implementation checkpoint готов к owner review/delivery; exact E06A integration, cross-platform JDK evidence и runtime/admission approval остаются отдельными gates.
+- Evidence: final SPEC review, `JvmJarNormalizer.cs`, conformance output, sequential suite outputs and independent read-only historical-archive probe.
+- Последствие: delivery claims ограничены тем, что реально проверено локально; старая feasibility запись не смешивается с новым canonical output.
+- Supersedes / supersededBy: уточняет K-E06-086/K-E06-087; следующий шаг — owner-reviewed delivery и следующий утверждённый этап.
+
+## K-E06-089
+
+- Дата / фаза: 2026-09-11 / E06B independent corpus probe.
+- Тип / статус: Independent reproducibility / Confirmed with bounded scope.
+- Утверждение: сохранённые 125 class-файлов historical feasibility staging были перепакованы текущим normalizer в canonical 126-entry JAR; `ValidateJar(control, expected)` прошёл, digest результата `d9bc7b393d63cc6b1bdef1ee91f96512b390ae32c28e27c53457b18ed512e989`. Мутация одного байта local name была отвергнута как `LocalCentralNameMismatch`.
+- Scope: это независимая проверка packaging/structural determinism на сохранённом class corpus. Она не доказывает свежую компиляцию, Java execution, dependency closure, cross-platform behaviour или runtime admission.
+- Evidence: independent probe output `strogo-real-normalized-cb1fdacc59dd4147b08982f25956cdf0`, current `JvmJarNormalizer.ValidateJar`, mutation result.
+- Последствие: старый non-canonical archive не используется как admission artifact; canonical repackaging показывает, что тот же сохранённый corpus совместим с E06B archive contract при явно отделённых границах доказательства.
+- Supersedes / supersededBy: уточняет K-E06-088; owner review/delivery и следующие E06A/runtime gates остаются впереди.

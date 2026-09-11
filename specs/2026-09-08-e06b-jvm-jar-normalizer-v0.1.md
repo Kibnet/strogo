@@ -67,7 +67,7 @@ JVM class output уже может быть принят по lint и behavior g
 1. Input is a new, previously absent staging root containing only promoted E06A candidate classes, adapter classes and explicitly declared runtime dependencies.
 2. Every logical entry has `{path, role, bytes, sha256, length}`. Paths use `/`, are relative ASCII, contain no empty/`.`/`..` segments, backslash, colon, control, absolute, drive or UNC form.
 3. Each segment matches `[A-Za-z0-9_$][A-Za-z0-9._$-]*`; `META-INF` is allowed only for the exact generated manifest and explicitly declared metadata.
-4. Exact ordinal path duplicates and ordinal case-fold duplicates are rejected before invoking `jar`. Missing, extra or role-inconsistent entries are rejected.
+4. Exact ordinal path duplicates and ordinal case-fold duplicates are rejected before invoking `jar`. Missing, extra or role-inconsistent entries are rejected. Input roles are restricted to the canonical set `class`, `adapter` and `runtime-dependency`; the caller-supplied approved inventory is the source of role identity, while the generated manifest uses the internal `metadata` role.
 5. Input inventory is retained as diagnostic evidence and its physical root is excluded from logical identities.
 
 #### Canonical manifest and invocation
@@ -296,6 +296,8 @@ Owner approval: **«Спеку подтверждаю»** получено 2026-
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | SPEC | Сформировать отдельный deterministic JAR gate после E06A Phase 2 | 0.95 | Нет для v0.1; external dependencies запрещены | Показать SPEC владельцу; ждать `Спеку подтверждаю` | Да | Нет | JDK остаётся ответственным за archive encoding, а Strogo контролирует inputs и validation | Этот файл |
 | EXEC | Реализовать typed inventory, pinned `jar`, raw ZIP validator, quarantine/promotion и conformance mutations | 0.93 | Полная E06A integration и cross-platform JDK run остаются отдельными evidence | Провести post-EXEC review и обновить acceptance evidence | Нет | Да: «Спеку подтверждаю» 2026-09-09 | Implementation ограничена approved E06B; no-overwrite и raw local/central checks закрывают основные ambiguity seams | `JvmJarNormalizer.cs`, `JvmProcessRunner.cs`, portability conformance |
+| EXEC | Сохранить отдельные canonical input/final inventories и завершить A5/A6 mutation coverage | 0.94 | Cross-platform JDK и exact E06A integration остаются отдельными gates | Выполнить последовательный full-suite audit и зафиксировать final review | Нет | Да: approval уже получен | Output/evidence contract теперь имеет самостоятельные inventory artifacts; process-kind и raw ZIP faults проверяются typed fixtures | `input-inventory.json`, `final-inventory.json`, `receipt.json`, conformance |
+| EXEC | Закрыть role-set ambiguity и завершить final post-EXEC audit | 0.95 | Exact E06A integration, cross-platform JDK и runtime admission остаются отдельными gates | Передать контрольную точку владельцу и продолжить следующим утверждённым этапом | Нет | Да: approval уже получен | Роли ограничены каноническим набором; historical feasibility JAR явно отделён от E06B admission | `JvmJarNormalizer.cs`, conformance, this review |
 
 ### Post-EXEC Review: checkpoint 1
 
@@ -307,3 +309,13 @@ Owner approval: **«Спеку подтверждаю»** получено 2026-
 - Fix and re-review: выполнено после первичного запуска, package integration и cleanup ordering; затронутые build/conformance checks повторены.
 - Findings: нет открытых BLOCKER/HIGH/MEDIUM. Residual: A6 process/cleanup fault fixtures, full E06A integration и cross-platform evidence ещё требуют отдельного checkpoint.
 - Validation evidence: `dotnet build tests/Strogo.Modules.Portability.Conformance/Strogo.Modules.Portability.Conformance.csproj -c Release --no-restore` — `0/0`; `dotnet run ... --no-build` — `PASS portability contract checks=252 valid=10 refusals=3 transport=24 mutations=4`; full solution Release build — `0/0`.
+
+### Post-EXEC Review: final checkpoint
+
+- Scope/Evidence: reviewed the approved SPEC, implementation diff, canonical input/final inventory artifacts, conformance mutation matrix, repository status and sequential Release validation. Independent read-only inspection also checked both the retained historical feasibility JAR and a freshly normalized archive built from its preserved class corpus.
+- Contract pass: the normalizer now emits separate `input-inventory.json`, `final-inventory.json` and `receipt.json`; accepted input roles are closed to `class`, `adapter` and `runtime-dependency`; JAR packaging uses the pinned `JarPackaging` process kind and the package harness binds the promoted raw JAR digest.
+- Adversarial pass: local/central name, CRC, size, offset, compression, timestamp, encryption, extra-field, ZIP64, truncation, duplicates, traversal, unsupported role and no-overwrite mutations fail closed. Quarantine and staging cleanup are checked before promotion; process diagnostics remain bounded and typed.
+- Role-based pass: tester/validation, developer/architect and delivery/operations/security concerns were rechecked; UX and business workflow remain not applicable. The independent historical-JAR result is an explicit residual boundary: the old feasibility archive is byte-repeatable but is rejected for non-canonical central-directory order, so it is not E06B admission evidence. Repacking the preserved 125-class corpus through the normalizer produced a 126-entry canonical archive and rejected a local-name mutation, but this remains packaging/structural evidence rather than fresh compilation, runtime execution or closure approval.
+- Fix and re-review: the role-set hardening and separate inventory artifacts were followed by targeted conformance `PASS portability contract checks=253 valid=10 refusals=3 transport=24 mutations=4`; the full sequential suite then passed Modules `362`, Graph `141`, Core `29/29; 10904 assertions`, with solution and targeted builds at `0/0`.
+- Findings: no open BLOCKER/HIGH/MEDIUM findings for the implemented E06B checkpoint. Residual gates remain exact E06A integration, cross-platform JDK evidence and runtime/admission approval; those are outside this SPEC and are not claimed closed.
+- Stop decision: **PASS; E06B implementation checkpoint is ready for owner review and delivery.**

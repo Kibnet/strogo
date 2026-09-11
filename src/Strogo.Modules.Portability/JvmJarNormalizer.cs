@@ -102,6 +102,7 @@ public static class JvmJarNormalizer
     private static readonly Regex SegmentPattern = new("^[A-Za-z0-9_$][A-Za-z0-9._$-]*$", RegexOptions.CultureInvariant | RegexOptions.NonBacktracking);
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
     private static readonly byte[] ManifestBytes = Encoding.UTF8.GetBytes(ManifestText);
+    private static readonly ImmutableHashSet<string> InputRoles = ImmutableHashSet.Create(StringComparer.Ordinal, "class", "adapter", "runtime-dependency");
 
     public static JvmJarInventory ValidateJar(ReadOnlySpan<byte> bytes, IReadOnlyList<JvmJarExpectedEntry> expectedEntries)
     {
@@ -144,6 +145,8 @@ public static class JvmJarNormalizer
             Directory.CreateDirectory(runRoot);
             Directory.CreateDirectory(staging);
             var input = ReadInputInventory(inputRoot, request.ExpectedEntries);
+            var inputInventory = new JvmJarInventory(input.Select(item => new JvmJarInventoryEntry(item.Expected.Path, item.Expected.Role, item.Expected.Sha256, item.Expected.Length)).ToImmutableArray());
+            File.WriteAllBytes(Path.Combine(runRoot, "input-inventory.json"), inputInventory.CanonicalBytes());
             var expectedArchive = new[] { new JvmJarExpectedEntry(ManifestPath, "metadata", Digest(ManifestBytes), Decimal(ManifestBytes.Length)) }
                 .Concat(input.Select(item => item.Expected).OrderBy(entry => entry.Path, StringComparer.Ordinal))
                 .ToArray();
@@ -167,6 +170,8 @@ public static class JvmJarNormalizer
 
             var jarBytes = File.ReadAllBytes(quarantine);
             var inventory = ValidateArchive(jarBytes, expectedArchive);
+            var finalInventory = new JvmJarInventory(inventory);
+            File.WriteAllBytes(Path.Combine(runRoot, "final-inventory.json"), finalInventory.CanonicalBytes());
             var receipt = new JvmJarBuildReceipt(
                 SchemaVersion,
                 request.ProfileId,
@@ -179,8 +184,8 @@ public static class JvmJarNormalizer
                 process.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture),
                 process.StdoutDigest,
                 process.StderrDigest,
-                new(input.Select(item => new JvmJarInventoryEntry(item.Expected.Path, item.Expected.Role, item.Expected.Sha256, item.Expected.Length)).ToImmutableArray()),
-                new(inventory));
+                inputInventory,
+                finalInventory);
             File.WriteAllBytes(receiptPath, receipt.CanonicalBytes());
 
             DeleteContained(staging, runRoot);
@@ -442,7 +447,7 @@ public static class JvmJarNormalizer
 
     private static void ValidateRole(string role, string locus)
     {
-        if (string.IsNullOrEmpty(role) || role.Any(character => character < 0x21 || character > 0x7e)) Reject("RoleInvalid", locus);
+        if (!InputRoles.Contains(role)) Reject("RoleInvalid", locus);
     }
 
     private static string DecodeName(byte[] bytes, string locus)

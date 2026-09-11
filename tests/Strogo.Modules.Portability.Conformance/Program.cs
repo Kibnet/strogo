@@ -1106,7 +1106,7 @@ static int RunJvmJarNormalizerChecks(PortabilityPackageDefinition baseDefinition
         Assert(receiptA.Inventory.Entries.Length == 3 && receiptA.Inventory.Entries[0].Path == JvmJarNormalizer.ManifestPath, "receipt contains manifest-first canonical inventory");
         Assert(receiptA.Inventory.Entries[1].Role == "class" && receiptA.Inventory.Entries[2].Role == "adapter", "receipt preserves input roles");
         Assert(receiptA.InputInventory.Entries.Length == 2 && receiptA.InputInventory.Entries.All(entry => entry.Path != JvmJarNormalizer.ManifestPath), "receipt retains the pre-normalization input inventory separately");
-        Assert(File.Exists(Path.Combine(runA, "receipt.json")) && !Directory.Exists(Path.Combine(runA, "staging")), "successful run retains receipt and removes staging");
+        Assert(File.Exists(Path.Combine(runA, "receipt.json")) && File.Exists(Path.Combine(runA, "input-inventory.json")) && File.Exists(Path.Combine(runA, "final-inventory.json")) && !Directory.Exists(Path.Combine(runA, "staging")), "successful run retains inventory/receipt evidence and removes staging");
 
         var requestB = requestA with { RunRoot = runB, FinalPath = finalB };
         var receiptB = JvmJarNormalizer.Normalize(requestB);
@@ -1194,6 +1194,8 @@ static int RunJvmJarNormalizerChecks(PortabilityPackageDefinition baseDefinition
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), exactDuplicate), "DuplicateEntry"), "exact duplicate input is rejected");
         var unsafePath = expected.Concat([expected[0] with { Path = "../escape.class" }]).ToArray();
         Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), unsafePath), "UnsafePath"), "traversal input path is rejected");
+        var invalidRole = expected.Select((entry, index) => index == 0 ? entry with { Role = "untrusted" } : entry).ToArray();
+        Assert(RejectsTargetBuild(() => JvmJarNormalizer.ValidateJar(File.ReadAllBytes(finalA), invalidRole), "RoleInvalid"), "unapproved input role is rejected");
         return checks;
     }
     finally
