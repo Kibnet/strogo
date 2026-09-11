@@ -1871,3 +1871,14 @@
 - Evidence: independent probe output `strogo-real-normalized-cb1fdacc59dd4147b08982f25956cdf0`, current `JvmJarNormalizer.ValidateJar`, mutation result.
 - Последствие: старый non-canonical archive не используется как admission artifact; canonical repackaging показывает, что тот же сохранённый corpus совместим с E06B archive contract при явно отделённых границах доказательства.
 - Supersedes / supersededBy: уточняет K-E06-088; owner review/delivery и следующие E06A/runtime gates остаются впереди.
+
+## K-E06-090
+
+- Дата / фаза: 2026-09-11 / E06B independent provenance check.
+- Тип / статус: Independent artifact verification / Confirmed.
+- Утверждение: на публичном `b51b935` независимая проверка повторно получила canonical JAR digest `d9bc7b393d63cc6b1bdef1ee91f96512b390ae32c28e27c53457b18ed512e989` для 125 сохранённых class-файлов; `ValidateJar` прошёл, local-name mutation отвергнута `LocalCentralNameMismatch`.
+- Provenance check: содержимое `input-inventory.json` совпало с `receipt.inputInventory` (125 записей), `final-inventory.json` совпало с `receipt.inventory` (126 записей), staging отсутствовал после завершения.
+- Scope: это подтверждение packaging determinism и provenance consistency на сохранённом corpus; оно не доказывает recompilation, Java execution, cross-platform behaviour или admission approval.
+- Evidence: independent output `strogo-real-normalized-08d9cc6c4b5a41c596a920dbaa00c025`, public commit `b51b935`.
+- Последствие: отдельные inventory artifacts проверены по содержимому и согласованы с receipt, а не только по факту существования.
+- Supersedes / supersededBy: уточняет K-E06-089; runtime и cross-platform gates остаются открыты.
