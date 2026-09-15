@@ -28,7 +28,7 @@ Outcome contract:
 - Host повторно проверяет state/program/policy/manifest/admission перед записью.
 - Язык v0 описывает pure typed DAG; `effects` пусты, а единственная запись выполняется host после проверки результата.
 - Existing conformance уже покрывает stale snapshots, CAS race, program/policy/manifest drift и rollback.
-- Внешний contributor #11295 предложил три различающих задачи; формат обмена #12482 принят как fixture format, не parser schema.
+- Внешний contributor #11295 предложил три различающих задачи; формат обмена впервые предложен в #12476 и принят как fixture format, не parser schema. #12482 содержит последующее mapping-уточнение.
 
 ## 3. Проблема
 
@@ -99,7 +99,7 @@ The current v0 schema has only pure DAG operations and `effects=[]`. The first f
 
 #### Comparison rule
 
-The same fixture bytes, fault schedule and expected state are supplied to all paths. A guarantee is attributed to the language only when the independent direct baseline and second host cannot reproduce it without the language restriction, and the enforcement matrix points to a language/runtime rule. A second host alone is insufficient.
+The same fixture bytes, fault schedule and expected state are supplied to all paths. The report makes only observable claims: it records each path's outcome and enforcing component. Equal PASS means the guarantee was reproduced without the language path; a difference requires a concrete ablation/control and is reported as an observed divergence, not as proof that a general-purpose API cannot reproduce the guarantee. A second host alone is insufficient.
 
 ### 6.3 User-Observable Scenarios
 
@@ -121,7 +121,7 @@ The same fixture bytes, fault schedule and expected state are supplied to all pa
 | Second host technology | user | independent minimal C# host with no `Kernel.Host` reference | 0.70 | same-runtime confounder | Да |
 | Direct baseline boundary | agent | checked API with identical state/contract and fault schedule | 0.90 | baseline may duplicate host logic | Нет |
 | Effect seam | user | separate future SPEC | 0.95 | task C otherwise proves only absence of surface | Да |
-| Causal claim threshold | user | no language claim unless both baselines pass same schedule | 0.95 | slower experiment | Да |
+| Causal claim threshold | user | report observed outcomes and enforcement; use ablation for any stronger attribution | 0.95 | overclaiming impossibility from finite runs | Да |
 
 ## 7. Бизнес-правила / Алгоритмы
 
@@ -232,3 +232,4 @@ No code/test implementation is authorized until owner approval. Existing charact
 | SPEC | Прочитан внешний challenge #11295 и текущий Kernel v0 contract | 0.95 | Зафиксировать три fixture и causal boundary | Да |
 | SPEC | Опубликована clarification #12482, read-back seq `12482` | 0.95 | Получить owner decisions и approval | Да |
 | SPEC | Создан draft cross-host fixture SPEC | 0.90 | Ждать `Спеку подтверждаю` и ответы на открытые вопросы | Да |
+| SPEC | Исправлен causal-claim criterion по review: observable outcomes вместо доказательства невозможности API; источник fixture format уточнён на #12476 | 0.97 | Owner review и выбор second host остаются открыты | Да |

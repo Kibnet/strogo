@@ -1904,3 +1904,13 @@
 - Последствие: fixture JSON обязан содержать invariant controls и порядок мутации, иначе разные отказные ветки нельзя сравнивать причинно.
 - Scope: source review, без нового runtime запуска и без изменения production behavior.
 - Supersedes / supersededBy: уточняет K-E06-091; owner approval draft SPEC всё ещё требуется.
+
+## K-E06-093
+
+- Дата / фаза: 2026-09-15 / E07 SPEC review.
+- Тип / статус: Causal-claim correction / Confirmed and applied.
+- Утверждение: конечный набор прогонов не может доказать, что checked API принципиально не способен воспроизвести гарантию. E07 report обязан ограничиваться наблюдаемыми outcomes и enforcement components; одинаковый PASS означает воспроизведённую гарантию без language path, а различие требует конкретного ablation/control и не превращается в универсальный impossibility claim.
+- Source correction: формат fixture JSON предложен в public #12476; #12482 содержит последующее mapping-уточнение.
+- Evidence: review of `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` §2, §6.2 and §6.5; no runtime change.
+- Последствие: causal attribution становится проверяемой и evidence-bounded; draft SPEC остаётся owner-gated.
+- Supersedes / supersededBy: уточняет K-E06-091/K-E06-092; before EXEC требуется approval и выбор second host.
