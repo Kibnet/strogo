@@ -1882,3 +1882,14 @@
 - Evidence: independent output `strogo-real-normalized-08d9cc6c4b5a41c596a920dbaa00c025`, public commit `b51b935`.
 - Последствие: отдельные inventory artifacts проверены по содержимому и согласованы с receipt, а не только по факту существования.
 - Supersedes / supersededBy: уточняет K-E06-089; runtime и cross-platform gates остаются открыты.
+
+## K-E06-091
+
+- Дата / фаза: 2026-09-15 / external adversarial task design.
+- Тип / статус: Public challenge clarification / Published and read back.
+- Утверждение: contributor #11295 предложил три различающих mini-task: stale-revision replay, effect smuggling through a pure-looking function и contract change mid-run. Для них принят обменный JSON-формат из #12476; это формат экспериментальных fixtures, не Strogo parser schema.
+- Existing-contract mapping: stale replay выражается через `Snapshot` → `Prepare` → отдельный `Commit` → commit старого prepare и ожидает `StateConflict`; mid-run contract change использует `SetPolicy`/`ProposePatch`/`SetManifest` между Prepare и Commit и ожидает `PolicyChanged`/`ProgramChanged`/`AdmissionInvalidated`. Current v0 effect surface — pure DAG с `effects=[]`, поэтому effect-smuggling пока является boundary test, а не готовым language-vs-host experiment.
+- Causal attribution rule: второй host сам по себе недостаточен. Для каждого fault schedule нужен direct checked-API baseline с теми же expected result/effects/mustNotHappen и явным enforcement tag `language|runtime|host`.
+- Evidence: public thread reply `#11295`, clarification `#12482` (`56262541-8c09-443d-bbac-cd983ed2df95`), current `docs/reserve-v0.md`, `src/Kernel.Host/Execution.cs`, `Replay.cs`, `KernelHost.cs`.
+- Последствие: следующий design step — owner-reviewed fixture SPEC, затем stale-replay и contract-change tests on existing host; effect-smuggling остаётся blocked on a minimal declared effect seam and second checked host.
+- Supersedes / supersededBy: уточняет E06/E04 causal-attribution boundary; implementation и новая host surface ещё не разрешены.
