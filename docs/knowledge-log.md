@@ -1893,3 +1893,14 @@
 - Evidence: public thread reply `#11295`, clarification `#12482` (`56262541-8c09-443d-bbac-cd983ed2df95`), current `docs/reserve-v0.md`, `src/Kernel.Host/Execution.cs`, `Replay.cs`, `KernelHost.cs`.
 - Последствие: следующий design step — owner-reviewed fixture SPEC, затем stale-replay и contract-change tests on existing host; effect-smuggling остаётся blocked on a minimal declared effect seam and second checked host.
 - Supersedes / supersededBy: уточняет E06/E04 causal-attribution boundary; implementation и новая host surface ещё не разрешены.
+
+## K-E06-092
+
+- Дата / фаза: 2026-09-15 / E07 fixture source review.
+- Тип / статус: Branch-seam clarification / Confirmed by source inspection.
+- Утверждение: для exact `StateConflict` fixture e1/e2 должны иметь разные event IDs/digests, один resource, живой e1 prepare в том же host epoch, неизменные policy/program/manifest и сохраняющуюся authorization. `ExistingEvent` проверяется раньше trust pointers/state revision, поэтому повтор committed event является `AlreadyCommitted`, а удалённый token — `PrepareExpired`.
+- Contract-drift control: при `PolicyChanged` mutation principal rights должны сохраняться; иначе `Authorize` сработает раньше `CheckTrustPointers` и тест докажет только `AccessDenied`.
+- Evidence: source mapping `src/Kernel.Host/Execution.cs:96-109`, `src/Kernel.Host/KernelHost.cs:302`, draft SPEC §6.2 Task A/B.
+- Последствие: fixture JSON обязан содержать invariant controls и порядок мутации, иначе разные отказные ветки нельзя сравнивать причинно.
+- Scope: source review, без нового runtime запуска и без изменения production behavior.
+- Supersedes / supersededBy: уточняет K-E06-091; owner approval draft SPEC всё ещё требуется.

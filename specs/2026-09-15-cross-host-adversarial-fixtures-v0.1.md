@@ -79,16 +79,16 @@ Outcome contract:
 #### Task A — stale-revision replay
 
 1. Capture state revision `R0`.
-2. Prepare `e1` against `R0`.
-3. Commit independent `e2` from the same initial snapshot, or use the smallest concurrent schedule that advances state.
+2. Prepare `e1` against `R0`; keep its token alive in the same host epoch.
+3. Commit independent `e2` from the same resource and initial snapshot. `e1` and `e2` must have different event IDs/digests; policy, program, manifest and principal authorization remain unchanged.
 4. Commit the old `e1` plan.
 
-Expected: `StateConflict`; no new receipt, transition or state write for `e1`; replay of the durable `e2` receipt remains valid. Current expected enforcement is host commit re-check plus durable replay, not language-only.
+Expected: `StateConflict`; no new receipt, transition or state write for `e1`; replay of the durable `e2` receipt remains valid. ExistingEvent is intentionally not exercised: repeating a committed event must be a separate `AlreadyCommitted` control, and a removed token is `PrepareExpired`. Current expected enforcement is host commit re-check plus durable replay, not language-only.
 
 #### Task B — contract change during a prepared run
 
 1. Prepare `e1` under program/policy/manifest pointers `P0`.
-2. Before effect commit, change exactly one pointer: `ProposePatch`, `SetPolicy` or `SetManifest`.
+2. Before effect commit, change exactly one pointer: `ProposePatch`, `SetPolicy` or `SetManifest`; preserve the principal's current rights so authorization does not mask the drift branch.
 3. Commit the old prepare.
 
 Expected: `ProgramChanged`, `PolicyChanged` or `AdmissionInvalidated`; no state/effect/receipt write for `e1`. The fixture must record whether the mutation occurs before commit checks, during the commit barrier, or after the linearization point.
