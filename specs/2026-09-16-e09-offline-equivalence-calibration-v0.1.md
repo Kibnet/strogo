@@ -65,7 +65,7 @@ Outcome contract:
 
 ### 6.2 Детальный дизайн
 
-Каждый case имеет stable `caseId`, `pairId`, `protocolRevision`, `arm`, input digest, source digest, expected outcome class и trusted expected graph вне export package. Positive notation input компилируется только через `NotationCompiler`; graph input проходит только `ProgramCodec`. Оба результата затем проходят общий `GraphValidator`, `Lowerer`, evaluator и business oracle.
+Каждый case имеет stable `caseId`, `pairId`, `protocolRevision`, `arm`, input digest, source digest, expected outcome class и trusted expected graph вне export package. Corpus разделён на два слоя: `equivalence-vector` содержит canonical graph и notation source для внутренней проверки lowering; `job-starter` содержит только публичное задание и arm-specific incomplete/defective candidate для export/evaluate. Canonical expected source никогда не экспортируется как starter, а integrity test обязан доказать, что starter bytes и expected graph bytes не совпадают и что expected digest не входит в public manifest. Positive notation input компилируется только через `NotationCompiler`; graph input проходит только `ProgramCodec`. Оба результата затем проходят общий `GraphValidator`, `Lowerer`, evaluator и business oracle.
 
 Минимальный corpus — 12 случаев, включающий baseline, accepted/rejected Reserve branches, I64 boundary values, checked overflow in selected/unselected branch, bool `Select`, `bool.not`, strict `and/or`, malformed graph, typed notation refusal и deterministic declaration-order pair. Cases должны различать success, correct refusal и infrastructure failure; один случай не получает скрытый repair answer.
 
@@ -151,7 +151,7 @@ Additive projects and fixtures only. Existing commands remain unchanged. A run n
 - AC2: cases cover all E08 opcodes, I64 boundaries, strict branches, selected/unselected overflow and declaration-order determinism.
 - AC3: at least 20 negative cases classify malformed transport, graph/type errors, notation refusals, unsupported effects and evaluator mismatch without execution.
 - AC4: calibration and report are deterministic; repeated run bytes and report digests are equal; mismatch aborts rather than averages.
-- AC5: export allowlist test proves expected graph/oracle/repository paths are absent and every file digest is bound.
+- AC5: export allowlist test proves expected graph/oracle/repository paths are absent, every file digest is bound, and no exported `job-starter` is byte-equal to its trusted expected graph.
 - AC6: scripted provenance is explicit and no report field can claim LLM quality, cost, G05, portability or backend success.
 - AC7: locked restore/build, E08, E07 and full Core/Host regressions remain green; no Core/Host semantic diff is introduced.
 
@@ -193,7 +193,7 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | «Это снова не измеряет агента» | live model intentionally excluded | call it calibration, not benchmark; live pilot separate | mitigated |
 | «Одинаковый Core заранее делает arms равными» | E09 tests representation/evaluator integrity | declare equality as precondition for future paired pilot, not language advantage | accepted-risk |
 | «12 Reserve cases слишком мало» | narrow domain | use fixed calibration gate; do not generalize and require new corpus for live | accepted-risk |
-| «Почему expected graph скрыт?» | export must not leak oracle | keep trusted evaluator outside bundle and test allowlist | mitigated |
+| «Почему expected graph скрыт?» | export must not leak oracle or make the graph arm trivial | separate internal equivalence vectors from non-solution job starters and test byte inequality | mitigated |
 
 ### Rework Prevention Checklist
 
@@ -314,3 +314,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | SPEC | Запрошен внешний counterexample к paired corpus, export boundary и refusal scoring | 0.91 | Ответы board могут уточнить risk, но не заменяют owner approval | Учесть только рациональные, проверяемые предложения | Нет | Не требовалось | public reply `#12809`, id `1b131103-e945-48a4-837b-478d8b0a8b09`, read-back verified |
 | SPEC | Зафиксирован точный evaluator order, independent oracle seam и manifest identity | 0.94 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2.1 |
 | SPEC | Опубликовано evaluator уточнение и выполнен read-back | 0.94 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12811`, id `5480eead-bcb6-4615-946a-4cb0c5913817`, read-back verified |
+| SPEC | Разделены trusted equivalence vectors и exportable non-solution starters | 0.96 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2, AC5 |
