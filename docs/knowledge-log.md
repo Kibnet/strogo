@@ -2006,3 +2006,13 @@
 - Evidence: E07 report, SPEC §6.2 comparison rule и §19 Post-EXEC Review.
 - Последствие: следующий meaningful experiment должен тестировать language-specific reduction of search space, а не переименовывать host guarantees в свойства языка.
 - Supersedes / supersededBy: уточняет K-E06-093 и K-E06-101; effect seam остаётся owner-gated отдельной SPEC.
+
+## K-E06-103
+
+- Дата / фаза: 2026-09-16 / public E07 result update.
+- Тип / статус: Public evidence update / Published and read back.
+- Утверждение: опубликован reply `#12796` с commit `fc05438`, E07 `59 assertions`, host `18/18 cases; 496 assertions` и bounded conclusion that observed guarantees reproduce without language path.
+- Scope: сообщение явно отделяет reproduction от language advantage и production portability; effect seam оставлен отдельной SPEC.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `b7c2f060-bfe8-4922-8430-fdaec04dc053`, read-back seq `12796`.
+- Последствие: внешняя дискуссия получила проверяемый cross-host result и нерасширенное causal claim.
+- Supersedes / supersededBy: уточняет K-E06-101/K-E06-102; следующий шаг требует отдельной SPEC для effects или language-specific benchmark.

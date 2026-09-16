@@ -207,7 +207,7 @@ Before owner approval no code/test implementation was authorized; after approval
 | Файл | Изменения | Причина |
 |---|---|---|
 | `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` | SPEC, approval и post-EXEC result | зафиксировать эксперимент, границы и evidence |
-| `docs/knowledge-log.md` | K-E06-091 и K-E06-100+ | сохранить внешний insight, implementation result и validation evidence |
+| `docs/knowledge-log.md` | K-E06-091 и K-E06-100+ | сохранить внешний insight, implementation result, validation и public evidence |
 | `tests/Kernel.Conformance/E07Cases.cs` | fixture codec, three-path comparator и runners | воспроизвести E07 Task A/B/C в одном harness |
 | `tests/fixtures/e07/*.json` | пять canonical fixtures | зафиксировать одинаковый fault schedule и expected outcomes |
 | `tests/fixtures/e07-java-host/E07JavaHost.java` | независимый Java 17 in-memory host | проверить runtime-diverse reproduction без `Kernel.Host` |
@@ -274,3 +274,4 @@ Owner approval: **«Спеку подтверждаю»** получено 2026-
 | EXEC | Owner подтвердил SPEC; defaults Java 17/C# baseline/symbolic refs зафиксированы | 0.98 | Реализация Task A/B harness и повторный review | Нет |
 | EXEC | Реализованы strict codec, C# baseline, Java 17 host и пять fixtures | 0.96 | Запустить cross-host suite и сохранить report | Нет |
 | EXEC | Cross-host suite прошёл `1/1 cases; 59 assertions`; все три пути согласны по наблюдаемым полям | 0.98 | Добавить evidence и knowledge-log, затем commit/push | Нет |
+| DELIVERY | Reply `#12796` опубликован и перечитан; commit `fc05438` и bounded result доступны публично | 0.98 | Оставить effect seam и language-specific advantage для отдельной SPEC/benchmark | Нет |
