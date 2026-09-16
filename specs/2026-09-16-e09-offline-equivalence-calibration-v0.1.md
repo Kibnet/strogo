@@ -315,3 +315,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | SPEC | Зафиксирован точный evaluator order, independent oracle seam и manifest identity | 0.94 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2.1 |
 | SPEC | Опубликовано evaluator уточнение и выполнен read-back | 0.94 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12811`, id `5480eead-bcb6-4615-946a-4cb0c5913817`, read-back verified |
 | SPEC | Разделены trusted equivalence vectors и exportable non-solution starters | 0.96 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2, AC5 |
+| SPEC | Публично сообщён graph-arm leakage risk и выполнен read-back | 0.96 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12812`, id `2e162a84-0496-4eb8-a4a6-fe2b6ef49287`, read-back verified |
