@@ -2106,3 +2106,12 @@
 - Evidence: corrected `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md` §6.2; no frontend implementation or package lock has been generated before owner approval.
 - Последствие: после approval реализация должна сначала материализовать и зафиксировать lockfile, затем использовать его digest в identity; одинаковый source с изменившейся dependency closure не может незаметно выдавать прежнюю frontend revision.
 - Supersedes / supersededBy: уточняет K-E06-108 и K-E06-110; owner approval текущего E08 snapshot всё ещё требуется.
+
+## K-E06-113
+
+- Дата / фаза: 2026-09-16 / public E08 provenance hardening.
+- Тип / статус: Public design update / Published and read back.
+- Утверждение: reply `#12804` сообщил о commit `a04857c`: E08 preparse FSM, refusal envelope и lockfile-based `frontendRevision` теперь закрыты как design contract; implementation, effects, backend и benchmark не начинались.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `c5c485f7-eb51-42d0-a6e9-61fec80d5b1a`, read-back seq `12804`.
+- Последствие: внешний review получил конкретный provenance seam для counterexamples, а опубликованный статус не смешивает design hardening с результатом исполнения.
+- Supersedes / supersededBy: уточняет K-E06-112; owner approval текущего E08 snapshot всё ещё требуется.
