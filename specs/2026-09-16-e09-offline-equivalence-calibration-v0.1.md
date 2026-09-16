@@ -324,7 +324,8 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 - Regressions: locked restore/build, E08, E07 and full Core/Host/CLI conformance are required and recorded in the action journal below.
 - Findings: no blocking implementation finding. Residual risks are the fixed Reserve-only corpus, deliberately invalid job starters and the fact that both arms share Kernel.Core; none establishes G05, portability, machine-code performance or live LLM quality.
 - Stop decision: E09 is complete as offline calibration. Any live model/provider, additional domain, backend or effects work requires a new SPEC and exact approval.
-- Adversarial follow-up: the negative suite was reworked after review so every one of its 20 results exercises a production boundary; report acceptance is gated on all twenty `ValidRefusal` outcomes.
+- Adversarial follow-up: the negative suite was reworked after review so every executed result exercises a production boundary; report acceptance is gated on all `ValidRefusal` outcomes (21 probes in the final corpus).
+- Manifest identity follow-up: trusted export identity is now recomputed for the case/arm and compared field-by-field; the negative suite has 21 probes, including six independent tool/source identity mutations.
 
 ## Approval
 
@@ -348,3 +349,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | REVIEW | Проверены refusal-before-graph, starter inequality/digest boundary и отсутствие live/model claims | 0.94 | Новых scope decisions нет | Закрыть E09 checkpoint; live pilot вынести в отдельную SPEC | Нет | Подтверждено: «Спеку подтверждаю» | Post-EXEC Review, KB K-E06-116/K-E06-117 |
 | REVIEW | Повторная adversarial проверка отклонила synthetic manifest probes; добавлены ManifestCodec, arm-specific checks и report gate по каждому negative result | 0.97 | Новых scope decisions нет | Зафиксировать rerun evidence и push | Нет | Подтверждено: «Спеку подтверждаю» | KB K-E06-118, report `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098` |
 | REVIEW | Исправлены false-positive fixtures `CycleDetected` и `DeepDelimiter`; probes требуют точный отказ boundary | 0.98 | Новых scope decisions нет | Зафиксировать final rerun и push | Нет | Подтверждено: «Спеку подтверждаю» | KB K-E06-119, final E09 report |
+| REVIEW | Добавлена trusted identity binding для manifest и шесть независимых identity mutations | 0.99 | Новых scope decisions нет | Зафиксировать final rerun и push | Нет | Подтверждено: «Спеку подтверждаю» | KB K-E06-120, report `1951615e2cc85180f5dee1f5e69f7da2f622e6351637ed57e7479dbcf4576a5a` |

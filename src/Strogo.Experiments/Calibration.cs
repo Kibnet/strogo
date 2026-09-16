@@ -147,7 +147,7 @@ public static class CalibrationEvaluator
     public static CalibrationReport Run()
     {
         var pairs = CalibrationCorpus.Create().Select(EvaluatePair).ToImmutableArray();
-        var negative = ImmutableArray.Create("SchemaInvalid", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "RefusalCodeMismatch", "InvalidCandidate", "UnknownArm", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "CompleteSolutionStarter");
+        var negative = ImmutableArray.Create("SchemaInvalid", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "RefusalCodeMismatch", "InvalidCandidate", "UnknownArm", "EvaluatorMismatch", "ManifestDigestMismatch", "ManifestIdentityMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "CompleteSolutionStarter");
         var negativeResults = RunNegativeProbes(negative, CalibrationCorpus.Create());
         string status = pairs.All(p => p.Equivalent) && negativeResults.All(x => x.EndsWith(":ValidRefusal", StringComparison.Ordinal)) ? "Accepted" : "Refused";
         var skeleton = new { protocol = CalibrationIdentity.Protocol, corpus = CalibrationIdentity.Corpus, evaluator = CalibrationIdentity.Evaluator, status, positiveCases = pairs.Length, negativeCases = negative.Length, pairs, negativeCategories = negative, negativeResults };
@@ -180,12 +180,20 @@ public static class CalibrationEvaluator
         Probe(names[14], () => CalibrationEvaluator.Evaluate(mutant, "graph-json").Stages.Any(s => s.Code == "EvaluatorMismatch"));
         byte[] manifestBytes = CanonicalJson.Encode(starter.Manifest);
         Probe(names[15], () => { var parsed = ManifestCodec.ParseStrict(manifestBytes); return !Exporter.ValidateStarter(starter with { Manifest = parsed with { CandidateDigest = "bad" } }, c, out var code) && code == "ArtifactMismatch"; });
-        Probe(names[16], () => { try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes("{\"protocol\":\"" + CalibrationIdentity.Protocol + "\"}")); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
-        Probe(names[17], () => { string extra = Encoding.UTF8.GetString(manifestBytes).TrimEnd('}') + ",\"extra\":true}"; try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes(extra)); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
+        Probe(names[16], () =>
+        {
+            var parsed = ManifestCodec.ParseStrict(manifestBytes);
+            Func<ExportManifest, ExportManifest>[] mutations =
+            [m => m with { SourceDigest = "tampered" }, m => m with { FrontendRevision = "tampered" }, m => m with { CoreSchema = "tampered" },
+             m => m with { HostRevision = "tampered" }, m => m with { SolverDigest = "tampered" }, m => m with { OracleRevision = "tampered" }];
+            return mutations.All(mutation => !Exporter.ValidateStarter(starter with { Manifest = mutation(parsed) }, c, out var code) && code == "ArtifactMismatch");
+        });
+        Probe(names[17], () => { try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes("{\"protocol\":\"" + CalibrationIdentity.Protocol + "\"}")); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
+        Probe(names[18], () => { string extra = Encoding.UTF8.GetString(manifestBytes).TrimEnd('}') + ",\"extra\":true}"; try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes(extra)); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
         var collision = starter with { CandidateBytes = ProgramCodec.CanonicalBytes(c.Program), Manifest = starter.Manifest with { CandidateDigest = CanonicalJson.RawDigest(ProgramCodec.CanonicalBytes(c.Program)) } };
-        Probe(names[18], () => !Exporter.ValidateStarter(collision, c, out var code) && code == "ExpectedGraphLeak");
+        Probe(names[19], () => !Exporter.ValidateStarter(collision, c, out var code) && code == "ExpectedGraphLeak");
         var full = new ExportBundle(starter.Manifest with { Arm = "strogo-notation", CandidateDigest = CanonicalJson.RawDigest(Encoding.UTF8.GetBytes(c.NotationSource)) }, Encoding.UTF8.GetBytes(c.NotationSource));
-        Probe(names[19], () => !Exporter.ValidateStarter(full, c, out var code) && code == "StarterAccepted");
+        Probe(names[20], () => !Exporter.ValidateStarter(full, c, out var code) && code == "StarterAccepted");
         return results.ToImmutable();
     }
     private static bool RejectProgram(KernelProgram program) => RejectCode(program) is not null;
@@ -208,6 +216,8 @@ public static class Exporter
     {
         code = "";
         if (bundle.Manifest.Protocol != CalibrationIdentity.Protocol || bundle.Manifest.CaseId != trusted.Id || bundle.Manifest.Arm is not ("graph-json" or "strogo-notation")) { code = "ManifestMismatch"; return false; }
+        var trustedManifest = Export(trusted, bundle.Manifest.Arm).Manifest;
+        if (bundle.Manifest with { CandidateDigest = "" } != trustedManifest with { CandidateDigest = "" }) { code = "ArtifactMismatch"; return false; }
         if (bundle.Manifest.CandidateDigest != CanonicalJson.RawDigest(bundle.CandidateBytes)) { code = "ArtifactMismatch"; return false; }
         if (bundle.CandidateBytes.AsSpan().SequenceEqual(ProgramCodec.CanonicalBytes(trusted.Program))) { code = "ExpectedGraphLeak"; return false; }
         try

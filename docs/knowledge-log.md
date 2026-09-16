@@ -2171,3 +2171,11 @@
 - Утверждение: `SchemaInvalid` использует корректный JSON с отсутствующей схемой и проверяет точный parser code; `CycleDetected` получает type-correct self-cycle; `DeepDelimiter` использует 33 nested delimiters и проверяет точный `DelimiterDepthExceeded`; любой другой refusal code больше не считается успехом probe.
 - Evidence: финальный E09 run — `Accepted`, 12 positive pairs, 20/20 `ValidRefusal`, report digest `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098`.
 - Последствие: категории negative report теперь соответствуют достигнутой стадии boundary, а не просто факту любого отказа.
+
+## K-E06-120
+
+- Дата / фаза: 2026-09-16 / E09 manifest identity hardening.
+- Тип / статус: Trusted identity binding / Fixed and rerun.
+- Утверждение: `Exporter.ValidateStarter` теперь сверяет candidate manifest с доверенно построенным identity для case/arm; независимые mutations `SourceDigest`, `FrontendRevision`, `CoreSchema`, `HostRevision`, `SolverDigest` и `OracleRevision` получают `ArtifactMismatch`.
+- Evidence: финальный E09 report — `Accepted`, 12 positive pairs, 21/21 `ValidRefusal`, 20437 bytes, digest `1951615e2cc85180f5dee1f5e69f7da2f622e6351637ed57e7479dbcf4576a5a`.
+- Ограничение: это усиливает export/provenance boundary offline harness; не является portability или G05 evidence.
