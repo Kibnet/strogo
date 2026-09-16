@@ -2046,3 +2046,13 @@
 - Evidence: corrected `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md` §6.2, `tests/Kernel.Conformance/Fixtures.cs`, `src/Kernel.Core/Codec.cs`.
 - Последствие: AC1 exact graph revision стал проверяемым до реализации; это также подтверждает, что canonical identity должна быть частью frontend contract, а не побочным эффектом parser implementation.
 - Supersedes / supersededBy: уточняет K-E06-104/K-E06-105; owner approval всё ещё требуется для текущего SPEC snapshot.
+
+## K-E06-107
+
+- Дата / фаза: 2026-09-16 / public E08 correction.
+- Тип / статус: Public design correction / Published and read back.
+- Утверждение: reply `#12800` сообщил о фиксации canonical identity mismatch в commit `58c819e`; актуальная E08 notation теперь задаёт явные input bindings и reserved canonical names.
+- Scope: это уточнение SPEC до approval; реализация frontend, effects, host semantics и benchmark не начинались.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `5eeabd0c-3882-4c1e-9898-0d1ad2c6711e`, read-back seq `12800`.
+- Последствие: публичная версия design discussion больше не содержит прежнего identity ambiguity.
+- Supersedes / supersededBy: уточняет K-E06-106; owner approval текущего SPEC snapshot всё ещё требуется.
