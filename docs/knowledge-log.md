@@ -2056,3 +2056,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `5eeabd0c-3882-4c1e-9898-0d1ad2c6711e`, read-back seq `12800`.
 - Последствие: публичная версия design discussion больше не содержит прежнего identity ambiguity.
 - Supersedes / supersededBy: уточняет K-E06-106; owner approval текущего SPEC snapshot всё ещё требуется.
+
+## K-E06-108
+
+- Дата / фаза: 2026-09-16 / E08 pre-approval contract hardening.
+- Тип / статус: Encoding and identity contract / Fixed in SPEC.
+- Утверждение: frontend identity нельзя надёжно определить из уже декодированной `string`: E08 entry point должен принимать raw UTF-8 bytes, строго декодировать их, считать digest исходных bytes и отдельно отвергать BOM/invalid encoding.
+- Исправление: E08 закрепляет `NotationCompiler.Compile(ReadOnlySpan<byte>)`, `Microsoft.CodeAnalysis.CSharp` 4.14.0 и формулу `frontendRevision` из canonical descriptor без absolute paths/PIDs.
+- Evidence: corrected E08 SPEC §6.2/§8, existing `CanonicalJson.RawDigest`, current `global.json`/lockfile policy.
+- Последствие: source identity, invalid encoding and toolchain identity становятся проверяемой частью frontend contract до owner approval.
+- Supersedes / supersededBy: уточняет K-E06-104/K-E06-106; реализация и approval всё ещё отсутствуют.

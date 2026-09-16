@@ -69,7 +69,9 @@ Outcome contract:
 
 #### Source envelope
 
-The input is exactly one UTF-8 source block:
+The public entry point is `NotationCompiler.Compile(ReadOnlySpan<byte> sourceUtf8)`. It hashes the original bytes, decodes with strict UTF-8 (`throwOnInvalidBytes: true`) and then scans exactly one source block. This keeps invalid encoding and BOM handling observable instead of silently normalizing a `string`.
+
+The source block is:
 
 ```csharp
 {
@@ -106,7 +108,7 @@ The only declarations are single-assignment locals with explicit `long` or `bool
 
 Only previously declared locals may be operands. The bindings `available` and `quantity` are accepted only with their exact input member expressions, and `zero` only with the exact `0L` literal. Other local IDs are `n.` plus the source identifier; generated literal IDs use a deterministic reserved prefix. No duplicate declaration, reassignment, shadowing, implicit conversion, nested expression, alternate spelling, short-circuit operator or statement is accepted. Canonical node ordering is delegated to `ProgramCodec`/`GraphValidator`; source declaration order cannot change revision when the resulting graph is identical.
 
-The parser may use pinned `Microsoft.CodeAnalysis.CSharp` as a syntax tokenizer/parser, but it must inspect syntax-as-data and allowlist every node. It must not use Roslyn semantic compilation or execute source. The exact package version and lockfile are part of frontend identity.
+The parser may use `Microsoft.CodeAnalysis.CSharp` **4.14.0** as a syntax tokenizer/parser, but it must inspect syntax-as-data and allowlist every node. It must not use Roslyn semantic compilation or execute source. The exact package version and lockfile are part of frontend identity.
 
 #### Identity and errors
 
@@ -121,6 +123,8 @@ Frontend output contains:
   "status": "Accepted"
 }
 ```
+
+`sourceDigest` is lowercase SHA-256 of the original UTF-8 bytes. `programRevision` is the existing `ProgramCodec.Revision`. `frontendRevision` is lowercase SHA-256 of the canonical UTF-8 JSON descriptor `{schemaVersion, grammarRevision:"e08.1", parserPackage:"Microsoft.CodeAnalysis.CSharp/4.14.0", coreSchema:"kernel.v0", coreSemantics:"kernel.v0"}` with ordinal keys and no whitespace. It is independent of absolute paths and process IDs.
 
 Refusals use a closed code set: `SourceEncodingInvalid`, `SourceTooLarge`, `TokenLimitExceeded`, `DelimiterDepthExceeded`, `UnaryChainExceeded`, `SyntaxInvalid`, `UnsupportedSyntax`, `GrammarInvalid`, `TypeMismatch`, `DuplicateLocal`, `ForwardReference`, `OutputInvalid`, `GraphInvalid`. The first diagnostic is selected by a fixed phase order: source limits → syntax → grammar → binding/types → graph validation. Diagnostics contain a stable locus and do not include absolute paths.
 
@@ -151,7 +155,7 @@ The report records source digest, frontend identity, expected graph revision, ac
 | Decision | Owner | Default / chosen option | Confidence | Risk if assumed | Needs user before EXEC |
 | --- | --- | --- | ---: | --- | --- |
 | Surface syntax | agent | Closed C#-like block from §6.2, syntax-as-data only | 0.90 | another notation may be better for LLMs | Да |
-| Parser implementation | agent | Pinned Roslyn syntax parser, no semantic compilation | 0.86 | package/toolchain adds dependency | Да |
+| Parser implementation | agent | `Microsoft.CodeAnalysis.CSharp` 4.14.0 syntax parser, no semantic compilation | 0.86 | package/toolchain adds dependency | Да |
 | Semantic target | user/agent | Existing Reserve v0 graph and `ProgramCodec` revision | 0.99 | frontend could accidentally fork semantics | Нет |
 | Effects/capabilities | user | Out of scope; `effects=[]` and host-owned rights remain | 0.99 | no direct effect experiment yet | Нет |
 | Benchmark | user | Out of scope; only offline compiler correctness | 0.99 | no G05 claim from frontend | Нет |
@@ -175,7 +179,7 @@ The report records source digest, frontend identity, expected graph revision, ac
 
 ## 8. Точки интеграции и триггеры
 
-- `NotationCompiler.Compile(source)` is the only public frontend entry point.
+- `NotationCompiler.Compile(ReadOnlySpan<byte> sourceUtf8)` is the only public frontend entry point; no path-based or implicit-encoding overload is part of E08.
 - Tests call the frontend, then `ProgramCodec.CanonicalBytes`, `GraphValidator.Validate` and existing `Verifier` where the fixture requires it.
 - `Kernel.Host` is used only by characterization tests; frontend unit tests do not write SQLite or invoke commit/replay.
 
