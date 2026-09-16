@@ -2086,3 +2086,13 @@
 - Evidence: corrected E08 SPEC §6.2, `GraphValidator.Opcodes` and `ProgramCodec` literal fields.
 - Последствие: positive corpus и exact revision checks могут однозначно покрыть весь заявленный opcode surface без скрытых naming choices.
 - Supersedes / supersededBy: уточняет K-E06-108/K-E06-109; owner approval всё ещё требуется.
+
+## K-E06-111
+
+- Дата / фаза: 2026-09-16 / public E08 grammar closure.
+- Тип / статус: Public design correction / Published and read back.
+- Утверждение: reply `#12802` сообщил о закрытии literal identity и `bool.const`/typed `Select` surface в commit `0676f06`.
+- Scope: design-only; code, effects, backend and benchmark не запускались.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `2961b653-5755-4320-891e-e5aa9159f7a3`, read-back seq `12802`.
+- Последствие: public review видит полный canonical lowering rule, необходимый для exact graph revision.
+- Supersedes / supersededBy: уточняет K-E06-110; owner approval текущего E08 snapshot всё ещё требуется.
