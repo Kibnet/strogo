@@ -2096,3 +2096,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `2961b653-5755-4320-891e-e5aa9159f7a3`, read-back seq `12802`.
 - Последствие: public review видит полный canonical lowering rule, необходимый для exact graph revision.
 - Supersedes / supersededBy: уточняет K-E06-110; owner approval текущего E08 snapshot всё ещё требуется.
+
+## K-E06-112
+
+- Дата / фаза: 2026-09-16 / E08 provenance readiness audit.
+- Тип / статус: Frontend provenance and refusal envelope / Fixed in SPEC.
+- Утверждение: фиксация версии parser package сама по себе не фиксирует транзитивные зависимости и не делает frontend identity воспроизводимой.
+- Исправление: E08 закрепляет конечный preparse scanner как FSM, refusal envelope с `status`, `errorCode` и стабильным `locus`, а `frontendRevision` включает lowercase SHA-256 bytes committed `packages.lock.json` через `dependencyLockDigest`.
+- Evidence: corrected `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md` §6.2; no frontend implementation or package lock has been generated before owner approval.
+- Последствие: после approval реализация должна сначала материализовать и зафиксировать lockfile, затем использовать его digest в identity; одинаковый source с изменившейся dependency closure не может незаметно выдавать прежнюю frontend revision.
+- Supersedes / supersededBy: уточняет K-E06-108 и K-E06-110; owner approval текущего E08 snapshot всё ещё требуется.

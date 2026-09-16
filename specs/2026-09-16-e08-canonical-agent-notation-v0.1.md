@@ -85,7 +85,7 @@ The source block is:
 }
 ```
 
-The scanner runs before syntax parsing and accepts only printable ASCII plus TAB/CR/LF. It rejects BOM, comments, directives, strings, interpolations, Unicode identifiers and trailing tokens. Limits are fixed: source ≤65536 UTF-8 bytes, ≤4096 tokens, delimiter nesting ≤32, ≤128 declarations, ≤32 statements between semicolons, and no unary chain longer than one operator.
+The scanner runs before syntax parsing and accepts only printable ASCII plus TAB/CR/LF. It is a finite state machine over the decoded source: whitespace is skipped; identifiers, decimal literals, punctuation and operators are counted as one token each; comments, directives, strings and interpolations are rejected at their first byte. It rejects BOM, Unicode identifiers and trailing tokens. Limits are fixed: source ≤65536 UTF-8 bytes, ≤4096 tokens, delimiter nesting ≤32, ≤128 declarations, ≤32 statements between semicolons, and no unary chain longer than one operator.
 
 #### Closed grammar and canonical lowering
 
@@ -113,7 +113,7 @@ The parser may use `Microsoft.CodeAnalysis.CSharp` **4.14.0** as a syntax tokeni
 
 #### Identity and errors
 
-Frontend output contains:
+For an accepted source, frontend output contains exactly:
 
 ```json
 {
@@ -125,7 +125,7 @@ Frontend output contains:
 }
 ```
 
-`sourceDigest` is lowercase SHA-256 of the original UTF-8 bytes. `programRevision` is the existing `ProgramCodec.Revision`. `frontendRevision` is lowercase SHA-256 of the canonical UTF-8 JSON descriptor `{schemaVersion, grammarRevision:"e08.1", parserPackage:"Microsoft.CodeAnalysis.CSharp/4.14.0", coreSchema:"kernel.v0", coreSemantics:"kernel.v0"}` with ordinal keys and no whitespace. It is independent of absolute paths and process IDs.
+For a refusal, the same envelope contains `status:"Refused"`, `errorCode` and stable `locus`; `programRevision` is absent and no graph is emitted. `sourceDigest` is lowercase SHA-256 of the original UTF-8 bytes. `programRevision` is the existing `ProgramCodec.Revision`. `frontendRevision` is lowercase SHA-256 of the canonical UTF-8 JSON descriptor `{schemaVersion, grammarRevision:"e08.1", parserPackage:"Microsoft.CodeAnalysis.CSharp/4.14.0", dependencyLockDigest:"<64 lowercase hex>", coreSchema:"kernel.v0", coreSemantics:"kernel.v0"}` with ordinal keys and no whitespace. `dependencyLockDigest` is the lowercase SHA-256 of the committed frontend `packages.lock.json` bytes. The revision is independent of absolute paths and process IDs.
 
 Refusals use a closed code set: `SourceEncodingInvalid`, `SourceTooLarge`, `TokenLimitExceeded`, `DelimiterDepthExceeded`, `UnaryChainExceeded`, `SyntaxInvalid`, `UnsupportedSyntax`, `GrammarInvalid`, `TypeMismatch`, `DuplicateLocal`, `ForwardReference`, `OutputInvalid`, `GraphInvalid`. The first diagnostic is selected by a fixed phase order: source limits → syntax → grammar → binding/types → graph validation. Diagnostics contain a stable locus and do not include absolute paths.
 
