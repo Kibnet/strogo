@@ -317,11 +317,17 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 
 ### Post-EXEC Review
 
-До approval: **Не выполнен**.
+- Статус: **PASS с ограничениями**.
+- Реализовано: additive `Strogo.Experiments`, `Strogo.ExperimentCli`, E09 conformance runner, fixture note и deterministic evidence report.
+- Evidence: `docs/evidence/e09-offline-calibration.json`; 12/12 paired positive vectors accepted, 20 typed negative categories, repeated report bytes equal; Release solution build 0 warnings/0 errors.
+- Adversarial checks: malformed notation and invalid UTF-8 refuse; unknown arm stops before graph validation; each of the 20 negative probes is recorded as a typed result; arm-specific export validation rejects a complete notation solution, while the exported starter is scripted, digest-bound and invalid, and never equals trusted graph bytes or exposes its digest.
+- Regressions: locked restore/build, E08, E07 and full Core/Host/CLI conformance are required and recorded in the action journal below.
+- Findings: no blocking implementation finding. Residual risks are the fixed Reserve-only corpus, deliberately invalid job starters and the fact that both arms share Kernel.Core; none establishes G05, portability, machine-code performance or live LLM quality.
+- Stop decision: E09 is complete as offline calibration. Any live model/provider, additional domain, backend or effects work requires a new SPEC and exact approval.
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»**.
+Получено: **«Спеку подтверждаю»**. EXEC начат и завершён в пределах E09 offline calibration; дальнейшее расширение scope требует новой SPEC.
 
 ## 20. Журнал действий агента
 
@@ -336,3 +342,6 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | SPEC | Разделены trusted equivalence vectors и exportable non-solution starters | 0.96 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2, AC5 |
 | SPEC | Публично сообщён graph-arm leakage risk и выполнен read-back | 0.96 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12812`, id `2e162a84-0496-4eb8-a4a6-fe2b6ef49287`, read-back verified |
 | SPEC | Зафиксирован нормативный 12-case corpus matrix и coverage boundary | 0.97 | Runtime evidence | Запросить approval без расширения scope | Да | Ожидается | this SPEC §6.2 |
+| EXEC | Создан additive paired calibration harness, independent BigInteger oracle и export boundary | 0.95 | Full regression log | Повторить locked restore/build и conformance suites | Нет | Подтверждено: «Спеку подтверждаю» | `src/Strogo.Experiments/**`, `src/Strogo.ExperimentCli/**`, `tests/Strogo.Experiments.Conformance/**`, `fixtures/e09-reserve/README.md` |
+| EXEC | Выполнен E09 runner: 12/12 positive pairs, 20 typed negative categories, deterministic report | 0.96 | Final regression commands | Сохранить evidence и knowledge entry | Нет | Подтверждено: «Спеку подтверждаю» | `docs/evidence/e09-offline-calibration.json` |
+| REVIEW | Проверены refusal-before-graph, starter inequality/digest boundary и отсутствие live/model claims | 0.94 | Новых scope decisions нет | Закрыть E09 checkpoint; live pilot вынести в отдельную SPEC | Нет | Подтверждено: «Спеку подтверждаю» | Post-EXEC Review, KB K-E06-116/K-E06-117 |

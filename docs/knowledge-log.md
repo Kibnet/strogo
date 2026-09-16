@@ -2135,3 +2135,21 @@
 - Ограничение: E08 доказывает только deterministic frontend-to-Core lowering для закрытой grammar; agent productivity, all-defect elimination, machine code, performance, portability and production runtime остаются не измерены.
 - Последствие: E08 можно считать завершённым checkpoint; следующие effects/backend/benchmark changes требуют отдельных SPEC и approval.
 - Supersedes / supersededBy: закрывает review state K-E06-114 и уточняет его environment boundary.
+
+## K-E06-116
+
+- Дата / фаза: 2026-09-16 / E09 EXEC.
+- Тип / статус: Offline paired calibration harness / Implemented.
+- Утверждение: E09 добавил два адаптера (`graph-json`, `strogo-notation`), общий фиксированный evaluator order, независимый BigInteger `ReserveOracle`, export boundary с scripted invalid `job-starter` и детерминированный report без live LLM.
+- Evidence: `src/Strogo.Experiments/Calibration.cs`, `src/Strogo.ExperimentCli/Program.cs`, `tests/Strogo.Experiments.Conformance/Program.cs`, `fixtures/e09-reserve/README.md`.
+- Ограничение: общий Core между arms делает этот checkpoint проверкой представления, evaluator и provenance; он не доказывает G05, качество агента, machine code, portability, производительность или отсутствие всех ошибок.
+- Последствие: следующий live/provider/backend/effects эксперимент должен иметь отдельную SPEC и approval; E09 остаётся воспроизводимым offline gate.
+
+## K-E06-117
+
+- Дата / фаза: 2026-09-16 / E09 post-EXEC review.
+- Тип / статус: Evidence and review / PASS with bounded residual risks.
+- Утверждение: 12/12 trusted positive pairs совпали по canonical program и IR revisions и дали одинаковые outcomes; negative corpus содержит 20 закрытых категорий; повторный отчёт byte-identical; malformed UTF-8, refusal-before-graph и starter digest checks прошли.
+- Evidence: `docs/evidence/e09-offline-calibration.json`; conformance output `E09 PASS: 12 positive pairs, 20 negative categories, 20446 report bytes`; twenty individual negative probe records and arm-specific starter validation passed; Release solution build 0 warnings/0 errors.
+- Ограничение: corpus остаётся Reserve-only, экспортный starter намеренно invalid, а E09 не измеряет live LLM productivity или межплатформенный backend.
+- Последствие: E09 checkpoint закрыт; новые claims о производительности, portability или live model comparison нельзя выводить из этого отчёта.
