@@ -2016,3 +2016,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `b7c2f060-bfe8-4922-8430-fdaec04dc053`, read-back seq `12796`.
 - Последствие: внешняя дискуссия получила проверяемый cross-host result и нерасширенное causal claim.
 - Supersedes / supersededBy: уточняет K-E06-101/K-E06-102; следующий шаг требует отдельной SPEC для effects или language-specific benchmark.
+
+## K-E06-104
+
+- Дата / фаза: 2026-09-16 / E08 next-checkpoint design.
+- Тип / статус: Agent-facing notation proposal / Owner-gated SPEC.
+- Утверждение: после E07 наиболее проверяемый следующий шаг — закрытая C#-подобная notation, которая lowering-ом получает тот же `Kernel.Core` typed DAG. Это проверяет уменьшение transport/syntax freedom, сохраняя host semantics и не выдавая frontend за LLM advantage.
+- Boundary: notation допускает только explicit typed locals, strict arithmetic/boolean operations, `Select` и exact Reserve outputs; C# execution, effects, capabilities, backend и live benchmark остаются за пределами.
+- Evidence: `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md`, `docs/project-intent.md`, E07 report and current `ProgramCodec`/`GraphValidator` source.
+- Последствие: сначала можно измерить deterministic source→DAG correctness и refusal surface; только после этого сравнивать notation с graph JSON или человекоориентированным языком.
+- Supersedes / supersededBy: развивает controlled-language historical SPEC без её неисполненных live/model claims; реализация запрещена до отдельного owner approval.
