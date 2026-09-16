@@ -1965,3 +1965,13 @@
 - Evidence: `global.json`, `java -version`, `javac -version`, existing `tests/fixtures/portability-consumers/java`.
 - Последствие: второй host получает другой runtime и независимую реализацию contract checks, сохраняя ограниченный объём; owner должен принять Java/isolation choice до EXEC.
 - Supersedes / supersededBy: уточняет K-E06-091/K-E06-097; implementation не начиналась.
+
+## K-E06-099
+
+- Дата / фаза: 2026-09-16 / public E07 second-host proposal.
+- Тип / статус: Public design update / Published and read back.
+- Утверждение: опубликован reply `#12782` с рекомендацией независимого Java 17 fixture-only in-memory host без ссылки на `Kernel.Host`; direct checked-API baseline остаётся отдельным C# path.
+- Scope: сообщение явно не заявляет production storage, JVM admission или portability; effect seam не добавляется.
+- Evidence: thread reply id `d5ea9ad1-8f01-4366-9492-0b954939116e`, read-back seq `12782`, SPEC commit `41cc75a`.
+- Последствие: публично предложен runtime-diverse comparison path с сохранённой owner/isolation gate.
+- Supersedes / supersededBy: уточняет K-E06-098; owner decision всё ещё требуется.
