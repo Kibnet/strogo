@@ -73,11 +73,12 @@ The input is exactly one UTF-8 source block:
 
 ```csharp
 {
-  long availableValue = available;
-  long quantityValue = quantity;
-  bool enough = quantityValue <= availableValue;
-  long debit = Select(enough, quantityValue, 0L);
-  long remaining = checked(availableValue - debit);
+  long available = input.resourceAvailable;
+  long quantity = input.requestedQuantity;
+  bool enough = quantity <= available;
+  long zero = 0L;
+  long debit = Select(enough, quantity, zero);
+  long remaining = checked(available - debit);
   return (accepted: enough, available: remaining, reserved: debit);
 }
 ```
@@ -86,13 +87,14 @@ The scanner runs before syntax parsing and accepts only printable ASCII plus TAB
 
 #### Closed grammar and canonical lowering
 
-The only declarations are single-assignment locals with explicit `long` or `bool` type. Identifiers match `[a-z][a-z0-9_]{0,47}` and cannot be keywords, `available`, `quantity` or output names.
+The only declarations are single-assignment locals with explicit `long` or `bool` type. Identifiers match `[a-z][a-z0-9_]{0,47}`. The names `input`, `return`, `checked`, `Select` and output labels are reserved. `available`, `quantity` and `zero` are canonical binding names with the special rules shown below.
 
 | Source form | Canonical graph operation |
 | --- | --- |
-| `long x = available;` | `input` field `state.available` |
-| `long x = quantity;` | `input` field `event.quantity` |
-| `long x = 0L;` or signed I64 literal | `i64.const` |
+| `long available = input.resourceAvailable;` | `input` field `state.available`, node ID `n.available` |
+| `long quantity = input.requestedQuantity;` | `input` field `event.quantity`, node ID `n.quantity` |
+| `long zero = 0L;` | `i64.const`, node ID `n.zero` |
+| `long x = <signed I64 literal>;` | canonical `i64.const` node derived from the literal |
 | `long x = checked(a + b);` | `i64.add_checked` |
 | `long x = checked(a - b);` | `i64.sub_checked` |
 | `bool x = a <= b;` | `i64.le` |
@@ -102,7 +104,7 @@ The only declarations are single-assignment locals with explicit `long` or `bool
 | `T x = Select(p, a, b);` | strict `select` with three same-typed operands |
 | `return (accepted: a, available: b, reserved: c);` | exact `OutputRefs` |
 
-Only previously declared locals may be operands. Each local ID is `n.` plus the source identifier. No duplicate declaration, reassignment, shadowing, implicit conversion, nested expression, alternate spelling, short-circuit operator or statement is accepted. Canonical node ordering is delegated to `ProgramCodec`/`GraphValidator`; source declaration order cannot change revision when the resulting graph is identical.
+Only previously declared locals may be operands. The bindings `available` and `quantity` are accepted only with their exact input member expressions, and `zero` only with the exact `0L` literal. Other local IDs are `n.` plus the source identifier; generated literal IDs use a deterministic reserved prefix. No duplicate declaration, reassignment, shadowing, implicit conversion, nested expression, alternate spelling, short-circuit operator or statement is accepted. Canonical node ordering is delegated to `ProgramCodec`/`GraphValidator`; source declaration order cannot change revision when the resulting graph is identical.
 
 The parser may use pinned `Microsoft.CodeAnalysis.CSharp` as a syntax tokenizer/parser, but it must inspect syntax-as-data and allowlist every node. It must not use Roslyn semantic compilation or execute source. The exact package version and lockfile are part of frontend identity.
 
@@ -332,8 +334,9 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 - Scope/Evidence: прочитаны `docs/project-intent.md`, current `Kernel.Core` codec/validator, E07 SPEC/report, controlled-language historical SPEC and repository instructions.
 - Contract: the notation lowers only to existing graph operations; `Kernel.Host` and capabilities remain authoritative.
 - Adversarial: syntax-as-data, semantic-model bypass, literal overflow, unary/depth limits, partial output and false `Accepted` paths are covered.
+- Correction before approval: the initial draft's generic `n.`+source-name rule could not produce the existing `n.available`/`n.quantity`/`n.zero` graph IDs from the example. The current revision makes input bindings and the zero literal explicit and canonical, so AC1 is now mechanically attainable.
 - Residual risk: this checkpoint tests a representation and compiler, not agent productivity or final human-facing syntax.
-- Stop decision: do not implement until owner sends exact **«Спеку подтверждаю»** for this file/version.
+- Stop decision: do not implement until owner sends exact **«Спеку подтверждаю»** for this corrected file/version.
 
 ## Approval
 
@@ -346,3 +349,4 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 | RESEARCH | Проверен текущий checkout после E07 | 0.99 | Нет для design draft | Зафиксировать next language checkpoint | Нет | E07 pushed at `1f41d0b` | Git, README, E07 report |
 | SPEC | Сопоставлены G01/G03/G04 с frontend gap | 0.94 | Owner choice notation surface | Запросить exact approval | Да | Пока не получено | `docs/project-intent.md`, this SPEC |
 | SPEC | Подготовлен closed grammar, error contract and AC matrix | 0.92 | Runtime implementation evidence | После approval создать frontend project | Да | Ожидается | this SPEC |
+| SPEC | Исправлено несоответствие source names и canonical Reserve node IDs до approval | 0.98 | Нет для design gate | Зафиксировать correction и снова запросить approval | Да | Пока не получено | this SPEC, K-E06-106 |

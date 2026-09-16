@@ -2036,3 +2036,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `17c0619a-03ba-45cb-bc97-f4ba6878143e`, read-back seq `12798`.
 - Последствие: внешний review может проверить следующий язык-specific seam до начала реализации.
 - Supersedes / supersededBy: уточняет K-E06-104; ждёт owner approval exact SPEC.
+
+## K-E06-106
+
+- Дата / фаза: 2026-09-16 / E08 pre-approval correction.
+- Тип / статус: Canonical identity finding / Fixed in SPEC.
+- Утверждение: generic mapping `nodeId = n.` + source identifier недостаточен для exact lowering к существующему Reserve graph: source-local names не обязаны совпадать с canonical IDs `n.available`, `n.quantity`, `n.zero`.
+- Исправление: E08 теперь задаёт явные `input.resourceAvailable`/`input.requestedQuantity` bindings, специальные canonical names `available`/`quantity`/`zero` и deterministic IDs для остальных locals/literals.
+- Evidence: corrected `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md` §6.2, `tests/Kernel.Conformance/Fixtures.cs`, `src/Kernel.Core/Codec.cs`.
+- Последствие: AC1 exact graph revision стал проверяемым до реализации; это также подтверждает, что canonical identity должна быть частью frontend contract, а не побочным эффектом parser implementation.
+- Supersedes / supersededBy: уточняет K-E06-104/K-E06-105; owner approval всё ещё требуется для текущего SPEC snapshot.
