@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kernel.Core\Kernel.Core.csproj" />
+    <ProjectReference Include="..\Strogo.Notation\Strogo.Notation.csproj" />
+  </ItemGroup>
+</Project>

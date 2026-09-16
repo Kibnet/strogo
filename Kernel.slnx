@@ -6,6 +6,9 @@
     <Project Path="src/Kernel.Host/Kernel.Host.csproj" />
     <Project Path="src/Kernel.Cli/Kernel.Cli.csproj" />
     <Project Path="src/Strogo.Modules/Strogo.Modules.csproj" />
+    <Project Path="src/Strogo.Experiments/Strogo.Experiments.csproj" />
+    <Project Path="src/Strogo.ExperimentCli/Strogo.ExperimentCli.csproj" />
+    <Project Path="tests/Strogo.Experiments.Conformance/Strogo.Experiments.Conformance.csproj" />
     <Project Path="src/Strogo.Notation/Strogo.Notation.csproj" />
     <Project Path="src/Strogo.Modules.Portability/Strogo.Modules.Portability.csproj" />
   </Folder>
