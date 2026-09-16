@@ -2076,3 +2076,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `561cf25e-8c90-4570-b02e-60b7292a6e0b`, read-back seq `12801`.
 - Последствие: публичный review видит полный provenance contract, а не только grammar surface.
 - Supersedes / supersededBy: уточняет K-E06-108; owner approval текущей E08 SPEC всё ещё требуется.
+
+## K-E06-110
+
+- Дата / фаза: 2026-09-16 / E08 grammar closure review.
+- Тип / статус: Canonical literal identity / Fixed in SPEC.
+- Утверждение: deterministic lowering требует явного алгоритма для literal nodes; одного обещания “reserved prefix” недостаточно, а `bool.const` нельзя оставлять за пределами таблицы разрешённых операций.
+- Исправление: E08 задаёт interning равных literals, IDs `n.const.i64.<canonical-decimal>`, `n.bool.true`/`n.bool.false`, специальный alias `zero → n.zero` и отдельные `Select(long|bool, ...)` forms.
+- Evidence: corrected E08 SPEC §6.2, `GraphValidator.Opcodes` and `ProgramCodec` literal fields.
+- Последствие: positive corpus и exact revision checks могут однозначно покрыть весь заявленный opcode surface без скрытых naming choices.
+- Supersedes / supersededBy: уточняет K-E06-108/K-E06-109; owner approval всё ещё требуется.

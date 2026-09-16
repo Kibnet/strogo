@@ -96,17 +96,18 @@ The only declarations are single-assignment locals with explicit `long` or `bool
 | `long available = input.resourceAvailable;` | `input` field `state.available`, node ID `n.available` |
 | `long quantity = input.requestedQuantity;` | `input` field `event.quantity`, node ID `n.quantity` |
 | `long zero = 0L;` | `i64.const`, node ID `n.zero` |
-| `long x = <signed I64 literal>;` | canonical `i64.const` node derived from the literal |
+| `long x = <signed I64 literal>;` | canonical `i64.const`; ID `n.const.i64.<canonical-decimal>` |
+| `bool x = true;` / `bool x = false;` | `bool.const`; IDs `n.bool.true` / `n.bool.false` |
 | `long x = checked(a + b);` | `i64.add_checked` |
 | `long x = checked(a - b);` | `i64.sub_checked` |
 | `bool x = a <= b;` | `i64.le` |
 | `bool x = a == b;` | `i64.eq` |
 | `bool x = !a;` | `bool.not` |
 | `bool x = a & b;` / `a | b` | `bool.and` / `bool.or` |
-| `T x = Select(p, a, b);` | strict `select` with three same-typed operands |
+| `long x = Select(p, a, b);` or `bool x = Select(p, a, b);` | strict `select` with three same-typed operands |
 | `return (accepted: a, available: b, reserved: c);` | exact `OutputRefs` |
 
-Only previously declared locals may be operands. The bindings `available` and `quantity` are accepted only with their exact input member expressions, and `zero` only with the exact `0L` literal. Other local IDs are `n.` plus the source identifier; generated literal IDs use a deterministic reserved prefix. No duplicate declaration, reassignment, shadowing, implicit conversion, nested expression, alternate spelling, short-circuit operator or statement is accepted. Canonical node ordering is delegated to `ProgramCodec`/`GraphValidator`; source declaration order cannot change revision when the resulting graph is identical.
+Only previously declared locals may be operands. The bindings `available` and `quantity` are accepted only with their exact input member expressions, and `zero` only with the exact `0L` literal. Other local IDs are `n.` plus the source identifier. All repeated equal literals are interned to the same canonical node: I64 values use decimal form with no leading zero (`0` or `-` plus digits), and bool values use lowercase `true`/`false`; the `n.zero` alias is the required spelling for I64 zero. No duplicate declaration, reassignment, shadowing, implicit conversion, nested expression, alternate spelling, short-circuit operator or statement is accepted. Canonical node ordering is delegated to `ProgramCodec`/`GraphValidator`; source declaration order cannot change revision when the resulting graph is identical.
 
 The parser may use `Microsoft.CodeAnalysis.CSharp` **4.14.0** as a syntax tokenizer/parser, but it must inspect syntax-as-data and allowlist every node. It must not use Roslyn semantic compilation or execute source. The exact package version and lockfile are part of frontend identity.
 
@@ -194,7 +195,7 @@ No rollout. The new project is additive and can be removed with its fixtures and
 ## 11. Тестирование и критерии приёмки
 
 - AC1: canonical Reserve source compiles to the exact approved `Fixtures.Reserve()` revision and canonical bytes.
-- AC2: at least 12 positive vectors cover all allowed operations, both strict branches, I64 boundaries, bool operators and output mapping.
+- AC2: at least 12 positive vectors cover all allowed operations, both strict branches, I64 boundaries, bool constants/operators and output mapping.
 - AC3: at least 20 negative vectors reject comments, Unicode/BOM, unsupported syntax, implicit conversion, duplicate/forward locals, short-circuit operators and wrong outputs with stable codes.
 - AC4: compiling every positive vector twice produces byte-equal graph and report identity; source and frontend digests are retained.
 - AC5: oversized, deep, token-heavy and unary-heavy sources are rejected before syntax lowering and do not touch host state.
