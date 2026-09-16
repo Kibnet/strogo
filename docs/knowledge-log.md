@@ -1935,3 +1935,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `1d7e3ef3-88fd-44a5-acf8-be1b7ed9b623`, read-back seq `12780`.
 - Последствие: внешняя дискуссия получила воспроизводимую текущую точку сравнения без расширения заявлений.
 - Supersedes / supersededBy: уточняет K-E06-094; E07 owner approval и independent paths остаются открыты.
+
+## K-E06-096
+
+- Дата / фаза: 2026-09-16 / E07 fixture design.
+- Тип / статус: Reviewable fixture sketch / Draft, owner-gated.
+- Утверждение: draft SPEC теперь содержит non-executable JSON sketch для stale replay с разными event digests, живыми opaque prepare handles, неизменными pointers/authorization и expected `StateConflict`; contract drift разложен на отдельные `SetPolicy`/`ProposePatch`/`SetManifest` variants с сохранением прав.
+- Boundary: `$R0`, `$P0`, `$e1.prepareId` и подобные значения — символические placeholders; binding convention должен быть утверждён до EXEC и не является parser schema.
+- Evidence: `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` §6.2, current host suite evidence K-E06-094.
+- Последствие: внешний contributor и owner могут ревьюировать точные шаги и expected refusal до выбора second host и реализации harness.
+- Supersedes / supersededBy: уточняет K-E06-091/K-E06-092/K-E06-095; implementation по-прежнему не разрешена.

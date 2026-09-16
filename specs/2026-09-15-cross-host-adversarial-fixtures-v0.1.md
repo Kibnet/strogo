@@ -101,6 +101,29 @@ The current v0 schema has only pure DAG operations and `effects=[]`. The first f
 
 The same fixture bytes, fault schedule and expected state are supplied to all paths. The report makes only observable claims: it records each path's outcome and enforcing component. Equal PASS means the guarantee was reproduced without the language path; a difference requires a concrete ablation/control and is reported as an observed divergence, not as proof that a general-purpose API cannot reproduce the guarantee. A second host alone is insufficient.
 
+#### Draft fixture sketches (non-executable)
+
+Opaque handles and revisions below are symbolic placeholders. The fixture runner must define their binding convention before EXEC; these sketches do not extend the Strogo parser schema.
+
+```json
+{
+  "id": "stale-replay",
+  "initial": {"resourceId": "item-001", "stateRevision": "$R0", "programRevision": "$P0", "policyRevision": "$Y0", "manifestRevision": "$M0"},
+  "contract": {"id": "reserve.v0", "revision": "$P0"},
+  "grants": [{"principal": "agent", "rights": ["ReadResource", "ExecuteResource", "StateWrite", "ReplayResource"]}],
+  "steps": [
+    {"actor": "agent", "operation": "Prepare", "args": {"eventId": "e1", "quantity": "3", "expectedStateRevision": "$R0", "expectedProgramRevision": "$P0", "expectedPolicyRevision": "$Y0"}, "expectedRevision": "$R0"},
+    {"actor": "agent", "operation": "Prepare", "args": {"eventId": "e2", "quantity": "4", "expectedStateRevision": "$R0", "expectedProgramRevision": "$P0", "expectedPolicyRevision": "$Y0"}, "expectedRevision": "$R0"},
+    {"actor": "agent", "operation": "Commit", "args": {"prepareId": "$e2.prepareId"}, "expectedRevision": "$R0"},
+    {"actor": "agent", "operation": "Commit", "args": {"prepareId": "$e1.prepareId"}, "expectedRevision": "$e2.committedStateRevision"}
+  ],
+  "expected": {"result": "StateConflict", "effects": [], "mustNotHappen": ["receipt:e1", "transition:e1", "state overwrite"]},
+  "control": "same epoch; distinct event digests; unchanged pointers and authorization; replay e2 read-only"
+}
+```
+
+The contract-drift sketch is the same sequence with one explicit mutation inserted after `Prepare` and before `Commit`: `SetPolicy` preserves the agent grant and expects `PolicyChanged`; the parallel controls replace it with `ProposePatch` → `ProgramChanged` or `SetManifest` → `AdmissionInvalidated`. Each variant must be a separate fixture so the expected refusal is not a union of branches.
+
 ### 6.3 User-Observable Scenarios
 
 Не применимо: artifact-only research checkpoint; visible output is a report and fixture set.
@@ -234,3 +257,4 @@ No code/test implementation is authorized until owner approval. Existing charact
 | SPEC | Создан draft cross-host fixture SPEC | 0.90 | Ждать `Спеку подтверждаю` и ответы на открытые вопросы | Да |
 | SPEC | Исправлен causal-claim criterion по review: observable outcomes вместо доказательства невозможности API; источник fixture format уточнён на #12476 | 0.97 | Owner review и выбор second host остаются открыты | Да |
 | SPEC | Запущен current-checkout host characterization: `18/18 cases; 496 assertions`, solution Release build `0/0` | 0.98 | Direct baseline и second host ещё не реализованы | Да |
+| SPEC | Добавлены non-executable fixture sketches для stale replay и трёх contract-drift вариантов | 0.96 | Binding convention для opaque handles и second host требуют owner decision | Да |
