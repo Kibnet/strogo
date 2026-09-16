@@ -13,6 +13,7 @@ Check(report.Status == "Accepted", "paired report accepted");
 Check(report.Pairs.Length == 12 && report.Pairs.All(p => p.Equivalent), "all pairs equivalent");
 Check(report.NegativeCases >= 20, "negative corpus >=20");
 Check(report.NegativeCategories.Distinct().Count() == report.NegativeCategories.Length, "typed negative categories");
+Check(report.NegativeResults.Length == report.NegativeCases && report.NegativeResults.All(x => x.Contains(":ValidRefusal", StringComparison.Ordinal)), "negative probes recorded");
 
 var opcodes = corpus.SelectMany(c => c.Program.Nodes).Select(n => n.Op).ToHashSet(StringComparer.Ordinal);
 foreach (var op in GraphValidator.Opcodes) Check(opcodes.Contains(op) || op == "input", $"opcode coverage {op}");
@@ -31,6 +32,9 @@ foreach (var arm in new[] { "graph-json", "strogo-notation" })
     Check(!Encoding.UTF8.GetString(bundle.CandidateBytes).Contains(CanonicalJson.RawDigest(expected), StringComparison.Ordinal), $"no expected digest leak {c.Id}/{arm}");
     Check(bundle.Manifest.Mode == "job-starter" && bundle.Manifest.DataOrigin == "scripted-fixture", $"manifest provenance {c.Id}/{arm}");
 }
+var fullNotation = new ExportBundle(new ExportManifest(CalibrationIdentity.Protocol, CalibrationIdentity.Corpus, corpus[0].Id, "strogo-notation", "job-starter", "scripted-fixture", "", "", Strogo.Notation.NotationCompiler.GrammarRevision, KernelVersions.Schema, "host.e09.v0.1", "solver.none", ReserveOracle.Revision), Encoding.UTF8.GetBytes(corpus[0].NotationSource));
+fullNotation = fullNotation with { Manifest = fullNotation.Manifest with { CandidateDigest = CanonicalJson.RawDigest(fullNotation.CandidateBytes) } };
+Check(!Exporter.ValidateStarter(fullNotation, corpus[0], out _), "full notation solution rejected");
 
 // Negative/refusal probes: parser and validator must fail closed before evaluation.
 var malformed = CalibrationEvaluator.Evaluate(corpus[0] with { NotationSource = "{ // comment\n }" }, "strogo-notation");

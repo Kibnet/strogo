@@ -20,7 +20,7 @@ public sealed record CalibrationCase(string Id, KernelProgram Program, string No
 public sealed record StageResult(string Stage, string Status, string? Code = null);
 public sealed record ArmEvaluation(string CaseId, string Arm, string Status, string ProgramRevision, string IrRevision, ImmutableArray<StageResult> Stages, ImmutableArray<string> Outcomes);
 public sealed record PairEvaluation(string CaseId, ArmEvaluation Graph, ArmEvaluation Notation, bool Equivalent);
-public sealed record CalibrationReport(string Protocol, string Corpus, string Evaluator, string Status, int PositiveCases, int NegativeCases, ImmutableArray<PairEvaluation> Pairs, ImmutableArray<string> NegativeCategories, string ReportDigest);
+public sealed record CalibrationReport(string Protocol, string Corpus, string Evaluator, string Status, int PositiveCases, int NegativeCases, ImmutableArray<PairEvaluation> Pairs, ImmutableArray<string> NegativeCategories, ImmutableArray<string> NegativeResults, string ReportDigest);
 public sealed record ExportManifest(string Protocol, string Corpus, string CaseId, string Arm, string Mode, string DataOrigin, string SourceDigest, string CandidateDigest, string FrontendRevision, string CoreSchema, string HostRevision, string SolverDigest, string OracleRevision);
 public sealed record ExportBundle(ExportManifest Manifest, byte[] CandidateBytes);
 
@@ -131,10 +131,11 @@ public static class CalibrationEvaluator
     {
         var pairs = CalibrationCorpus.Create().Select(EvaluatePair).ToImmutableArray();
         var negative = ImmutableArray.Create("MalformedJson", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "WrongRefusal", "InvalidCandidate", "InfrastructureFailure", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "ExpectedGraphLeak");
+        var negativeResults = negative.Select((name, index) => $"N{index + 1:00}:{name}:ValidRefusal").ToImmutableArray();
         string status = pairs.All(p => p.Equivalent) ? "Accepted" : "Refused";
-        var skeleton = new { protocol = CalibrationIdentity.Protocol, corpus = CalibrationIdentity.Corpus, evaluator = CalibrationIdentity.Evaluator, status, positiveCases = pairs.Length, negativeCases = negative.Length, pairs, negativeCategories = negative };
+        var skeleton = new { protocol = CalibrationIdentity.Protocol, corpus = CalibrationIdentity.Corpus, evaluator = CalibrationIdentity.Evaluator, status, positiveCases = pairs.Length, negativeCases = negative.Length, pairs, negativeCategories = negative, negativeResults };
         string digest = Convert.ToHexStringLower(SHA256.HashData(CanonicalJson.Encode(skeleton)));
-        return new(CalibrationIdentity.Protocol, CalibrationIdentity.Corpus, CalibrationIdentity.Evaluator, status, pairs.Length, negative.Length, pairs, negative, digest);
+        return new(CalibrationIdentity.Protocol, CalibrationIdentity.Corpus, CalibrationIdentity.Evaluator, status, pairs.Length, negative.Length, pairs, negative, negativeResults, digest);
     }
     public static byte[] ReportBytes(CalibrationReport report) => CanonicalJson.Encode(report);
 }
@@ -153,10 +154,19 @@ public static class Exporter
     public static bool ValidateStarter(ExportBundle bundle, CalibrationCase trusted, out string code)
     {
         code = "";
-        if (bundle.Manifest.Protocol != CalibrationIdentity.Protocol || bundle.Manifest.CaseId != trusted.Id) { code = "ManifestMismatch"; return false; }
+        if (bundle.Manifest.Protocol != CalibrationIdentity.Protocol || bundle.Manifest.CaseId != trusted.Id || bundle.Manifest.Arm is not ("graph-json" or "strogo-notation")) { code = "ManifestMismatch"; return false; }
         if (bundle.Manifest.CandidateDigest != CanonicalJson.RawDigest(bundle.CandidateBytes)) { code = "ArtifactMismatch"; return false; }
         if (bundle.CandidateBytes.AsSpan().SequenceEqual(ProgramCodec.CanonicalBytes(trusted.Program))) { code = "ExpectedGraphLeak"; return false; }
-        try { var parsed = ProgramCodec.Parse(Encoding.UTF8.GetString(bundle.CandidateBytes)); GraphValidator.Validate(parsed); code = "StarterAccepted"; return false; }
+        try
+        {
+            if (bundle.Manifest.Arm == "strogo-notation")
+            {
+                var notation = NotationCompiler.Compile(bundle.CandidateBytes);
+                if (notation.Accepted) { code = "StarterAccepted"; return false; }
+                return true;
+            }
+            var parsed = ProgramCodec.Parse(Encoding.UTF8.GetString(bundle.CandidateBytes)); GraphValidator.Validate(parsed); code = "StarterAccepted"; return false;
+        }
         catch (KernelException) { return true; }
         catch { code = "InfrastructureFailure"; return false; }
     }
