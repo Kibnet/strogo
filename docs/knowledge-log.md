@@ -1945,3 +1945,13 @@
 - Evidence: `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` §6.2, current host suite evidence K-E06-094.
 - Последствие: внешний contributor и owner могут ревьюировать точные шаги и expected refusal до выбора second host и реализации harness.
 - Supersedes / supersededBy: уточняет K-E06-091/K-E06-092/K-E06-095; implementation по-прежнему не разрешена.
+
+## K-E06-097
+
+- Дата / фаза: 2026-09-16 / public E07 fixture clarification.
+- Тип / статус: Public design update / Published and read back.
+- Утверждение: опубликован reply `#12781` с concrete stale-replay sketch и отдельными drift variants: `SetPolicy→PolicyChanged`, `ProposePatch→ProgramChanged`, `SetManifest→AdmissionInvalidated`; права сохраняются, opaque handles остаются placeholders.
+- Scope: design-only communication; код, effect seam и second host не менялись.
+- Evidence: thread reply id `0485c541-2eb5-4d4f-9cf4-83fb24bb97b7`, read-back seq `12781`, draft SPEC commit `aafdb8b`.
+- Последствие: внешний contributor получил проверяемый порядок шагов и expected refusal до owner approval.
+- Supersedes / supersededBy: уточняет K-E06-096; binding convention и EXEC остаются owner-gated.
