@@ -1955,3 +1955,13 @@
 - Evidence: thread reply id `0485c541-2eb5-4d4f-9cf4-83fb24bb97b7`, read-back seq `12781`, draft SPEC commit `aafdb8b`.
 - Последствие: внешний contributor получил проверяемый порядок шагов и expected refusal до owner approval.
 - Supersedes / supersededBy: уточняет K-E06-096; binding convention и EXEC остаются owner-gated.
+
+## K-E06-098
+
+- Дата / фаза: 2026-09-16 / E07 second-host selection.
+- Тип / статус: Toolchain-informed design recommendation / Owner-gated.
+- Утверждение: локально доступны `.NET SDK 10.0.400`, Python `3.14.7` и pinned Java `17.0.19`/`javac 17.0.19`. Для E07 рекомендован независимый Java 17 fixture-only in-memory host без ссылки на `Kernel.Host`; C# direct checked API остаётся отдельным baseline.
+- Scope: recommendation касается только causal fixture harness, не production storage, JVM runtime admission или portability claim.
+- Evidence: `global.json`, `java -version`, `javac -version`, existing `tests/fixtures/portability-consumers/java`.
+- Последствие: второй host получает другой runtime и независимую реализацию contract checks, сохраняя ограниченный объём; owner должен принять Java/isolation choice до EXEC.
+- Supersedes / supersededBy: уточняет K-E06-091/K-E06-097; implementation не начиналась.

@@ -10,7 +10,7 @@
 - Eval baseline: existing `tests/Kernel.Conformance` host cases plus new fixture reports
 - Ветка: `main`
 - Ограничения: no implementation before owner approval; no language-advantage claim from a single host
-- Связанные источники: Posting Board #11295, clarification #12482, `docs/reserve-v0.md`
+- Связанные источники: Posting Board #11295, clarification #12482, `docs/reserve-v0.md`, local JDK `17.0.19`
 
 ## 1. Overview / Цель
 
@@ -57,7 +57,7 @@ Outcome contract:
 | Fixture codec | strict canonical JSON, ordered steps and expected outcome |
 | Language path | compile/validate/execute the same contract |
 | Direct checked-API baseline | independent host call sequence without language evaluator |
-| Second host | separate implementation of the same state/contract rules |
+| Second host | separate Java 17 fixture-only implementation of the same state/contract rules; no `Kernel.Host` reference |
 | Comparator | classify equal guarantees and enforcement locations |
 
 ### 6.2 Детальный дизайн
@@ -141,7 +141,7 @@ The contract-drift sketch is the same sequence with one explicit mutation insert
 
 | Decision | Owner | Default | Confidence | Risk | Needs user before EXEC |
 |---|---|---|---:|---|---|
-| Second host technology | user | independent minimal C# host with no `Kernel.Host` reference | 0.70 | same-runtime confounder | Да |
+| Second host technology | user | **recommended:** independent Java 17 in-memory fixture host with no `Kernel.Host` reference; C# direct checked API remains the first baseline | 0.82 | fixture host is not production storage and Java implementation adds harness work | Да |
 | Direct baseline boundary | agent | checked API with identical state/contract and fault schedule | 0.90 | baseline may duplicate host logic | Нет |
 | Effect seam | user | separate future SPEC | 0.95 | task C otherwise proves only absence of surface | Да |
 | Causal claim threshold | user | report observed outcomes and enforcement; use ablation for any stronger attribution | 0.95 | overclaiming impossibility from finite runs | Да |
@@ -193,7 +193,8 @@ No code/test implementation is authorized until owner approval. Existing charact
 
 ## 14. Открытые вопросы
 
-- Which second-host technology and isolation level does the owner accept?
+- Does the owner accept the recommended Java `17.0.19` fixture-only in-memory host, with no claim of production storage portability?
+- If not, should the second host be an independent C# implementation or another pinned runtime?
 - Is a separate C# implementation sufficient, or is a different runtime required?
 - What minimal effect model should Task C exercise, if any?
 
@@ -258,3 +259,4 @@ No code/test implementation is authorized until owner approval. Existing charact
 | SPEC | Исправлен causal-claim criterion по review: observable outcomes вместо доказательства невозможности API; источник fixture format уточнён на #12476 | 0.97 | Owner review и выбор second host остаются открыты | Да |
 | SPEC | Запущен current-checkout host characterization: `18/18 cases; 496 assertions`, solution Release build `0/0` | 0.98 | Direct baseline и second host ещё не реализованы | Да |
 | SPEC | Добавлены non-executable fixture sketches для stale replay и трёх contract-drift вариантов | 0.96 | Binding convention для opaque handles и second host требуют owner decision | Да |
+| SPEC | Проверен локальный toolchain и добавлена рекомендация Java 17 fixture-only host | 0.88 | Owner должен принять runtime и isolation boundary | Да |
