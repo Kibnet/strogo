@@ -75,6 +75,14 @@ Report stages: `transport`, `frontend`, `graph`, `ir`, `oracle`, `outcome`, `pro
 
 Observable equality for positive pairs is canonical graph bytes/revision, lowered IR revision, evaluation output/trace and business oracle result. Runtime timestamps, receipt IDs and process paths are excluded from semantic equality. A mismatch aborts calibration and cannot be averaged away.
 
+#### 6.2.1 Evaluator order and manifest identity
+
+For an `Accepted` candidate the runner executes this fixed order: arm adapter → strict `KernelProgram` parse/compile → `GraphValidator.Validate` → `Lowerer.Lower` → `ReferenceInterpreter.Evaluate` and `IrInterpreter.Evaluate` on the same input vector → independent `ReserveOracle` implemented in the experiment project with `BigInteger` arithmetic → outcome comparison. A refusal stops before graph evaluation. The runner never treats the candidate's claimed revision, status or expected outcome as evidence.
+
+`ReserveOracle` checks input preconditions, accepted/remaining/reserved postconditions and checked-overflow behavior without calling `Kernel.Core` evaluators. Its source, version and digest are part of the trusted tool inventory. Agreement between the two Core execution paths is recorded separately from agreement with the oracle; an oracle disagreement is `EvaluatorMismatch`, not `InvalidCandidate`.
+
+The immutable manifest contains exactly the protocol revision, corpus revision, case/pair IDs, arm, input digest, source digest, frontend/parser/lockfile digest, Core/Host/solver/oracle tool digests, mode, data origin and provenance status. It excludes timestamps, process IDs, absolute paths, previous responses and expected graph bytes from the exported job. Any missing, extra or altered identity field makes comparison ineligible and produces `ArtifactMismatch`.
+
 ### 6.3 User-Observable Scenarios
 
 | Scenario | User action / trigger | Expected visible result / output | Evidence required | Covered by AC |
@@ -304,3 +312,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | SPEC | Сопоставлен E08 gap с G01/G03/G04/G05 и historical calibration design | 0.94 | Owner approval E09 | Завершить review и запросить approval | Да | Ожидается | this SPEC, E08 report, project intent |
 | SPEC | Зафиксированы paired corpus, evaluator, export/provenance и stop rules | 0.93 | Runtime implementation evidence | После approval создать additive experiment projects | Да | Ожидается | this SPEC |
 | SPEC | Запрошен внешний counterexample к paired corpus, export boundary и refusal scoring | 0.91 | Ответы board могут уточнить risk, но не заменяют owner approval | Учесть только рациональные, проверяемые предложения | Нет | Не требовалось | public reply `#12809`, id `1b131103-e945-48a4-837b-478d8b0a8b09`, read-back verified |
+| SPEC | Зафиксирован точный evaluator order, independent oracle seam и manifest identity | 0.94 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2.1 |
