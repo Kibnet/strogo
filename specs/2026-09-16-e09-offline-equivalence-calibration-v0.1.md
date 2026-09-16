@@ -69,6 +69,25 @@ Outcome contract:
 
 Минимальный corpus — 12 случаев, включающий baseline, accepted/rejected Reserve branches, I64 boundary values, checked overflow in selected/unselected branch, bool `Select`, `bool.not`, strict `and/or`, malformed graph, typed notation refusal и deterministic declaration-order pair. Cases должны различать success, correct refusal и infrastructure failure; один случай не получает скрытый repair answer.
 
+Нормативный набор trusted `equivalence-vector` получает следующие IDs; case ID и порядок не являются случайным runtime output:
+
+| Case | Что различает | Обязательное покрытие |
+| --- | --- | --- |
+| `R01-baseline` | accepted Reserve, обычный input path | `input`, `i64.le`, `select`, checked subtraction |
+| `R02-bool-true` | constant accepted branch | `bool.const(true)` |
+| `R03-bool-false` | constant refusal branch | `bool.const(false)` |
+| `R04-not` | derived boolean | `bool.not` |
+| `R05-and` | strict conjunction | `bool.and`, both operands evaluated |
+| `R06-or` | strict disjunction | `bool.or`, both operands evaluated |
+| `R07-eq` | equality instead of ordering | `i64.eq` |
+| `R08-bool-select` | boolean result selection | typed `select` with `Bool` branches |
+| `R09-add` | checked addition path | `i64.add_checked` |
+| `R10-min` | signed lower boundary | `long.MinValue` literal and checked operation |
+| `R11-max` | signed upper boundary | `long.MaxValue` literal and checked operation |
+| `R12-order` | source-order freedom | declaration reorder with identical graph revision |
+
+The vector manifest additionally records selected and unselected overflow inputs for `R09`/`R10`/`R11`; these are input rows, not extra cases. Negative transport/grammar/graph/evaluator cases are separate and cannot inflate the 12-case positive count.
+
 `export` пишет только allowlisted job bundle: protocol/corpus/arm/case IDs, source bytes, digests и public input contract. В bundle запрещены expected graph, oracle implementation, соседние cases, repository paths и previous responses. Hash collision or overwrite is refusal. `evaluate` читает owner-selected response/candidate file as data, не исполняет его и не принимает IDs/path из candidate как команды.
 
 Report stages: `transport`, `frontend`, `graph`, `ir`, `oracle`, `outcome`, `provenance`. Categories are closed: `Solved`, `ValidRefusal`, `WrongRefusal`, `InvalidCandidate`, `InfrastructureFailure`, `EvaluatorMismatch`. A report cannot set `eligibleForLlmClaims=true`; `dataOrigin=scripted` and `mode=offline-calibration` are mandatory in this checkpoint.
@@ -316,3 +335,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | SPEC | Опубликовано evaluator уточнение и выполнен read-back | 0.94 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12811`, id `5480eead-bcb6-4615-946a-4cb0c5913817`, read-back verified |
 | SPEC | Разделены trusted equivalence vectors и exportable non-solution starters | 0.96 | Runtime evidence | Повторить contract review и запросить approval | Да | Ожидается | this SPEC §6.2, AC5 |
 | SPEC | Публично сообщён graph-arm leakage risk и выполнен read-back | 0.96 | Новых внешних counterexamples нет | Ожидать owner approval E09 | Да | Ожидается | public reply `#12812`, id `2e162a84-0496-4eb8-a4a6-fe2b6ef49287`, read-back verified |
+| SPEC | Зафиксирован нормативный 12-case corpus matrix и coverage boundary | 0.97 | Runtime evidence | Запросить approval без расширения scope | Да | Ожидается | this SPEC §6.2 |
