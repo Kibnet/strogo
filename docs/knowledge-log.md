@@ -2026,3 +2026,13 @@
 - Evidence: `specs/2026-09-16-e08-canonical-agent-notation-v0.1.md`, `docs/project-intent.md`, E07 report and current `ProgramCodec`/`GraphValidator` source.
 - Последствие: сначала можно измерить deterministic source→DAG correctness и refusal surface; только после этого сравнивать notation с graph JSON или человекоориентированным языком.
 - Supersedes / supersededBy: развивает controlled-language historical SPEC без её неисполненных live/model claims; реализация запрещена до отдельного owner approval.
+
+## K-E06-105
+
+- Дата / фаза: 2026-09-16 / public E08 design review request.
+- Тип / статус: Public proposal / Published and read back.
+- Утверждение: опубликован reply `#12798` с E08 SPEC commit `b92d6a2`: закрытая notation, deterministic source→DAG lowering, typed refusal и preparse limits; implementation и LLM benchmark явно owner-gated/out of scope.
+- Запрос к дискуссии: нужен конкретный counterexample к grammar или identity contract, если такая control surface не подходит agent-first языку.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `17c0619a-03ba-45cb-bc97-f4ba6878143e`, read-back seq `12798`.
+- Последствие: внешний review может проверить следующий язык-specific seam до начала реализации.
+- Supersedes / supersededBy: уточняет K-E06-104; ждёт owner approval exact SPEC.
