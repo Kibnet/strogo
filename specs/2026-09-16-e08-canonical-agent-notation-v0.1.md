@@ -357,3 +357,56 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 | EXEC | Владелец подтвердил текущую версию SPEC точной фразой | 0.99 | Нет для E08 frontend MVP | Реализовать additive frontend и corpus | Нет | «Спеку подтверждаю» | commit `4681e22`, this SPEC |
 | EXEC | Реализованы scanner, Roslyn allowlist, typed binder, canonical lowering и refusals | 0.94 | Full post-EXEC review | Запустить regressions и сохранить report | Нет | Решение не требовалось | `src/Strogo.Notation`, commit `6b54729` |
 | EXEC | E08 conformance и Core/E07 regressions прошли; report сохранён | 0.98 | Post-EXEC review and future benchmark | Обновить knowledge log и закрыть review findings | Нет | Решение не требовалось | `docs/evidence/e08-notation-conformance.json`, local runs |
+
+## 21. Post-EXEC Review
+
+### Статус и решение
+
+- Статус: **PASS**.
+- Решение: E08 frontend checkpoint можно считать завершённым в пределах утверждённого scope; effects, backend, portability and LLM benchmark остаются отдельными этапами.
+
+### Scope / Evidence pass
+
+- Reviewed: approved SPEC, `git status --short`, commits `6b54729` и `53bc111`, `Kernel.slnx`, `src/Strogo.Notation/**`, `tests/Strogo.Notation.Conformance/**`, lockfiles, `docs/evidence/e08-notation-conformance.json`, `docs/knowledge-log.md` и owner instructions.
+- Commands: locked restore, Release solution build, E08 conformance, E07 suite and full `Kernel.Conformance`.
+- Final runtime surface: temporary working directory with installed SDK `10.0.401`; repository `global.json` remains unchanged and pins unavailable `10.0.400`.
+
+### Contract pass
+
+- Raw UTF-8 entry point, source digest, BOM/encoding refusal, finite scanner limits, closed syntax allowlist, typed first-error refusal and no graph on refusal are implemented.
+- Accepted output lowers only to the existing `Kernel.Core` `reserve.v0` graph and is revalidated by `GraphValidator`; `Kernel.Host` semantics were not changed.
+- `frontendRevision` includes the embedded committed frontend lockfile digest; report fields and evidence match the SPEC envelope.
+- User-observable scenarios and AC1–AC7 are covered by the conformance runner and report; no G05/G06 claim is made.
+
+### Adversarial risk pass
+
+- Checked unsupported comments/directives/strings/interpolations, Unicode/BOM/invalid UTF-8, oversized/deep/token/unary inputs, duplicate/forward/type/output errors, short-circuit and nested expressions, I64 boundary literals, repeated literals and declaration-order identity.
+- Checked no semantic compilation, emit, load, Host call, effect path or untrusted revision is used.
+- Checked solution diff and status for unrelated changes; final working tree was clean after delivery commits.
+
+### Role-Based Review Result
+
+- Business/domain workflow: PASS — Reserve input/output contract is preserved; no host business rule changed.
+- UX/designer: PASS — source and refusal report are machine-facing; no UI or human syntax claim is introduced.
+- Tester/validation: PASS — positive, negative, determinism, resource-boundary and regression evidence are present.
+- Developer/architect: PASS — additive project, pinned dependency closure, Core-owned semantics and rollback by commit revert are coherent.
+- Delivery/operations/security: PASS with residual environment note — locked restore and clean push passed; exact project-pinned SDK was unavailable on this machine, so validation used installed `10.0.401` from an isolated working directory.
+
+### Findings and fixes
+
+| Severity | Area | Finding | Required action | Status |
+| --- | --- | --- | --- | --- |
+| MEDIUM | acceptance | Initial E08 harness did not explicitly prove declaration-order identity, although the SPEC required it. | Add a reordered-declaration vector and rerun the affected report. | fixed in `53bc111`; E08 rerun 143 assertions |
+| LOW | environment | Repository pins SDK `10.0.400`, which is not installed on this host. | Keep project pin unchanged; run final checks from isolated temp directory on installed `10.0.401` and report the boundary. | accepted-risk; no product evidence was hidden |
+| LOW | scope | Inline vectors are used by the conformance executable instead of a separate source fixture directory. | Keep the corpus in the executable for this small checkpoint; split fixtures only if the next benchmark/notation stage needs independent corpus exchange. | follow-up |
+
+### Fix and re-review
+
+- Re-ran the affected E08 build and runner after adding the declaration-order vector: 12 positive, 23 negative, 143 assertions.
+- Re-ran locked restore, full Release solution build (0 warnings/0 errors), E07 (59 assertions) and full Core/Host/CLI conformance (29 cases, 10,904 assertions) under SDK `10.0.401`.
+- Re-read the report, SPEC paths, knowledge entry and final Git status; no new finding changed the stop decision.
+
+### Residual risks / follow-ups
+
+- This evidence establishes deterministic frontend-to-Core lowering for the stated grammar only. It does not establish agent productivity, absence of all defects, machine-code generation, performance, portability or production runtime guarantees.
+- Next approval-gated work may add a human projection, effects/capabilities or backend experiments without silently widening E08.

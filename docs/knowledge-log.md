@@ -2121,7 +2121,17 @@
 - Дата / фаза: 2026-09-16 / E08 EXEC checkpoint.
 - Тип / статус: Frontend implementation and conformance result / Verified for the stated local contract.
 - Утверждение: после owner approval реализован additive `Strogo.Notation` frontend: raw UTF-8 entry point, bounded ASCII FSM, Roslyn syntax-as-data allowlist, typed binding, canonical literal interning, Reserve lowering и refusal envelope без Host/effects/backend.
-- Evidence: commit `6b54729`; `docs/evidence/e08-notation-conformance.json`; Release solution build — 0 warnings/0 errors; E08 runner — 12 positive, 23 negative, 142 assertions; E07 — 59 assertions; full `Kernel.Conformance` — 29 cases, 10904 assertions.
+- Evidence: commit `6b54729`; `docs/evidence/e08-notation-conformance.json`; Release solution build — 0 warnings/0 errors; E08 runner — 12 positive, 23 negative, 143 assertions including declaration-order identity; E07 — 59 assertions; full `Kernel.Conformance` — 29 cases, 10904 assertions.
 - Ограничение: проверен только deterministic source→Kernel.Core graph boundary и regressions текущего repository; это не доказательство G05, отсутствия всех ошибок, производительности, portability или production runtime.
 - Последствие: E08 frontend seam теперь исполняем и измерим; следующий этап может обсуждать agent-facing ergonomics или benchmark отдельно, не меняя уже подтверждённый Core contract.
 - Supersedes / supersededBy: реализует K-E06-104/K-E06-112 после approval; effects, backend и LLM benchmark остаются отдельными approval-gated задачами.
+
+## K-E06-115
+
+- Дата / фаза: 2026-09-16 / E08 post-EXEC review.
+- Тип / статус: Review finding and revalidation / PASS with bounded residual risks.
+- Утверждение: review нашёл и закрыл отсутствовавший AC-вектор перестановки независимых деклараций; после исправления повторно прошли E08 (12 positive, 23 negative, 143 assertions), locked restore, Release solution build, E07 и full Core/Host/CLI conformance.
+- Evidence: SPEC §21, commit `53bc111`, `docs/evidence/e08-notation-conformance.json`; final validation used installed SDK `10.0.401` from an isolated temp working directory because repository-pinned `10.0.400` is not installed.
+- Ограничение: E08 доказывает только deterministic frontend-to-Core lowering для закрытой grammar; agent productivity, all-defect elimination, machine code, performance, portability and production runtime остаются не измерены.
+- Последствие: E08 можно считать завершённым checkpoint; следующие effects/backend/benchmark changes требуют отдельных SPEC и approval.
+- Supersedes / supersededBy: закрывает review state K-E06-114 и уточняет его environment boundary.

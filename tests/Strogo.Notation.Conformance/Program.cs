@@ -77,6 +77,9 @@ var baselineResult = NotationCompiler.Compile(Encoding.UTF8.GetBytes(baseline));
 Check(baselineResult.Accepted, "baseline accepted");
 var expected = ProgramCodec.Parse(expectedGraph);
 Check(baselineResult.ProgramRevision == ProgramCodec.Revision(expected), "baseline exact graph revision");
+var reordered = baseline.Replace("  bool enough = quantity <= available;\n  long zero = 0L;", "  long zero = 0L;\n  bool enough = quantity <= available;", StringComparison.Ordinal);
+var reorderedResult = NotationCompiler.Compile(Encoding.UTF8.GetBytes(reordered));
+Check(reorderedResult.Accepted && reorderedResult.ProgramRevision == baselineResult.ProgramRevision, "independent declaration order preserves graph revision");
 var positiveReports = new List<object>();
 var negativeReports = new List<object>();
 
