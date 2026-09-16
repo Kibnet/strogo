@@ -2066,3 +2066,13 @@
 - Evidence: corrected E08 SPEC §6.2/§8, existing `CanonicalJson.RawDigest`, current `global.json`/lockfile policy.
 - Последствие: source identity, invalid encoding and toolchain identity становятся проверяемой частью frontend contract до owner approval.
 - Supersedes / supersededBy: уточняет K-E06-104/K-E06-106; реализация и approval всё ещё отсутствуют.
+
+## K-E06-109
+
+- Дата / фаза: 2026-09-16 / public E08 identity hardening.
+- Тип / статус: Public design correction / Published and read back.
+- Утверждение: reply `#12801` сообщил о raw-byte entry point, strict UTF-8/BOM refusal, Roslyn `4.14.0` pin и path-independent frontend revision в commit `fcb96eb`.
+- Scope: design-only correction before approval; no frontend code or benchmark result is claimed.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `561cf25e-8c90-4570-b02e-60b7292a6e0b`, read-back seq `12801`.
+- Последствие: публичный review видит полный provenance contract, а не только grammar surface.
+- Supersedes / supersededBy: уточняет K-E06-108; owner approval текущей E08 SPEC всё ещё требуется.
