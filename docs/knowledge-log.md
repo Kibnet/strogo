@@ -2150,6 +2150,7 @@
 - Дата / фаза: 2026-09-16 / E09 post-EXEC review.
 - Тип / статус: Evidence and review / PASS with bounded residual risks.
 - Утверждение: 12/12 trusted positive pairs совпали по canonical program и IR revisions и дали одинаковые outcomes; negative corpus содержит 20 закрытых категорий; повторный отчёт byte-identical; malformed UTF-8, refusal-before-graph и starter digest checks прошли.
-- Evidence: `docs/evidence/e09-offline-calibration.json`; conformance output `E09 PASS: 12 positive pairs, 20 negative categories, 20446 report bytes`; twenty individual negative probe records and arm-specific starter validation passed; Release solution build 0 warnings/0 errors.
+- Evidence: `docs/evidence/e09-offline-calibration.json`; conformance output `E09 PASS: 12 positive pairs, 20 negative categories, 20366 report bytes`; twenty executed negative probe records, arm-specific starter validation and mandatory reference/IR-to-oracle matching passed; Release solution build 0 warnings/0 errors.
 - Ограничение: corpus остаётся Reserve-only, экспортный starter намеренно invalid, а E09 не измеряет live LLM productivity или межплатформенный backend.
 - Последствие: E09 checkpoint закрыт; новые claims о производительности, portability или live model comparison нельзя выводить из этого отчёта.
+- Исправление после adversarial review: одинаковые reference/IR результаты больше не маскируют расхождение с независимым oracle; такой случай получает terminal `EvaluatorMismatch` и отдельный regression probe.
