@@ -147,7 +147,7 @@ public static class CalibrationEvaluator
     public static CalibrationReport Run()
     {
         var pairs = CalibrationCorpus.Create().Select(EvaluatePair).ToImmutableArray();
-        var negative = ImmutableArray.Create("MalformedJson", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "RefusalCodeMismatch", "InvalidCandidate", "UnknownArm", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "CompleteSolutionStarter");
+        var negative = ImmutableArray.Create("SchemaInvalid", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "RefusalCodeMismatch", "InvalidCandidate", "UnknownArm", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "CompleteSolutionStarter");
         var negativeResults = RunNegativeProbes(negative, CalibrationCorpus.Create());
         string status = pairs.All(p => p.Equivalent) && negativeResults.All(x => x.EndsWith(":ValidRefusal", StringComparison.Ordinal)) ? "Accepted" : "Refused";
         var skeleton = new { protocol = CalibrationIdentity.Protocol, corpus = CalibrationIdentity.Corpus, evaluator = CalibrationIdentity.Evaluator, status, positiveCases = pairs.Length, negativeCases = negative.Length, pairs, negativeCategories = negative, negativeResults };
@@ -160,16 +160,17 @@ public static class CalibrationEvaluator
     {
         var c = corpus[0]; var results = ImmutableArray.CreateBuilder<string>();
         bool Probe(string name, Func<bool> action) { bool passed = action(); results.Add($"{name}:{(passed ? "ValidRefusal" : "ProbeFailed")}"); return passed; }
-        Probe(names[0], () => { try { ProgramCodec.Parse("{}"); return false; } catch (KernelException) { return true; } });
+        Probe(names[0], () => { try { ProgramCodec.Parse("{}"); return false; } catch (KernelException e) { return e.Error.Code == "SchemaInvalid"; } });
         Probe(names[1], () => { try { ProgramCodec.Parse("{\"schemaVersion\":\"kernel.v0\",\"programId\":\"reserve\",\"profileId\":\"reserve.v0\",\"nodes\":[{\"id\":\"n.x\",\"op\":\"x\",\"type\":\"I64\",\"args\":[]}],\"outputs\":{\"accepted\":\"n.x\",\"available\":\"n.x\",\"reserved\":\"n.x\"}}"); return false; } catch (KernelException) { return true; } });
         Probe(names[2], () => RejectProgram(c.Program with { Nodes = c.Program.Nodes.SetItem(2, c.Program.Nodes[2] with { Type = KernelType.I64 }) }));
         Probe(names[3], () => RejectProgram(c.Program with { Outputs = new("n.missing", "n.remaining", "n.debit") }));
-        Probe(names[4], () => RejectProgram(c.Program with { Nodes = c.Program.Nodes.SetItem(2, c.Program.Nodes[2] with { Args = ["n.enough", "n.enough"] }) }));
+        Probe(names[4], () => RejectCode(c.Program with { Nodes = c.Program.Nodes.SetItem(5, c.Program.Nodes[5] with { Args = ["n.remaining", "n.debit"] }) }) == "CycleDetected");
         Probe(names[5], () => RejectProgram(c.Program with { Nodes = c.Program.Nodes.Add(new("n.dead", "i64.const", KernelType.I64, [], null, 1)) }));
         Probe(names[6], () => !NotationCompiler.Compile([0xff]).Accepted);
         Probe(names[7], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ // comment\n }")).Accepted);
         Probe(names[8], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ /* comment */ }")).Accepted);
-        Probe(names[9], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ long a = input.resourceAvailable; long b = input.requestedQuantity; bool x = (((b <= a))); long z = 0L; long d = Select(x,b,z); long r = checked(a-d); return (accepted:x, available:r, reserved:d); }")).Accepted);
+        string deep = new string('(', 33) + "b <= a" + new string(')', 33);
+        Probe(names[9], () => NotationError(Encoding.UTF8.GetBytes($"{{ long a = input.resourceAvailable; long b = input.requestedQuantity; bool x = {deep}; long z = 0L; long d = Select(x,b,z); long r = checked(a-d); return (accepted:x, available:r, reserved:d); }}")) == "DelimiterDepthExceeded");
         Probe(names[10], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ long a = input.resourceAvailable; long b = input.requestedQuantity; bool x = !!(b <= a); long z = 0L; long d = Select(x,b,z); long r = checked(a-d); return (accepted:x, available:r, reserved:d); }")).Accepted);
         Probe(names[11], () => { var refusal = CalibrationEvaluator.Evaluate(c with { NotationSource = "{ // comment\n }" }, "strogo-notation"); return refusal.Status == "Refused" && refusal.Stages.Any(s => s.Code == "UnsupportedSyntax"); });
         var starter = Exporter.Export(c, "graph-json");
@@ -187,7 +188,9 @@ public static class CalibrationEvaluator
         Probe(names[19], () => !Exporter.ValidateStarter(full, c, out var code) && code == "StarterAccepted");
         return results.ToImmutable();
     }
-    private static bool RejectProgram(KernelProgram program) { try { GraphValidator.Validate(program); return false; } catch (KernelException) { return true; } }
+    private static bool RejectProgram(KernelProgram program) => RejectCode(program) is not null;
+    private static string? RejectCode(KernelProgram program) { try { GraphValidator.Validate(program); return null; } catch (KernelException e) { return e.Error.Code; } }
+    private static string? NotationError(byte[] source) { var result = NotationCompiler.Compile(source); return result.ErrorCode; }
 }
 
 public static class Exporter

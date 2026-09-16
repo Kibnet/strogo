@@ -2163,3 +2163,11 @@
 - Evidence: `docs/evidence/e09-offline-calibration.json`; все 20 `negativeResults` имеют `:ValidRefusal`, report `Accepted`, 12 paired positives, report digest `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098`.
 - Исправлено: удалены synthetic JSON-only checks для manifest categories; добавлены реальные missing/extra field, digest mismatch, starter collision, complete notation solution и evaluator mismatch regressions.
 - Ограничение: это по-прежнему offline Reserve calibration; live LLM, G05, portability, backend и performance claims отсутствуют.
+
+## K-E06-119
+
+- Дата / фаза: 2026-09-16 / E09 negative-fixture correction.
+- Тип / статус: Exact refusal-code coverage / Fixed and rerun.
+- Утверждение: `SchemaInvalid` использует корректный JSON с отсутствующей схемой и проверяет точный parser code; `CycleDetected` получает type-correct self-cycle; `DeepDelimiter` использует 33 nested delimiters и проверяет точный `DelimiterDepthExceeded`; любой другой refusal code больше не считается успехом probe.
+- Evidence: финальный E09 run — `Accepted`, 12 positive pairs, 20/20 `ValidRefusal`, report digest `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098`.
+- Последствие: категории negative report теперь соответствуют достигнутой стадии boundary, а не просто факту любого отказа.
