@@ -20,7 +20,7 @@
 Outcome contract:
 
 - Success means: каждый допустимый source из фиксированного корпуса даёт один canonical DAG, а его revision совпадает с заранее зафиксированным graph fixture; каждый запрещённый source получает детерминированный typed refusal до lowering.
-- Итоговый артефакт / output: новый `Kernel.CSharpNotation` library, conformance suite, canonical source fixtures и machine-readable frontend report.
+- Итоговый артефакт / output: новый `Strogo.Notation` library, conformance suite, canonical source vectors и machine-readable frontend report.
 - Stop rules: любое расхождение source→DAG, недетерминированная ошибка, обход preparse limits или изменение `Kernel.Core/Kernel.Host` semantics блокирует checkpoint; live LLM calls и benchmark не запускаются.
 
 ## 2. Текущее состояние (AS-IS)
@@ -59,9 +59,9 @@ Outcome contract:
 
 | Компонент / файл | Ответственность |
 | --- | --- |
-| `src/Kernel.CSharpNotation` | ASCII scanner, Roslyn syntax-as-data parser, closed grammar, lowering to `KernelProgram` |
-| `tests/Kernel.CSharpNotation.Conformance` | positive corpus, negative corpus, determinism and resource-boundary tests |
-| `tests/fixtures/notation-v0` | canonical sources, expected graph revisions and refusal expectations |
+| `src/Strogo.Notation` | ASCII scanner, Roslyn syntax-as-data parser, closed grammar, lowering to `KernelProgram` |
+| `tests/Strogo.Notation.Conformance` | positive corpus, negative corpus, determinism and resource-boundary tests |
+| `docs/evidence/e08-notation-conformance.json` | source/frontend/program digests and refusal report |
 | `docs/evidence/e08-notation-*.json` | filtered machine-readable report; no generated binaries or DB |
 | `Kernel.Core` | unchanged source of truth for node semantics, validation and revision |
 
@@ -219,7 +219,7 @@ Commands after approval:
 ```powershell
 dotnet restore --locked-mode
 dotnet build Kernel.slnx -c Release --no-restore
-dotnet run --project tests/Kernel.CSharpNotation.Conformance/Kernel.CSharpNotation.Conformance.csproj -c Release --no-build
+dotnet run --project tests/Strogo.Notation.Conformance/Strogo.Notation.Conformance.csproj -c Release --no-build -- --report docs/evidence/e08-notation-conformance.json
 dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite e07
 ```
 
@@ -251,12 +251,12 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 
 ## 13. План выполнения
 
-1. Получить owner approval этой версии SPEC.
-2. Создать additive project and pinned dependency; сначала проверить source/lockfile identity.
-3. Реализовать scanner, syntax allowlist, binder and lowering; не подключать Host.
-4. Добавить positive/negative/boundary corpus and conformance runner.
-5. Запустить Core/Host/E07 regressions, сохранить report and knowledge entry.
-6. Провести post-EXEC review; benchmark, effects и backend вынести в следующие approval-gated этапы.
+1. Получить owner approval этой версии SPEC — выполнено фразой владельца «Спеку подтверждаю».
+2. Создать additive project and pinned dependency; сначала проверить source/lockfile identity — выполнено в `6b54729`.
+3. Реализовать scanner, syntax allowlist, binder and lowering; не подключать Host — выполнено в `6b54729`.
+4. Добавить positive/negative/boundary corpus and conformance runner — выполнено в `6b54729`, report обновлён после запуска.
+5. Запустить Core/Host/E07 regressions, сохранить report and knowledge entry — выполнено локально, evidence и запись K-E06-114 добавлены.
+6. Провести post-EXEC review; benchmark, effects и backend вынести в следующие approval-gated этапы — следующий шаг.
 
 ## 14. Открытые вопросы
 
@@ -271,10 +271,9 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 
 | Файл | Изменения | Причина |
 | --- | --- | --- |
-| `src/Kernel.CSharpNotation/**` | new frontend | canonical agent-facing source |
-| `tests/Kernel.CSharpNotation.Conformance/**` | new tests and runner | verify grammar/lowering |
-| `tests/fixtures/notation-v0/**` | source and expected identity fixtures | reproducible corpus |
-| `docs/evidence/e08-notation-*.json` | filtered report | auditable output |
+| `src/Strogo.Notation/**` | new frontend | canonical agent-facing source |
+| `tests/Strogo.Notation.Conformance/**` | new tests and runner | verify grammar/lowering |
+| `docs/evidence/e08-notation-conformance.json` | filtered report | auditable output |
 | `docs/knowledge-log.md` | implementation/result entries | preserve significant knowledge |
 | `Kernel.slnx` and lockfiles | additive project/dependency references | build integration |
 
@@ -310,7 +309,7 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 
 Итог: **НУЖНА ДОРАБОТКА / OWNER REVIEW** до получения approval.
 
-### SPEC Rubric Result
+### SPEC Rubric Result (на момент pre-approval)
 
 | Критерий | Балл (0/2/5) | Обоснование |
 | --- | ---: | --- |
@@ -319,11 +318,11 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 | Конкретность целевого дизайна | 5 | grammar, lowering, errors and report fixed |
 | Безопасность и откат | 5 | no execution, additive project, lockfile gate |
 | Тестируемость | 5 | positive/negative/boundary matrix |
-| Готовность к автономной реализации | 2 | exact owner approval is still required |
+| Готовность к автономной реализации | 2 | exact owner approval was still required at the SPEC gate |
 
-Итоговый балл: **27 / 30**; зона: под контролем, owner approval required.
+Итог pre-approval: **27 / 30**; зона: под контролем, owner approval was required at that gate.
 
-### Role-Based Review Result
+### Role-Based Review Result (на момент pre-approval)
 
 | Role | Applicability | Verdict | Required spec changes |
 | --- | --- | --- | --- |
@@ -335,17 +334,17 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 
 ### Post-SPEC Review
 
-- Статус: **PASS с owner gate**.
+- Статус на момент SPEC: **PASS с owner gate**; gate закрыт последующим owner approval.
 - Scope/Evidence: прочитаны `docs/project-intent.md`, current `Kernel.Core` codec/validator, E07 SPEC/report, controlled-language historical SPEC and repository instructions.
 - Contract: the notation lowers only to existing graph operations; `Kernel.Host` and capabilities remain authoritative.
 - Adversarial: syntax-as-data, semantic-model bypass, literal overflow, unary/depth limits, partial output and false `Accepted` paths are covered.
 - Correction before approval: the initial draft's generic `n.`+source-name rule could not produce the existing `n.available`/`n.quantity`/`n.zero` graph IDs from the example. The current revision makes input bindings and the zero literal explicit and canonical, so AC1 is now mechanically attainable.
 - Residual risk: this checkpoint tests a representation and compiler, not agent productivity or final human-facing syntax.
-- Stop decision: do not implement until owner sends exact **«Спеку подтверждаю»** for this corrected file/version.
+- Stop decision at SPEC boundary: implementation was held until the owner sent exact **«Спеку подтверждаю»** for this corrected file/version; approval was subsequently received and EXEC began.
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»**.
+Получено: **«Спеку подтверждаю»**; EXEC начат после фиксации commit `4681e22`.
 
 ## 20. Журнал действий агента
 
@@ -353,5 +352,8 @@ Stop if restore changes a lockfile, any positive vector diverges from graph revi
 | --- | --- | ---: | --- | --- | --- | --- | --- |
 | RESEARCH | Проверен текущий checkout после E07 | 0.99 | Нет для design draft | Зафиксировать next language checkpoint | Нет | E07 pushed at `1f41d0b` | Git, README, E07 report |
 | SPEC | Сопоставлены G01/G03/G04 с frontend gap | 0.94 | Owner choice notation surface | Запросить exact approval | Да | Пока не получено | `docs/project-intent.md`, this SPEC |
-| SPEC | Подготовлен closed grammar, error contract and AC matrix | 0.92 | Runtime implementation evidence | После approval создать frontend project | Да | Ожидается | this SPEC |
+| SPEC | Подготовлен closed grammar, error contract and AC matrix | 0.92 | Runtime implementation evidence | После approval создать frontend project | Да | На момент записи ожидалось; затем получено | this SPEC |
 | SPEC | Исправлено несоответствие source names и canonical Reserve node IDs до approval | 0.98 | Нет для design gate | Зафиксировать correction и снова запросить approval | Да | Пока не получено | this SPEC, K-E06-106 |
+| EXEC | Владелец подтвердил текущую версию SPEC точной фразой | 0.99 | Нет для E08 frontend MVP | Реализовать additive frontend и corpus | Нет | «Спеку подтверждаю» | commit `4681e22`, this SPEC |
+| EXEC | Реализованы scanner, Roslyn allowlist, typed binder, canonical lowering и refusals | 0.94 | Full post-EXEC review | Запустить regressions и сохранить report | Нет | Решение не требовалось | `src/Strogo.Notation`, commit `6b54729` |
+| EXEC | E08 conformance и Core/E07 regressions прошли; report сохранён | 0.98 | Post-EXEC review and future benchmark | Обновить knowledge log и закрыть review findings | Нет | Решение не требовалось | `docs/evidence/e08-notation-conformance.json`, local runs |

@@ -2115,3 +2115,13 @@
 - Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `c5c485f7-eb51-42d0-a6e9-61fec80d5b1a`, read-back seq `12804`.
 - Последствие: внешний review получил конкретный provenance seam для counterexamples, а опубликованный статус не смешивает design hardening с результатом исполнения.
 - Supersedes / supersededBy: уточняет K-E06-112; owner approval текущего E08 snapshot всё ещё требуется.
+
+## K-E06-114
+
+- Дата / фаза: 2026-09-16 / E08 EXEC checkpoint.
+- Тип / статус: Frontend implementation and conformance result / Verified for the stated local contract.
+- Утверждение: после owner approval реализован additive `Strogo.Notation` frontend: raw UTF-8 entry point, bounded ASCII FSM, Roslyn syntax-as-data allowlist, typed binding, canonical literal interning, Reserve lowering и refusal envelope без Host/effects/backend.
+- Evidence: commit `6b54729`; `docs/evidence/e08-notation-conformance.json`; Release solution build — 0 warnings/0 errors; E08 runner — 12 positive, 23 negative, 142 assertions; E07 — 59 assertions; full `Kernel.Conformance` — 29 cases, 10904 assertions.
+- Ограничение: проверен только deterministic source→Kernel.Core graph boundary и regressions текущего repository; это не доказательство G05, отсутствия всех ошибок, производительности, portability или production runtime.
+- Последствие: E08 frontend seam теперь исполняем и измерим; следующий этап может обсуждать agent-facing ergonomics или benchmark отдельно, не меняя уже подтверждённый Core contract.
+- Supersedes / supersededBy: реализует K-E06-104/K-E06-112 после approval; effects, backend и LLM benchmark остаются отдельными approval-gated задачами.

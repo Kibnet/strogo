@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Kernel.Core;
 using Strogo.Notation;
 
@@ -17,6 +18,10 @@ const string baseline = """
 const string expectedGraph = """
 {"schemaVersion":"kernel.v0","programId":"reserve","profileId":"reserve.v0","nodes":[{"id":"n.available","op":"input","type":"I64","args":[],"fieldId":"state.available"},{"id":"n.quantity","op":"input","type":"I64","args":[],"fieldId":"event.quantity"},{"id":"n.zero","op":"i64.const","type":"I64","args":[],"value":"0"},{"id":"n.enough","op":"i64.le","type":"Bool","args":["n.quantity","n.available"]},{"id":"n.debit","op":"select","type":"I64","args":["n.enough","n.quantity","n.zero"]},{"id":"n.remaining","op":"i64.sub_checked","type":"I64","args":["n.available","n.debit"]}],"outputs":{"accepted":"n.enough","available":"n.remaining","reserved":"n.debit"}}
 """;
+
+int reportOption = Array.IndexOf(args, "--report");
+if (reportOption >= 0 && reportOption + 1 >= args.Length) throw new ArgumentException("--report requires a path");
+string? reportPath = reportOption >= 0 ? Path.GetFullPath(args[reportOption + 1]) : null;
 
 var positives = new[]
 {
@@ -72,6 +77,8 @@ var baselineResult = NotationCompiler.Compile(Encoding.UTF8.GetBytes(baseline));
 Check(baselineResult.Accepted, "baseline accepted");
 var expected = ProgramCodec.Parse(expectedGraph);
 Check(baselineResult.ProgramRevision == ProgramCodec.Revision(expected), "baseline exact graph revision");
+var positiveReports = new List<object>();
+var negativeReports = new List<object>();
 
 for (int positiveIndex = 0; positiveIndex < positives.Length; positiveIndex++)
 {
@@ -85,6 +92,7 @@ for (int positiveIndex = 0; positiveIndex < positives.Length; positiveIndex++)
     Check(first.ReportBytes().SequenceEqual(second.ReportBytes()), "positive report deterministic");
     Check(first.Program is not null, "positive graph emitted");
     GraphValidator.Validate(first.Program!);
+    positiveReports.Add(new { testName = $"positive-{positiveIndex:00}", first.SourceDigest, first.FrontendRevision, first.ProgramRevision, first.Status });
 }
 
 for (int negativeIndex = 0; negativeIndex < negatives.Length; negativeIndex++)
@@ -96,6 +104,25 @@ for (int negativeIndex = 0; negativeIndex < negatives.Length; negativeIndex++)
     Check(result.ErrorCode == expectedCode, $"negative[{negativeIndex}] code expected {expectedCode}, actual {result.ErrorCode}");
     Check(result.Program is null && result.ProgramRevision is null, "negative has no graph/revision");
     Check(!string.IsNullOrWhiteSpace(result.Locus), "negative has locus");
+    negativeReports.Add(new { testName = $"negative-{negativeIndex:00}", result.SourceDigest, result.FrontendRevision, result.Status, result.ErrorCode, result.Locus });
+}
+
+if (reportPath is not null)
+{
+    Directory.CreateDirectory(Path.GetDirectoryName(reportPath) ?? throw new InvalidOperationException("Report path has no directory"));
+    var report = new
+    {
+        schemaVersion = NotationCompiler.SchemaVersion,
+        grammarRevision = NotationCompiler.GrammarRevision,
+        baselineProgramRevision = baselineResult.ProgramRevision,
+        frontendRevision = baselineResult.FrontendRevision,
+        positiveCount = positiveReports.Count,
+        negativeCount = negativeReports.Count,
+        checks,
+        positives = positiveReports,
+        negatives = negativeReports
+    };
+    File.WriteAllBytes(reportPath, JsonSerializer.SerializeToUtf8Bytes(report, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
 }
 
 Console.WriteLine($"E08 notation conformance PASS: positives={positives.Length}, negatives={negatives.Length}, checks={checks}");

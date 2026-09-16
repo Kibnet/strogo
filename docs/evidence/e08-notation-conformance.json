@@ -1,0 +1,281 @@
+{
+  "schemaVersion": "strogo.csharp-notation.v0.1",
+  "grammarRevision": "e08.1",
+  "baselineProgramRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+  "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+  "positiveCount": 12,
+  "negativeCount": 23,
+  "checks": 142,
+  "positives": [
+    {
+      "testName": "positive-00",
+      "sourceDigest": "131ce295be46ff242a3a1c155b14ab340a8dbfcd0fa4387cdb29a59734f975bc",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "b286d3db46edcd3b79e0aa6993bdf4561de21bb8dae33c161512711be4ec5ebe",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-01",
+      "sourceDigest": "f27dacba9fbd33ed75c716d31dd0dd13dc3a69510f037eda716d8c78c5665250",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "7de07d0d0e7aa59df13a5270e46a2651295ace467860b4294047273cc523731a",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-02",
+      "sourceDigest": "de76f7eb6bea72113f6f8819539bd9f39e3fd00447eeeb47eef8a589c68f6f64",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "e63e054d65f937c2f9772dd3febf0cabc0f4f3b1be4876a43af67f744d35e404",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-03",
+      "sourceDigest": "16be551be9723103732a7804b74166bccbd439a593f92c4125f73b62190daec7",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "30c0f806d0a3fb425f30e3e43de6c7896cdd3c4dda0094f73f260c681736e893",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-04",
+      "sourceDigest": "764a8ecd690716a9843b7f409604aad96b5b01cbc65de5e389fbc6a65fbcb2e2",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "31913f54a44f5a04c2678cb3e7d4dde682a2bdb98c6d0a5bb86bec32770e2362",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-05",
+      "sourceDigest": "8df0c47e1a19895f8130fda61a2225f6255fe41166747ff0cffabafc1199b8a6",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "ddc5ec4e1c41c670877d8149d64a3f9aaf84c3f84f8f520745754250a7489c90",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-06",
+      "sourceDigest": "ae31e23c2e690823b6c3f9236227fd816b80c2df82bac1d49abe688500241b17",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "356eea707a0cf0423693d16ae3aab0eef09a93eb70f13c5ac226d0d0366884e1",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-07",
+      "sourceDigest": "acbfb145bf7397f60772a8ef39ab9b2bcb244abc6c55ab2e8bf7775b6809d310",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "00e771aea664ba588918609f75dbe94e0934d7dbebbdec5c46a0247640118f77",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-08",
+      "sourceDigest": "e51af0a4f7edeaa3fc3272f640f049c722516c4871283e1ee49a55f753a49d19",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "40397eedfb3d58278559c5176ce3846ff767b8d7bc325bbaf08e4be45d905a6e",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-09",
+      "sourceDigest": "dcc006962e660adcde5ac1cce992e0387cab095d23c3bec3d7d94512def6f6c8",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "152ee5c5117352f946f492eede4de4ff13c8b2bb265457a67235b719e464f2d5",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-10",
+      "sourceDigest": "14b6b4210160f92f8de99c437461dfe905f7bec62479a228f79c78bb427c685b",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "e433bfe4ac3dff7aa361d4b4f4db4ec15c1cf56fbdedc17953a14cab55791abd",
+      "status": "Accepted"
+    },
+    {
+      "testName": "positive-11",
+      "sourceDigest": "ac00d6c0205c93d729254af0ad21861d138cc900e7ed57863976601aa65a21bc",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "programRevision": "78bb73182b7e00c5aa71242cf351f2cd9d4fb51b891538efb2cbb5d3ab1c1865",
+      "status": "Accepted"
+    }
+  ],
+  "negatives": [
+    {
+      "testName": "negative-00",
+      "sourceDigest": "a9ba2699df2dc21a5f7dde0dfff65cf295789229902e361499094ea2a641c910",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:1"
+    },
+    {
+      "testName": "negative-01",
+      "sourceDigest": "c5c2c48aa9e4135af772e0f87c7d8153ca099918dd0908fe1f5657999f880e62",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:0"
+    },
+    {
+      "testName": "negative-02",
+      "sourceDigest": "083e3d1cdf02e24b24c065aa867481cab2320ddd70d0ffda1da077c1303dcb51",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:142"
+    },
+    {
+      "testName": "negative-03",
+      "sourceDigest": "41603ec5b9dedd2d5b53ff76b3351215b741f2d87a899d49313069c10f6bcfa7",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:142"
+    },
+    {
+      "testName": "negative-04",
+      "sourceDigest": "dcdd60555ad85b269385671400f45bdc00b93a9820ac5a32af2f599b932117e3",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:9"
+    },
+    {
+      "testName": "negative-05",
+      "sourceDigest": "8ca9f8c269c0a4b1d8bf0efc67d97df8ad5e0ea93630fd9099860d36c0fe75ea",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "SourceEncodingInvalid",
+      "locus": "offset:0"
+    },
+    {
+      "testName": "negative-06",
+      "sourceDigest": "b9448c70bf0f07edec1b324800f7c2608c016c50f282bf603ea304bdc9e8fade",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "SourceEncodingInvalid",
+      "locus": "offset:0"
+    },
+    {
+      "testName": "negative-07",
+      "sourceDigest": "8e4f48906c44f9d75a773f5752c878f15f3d8e05bfe94a8791bbd88a2ecfb1d5",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "SourceTooLarge",
+      "locus": "offset:0"
+    },
+    {
+      "testName": "negative-08",
+      "sourceDigest": "221add2ff75f5c1e377c93d77deff5ad44e13bb676517f8f3af9d9b84a24accf",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "DuplicateLocal",
+      "locus": "offset:130"
+    },
+    {
+      "testName": "negative-09",
+      "sourceDigest": "c37e4bd0b017c7c81c5c27345a18677331e7aed2ecc2abb24a467d33a48b97ee",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "ForwardReference",
+      "locus": "offset:104"
+    },
+    {
+      "testName": "negative-10",
+      "sourceDigest": "c29cf9be3e7b81bfd2f6e78f36d3ce42c9a929dceb69ce24a5c551a17a251e08",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "TypeMismatch",
+      "locus": "offset:96"
+    },
+    {
+      "testName": "negative-11",
+      "sourceDigest": "2911cb9739cf9d5c5cea7a2cb3589eccf7f9ab73bc7932bae7b213e822739707",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "TypeMismatch",
+      "locus": "offset:96"
+    },
+    {
+      "testName": "negative-12",
+      "sourceDigest": "a1f37a6b7c6cad7bfe92e072b7aaf14634a7cc831d5f4cd3bfe5bed785ffe9ca",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "GrammarInvalid",
+      "locus": "offset:232"
+    },
+    {
+      "testName": "negative-13",
+      "sourceDigest": "7f049e276150f389858c2cc954d50d4d570b1d26ad67127b70e3a91e7b07db65",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:168"
+    },
+    {
+      "testName": "negative-14",
+      "sourceDigest": "04b06b6fbf5ba02aa7bcfbfffe769e2456aab40f7d80693ef88a12a51f3572ec",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "OutputInvalid",
+      "locus": "offset:242"
+    },
+    {
+      "testName": "negative-15",
+      "sourceDigest": "68edf4efc88c8264e3069b80d07886481f6bdcf09294092021fec9e300e4e3e9",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "TypeMismatch",
+      "locus": "offset:242"
+    },
+    {
+      "testName": "negative-16",
+      "sourceDigest": "613a4b8bd8a461a0e62332f02b086c24f62d6b732df546d556b1c7adb54d126e",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "GrammarInvalid",
+      "locus": "offset:170"
+    },
+    {
+      "testName": "negative-17",
+      "sourceDigest": "bf220742f580e95522bbea213492edfff4b79aa9a12aa4c4e1973e8363d13117",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnsupportedSyntax",
+      "locus": "offset:27"
+    },
+    {
+      "testName": "negative-18",
+      "sourceDigest": "f8aaa445012dbfe48a54b5f17f8121c2eaab4024d8231f9bcc9907fffd188c3b",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "UnaryChainExceeded",
+      "locus": "offset:106"
+    },
+    {
+      "testName": "negative-19",
+      "sourceDigest": "b44acaee1554b6dfe88f6d7e217fe9e4c12fa786d2f0adc0e4e3787c58b0c889",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "GrammarInvalid",
+      "locus": "offset:0"
+    },
+    {
+      "testName": "negative-20",
+      "sourceDigest": "a6ca76678c13b3b1bf3a4f5cfafaee39dcb13dc313319637ac686bc8d92de2a9",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "DelimiterDepthExceeded",
+      "locus": "offset:32"
+    },
+    {
+      "testName": "negative-21",
+      "sourceDigest": "a5ca85d2e794e5158dabb4f68dc41d175ca60be41c11388bced8fa5a7f5838db",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "SyntaxInvalid",
+      "locus": "offset:396"
+    },
+    {
+      "testName": "negative-22",
+      "sourceDigest": "3057b7e369c357afe023bdc35769bc770966dcad15b1d8586316233a7450cbee",
+      "frontendRevision": "6dcc16aedc33defc1dfe4d09f700a5a5d81d941ecdf9932bc47fbbd6555e2b3a",
+      "status": "Refused",
+      "errorCode": "TokenLimitExceeded",
+      "locus": "offset:20476"
+    }
+  ]
+}
