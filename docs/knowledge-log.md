@@ -1975,3 +1975,34 @@
 - Evidence: thread reply id `d5ea9ad1-8f01-4366-9492-0b954939116e`, read-back seq `12782`, SPEC commit `41cc75a`.
 - Последствие: публично предложен runtime-diverse comparison path с сохранённой owner/isolation gate.
 - Supersedes / supersededBy: уточняет K-E06-098; owner decision всё ещё требуется.
+
+## K-E06-100
+
+- Дата / фаза: 2026-09-16 / E07 EXEC implementation.
+- Тип / статус: Cross-host harness / Implemented.
+- Утверждение: реализованы strict canonical fixture codec, пять E07 fixtures, независимый C# direct checked-API baseline и отдельный Java 17 fixture-only in-memory host без ссылки на `Kernel.Host`.
+- Scope: добавлен только conformance harness; production storage, effect seam, callbacks и parser surface не менялись.
+- Evidence: `tests/Kernel.Conformance/E07Cases.cs`, `tests/fixtures/e07/*.json`, `tests/fixtures/e07-java-host/E07JavaHost.java`, SPEC owner approval от 2026-09-16.
+- Последствие: один и тот же fault schedule теперь можно прогонять через language path, direct baseline и runtime-diverse fixture host.
+- Supersedes / supersededBy: уточняет K-E06-098/K-E06-099; effect model остаётся отдельной будущей SPEC.
+
+## K-E06-101
+
+- Дата / фаза: 2026-09-16 / E07 validation.
+- Тип / статус: Three-path agreement / Confirmed.
+- Утверждение: E07 suite прошёл `1/1 cases; 59 assertions`; stale replay, policy/program/manifest drift и effect-smuggling дали одинаковые ordered statuses, available, receipt/transition counts, committed event IDs, empty effects и `mustNotHappen` на всех трёх путях.
+- Observable outcomes: `e1:StateConflict` после commit e2; drift branches отказали как `PolicyChanged`, `ProgramChanged`, `AdmissionInvalidated`; effectful operation получила `pre-admission:UnsupportedEffectSurface`.
+- Evidence: `docs/evidence/e07-cross-host-fixtures-20260916.json`, команда `dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite e07`.
+- Toolchain note: pinned `global.json` требует SDK 10.0.400, которого нет локально; проверка выполнена на совместимом 10.0.401 во временном восстановимом override, `global.json` не изменён.
+- Последствие: E07 reproduces the observed guarantees without the language path; это не доказательство общей невозможности checked API.
+- Supersedes / supersededBy: уточняет K-E06-094 и K-E06-100; production portability claim не сделан.
+
+## K-E06-102
+
+- Дата / фаза: 2026-09-16 / E07 result review.
+- Тип / статус: Causal boundary / Confirmed and recorded.
+- Утверждение: согласованный PASS трёх путей показывает, что текущие E07 guarantees фактически enforced host/contract checks; в этих fixtures не наблюдается отдельного language-only advantage.
+- Ограничение: finite fixture suite не различает общую выразительную мощность языкового слоя и disciplined checked API; для более сильного вывода нужен отдельный ablation/control.
+- Evidence: E07 report, SPEC §6.2 comparison rule и §19 Post-EXEC Review.
+- Последствие: следующий meaningful experiment должен тестировать language-specific reduction of search space, а не переименовывать host guarantees в свойства языка.
+- Supersedes / supersededBy: уточняет K-E06-093 и K-E06-101; effect seam остаётся owner-gated отдельной SPEC.

@@ -1,0 +1,264 @@
+{
+  "schemaVersion": "e07-cross-host-fixtures.v0.1",
+  "generatedAtUtc": "2026-09-16T12:01:17.6054886+03:00",
+  "runtime": ".NET 10.0.12",
+  "javaToolchain": "Java 17 fixture-only in-memory host",
+  "suite": "e07",
+  "passed": true,
+  "testCount": 1,
+  "assertionCount": 59,
+  "fixtures": {
+    "stale-replay": {
+      "fixture": "29d4441ab9e201521c902918471309c96b0c82fd85d13ccf4eec2d8baad82af0",
+      "language": {
+        "pathName": "language",
+        "fixtureId": "stale-replay",
+        "statuses": [
+          "e1:Prepared",
+          "e2:Prepared",
+          "e2:Committed",
+          "e1:StateConflict",
+          "e2-replay:Replayed"
+        ],
+        "available": 6,
+        "receiptCount": 1,
+        "transitionCount": 1,
+        "eventIds": [
+          "e2"
+        ],
+        "effects": [],
+        "forbidden": [
+          "receipt:e2"
+        ]
+      },
+      "direct": {
+        "pathName": "direct",
+        "fixtureId": "stale-replay",
+        "statuses": [
+          "e1:Prepared",
+          "e2:Prepared",
+          "e2:Committed",
+          "e1:StateConflict",
+          "e2-replay:Replayed"
+        ],
+        "available": 6,
+        "receiptCount": 1,
+        "transitionCount": 1,
+        "eventIds": [
+          "e2"
+        ],
+        "effects": [],
+        "forbidden": [
+          "receipt:e2"
+        ]
+      },
+      "java": {
+        "pathName": "java",
+        "fixtureId": "stale-replay",
+        "statuses": [
+          "e1:Prepared",
+          "e2:Prepared",
+          "e2:Committed",
+          "e1:StateConflict",
+          "e2-replay:Replayed"
+        ],
+        "available": 6,
+        "receiptCount": 1,
+        "transitionCount": 1,
+        "eventIds": [
+          "e2"
+        ],
+        "effects": [],
+        "forbidden": [
+          "receipt:e2"
+        ]
+      }
+    },
+    "contract-drift-policy": {
+      "fixture": "7b19d19fb7d861537f39c0aceff741f9f60dcc6e0c89a57b475ca9405c7c8b74",
+      "language": {
+        "pathName": "language",
+        "fixtureId": "contract-drift-policy",
+        "statuses": [
+          "e-policy:Prepared",
+          "mutation:PolicyChanged",
+          "e-policy:PolicyChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "direct": {
+        "pathName": "direct",
+        "fixtureId": "contract-drift-policy",
+        "statuses": [
+          "e-policy:Prepared",
+          "mutation:PolicyChanged",
+          "e-policy:PolicyChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "java": {
+        "pathName": "java",
+        "fixtureId": "contract-drift-policy",
+        "statuses": [
+          "e-policy:Prepared",
+          "mutation:PolicyChanged",
+          "e-policy:PolicyChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      }
+    },
+    "contract-drift-program": {
+      "fixture": "9049effa355aacaf5e6d6a463f2c8e472c09092b185de97cfdd0ae7178ad262f",
+      "language": {
+        "pathName": "language",
+        "fixtureId": "contract-drift-program",
+        "statuses": [
+          "e-program:Prepared",
+          "mutation:ProgramChanged",
+          "e-program:ProgramChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "direct": {
+        "pathName": "direct",
+        "fixtureId": "contract-drift-program",
+        "statuses": [
+          "e-program:Prepared",
+          "mutation:ProgramChanged",
+          "e-program:ProgramChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "java": {
+        "pathName": "java",
+        "fixtureId": "contract-drift-program",
+        "statuses": [
+          "e-program:Prepared",
+          "mutation:ProgramChanged",
+          "e-program:ProgramChanged"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      }
+    },
+    "contract-drift-manifest": {
+      "fixture": "dd7bde21703471b27ae2c425ef942eba6469caeed2490f4aeeb264f7708f0de8",
+      "language": {
+        "pathName": "language",
+        "fixtureId": "contract-drift-manifest",
+        "statuses": [
+          "e-manifest:Prepared",
+          "mutation:AdmissionInvalidated",
+          "e-manifest:AdmissionInvalidated"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "direct": {
+        "pathName": "direct",
+        "fixtureId": "contract-drift-manifest",
+        "statuses": [
+          "e-manifest:Prepared",
+          "mutation:AdmissionInvalidated",
+          "e-manifest:AdmissionInvalidated"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "java": {
+        "pathName": "java",
+        "fixtureId": "contract-drift-manifest",
+        "statuses": [
+          "e-manifest:Prepared",
+          "mutation:AdmissionInvalidated",
+          "e-manifest:AdmissionInvalidated"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      }
+    },
+    "effect-smuggling": {
+      "fixture": "18d97f1d69dd7aa2086fa77bca931d1a31b7ce9ad65b8551a7719a1bdfc6256b",
+      "language": {
+        "pathName": "language",
+        "fixtureId": "effect-smuggling",
+        "statuses": [
+          "pre-admission:UnsupportedEffectSurface"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "direct": {
+        "pathName": "direct",
+        "fixtureId": "effect-smuggling",
+        "statuses": [
+          "pre-admission:UnsupportedEffectSurface"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      },
+      "java": {
+        "pathName": "java",
+        "fixtureId": "effect-smuggling",
+        "statuses": [
+          "pre-admission:UnsupportedEffectSurface"
+        ],
+        "available": 10,
+        "receiptCount": 0,
+        "transitionCount": 0,
+        "eventIds": [],
+        "effects": [],
+        "forbidden": []
+      }
+    }
+  }
+}

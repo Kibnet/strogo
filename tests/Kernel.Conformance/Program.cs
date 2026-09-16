@@ -15,14 +15,15 @@ internal static class Program
                 return await HostCases.RunChildAsync(args.Skip(1).ToArray());
 
             string suite = Option(args, "--suite") ?? "all";
-            if (suite is not ("all" or "core" or "host" or "cli"))
-                throw new ArgumentException("--suite must be core, host, cli, or all");
+            if (suite is not ("all" or "core" or "host" or "cli" or "e07"))
+                throw new ArgumentException("--suite must be core, host, cli, e07, or all");
             string? reportPath = Option(args, "--report");
             string? z3 = Option(args, "--z3");
             var cases = new List<ConformanceCase>();
             if (suite is "all" or "core") CoreCases.Register(cases);
             if (suite is "all" or "host") HostCases.Register(cases);
             if (suite is "all" or "cli") CliCases.Register(cases);
+            if (suite == "e07") E07Cases.Register(cases);
             if (cases.Count == 0) throw new InvalidOperationException("No conformance cases registered");
 
             var results = new List<CaseResult>();

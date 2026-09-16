@@ -141,9 +141,9 @@ The contract-drift sketch is the same sequence with one explicit mutation insert
 
 | Decision | Owner | Default | Confidence | Risk | Needs user before EXEC |
 |---|---|---|---:|---|---|
-| Second host technology | user | **recommended:** independent Java 17 in-memory fixture host with no `Kernel.Host` reference; C# direct checked API remains the first baseline | 0.82 | fixture host is not production storage and Java implementation adds harness work | Да |
+| Second host technology | user | **accepted:** independent Java 17 in-memory fixture host with no `Kernel.Host` reference; C# direct checked API remains the first baseline | 0.82 | fixture host is not production storage and Java implementation adds harness work | Нет |
 | Direct baseline boundary | agent | checked API with identical state/contract and fault schedule | 0.90 | baseline may duplicate host logic | Нет |
-| Effect seam | user | separate future SPEC | 0.95 | task C otherwise proves only absence of surface | Да |
+| Effect seam | user | separate future SPEC | 0.95 | task C otherwise proves only absence of surface | Нет |
 | Causal claim threshold | user | report observed outcomes and enforcement; use ablation for any stronger attribution | 0.95 | overclaiming impossibility from finite runs | Да |
 
 ## 7. Бизнес-правила / Алгоритмы
@@ -167,14 +167,14 @@ No rollout. Delete experimental fixture outputs to roll back; existing v0 behavi
 
 ## 11. Тестирование и критерии приёмки
 
-- AC1: three canonical fixture documents exist and validate strictly.
-- AC2: Task A reproduces typed stale refusal and no-write state on all available paths.
-- AC3: Task B covers program, policy and manifest drift with exact mutation order.
-- AC4: Task C is either rejected as unsupported before admission or moved to a new approved effect SPEC; no hidden callback is silently accepted.
-- AC5: direct baseline and second-host results are recorded beside language-path results.
-- AC6: report distinguishes observed agreement from causal attribution and lists residual confounders.
+- AC1: five canonical fixture documents exist and validate strictly — **PASS**.
+- AC2: Task A reproduces typed stale refusal and no-write state on all three paths — **PASS**.
+- AC3: Task B covers program, policy and manifest drift with exact mutation order — **PASS**.
+- AC4: Task C is rejected as unsupported before admission; no hidden callback is accepted — **PASS**.
+- AC5: direct baseline and second-host results are recorded beside language-path results — **PASS**.
+- AC6: report distinguishes observed agreement from causal attribution and lists residual confounders — **PASS**.
 
-No code/test implementation is authorized until owner approval. Existing characterization tests are evidence for AS-IS only.
+Before owner approval no code/test implementation was authorized; after approval the recorded EXEC scope below applies. Existing characterization tests remain evidence for AS-IS only.
 
 ## 12. Риски и edge cases
 
@@ -185,18 +185,17 @@ No code/test implementation is authorized until owner approval. Existing charact
 
 ## 13. План выполнения
 
-1. Owner confirms second-host and causal-threshold decisions.
-2. Implement strict fixture codec and Task A/B harness only.
-3. Implement independent direct baseline and second host.
-4. Run same fault schedules and publish report.
-5. Return to owner before any effect seam or language extension.
+1. Owner confirmed second-host and causal-threshold decisions — done 2026-09-16.
+2. Implement strict fixture codec and Task A/B harness only — done.
+3. Implement independent direct baseline and second host — done.
+4. Run same fault schedules and publish report — done; see `docs/evidence/e07-cross-host-fixtures-20260916.json`.
+5. Return to owner before any effect seam or language extension — remains open.
 
 ## 14. Открытые вопросы
 
-- Does the owner accept the recommended Java `17.0.19` fixture-only in-memory host, with no claim of production storage portability?
-- If not, should the second host be an independent C# implementation or another pinned runtime?
-- Is a separate C# implementation sufficient, or is a different runtime required?
-- What minimal effect model should Task C exercise, if any?
+- Resolved 2026-09-16: owner accepted the Java `17.0.19` fixture-only in-memory host, independent C# baseline and no production portability claim.
+- Resolved 2026-09-16: a different runtime is required for the second host; the C# path remains a separate checked-API baseline.
+- Open for a future SPEC: what minimal declared effect model should Task C exercise, if any?
 
 ## 15. Соответствие профилю
 
@@ -207,8 +206,11 @@ No code/test implementation is authorized until owner approval. Existing charact
 
 | Файл | Изменения | Причина |
 |---|---|---|
-| `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` | новый draft SPEC | зафиксировать эксперимент до EXEC |
-| `docs/knowledge-log.md` | K-E06-091 | сохранить внешний insight и public evidence |
+| `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` | SPEC, approval и post-EXEC result | зафиксировать эксперимент, границы и evidence |
+| `docs/knowledge-log.md` | K-E06-091 и K-E06-100+ | сохранить внешний insight, implementation result и validation evidence |
+| `tests/Kernel.Conformance/E07Cases.cs` | fixture codec, three-path comparator и runners | воспроизвести E07 Task A/B/C в одном harness |
+| `tests/fixtures/e07/*.json` | пять canonical fixtures | зафиксировать одинаковый fault schedule и expected outcomes |
+| `tests/fixtures/e07-java-host/E07JavaHost.java` | независимый Java 17 in-memory host | проверить runtime-diverse reproduction без `Kernel.Host` |
 
 ## 18. Альтернативы и компромиссы
 
@@ -240,14 +242,23 @@ No code/test implementation is authorized until owner approval. Existing charact
 
 ### Post-SPEC Review
 
-- Статус: **ASK-HUMAN**.
-- Findings: second-host technology, causal threshold and effect seam require owner decisions.
-- Current evidence: existing host characterization and public clarification #12482; current checkout host suite `18/18 cases; 496 assertions`; no new implementation.
-- Stop decision: do not enter EXEC until the owner confirms the SPEC.
+- Статус: **PASS; owner approval получено 2026-09-16**.
+- Findings: Java `17.0.19` fixture-only host, C# direct baseline and symbolic step references приняты как defaults; effect seam remains explicitly out of scope.
+- Current evidence: existing host characterization and public clarification #12482; current checkout host suite `18/18 cases; 496 assertions`; no implementation had started at approval.
+- Stop decision: enter EXEC for Task A/B fixture harness only; no production host or effect surface changes.
+
+### Post-EXEC Review
+
+- Статус: **PASS; scope выполнен 2026-09-16**.
+- Build evidence: `dotnet build Kernel.slnx -c Release --no-restore` — `0 warnings / 0 errors` (локальный SDK 10.0.401 из-за отсутствия pinned 10.0.400; `global.json` восстановлен без изменения).
+- E07 evidence: `dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite e07` — `1/1 cases; 59 assertions`.
+- Agreement: language path, independent direct baseline и Java 17 host совпали по ordered statuses, available, receipt/transition counts, committed event IDs, empty effects и `mustNotHappen` для всех пяти fixtures.
+- Boundary: результат доказывает воспроизведение наблюдаемых гарантий без language path; он не доказывает универсальную невозможность checked API и не добавляет production portability claim.
+- Residual: effect seam, внешние callbacks и production storage остаются отдельной SPEC; Java host fixture-only и не является production runtime.
 
 ## Approval
 
-Ожидается фраза: **«Спеку подтверждаю»**.
+Owner approval: **«Спеку подтверждаю»** получено 2026-09-16. Разрешён только E07 EXEC в пределах этой SPEC: fixture codec, direct checked-API baseline, Java 17 fixture-only host и Task A/B. Effect seam, production storage и язык effects требуют отдельной SPEC.
 
 ## 20. Журнал действий агента
 
@@ -260,3 +271,6 @@ No code/test implementation is authorized until owner approval. Existing charact
 | SPEC | Запущен current-checkout host characterization: `18/18 cases; 496 assertions`, solution Release build `0/0` | 0.98 | Direct baseline и second host ещё не реализованы | Да |
 | SPEC | Добавлены non-executable fixture sketches для stale replay и трёх contract-drift вариантов | 0.96 | Binding convention для opaque handles и second host требуют owner decision | Да |
 | SPEC | Проверен локальный toolchain и добавлена рекомендация Java 17 fixture-only host | 0.88 | Owner должен принять runtime и isolation boundary | Да |
+| EXEC | Owner подтвердил SPEC; defaults Java 17/C# baseline/symbolic refs зафиксированы | 0.98 | Реализация Task A/B harness и повторный review | Нет |
+| EXEC | Реализованы strict codec, C# baseline, Java 17 host и пять fixtures | 0.96 | Запустить cross-host suite и сохранить report | Нет |
+| EXEC | Cross-host suite прошёл `1/1 cases; 59 assertions`; все три пути согласны по наблюдаемым полям | 0.98 | Добавить evidence и knowledge-log, затем commit/push | Нет |
