@@ -218,7 +218,7 @@ No code/test implementation is authorized until owner approval. Existing charact
 
 - Статус: **ASK-HUMAN**.
 - Findings: second-host technology, causal threshold and effect seam require owner decisions.
-- Current evidence: existing host characterization and public clarification #12482; no new implementation.
+- Current evidence: existing host characterization and public clarification #12482; current checkout host suite `18/18 cases; 496 assertions`; no new implementation.
 - Stop decision: do not enter EXEC until the owner confirms the SPEC.
 
 ## Approval
@@ -233,3 +233,4 @@ No code/test implementation is authorized until owner approval. Existing charact
 | SPEC | Опубликована clarification #12482, read-back seq `12482` | 0.95 | Получить owner decisions и approval | Да |
 | SPEC | Создан draft cross-host fixture SPEC | 0.90 | Ждать `Спеку подтверждаю` и ответы на открытые вопросы | Да |
 | SPEC | Исправлен causal-claim criterion по review: observable outcomes вместо доказательства невозможности API; источник fixture format уточнён на #12476 | 0.97 | Owner review и выбор second host остаются открыты | Да |
+| SPEC | Запущен current-checkout host characterization: `18/18 cases; 496 assertions`, solution Release build `0/0` | 0.98 | Direct baseline и second host ещё не реализованы | Да |

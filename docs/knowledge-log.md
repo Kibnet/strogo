@@ -1914,3 +1914,14 @@
 - Evidence: review of `specs/2026-09-15-cross-host-adversarial-fixtures-v0.1.md` §2, §6.2 and §6.5; no runtime change.
 - Последствие: causal attribution становится проверяемой и evidence-bounded; draft SPEC остаётся owner-gated.
 - Supersedes / supersededBy: уточняет K-E06-091/K-E06-092; before EXEC требуется approval и выбор second host.
+
+## K-E06-094
+
+- Дата / фаза: 2026-09-16 / E07 AS-IS characterization.
+- Тип / статус: Current host baseline / Confirmed.
+- Утверждение: на текущем checkout после `dotnet build Kernel.slnx -c Release --no-restore` host suite прошёл `18/18 cases; 496 assertions`.
+- Покрытие для E07: `concurrent-cas-and-same-event`, `snapshot-consistency-during-competing-commit`, `commit-rechecks-program-policy-manifest`, `acl-update-serialized-with-commit`, persistent replay/tamper cases и rollback/process barriers.
+- Scope: это characterisation текущего trusted host; direct checked-API baseline, второй host и language-vs-host causal comparison ещё отсутствуют.
+- Evidence: `dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite host --report %TEMP%\\strogo-e07-host-20260916.json`; solution build `0 warnings / 0 errors`.
+- Последствие: E07 имеет воспроизводимый AS-IS baseline, но это не разрешает EXEC draft SPEC.
+- Supersedes / supersededBy: уточняет K-E06-091/K-E06-093; owner approval и independent paths остаются впереди.
