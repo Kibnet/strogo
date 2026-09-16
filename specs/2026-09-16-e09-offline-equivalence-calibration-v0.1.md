@@ -324,6 +324,7 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 - Regressions: locked restore/build, E08, E07 and full Core/Host/CLI conformance are required and recorded in the action journal below.
 - Findings: no blocking implementation finding. Residual risks are the fixed Reserve-only corpus, deliberately invalid job starters and the fact that both arms share Kernel.Core; none establishes G05, portability, machine-code performance or live LLM quality.
 - Stop decision: E09 is complete as offline calibration. Any live model/provider, additional domain, backend or effects work requires a new SPEC and exact approval.
+- Adversarial follow-up: the negative suite was reworked after review so every one of its 20 results exercises a production boundary; report acceptance is gated on all twenty `ValidRefusal` outcomes.
 
 ## Approval
 
@@ -345,3 +346,4 @@ Stop if any arm diverges, export contains hidden expected data, an evaluator mis
 | EXEC | Создан additive paired calibration harness, independent BigInteger oracle и export boundary | 0.95 | Full regression log | Повторить locked restore/build и conformance suites | Нет | Подтверждено: «Спеку подтверждаю» | `src/Strogo.Experiments/**`, `src/Strogo.ExperimentCli/**`, `tests/Strogo.Experiments.Conformance/**`, `fixtures/e09-reserve/README.md` |
 | EXEC | Выполнен E09 runner: 12/12 positive pairs, 20 typed negative categories, deterministic report | 0.96 | Final regression commands | Сохранить evidence и knowledge entry | Нет | Подтверждено: «Спеку подтверждаю» | `docs/evidence/e09-offline-calibration.json` |
 | REVIEW | Проверены refusal-before-graph, starter inequality/digest boundary и отсутствие live/model claims | 0.94 | Новых scope decisions нет | Закрыть E09 checkpoint; live pilot вынести в отдельную SPEC | Нет | Подтверждено: «Спеку подтверждаю» | Post-EXEC Review, KB K-E06-116/K-E06-117 |
+| REVIEW | Повторная adversarial проверка отклонила synthetic manifest probes; добавлены ManifestCodec, arm-specific checks и report gate по каждому negative result | 0.97 | Новых scope decisions нет | Зафиксировать rerun evidence и push | Нет | Подтверждено: «Спеку подтверждаю» | KB K-E06-118, report `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098` |

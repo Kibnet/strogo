@@ -24,6 +24,22 @@ public sealed record CalibrationReport(string Protocol, string Corpus, string Ev
 public sealed record ExportManifest(string Protocol, string Corpus, string CaseId, string Arm, string Mode, string DataOrigin, string SourceDigest, string CandidateDigest, string FrontendRevision, string CoreSchema, string HostRevision, string SolverDigest, string OracleRevision);
 public sealed record ExportBundle(ExportManifest Manifest, byte[] CandidateBytes);
 
+public static class ManifestCodec
+{
+    private static readonly string[] Fields = ["protocol", "corpus", "caseId", "arm", "mode", "dataOrigin", "sourceDigest", "candidateDigest", "frontendRevision", "coreSchema", "hostRevision", "solverDigest", "oracleRevision"];
+    public static ExportManifest ParseStrict(ReadOnlySpan<byte> bytes)
+    {
+        string json = new UTF8Encoding(false, true).GetString(bytes);
+        using var doc = CanonicalJson.ParseStrict(json);
+        var actual = doc.RootElement.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal).ToArray();
+        if (!actual.SequenceEqual(Fields.Order(StringComparer.Ordinal))) throw KernelErrorException("ManifestFields");
+        var manifest = JsonSerializer.Deserialize<ExportManifest>(json, CanonicalJson.SerializerOptions) ?? throw KernelErrorException("ManifestNull");
+        if (manifest.Protocol != CalibrationIdentity.Protocol || manifest.Corpus != CalibrationIdentity.Corpus || manifest.Mode != "job-starter" || manifest.DataOrigin != "scripted-fixture") throw KernelErrorException("ManifestIdentity");
+        return manifest;
+    }
+    private static KernelException KernelErrorException(string code) => new(KernelError.Create("manifest", code));
+}
+
 public static class ReserveOracle
 {
     public const string Revision = "reserve-oracle.bigint.v0.1";
@@ -131,9 +147,9 @@ public static class CalibrationEvaluator
     public static CalibrationReport Run()
     {
         var pairs = CalibrationCorpus.Create().Select(EvaluatePair).ToImmutableArray();
-        var negative = ImmutableArray.Create("MalformedJson", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "WrongRefusal", "InvalidCandidate", "InfrastructureFailure", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "ExpectedGraphLeak");
+        var negative = ImmutableArray.Create("MalformedJson", "UnsupportedOpcode", "TypeMismatch", "DanglingReference", "CycleDetected", "UnreachableNode", "InvalidUtf8", "UnsupportedSyntax", "CommentSyntax", "DeepDelimiter", "UnaryChain", "RefusalCodeMismatch", "InvalidCandidate", "UnknownArm", "EvaluatorMismatch", "ManifestDigestMismatch", "MissingAllowlistedField", "ExtraManifestField", "StarterCollision", "CompleteSolutionStarter");
         var negativeResults = RunNegativeProbes(negative, CalibrationCorpus.Create());
-        string status = pairs.All(p => p.Equivalent) ? "Accepted" : "Refused";
+        string status = pairs.All(p => p.Equivalent) && negativeResults.All(x => x.EndsWith(":ValidRefusal", StringComparison.Ordinal)) ? "Accepted" : "Refused";
         var skeleton = new { protocol = CalibrationIdentity.Protocol, corpus = CalibrationIdentity.Corpus, evaluator = CalibrationIdentity.Evaluator, status, positiveCases = pairs.Length, negativeCases = negative.Length, pairs, negativeCategories = negative, negativeResults };
         string digest = Convert.ToHexStringLower(SHA256.HashData(CanonicalJson.Encode(skeleton)));
         return new(CalibrationIdentity.Protocol, CalibrationIdentity.Corpus, CalibrationIdentity.Evaluator, status, pairs.Length, negative.Length, pairs, negative, negativeResults, digest);
@@ -155,18 +171,20 @@ public static class CalibrationEvaluator
         Probe(names[8], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ /* comment */ }")).Accepted);
         Probe(names[9], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ long a = input.resourceAvailable; long b = input.requestedQuantity; bool x = (((b <= a))); long z = 0L; long d = Select(x,b,z); long r = checked(a-d); return (accepted:x, available:r, reserved:d); }")).Accepted);
         Probe(names[10], () => !NotationCompiler.Compile(Encoding.UTF8.GetBytes("{ long a = input.resourceAvailable; long b = input.requestedQuantity; bool x = !!(b <= a); long z = 0L; long d = Select(x,b,z); long r = checked(a-d); return (accepted:x, available:r, reserved:d); }")).Accepted);
-        Probe(names[11], () => CalibrationEvaluator.Evaluate(c, "strogo-notation").Status == "Accepted");
+        Probe(names[11], () => { var refusal = CalibrationEvaluator.Evaluate(c with { NotationSource = "{ // comment\n }" }, "strogo-notation"); return refusal.Status == "Refused" && refusal.Stages.Any(s => s.Code == "UnsupportedSyntax"); });
         var starter = Exporter.Export(c, "graph-json");
         Probe(names[12], () => Exporter.ValidateStarter(starter, c, out _));
-        Probe(names[13], () => CalibrationEvaluator.Evaluate(c, "unknown").Status == "Refused");
+        Probe(names[13], () => CalibrationEvaluator.Evaluate(c, "unknown").Status == "Refused" && CalibrationEvaluator.Evaluate(c, "unknown").Stages.All(s => s.Stage != "graph-validator"));
         var mutant = c with { Program = c.Program with { Nodes = c.Program.Nodes.SetItem(2, c.Program.Nodes[2] with { Op = "i64.eq" }) }, NotationSource = c.NotationSource.Replace("quantity <= available", "quantity == available", StringComparison.Ordinal) };
         Probe(names[14], () => CalibrationEvaluator.Evaluate(mutant, "graph-json").Stages.Any(s => s.Code == "EvaluatorMismatch"));
-        Probe(names[15], () => !Exporter.ValidateStarter(starter with { Manifest = starter.Manifest with { CandidateDigest = "bad" } }, c, out _));
-        Probe(names[16], () => !JsonDocument.Parse("{\"protocol\":\"x\"}").RootElement.TryGetProperty("caseId", out _));
-        Probe(names[17], () => !JsonDocument.Parse("{\"protocol\":\"x\",\"extra\":true}").RootElement.EnumerateObject().All(p => p.Name is "protocol"));
-        Probe(names[18], () => !starter.CandidateBytes.AsSpan().SequenceEqual(ProgramCodec.CanonicalBytes(c.Program)));
+        byte[] manifestBytes = CanonicalJson.Encode(starter.Manifest);
+        Probe(names[15], () => { var parsed = ManifestCodec.ParseStrict(manifestBytes); return !Exporter.ValidateStarter(starter with { Manifest = parsed with { CandidateDigest = "bad" } }, c, out var code) && code == "ArtifactMismatch"; });
+        Probe(names[16], () => { try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes("{\"protocol\":\"" + CalibrationIdentity.Protocol + "\"}")); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
+        Probe(names[17], () => { string extra = Encoding.UTF8.GetString(manifestBytes).TrimEnd('}') + ",\"extra\":true}"; try { ManifestCodec.ParseStrict(Encoding.UTF8.GetBytes(extra)); return false; } catch (KernelException e) { return e.Error.Code == "ManifestFields"; } });
+        var collision = starter with { CandidateBytes = ProgramCodec.CanonicalBytes(c.Program), Manifest = starter.Manifest with { CandidateDigest = CanonicalJson.RawDigest(ProgramCodec.CanonicalBytes(c.Program)) } };
+        Probe(names[18], () => !Exporter.ValidateStarter(collision, c, out var code) && code == "ExpectedGraphLeak");
         var full = new ExportBundle(starter.Manifest with { Arm = "strogo-notation", CandidateDigest = CanonicalJson.RawDigest(Encoding.UTF8.GetBytes(c.NotationSource)) }, Encoding.UTF8.GetBytes(c.NotationSource));
-        Probe(names[19], () => !Exporter.ValidateStarter(full, c, out _));
+        Probe(names[19], () => !Exporter.ValidateStarter(full, c, out var code) && code == "StarterAccepted");
         return results.ToImmutable();
     }
     private static bool RejectProgram(KernelProgram program) { try { GraphValidator.Validate(program); return false; } catch (KernelException) { return true; } }

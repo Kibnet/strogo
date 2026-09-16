@@ -2154,3 +2154,12 @@
 - Ограничение: corpus остаётся Reserve-only, экспортный starter намеренно invalid, а E09 не измеряет live LLM productivity или межплатформенный backend.
 - Последствие: E09 checkpoint закрыт; новые claims о производительности, portability или live model comparison нельзя выводить из этого отчёта.
 - Исправление после adversarial review: одинаковые reference/IR результаты больше не маскируют расхождение с независимым oracle; такой случай получает terminal `EvaluatorMismatch` и отдельный regression probe.
+
+## K-E06-118
+
+- Дата / фаза: 2026-09-16 / E09 adversarial revalidation.
+- Тип / статус: Negative-boundary review / Fixed and rerun.
+- Утверждение: negative evidence теперь выполняет 20 probes через реальные Strogo boundaries: `ProgramCodec`, `GraphValidator`, `NotationCompiler`, `CalibrationEvaluator`, `Exporter.ValidateStarter` и строгий `ManifestCodec`; итоговый report gate требует, чтобы каждый probe завершился `ValidRefusal`.
+- Evidence: `docs/evidence/e09-offline-calibration.json`; все 20 `negativeResults` имеют `:ValidRefusal`, report `Accepted`, 12 paired positives, report digest `59addf19af9420f5d397c0bfe7ef54f3863584d88be462ac410af99dc2cd1098`.
+- Исправлено: удалены synthetic JSON-only checks для manifest categories; добавлены реальные missing/extra field, digest mismatch, starter collision, complete notation solution и evaluator mismatch regressions.
+- Ограничение: это по-прежнему offline Reserve calibration; live LLM, G05, portability, backend и performance claims отсутствуют.
