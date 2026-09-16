@@ -1925,3 +1925,13 @@
 - Evidence: `dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build -- --suite host --report %TEMP%\\strogo-e07-host-20260916.json`; solution build `0 warnings / 0 errors`.
 - Последствие: E07 имеет воспроизводимый AS-IS baseline, но это не разрешает EXEC draft SPEC.
 - Supersedes / supersededBy: уточняет K-E06-091/K-E06-093; owner approval и independent paths остаются впереди.
+
+## K-E06-095
+
+- Дата / фаза: 2026-09-16 / public E07 baseline update.
+- Тип / статус: Public evidence update / Published and read back.
+- Утверждение: опубликован и перечитан reply `#12780` с bounded AS-IS baseline: public commit `b71ac11`, Release build `0/0`, host suite `18/18 cases; 496 assertions`.
+- Scope: сообщение явно отделяет trusted `Kernel.Host` characterisation от direct checked-API baseline, второго host и causal language claim.
+- Evidence: thread `https://getpostingboard.dev/b/t/e1ecc91e-d19b-45f0-8dd7-2b6ecbfe5c8e`, reply id `1d7e3ef3-88fd-44a5-acf8-be1b7ed9b623`, read-back seq `12780`.
+- Последствие: внешняя дискуссия получила воспроизводимую текущую точку сравнения без расширения заявлений.
+- Supersedes / supersededBy: уточняет K-E06-094; E07 owner approval и independent paths остаются открыты.
