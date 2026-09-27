@@ -96,6 +96,13 @@ internal static class E10Cases
             string normalizedAfter = PromptInputInspector.NormalizeDigest(promptInputPath, File.ReadAllBytes(promptPath), Path.Combine(root, "sessions", "S1"));
             Check(normalizedBefore != normalizedAfter, "prompt normalizer preserves nonvolatile fields");
             File.WriteAllBytes(promptInputPath, promptInputOriginal);
+            foreach (string invalidCreateTime in new[] { "{}", "[]" })
+            {
+                string mutatedCreateTime = new System.Text.RegularExpressions.Regex("\\\"create_time\\\":[0-9.]+", System.Text.RegularExpressions.RegexOptions.CultureInvariant).Replace(File.ReadAllText(promptInputPath), $"\"create_time\":{invalidCreateTime}", 1);
+                File.WriteAllText(promptInputPath, mutatedCreateTime, new UTF8Encoding(false));
+                Check(ThrowsCode(() => PromptInputInspector.NormalizeDigest(promptInputPath, File.ReadAllBytes(promptPath), Path.Combine(root, "sessions", "S1")), "PromptInputInvalid"), $"create_time {invalidCreateTime} schema drift refused");
+                File.WriteAllBytes(promptInputPath, promptInputOriginal);
+            }
 
             File.WriteAllText(promptInputPath, File.ReadAllText(promptInputPath).Replace("shared developer context", pilot.HiddenCorpusDigest, StringComparison.Ordinal), new UTF8Encoding(false));
             Check(ThrowsCode(() => LivePilotReporting.ValidatePromptInputs(root), "TrustedContentLeak"), "hidden digest leak refused before live");
@@ -310,7 +317,7 @@ internal static class E10Cases
         string session = Path.Combine(root, "sessions", runId);
         string promptInput = System.Text.Json.JsonSerializer.Serialize(new object[]
         {
-            new { type = "message", id = $"volatile-{runId}", role = "developer", content = new[] { new { type = "input_text", text = "shared developer context" } } },
+            new { type = "message", id = $"volatile-{runId}", role = "developer", content = new[] { new { type = "input_text", text = "shared developer context" } }, internal_chat_message_metadata_passthrough = new { create_time = runId.StartsWith('S') ? 1790521515.7801986 : 1790521515.7804544 } },
             new { type = "message", id = $"environment-{runId}", role = "user", content = new[] { new { type = "input_text", text = $"cwd={session}; workspace={session}" } } },
             new { type = "message", id = $"prompt-{runId}", role = "user", content = new[] { new { type = "input_text", text = prompt } } }
         });

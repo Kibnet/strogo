@@ -456,7 +456,12 @@ public static class PromptInputInspector
                 foreach (var property in value.EnumerateObject().OrderBy(x => x.Name, StringComparer.Ordinal))
                 {
                     writer.WritePropertyName(property.Name);
-                    WriteNormalized(writer, property.Value, property.Name, expectedPrompt, sessionDirectory, ref promptReplacements);
+                    if (property.Name == "create_time")
+                    {
+                        if (property.Value.ValueKind is not (JsonValueKind.Number or JsonValueKind.String)) throw LivePilotJson.Failure("PromptInputInvalid");
+                        writer.WriteStringValue("<VOLATILE_CREATE_TIME>");
+                    }
+                    else WriteNormalized(writer, property.Value, property.Name, expectedPrompt, sessionDirectory, ref promptReplacements);
                 }
                 writer.WriteEndObject();
                 break;

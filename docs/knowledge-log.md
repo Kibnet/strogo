@@ -2239,3 +2239,12 @@
 - Дополнительное покрытие: leakage regressions теперь передают canonical serialization отдельной boundary/seeded row и PRNG fragment, а не только их IDs.
 - Evidence: `EvidenceRootIsOutsideRepository`, `pilot prepare`, `Run-E10LivePilot.ps1`, E10 conformance и обновлённая SPEC command block.
 - Последствие: raw evidence не может случайно попасть в Git workspace; публикуется только отдельно allowlisted canonical summary после scan.
+
+## K-E06-127
+
+- Дата / фаза: 2026-09-27 / E10 clean preflight.
+- Тип / статус: Real prompt-schema counterexample / Fixed before model exposure.
+- Утверждение: фактический `codex debug prompt-input` записывает `internal_chat_message_metadata_passthrough.create_time` как дробное JSON number. Core canonical JSON намеренно принимает только целые числа, поэтому recursive normalizer не может пропускать volatile timestamp как обычное значение.
+- Исправление: scalar number/string property `create_time` заменяется на фиксированный строковый placeholder до canonical parse; object/array/bool/null отказываются `PromptInputInvalid`, чтобы schema drift не скрывал содержательное различие. Conformance использует разные fractional timestamps между runs, требует общий normalized digest и отдельно проверяет отказ object/array.
+- Evidence: внешний preflight `preflight-20260927T150456Z` остановился `SchemaInvalid` после четырёх snapshots и до live calls; обновлённый E10/E09 targeted run снова PASS `12/21/20437`.
+- Последствие: preflight действительно проверяет текущий wire-shaped prompt snapshot, а синтетический fixture больше не скрывает дробный volatile metadata field.
