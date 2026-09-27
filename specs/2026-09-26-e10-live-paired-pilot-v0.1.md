@@ -25,7 +25,7 @@ Outcome contract:
 
 - Исходное поручение: выполнить Unlimotion-цель, начав с задачи «Провести E10: живой парный пилот Strogo и обычного языка».
 - Success means: один запуск orchestration создаёт четыре свежих arm-run, сохраняет provenance/usage/timing, слепо оценивает кандидаты и строит canonical отчёт, из которого можно проверить методику и ограничения.
-- Итоговый артефакт: `docs/evidence/e10-live-paired-pilot.json` плюс raw evidence в gitignored `artifacts/local-validation/e10/<pilot-id>/`.
+- Итоговый артефакт: `docs/evidence/e10-live-paired-pilot.json` плюс raw evidence во внешнем локальном каталоге `%LOCALAPPDATA%/Strogo/e10/<pilot-id>/`, который не является repository root или его descendant.
 - Stop rules: не запускать live model до exact approval; не повторять скрыто неуспешный run с раскрытием oracle; не объявлять G05 по E10; остановить pilot как `Invalid` при config drift, missing raw evidence, утечке trusted данных или невозможности установить exact toolchain.
 
 ## 2. Текущее состояние (AS-IS)
@@ -74,7 +74,7 @@ Outcome contract:
 - `tools/Run-E10LivePilot.ps1`: orchestration четырёх output-only `codex exec` процессов, timeout/kill, stdout JSONL/stderr/structured response capture и последовательный trusted evaluation.
 - `tests/Strogo.Experiments.Conformance/`: manifest, prompt freeze/parity, structured response, leakage, candidate, Docker evaluator, metrics и deterministic-report checks.
 - `fixtures/e10-live-pilot/`: публичный human task, exact arm instructions, JSON output schema, C# wrapper/project и четыре публичных примера; без hidden expected candidates.
-- `artifacts/local-validation/e10/<pilot-id>/`: raw run packages, JSONL, stderr, final messages, candidates, evaluations и environment receipt; gitignored.
+- `%LOCALAPPDATA%/Strogo/e10/<pilot-id>/`: raw run packages, JSONL, stderr, final messages, candidates, evaluations и environment receipt; путь находится вне repository tree и синхронизируемой базы знаний.
 - `docs/evidence/e10-live-paired-pilot.json`: allowlisted canonical summary для репозитория.
 - `docs/knowledge-log.md`: выводы и ограничения E10 после фактического run.
 
@@ -325,8 +325,9 @@ docker image inspect $e10Image
 & $e10Dotnet run --project tests/Kernel.Conformance/Kernel.Conformance.csproj -c Release --no-build
 codex debug models
 codex debug prompt-input -c project_doc_max_bytes=0 E10_PROMPT_PREFLIGHT
-pwsh -NoProfile -File tools/Run-E10LivePilot.ps1 -OutputDirectory artifacts/local-validation/e10/<pilot-id>
-& $e10Dotnet run --project src/Strogo.ExperimentCli/Strogo.ExperimentCli.csproj -c Release --no-build -- pilot report --directory artifacts/local-validation/e10/<pilot-id> --output docs/evidence/e10-live-paired-pilot.json
+$e10Raw = Join-Path $env:LOCALAPPDATA 'Strogo/e10/<pilot-id>'
+pwsh -NoProfile -File tools/Run-E10LivePilot.ps1 -OutputDirectory $e10Raw
+& $e10Dotnet run --project src/Strogo.ExperimentCli/Strogo.ExperimentCli.csproj -c Release --no-build -- pilot report --directory $e10Raw --output docs/evidence/e10-live-paired-pilot.json
 git diff --check
 ```
 
@@ -519,3 +520,13 @@ Stop rules: failure до первого `turn.started` можно повтори
 | SPEC-REVIEW | Проверен фактический model catalog Codex CLI; `gpt-6-sol` отсутствует, `gpt-6-astra` поддерживает `medium` | `codex debug models`; requested model заменён до live run | Связать catalog digest с pilot manifest | Не требовалось | this SPEC |
 | SPEC-REVIEW | Устранена последняя executable-identity ошибка: tag plus child digest заменён на repository@digest с explicit `linux/amd64` | Manifest-list `sha256:4beef...`; amd64 child `sha256:1aab...`; normative pull/inspect and runtime receipt | Запросить exact owner approval | Не требовалось | this SPEC |
 | SPEC-REVIEW | Full contract/adversarial/role review завершён; все findings закрыты, residual risks явно ограничивают claims | Post-SPEC Review PASS; linter 20/20; rubric 30/30 | Остановиться до фразы «Спеку подтверждаю» | Ожидается | this SPEC |
+| APPROVAL | Пользователь точной фразой подтвердил переход в EXEC | Ответ `Спеку подтверждаю` сохранён в Unlimotion execution question `66006e20-977c-4437-b9ed-fcb9d97b710c` | Реализовать и проверить pre-live контур | `Спеку подтверждаю` | this SPEC; Unlimotion execution |
+| EXEC | Реализованы frozen packages, four-run CLI/orchestrator, strict event/response parsing, Strogo/C# evaluators, restricted Docker и canonical report | Targeted E10/E09 conformance green; Release build 0 warnings/errors | Закрыть adversarial pre-live findings и сделать чистый checkpoint | Подтверждено ранее | `LivePilot*.cs`; fixtures; tests; PowerShell |
+| EXEC-REVIEW | Adversarial fallback нашёл ложную provenance к старому commit, fail-open event parsing, слабую prompt normalization, overwrite и неполный raw inventory | Findings исправлены: clean-tree gate, source/binary/invocation identities, unknown-event refusal, recursive evidence seal, idempotent evaluation, bounded output, evaluator-collected ACL, recursive scan/quarantine | Повторить полный mandatory set и preflight из чистого commit | Не требовалось | implementation + tests |
+| EXEC-INSIGHT | Windows CRLF в `vectors.csv` ломал Linux argument parsing завершающим `\r` | Fixture writer закреплён на LF; Docker conformance повторно green | Сохранить знание и проверить clean preflight | Не требовалось | `docs/knowledge-log.md`; Docker runner |
+| EXEC-INSIGHT | Private-path regex принимал escaped prose `inputs:\\n` за drive path и ложно ставил `EvidenceQuarantined` | Detector ограничен canonical uppercase drive path + allowlisted roots; nested-secret/quarantine regression сохранён | Повторить mandatory validation | Не требовалось | scanner; E10 conformance; knowledge log |
+| EXEC-REVIEW | `debug prompt-input` не принимает live-only ignore flags, поэтому обычный user `CODEX_HOME` оставлял config/tool drift | Оба пути переведены на один ACL-restricted temporary `CODEX_HOME` без config/rules/plugins/memories/global instructions; копируется только auth, среда удаляется в `finally` | Проверить clean preflight и prompt digest parity | Не требовалось | orchestrator; invocation/environment receipts; knowledge log |
+| EXEC-DECISION | Допустимый spec retry до exposure не реализован как автоматический in-pilot retry | Orchestrator fail-closed останавливает текущий pilot при любой terminal evaluation. Разрешённая §6.4 замена процесса до `turn.started` остаётся нормативной возможностью, но E10 script её не автоматизирует; для неё нужен отдельный явный operator path | Зафиксировать limitation `NoAutomaticRetry` в canonical report | Не требовалось | orchestrator; report limitation |
+| EXEC-REVIEW | Pre-live adversarial review обнаружил слабый leakage inventory, fast-exit output race, неполную binary revalidation, private-path gaps и SDK override | До exposure добавлены canonical forbidden inventory с hidden/expected/source identities, pre-live scan, exact implementation identity check до каждого run/evaluation, post-exit stream fault check, Windows/UNC/escaped path regressions и обязательный repo-local SDK | Повторить mandatory validation и clean preflight | Не требовалось | implementation; tests; orchestrator |
+| EXEC-REVIEW | Повторный adversarial pass нашёл partial hidden leak, незавершённый report после fail-closed stop, несвязанные parity/inventory и path-prefix traversal | Forbidden inventory дополнен каждой hidden row и generator fragments; после terminal failure оставшиеся slots получают `NotRunDueToPriorFailure` и строится canonical report; parity/preparation inventory digests связаны с pilot manifest и перепроверяются; path allowlist использует canonical directory boundary | Повторить mandatory validation и final review | Не требовалось | implementation; tests; orchestrator; knowledge log |
+| EXEC-REVIEW | Final pre-live pass обнаружил противоречивый внутренний raw path и неполное regression-покрытие row-value/PRNG leakage | Prepare/orchestrator fail-closed отклоняют repository root/descendants после canonical path resolution; нормативный путь перенесён в `%LOCALAPPDATA%`; tests покрывают root/descendant/sibling/traversal, canonical boundary/seeded rows и PRNG fragment | Повторить final mandatory validation | Не требовалось | SPEC; provenance; CLI; orchestrator; tests |

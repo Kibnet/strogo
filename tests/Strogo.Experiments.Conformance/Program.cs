@@ -44,6 +44,8 @@ Check(!invalidUtf8.Accepted && invalidUtf8.ErrorCode == "SourceEncodingInvalid",
 var unknown = CalibrationEvaluator.Evaluate(corpus[0], "unknown-arm");
 Check(unknown.Status == "Refused" && unknown.Stages.All(s => s.Stage != "graph-validator"), "unknown arm stops before graph");
 
+E10Cases.Run(failures);
+
 var outPath = args.FirstOrDefault(a => a.StartsWith("--report=", StringComparison.Ordinal))?.Split('=', 2)[1];
 if (outPath is not null) { Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!); File.WriteAllBytes(outPath, first); }
 if (failures.Count > 0) { Console.Error.WriteLine(string.Join("\n", failures)); return 1; }

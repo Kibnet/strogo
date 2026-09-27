@@ -1,0 +1,5 @@
+{
+  long available = input.resourceAvailable;
+  long quantity = input.requestedQuantity;
+  return TODO;
+}

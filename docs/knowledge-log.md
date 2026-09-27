@@ -2179,3 +2179,63 @@
 - Утверждение: `Exporter.ValidateStarter` теперь сверяет candidate manifest с доверенно построенным identity для case/arm; независимые mutations `SourceDigest`, `FrontendRevision`, `CoreSchema`, `HostRevision`, `SolverDigest` и `OracleRevision` получают `ArtifactMismatch`.
 - Evidence: финальный E09 report — `Accepted`, 12 positive pairs, 21/21 `ValidRefusal`, 20437 bytes, digest `1951615e2cc85180f5dee1f5e69f7da2f622e6351637ed57e7479dbcf4576a5a`.
 - Ограничение: это усиливает export/provenance boundary offline harness; не является portability или G05 evidence.
+
+## K-E06-121
+
+- Дата / фаза: 2026-09-27 / E10 pre-live EXEC.
+- Тип / статус: Cross-platform evaluator finding / Fixed and regression-tested.
+- Утверждение: текстовый fixture, записанный штатным Windows newline, передавал в Linux-контейнер число с завершающим `\r`; из-за этого корректный C# candidate получал ложный runtime failure. Для межплатформенного evaluator текстовый протокол должен закреплять байты перевода строки, а не полагаться на default среды.
+- Исправление: `vectors.csv` формируется с явным LF (`\n`), а Docker matrix исполняется на закреплённой `linux/amd64` image. Raw evidence теперь рекурсивно запечатывается, а Docker receipt связывает input/output digests с точной invocation identity.
+- Evidence: E10 conformance с четырьмя корректными arms и malicious matrix проходит на Docker; regression использует те же frozen runner fixtures и платформу, что запланированы для live pilot.
+- Ограничение: это подтверждает конкретную границу Windows host → Linux container; общий вывод о переносимости языка из него не следует.
+- Последствие: любые следующие cross-platform fixtures должны задавать encoding/newline как часть формального wire contract.
+
+## K-E06-122
+
+- Дата / фаза: 2026-09-27 / E10 evidence hardening.
+- Тип / статус: Secret/private-path scan counterexample / Fixed and regression-tested.
+- Утверждение: общий шаблон `[A-Za-z]:\\...` на JSON-тексте ошибочно распознаёт фрагменты escaped prose вроде `inputs:\n` как Windows path и без причины переводит корректный pilot в `EvidenceQuarantined`.
+- Исправление: Windows private-path detector принимает только каноническую заглавную букву диска, сравнивает найденный путь с явными allowlisted pilot/Codex instruction roots и имеет отдельный nested-secret/quarantine regression.
+- Evidence: E10 report после исправления снова `Completed`; реальный `authorization: bearer` во вложенном файле находится и весь evidence root перемещается в `.quarantine`.
+- Ограничение: scanner остаётся defense-in-depth эвристикой и не доказывает отсутствие неизвестного формата секрета; canonical report всё равно не включает raw content.
+- Последствие: fail-closed evidence scanners должны иметь positive и realistic false-positive fixtures, иначе защитный gate сам делает experiment недостоверным.
+
+## K-E06-123
+
+- Дата / фаза: 2026-09-27 / E10 prompt provenance review.
+- Тип / статус: Runtime configuration parity / Fixed before live exposure.
+- Утверждение: `codex debug prompt-input` не поддерживает флаги `--ignore-user-config` и `--ignore-rules`, поэтому одни и те же `-c` overrides не доказывают совпадение debug snapshot с live `exec`, если оба читают обычный пользовательский `CODEX_HOME`.
+- Исправление: orchestration создаёт ACL-restricted временный `CODEX_HOME` без `config.toml`, rules, plugins, memories и глобальных инструкций, переносит только auth, использует его для debug и всех live runs, а затем проверенно удаляет. Live по-прежнему передаёт fail-closed ignore flags; для debug их эффект достигается отсутствием соответствующих файлов.
+- Evidence: invocation identity закрепляет flags/args/environment names; environment receipt хранит value digests; recursive normalized prompt snapshot сохраняет все nonvolatile fields и сравнивается между четырьмя runs.
+- Ограничение: debug subcommand не предоставляет wire-level tool-definition snapshot; E10 доказывает message parity и zero-tool event outcome, но не заявляет общий provider/backend attestation.
+- Последствие: если диагностическая команда не принимает production flags, parity нужно достигать общей изолированной конфигурационной средой либо честно снижать claim.
+
+## K-E06-124
+
+- Дата / фаза: 2026-09-27 / E10 pre-live adversarial review.
+- Тип / статус: Leakage and executable-identity boundary / Fixed before model exposure.
+- Утверждение: проверки нескольких известных имён недостаточно для доказательства отсутствия trusted solution в model-visible input. До live-run нужен замороженный проверяемый inventory, включающий hidden corpus serialization/digest, expected-candidate bytes/digests, oracle/evaluator identifiers и identities trusted source/assemblies; scan выполняется по декодированным JSON-строкам и их whitespace-normalized представлению.
+- Исправление: `forbidden-prompt-inventory.json` создаётся из pilot manifest до первого вызова модели, сам детерминированно перепроверяется, а каждый полный `prompt-input` проходит leakage scan до live и повторно при evaluation. Exact source closure, CLI/Experiments/Notation/Core assemblies, SDK, Node и Codex entry пересчитываются перед каждым run и evaluation.
+- Дополнительные границы: orchestration не автоматизирует optional pre-exposure retry и останавливает pilot на первом terminal failure; SDK может быть только repo-local 10.0.400; private-path scan распознаёт backslash, forward slash, JSON-escaped и UNC пути; bounded Docker capture учитывает fault, возникший одновременно с быстрым завершением процесса.
+- Evidence: `LivePilotLeakage.cs`, `LivePilotProvenance.cs`, `LivePilotEvidence.cs`, `LivePilotEvaluation.cs`, `Run-E10LivePilot.ps1`, E10 conformance counterexamples.
+- Последствие: AC10 и executable provenance становятся проверяемыми до расхода live attempt; результаты всё ещё ограничены frozen finite corpus и не доказывают G05.
+
+## K-E06-125
+
+- Дата / фаза: 2026-09-27 / E10 second pre-live adversarial review.
+- Тип / статус: Terminal evidence and preparation identity / Fixed before model exposure.
+- Утверждение: fail-closed остановка новых model calls сама по себе недостаточна: каждый frozen slot должен иметь immutable terminal evaluation, иначе canonical report невозможно построить. Аналогично полный hidden corpus digest не исключает утечку одной строки или generator source, а подготовительные parity/inventory файлы не являются доказательством без связи с pilot manifest.
+- Исправление: первая `Invalid`/`InfrastructureFailure` evaluation прекращает live calls, оставшиеся slots получают `NotRunDueToPriorFailure` с отдельным receipt и sealed raw inventory, после чего orchestration обязательно строит terminal report. Forbidden inventory включает ID и canonical bytes каждой hidden row и фрагменты `BuildHidden`; pilot manifest связывает forbidden/parity/package inventory digests, а `LoadAndVerify` проверяет exact bytes и file set.
+- Дополнительная коррекция: private-path allowlist канонизирует `..`, схлопывает escaped separators и принимает только сам root или путь после обязательной границы каталога; sibling-prefix больше не разрешён.
+- Evidence: E10 conformance содержит abort после `S1` и `C1`, partial boundary/seeded/generator leaks, parity/inventory mutation/deletion, allowed-root/sibling/traversal regressions; targeted run PASS вместе с E09 `12/21/20437`.
+- Последствие: остановленный pilot остаётся аудируемым без дополнительных model calls, а pre-live proof material нельзя удалить или подменить незаметно.
+
+## K-E06-126
+
+- Дата / фаза: 2026-09-27 / E10 final pre-live storage review.
+- Тип / статус: Sensitive raw-root boundary / Fixed before model exposure.
+- Утверждение: `.gitignore` не превращает каталог внутри репозитория в допустимое место для raw model events. Контракт «вне repository tree» должен проверяться по canonical path, иначе root, descendant или traversal могут сохранить чувствительные данные рядом с публикуемым проектом.
+- Исправление: CLI prepare и PowerShell orchestration отклоняют repository root и любой descendant после `GetFullPath`; нормативный E10 root перенесён в `%LOCALAPPDATA%/Strogo/e10/<pilot-id>`. Regression различает root, descendant, traversal into repo и корректный внешний sibling.
+- Дополнительное покрытие: leakage regressions теперь передают canonical serialization отдельной boundary/seeded row и PRNG fragment, а не только их IDs.
+- Evidence: `EvidenceRootIsOutsideRepository`, `pilot prepare`, `Run-E10LivePilot.ps1`, E10 conformance и обновлённая SPEC command block.
+- Последствие: raw evidence не может случайно попасть в Git workspace; публикуется только отдельно allowlisted canonical summary после scan.

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "candidateSource", "question"],
+  "properties": {
+    "status": { "type": "string", "enum": ["Candidate", "NeedsHuman", "Refused"] },
+    "candidateSource": { "type": "string", "maxLength": 131072 },
+    "question": { "type": "string", "maxLength": 4096 }
+  }
+}
