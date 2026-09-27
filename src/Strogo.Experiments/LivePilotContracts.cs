@@ -443,8 +443,7 @@ public static class PromptInputInspector
         using var output = new MemoryStream();
         using (var writer = new Utf8JsonWriter(output)) WriteNormalized(writer, doc.RootElement, null, expected, sessionDirectory, ref promptReplacements);
         if (promptReplacements != 1) throw LivePilotJson.Failure("PromptInputPromptMismatch");
-        using var normalized = CanonicalJson.ParseStrict(new UTF8Encoding(false, true).GetString(output.ToArray()));
-        return CanonicalJson.RawDigest(CanonicalJson.Encode(normalized.RootElement));
+        return CanonicalJson.RawDigest(output.ToArray());
     }
 
     private static void WriteNormalized(Utf8JsonWriter writer, JsonElement value, string? propertyName, string expectedPrompt, string sessionDirectory, ref int promptReplacements)
@@ -453,8 +452,10 @@ public static class PromptInputInspector
         {
             case JsonValueKind.Object:
                 writer.WriteStartObject();
+                var names = new HashSet<string>(StringComparer.Ordinal);
                 foreach (var property in value.EnumerateObject().OrderBy(x => x.Name, StringComparer.Ordinal))
                 {
+                    if (!names.Add(property.Name)) throw LivePilotJson.Failure("PromptInputInvalid");
                     writer.WritePropertyName(property.Name);
                     if (property.Name == "create_time")
                     {
