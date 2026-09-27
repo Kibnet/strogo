@@ -70,6 +70,8 @@ internal static class E10Cases
             Check(EvaluatePolicyVariant(fixtures, additionalRoots, "tool-exit", "{\"type\":\"item.started\",\"item\":{\"type\":\"command_execution\"}}\n", false, 17).Code == "InvalidPolicy", "policy violation precedes exit");
             Check(EvaluatePolicyVariant(fixtures, additionalRoots, "event-order", "{\"type\":\"turn.completed\"}\n", false, 0).Code == "InvalidEventSequence", "event sequence fail closed");
             Check(EvaluatePolicyVariant(fixtures, additionalRoots, "item-missing", "{\"type\":\"item.updated\"}\n", false, 0).Code == "InvalidEventSequence", "item event requires structured item");
+            var runtimeErrorItem = EvaluatePolicyVariant(fixtures, additionalRoots, "runtime-error-item", "{\"type\":\"item.completed\",\"item\":{\"id\":\"runtime-error\",\"type\":\"error\",\"message\":\"transport fallback\"}}\n", false, 0);
+            Check(runtimeErrorItem.Code == "InvalidEventSequence" && runtimeErrorItem.Metrics.ToolCalls == 0, "runtime error item is not a model tool call");
             Check(EvaluateOutputLimitVariant(fixtures, additionalRoots).Code == "OutputLimitExceeded", "agent output limit typed");
 
             string missingRoot = Path.Combine(Path.GetTempPath(), $"strogo-e10-missing-raw-{Guid.NewGuid():N}");

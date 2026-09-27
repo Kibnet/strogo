@@ -357,7 +357,7 @@ public static class CodexEventParser
     };
     private static readonly HashSet<string> AllowedItemTypes = new(StringComparer.Ordinal)
     {
-        "agent_message", "reasoning", "todo_list"
+        "agent_message", "reasoning", "todo_list", "error"
     };
 
     public static RunEventSummary Parse(string path)
@@ -401,6 +401,7 @@ public static class CodexEventParser
                 {
                     string itemType = GetString(item, "type") ?? string.Empty;
                     if (type == "item.completed" && itemType == "agent_message") agentMessages++;
+                    if (itemType == "error") errors++;
                     if (!AllowedItemTypes.Contains(itemType))
                     {
                         tools++;

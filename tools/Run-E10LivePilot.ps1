@@ -263,13 +263,22 @@ try {
                 '--repository-root', $repoRoot, '--dotnet', $DotNetPath, '--dotnet-version', '10.0.400',
                 '--codex-node', $CodexNodePath, '--codex-entry', $CodexEntryPath
             )
-            & $DotNetPath $cliDll pilot report --directory $outputRoot --output (Join-Path $outputRoot 'pilot-report.json')
-            if (-not (Test-Path -LiteralPath (Join-Path $outputRoot 'pilot-report.json'))) { throw "Run $runId failed and canonical terminal report was not created." }
+            $reportOutput = @(& $DotNetPath $cliDll pilot report --directory $outputRoot --output (Join-Path $outputRoot 'pilot-report.json'))
+            $reportOutput | Write-Output
+            $reportRecord = $reportOutput[-1] | ConvertFrom-Json
+            $terminalRoot = if ([string]::IsNullOrWhiteSpace($reportRecord.quarantineDirectory)) { $outputRoot } else { $reportRecord.quarantineDirectory }
+            if (-not (Test-Path -LiteralPath (Join-Path $terminalRoot 'pilot-report.json'))) { throw "Run $runId failed and canonical terminal report was not created." }
             throw "Run $runId reached a non-success terminal evaluation; remaining runs are marked NotRunDueToPriorFailure and no automatic retry was attempted."
         }
     }
-    Invoke-Checked $DotNetPath @($cliDll, 'pilot', 'report', '--directory', $outputRoot, '--output', (Join-Path $outputRoot 'pilot-report.json'))
-    Write-Output "E10 pilot completed: $outputRoot"
+    $reportOutput = @(& $DotNetPath $cliDll pilot report --directory $outputRoot --output (Join-Path $outputRoot 'pilot-report.json'))
+    $reportExitCode = $LASTEXITCODE
+    $reportOutput | Write-Output
+    $reportRecord = $reportOutput[-1] | ConvertFrom-Json
+    $terminalRoot = if ([string]::IsNullOrWhiteSpace($reportRecord.quarantineDirectory)) { $outputRoot } else { $reportRecord.quarantineDirectory }
+    if (-not (Test-Path -LiteralPath (Join-Path $terminalRoot 'pilot-report.json'))) { throw 'E10 pilot completed its runs but canonical terminal report was not created.' }
+    if ($reportExitCode -ne 0) { throw "E10 pilot completed its runs with a non-success terminal report at $terminalRoot." }
+    Write-Output "E10 pilot completed: $terminalRoot"
 }
 finally {
     if ([string]::IsNullOrWhiteSpace($originalCodexHome)) { Remove-Item Env:CODEX_HOME -ErrorAction SilentlyContinue } else { $env:CODEX_HOME = $originalCodexHome }

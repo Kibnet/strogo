@@ -2248,3 +2248,22 @@
 - Исправление: scalar number/string `create_time` заменяется на placeholder; composite drift и duplicate fields отказываются `PromptInputInvalid`. Recursive normalizer сортирует object fields и детерминированно пишет JSON, но digest считает по normalized UTF-8 bytes без доменных Core ASCII/integer ограничений. Conformance содержит разные fractional timestamps, Unicode context, object/array и duplicate-field variants.
 - Evidence: внешние preflight `preflight-20260927T150456Z` и `preflight-20260927T151226Z` остановились `SchemaInvalid` после четырёх snapshots и до live calls; targeted regression после каждой коррекции оставался green.
 - Последствие: preflight проверяет текущий wire-shaped prompt snapshot, не смешивая transport normalization с ограничениями формата исполняемых Core artifacts.
+
+## K-E06-128
+
+- Дата / фаза: 2026-09-27 / E10 live pilot and post-EXEC review.
+- Тип / статус: Live experimental result / Invalid, evidence retained and quarantined.
+- Утверждение: approved pilot `e10-20260927T151727Z-1e0d239a` на commit `245a7a4` выполнил ровно один exposed run `S1`. Codex получил четыре WebSocket `403` retry errors, переключился на HTTPS и вернул syntactically plausible Strogo candidate, но strict frozen evaluator завершил run `InvalidPolicy`; `C1,C2,S2` не обращались к модели и получили `NotRunDueToPriorFailure`.
+- Evidence: canonical report `docs/evidence/e10-live-paired-pilot.json`, report digest `a94383990d9b9426006cfcb2c3453095b99b74be9541223d68d89493389ede37`, file SHA-256 `0d9cfdce94f859230a1b949d49b10bfc95798eb7840e4136744321f1ecf4f489`, raw root `%LOCALAPPDATA%/Strogo/e10/live-20260927T151721Z.quarantine`.
+- Metric correction: event `item.type=error` описывал transport fallback, а не model tool call. Frozen evaluator записал `toolCalls=1` из-за fail-closed unknown-item classification; это известная семантическая ошибка конкретного report и не переписывается post hoc. Future parser считает такой item error event с `toolCalls=0`, сохраняя terminal `InvalidEventSequence`.
+- Security result: raw scanner обнаружил физические paths из system skill catalog, temporary isolated Codex home и stderr, после чего весь root был перемещён в quarantine. Canonical report не содержит matched path values.
+- Ограничение: paired comparison не состоялся; E10 не даёт данных о преимуществе Strogo над C# и не подтверждает/опровергает G05. Повтор после model exposure потребовал бы нового pilot decision и не выполнялся автоматически.
+- Последствие: methodology controls preflight/no-retry/terminal report/quarantine сработали; будущий live protocol должен различать runtime error items и model tool events и явно учитывать ожидаемые system-path findings.
+
+## K-E06-129
+
+- Дата / фаза: 2026-09-27 / E10 post-EXEC hardening.
+- Тип / статус: Orchestration invariant / implemented and statically reviewed; not live re-run.
+- Утверждение: terminal report может корректно переместить evidence root в quarantine как после раннего failed run, так и после завершения всех planned runs. Обе ветки оркестратора должны извлекать `quarantineDirectory`, проверять `pilot-report.json` уже в terminal root и только затем возвращать terminal status.
+- Evidence: live failure branch выявила фактический move root; post-EXEC inspection обнаружил, что all-runs branch всё ещё использовала `Invoke-Checked` и исходный `$outputRoot`, поэтому могла оборваться до проверки созданного quarantined report.
+- Последствие: по статическому review обе ветки сохраняют canonical terminal evidence и сообщают его фактическое расположение; non-success status по-прежнему возвращается как ошибка и не превращается в успешный эксперимент. Frozen E10 report не изменялся и live pilot после этой правки не перезапускался.
