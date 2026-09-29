@@ -84,6 +84,17 @@ void Refuse(Action action, string code)
     throw new Exception("Expected admission refusal: " + code);
 }
 
+void RefusePackage(Action action, string code)
+{
+    try { action(); }
+    catch (ModuleException error) when (error.Stage == "package" && error.Code == code)
+    {
+        checks++;
+        return;
+    }
+    throw new Exception("Expected package refusal: " + code);
+}
+
 var state0 = State(0);
 var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
 var bundleBytes = File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "owner-fold-sum-valid-v0.4.json"));
@@ -169,6 +180,103 @@ using (var epochTrust = new OwnerTrust(publicKey, keyId))
     using var nextDocument = JsonDocument.Parse(advanced);
     Check(oldDocument.RootElement.GetProperty("policyDigest").GetString() ==
           nextDocument.RootElement.GetProperty("policyDigest").GetString(), "epoch advance preserves policy");
+}
+var manifestFiles = new (string Path, string Role)[]
+{
+    ("content/approval.json", "contract-approval"),
+    ("content/bundle.json", "bundle"),
+    ("content/candidate.dfy", "proof-source"),
+    ("content/generated.deps.json", "deps"),
+    ("content/generated.dll", "entry-assembly"),
+    ("content/module.json", "module"),
+    ("content/proof.json", "proof"),
+    ("content/source-map.json", "source-map"),
+    ("content/transcript.json", "proof-transcript")
+};
+byte[] Manifest((string Path, string Role)[] files, string rid = "win-x64",
+    IReadOnlyDictionary<string, byte[]>? content = null)
+{
+    var declared = files.Select(file => Fields(("path", file.Path),
+        ("sha256", content is null ? new string('a', 64) : Hex(SHA256.HashData(content[file.Path]))),
+        ("length", content is null ? 1L : content[file.Path].LongLength), ("role", file.Role))).ToArray();
+    var payload = Fields(("schemaVersion", "strogo.build-manifest.v0.2"),
+        ("moduleDigest", new string('a', 64)), ("bundleDigest", new string('b', 64)),
+        ("contractApprovalDigest", new string('c', 64)), ("proofDigest", new string('d', 64)),
+        ("toolchainDigest", new string('e', 64)), ("closureDigest", new string('f', 64)),
+        ("runtimeIdentifier", rid), ("entryAssemblyPath", "content/generated.dll"), ("files", declared));
+    payload.Add("packageDigest", Hex(Hash("strogo.package.v0.2/manifest-payload", Encode(payload))));
+    return Encode(payload);
+}
+var goodManifestBytes = Manifest(manifestFiles);
+var goodManifest = G02BuildManifest.Parse(goodManifestBytes);
+Check(goodManifest.Files.Length == manifestFiles.Length &&
+      goodManifest.EntryAssemblyPath == "content/generated.dll" &&
+      goodManifest.ArtifactDigest == Hex(Hash("strogo.build-manifest.v0.2/artifact", goodManifestBytes)),
+    "strict G02 manifest records only structural identity");
+RefusePackage(() => G02BuildManifest.Parse(Manifest(manifestFiles, "linux-x64")), "ArtifactFieldMismatch");
+RefusePackage(() => G02BuildManifest.Parse(Manifest(manifestFiles.Reverse().ToArray())), "ManifestFileOrderInvalid");
+RefusePackage(() => G02BuildManifest.Parse(Manifest(manifestFiles.Select(file =>
+    file.Path == "content/module.json" ? ("content/con.txt", file.Role) : file).OrderBy(file => file.Item1, StringComparer.Ordinal).ToArray())),
+    "ManifestPathInvalid");
+RefusePackage(() => G02BuildManifest.Parse(Manifest(manifestFiles.Where(file => file.Role != "proof").ToArray())),
+    "ManifestRoleCardinalityInvalid");
+var wrongPackageDigest = Encoding.UTF8.GetString(goodManifestBytes).Replace(goodManifest.PackageDigest,
+    new string('0', 64), StringComparison.Ordinal);
+RefusePackage(() => G02BuildManifest.Parse(Encoding.UTF8.GetBytes(wrongPackageDigest)), "PackageDigestMismatch");
+var duplicatedManifestField = Encoding.UTF8.GetString(goodManifestBytes).Replace(
+    "\"schemaVersion\":", "\"schemaVersion\":\"strogo.build-manifest.v0.2\",\"schemaVersion\":", StringComparison.Ordinal);
+RefusePackage(() => G02BuildManifest.Parse(Encoding.UTF8.GetBytes(duplicatedManifestField)), "DuplicateField");
+RefusePackage(() => G02BuildManifest.Parse(Encoding.UTF8.GetBytes(" " + Encoding.UTF8.GetString(goodManifestBytes))),
+    "ArtifactNotCanonical");
+if (OperatingSystem.IsWindows())
+{
+    var snapshotRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+        "package-snapshot-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(Path.Combine(snapshotRoot, "content"));
+    var content = manifestFiles.ToDictionary(file => file.Path,
+        file => Encoding.UTF8.GetBytes(file.Role), StringComparer.Ordinal);
+    foreach (var (path, _) in manifestFiles)
+        File.WriteAllBytes(Path.Combine(snapshotRoot, path.Replace('/', Path.DirectorySeparatorChar)), content[path]);
+    File.WriteAllBytes(Path.Combine(snapshotRoot, "build-manifest.json"), Manifest(manifestFiles, content: content));
+    using (var snapshot = G02PackageSnapshot.OpenStructural(snapshotRoot))
+    {
+        Check(snapshot.Manifest.Files.Length == manifestFiles.Length &&
+              snapshot.ReadHeld("content/module.json").SequenceEqual(content["content/module.json"]),
+            "package snapshot retains exact listed bytes");
+        var writeDenied = false;
+        try { File.WriteAllText(Path.Combine(snapshotRoot, "content", "module.json"), "tampered"); }
+        catch (IOException) { writeDenied = true; }
+        catch (UnauthorizedAccessException) { writeDenied = true; }
+        Check(writeDenied, "held package handle denies content mutation");
+    }
+    File.WriteAllText(Path.Combine(snapshotRoot, "content", "module.json"), "tampered");
+    RefusePackage(() => G02PackageSnapshot.OpenStructural(snapshotRoot), "PackageContentDigestMismatch");
+    File.WriteAllBytes(Path.Combine(snapshotRoot, "content", "module.json"), content["content/module.json"]);
+    File.WriteAllText(Path.Combine(snapshotRoot, "content", "unlisted.txt"), "x");
+    RefusePackage(() => G02PackageSnapshot.OpenStructural(snapshotRoot), "PackageInventoryMismatch");
+    File.Delete(Path.Combine(snapshotRoot, "content", "unlisted.txt"));
+    File.WriteAllText(Path.Combine(snapshotRoot, "content", "module.json") + ":sidecar", "hidden");
+    RefusePackage(() => G02PackageSnapshot.OpenStructural(snapshotRoot), "PackageAlternateStreamRejected");
+    File.Delete(Path.Combine(snapshotRoot, "content", "module.json") + ":sidecar");
+    File.CreateSymbolicLink(Path.Combine(snapshotRoot, "content", "link.txt"),
+        Path.Combine(snapshotRoot, "content", "module.json"));
+    RefusePackage(() => G02PackageSnapshot.OpenStructural(snapshotRoot), "PackageReparsePointRejected");
+
+    var raceRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+        "package-race-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(Path.Combine(raceRoot, "content"));
+    foreach (var (path, _) in manifestFiles)
+        File.WriteAllBytes(Path.Combine(raceRoot, path.Replace('/', Path.DirectorySeparatorChar)), content[path]);
+    File.WriteAllBytes(Path.Combine(raceRoot, "build-manifest.json"), Manifest(manifestFiles, content: content));
+    var outside = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+        "race-target-" + Guid.NewGuid().ToString("N") + ".json");
+    File.WriteAllBytes(outside, content["content/module.json"]);
+    RefusePackage(() => G02PackageSnapshot.OpenStructural(raceRoot, () =>
+    {
+        var path = Path.Combine(raceRoot, "content", "module.json");
+        File.Move(path, path + ".original");
+        File.CreateSymbolicLink(path, outside);
+    }), "PackageHandleTypeInvalid");
 }
 if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
 {
