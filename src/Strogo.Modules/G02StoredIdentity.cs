@@ -44,7 +44,7 @@ public static class G02StoredIdentityVerifier
             throw Refuse("PackageBundleInvalid");
         }
 
-        try { CheckProofMetadata(proofBytes, manifest); }
+        try { CheckProofMetadata(snapshot, proofBytes, manifest); }
         catch (ModuleException error) when (error.Stage != "package")
         {
             throw Refuse("PackageProofMetadataInvalid");
@@ -55,7 +55,7 @@ public static class G02StoredIdentityVerifier
     private static byte[] ReadRole(G02PackageSnapshot snapshot, string role)
         => snapshot.ReadHeld(snapshot.Manifest.Files.Single(file => file.Role == role).Path);
 
-    private static void CheckProofMetadata(byte[] bytes, G02BuildManifest manifest)
+    private static void CheckProofMetadata(G02PackageSnapshot snapshot, byte[] bytes, G02BuildManifest manifest)
     {
         using var document = OwnerAdmissionWire.Parse(bytes);
         var root = document.RootElement;
@@ -92,6 +92,7 @@ public static class G02StoredIdentityVerifier
         }
         if (OwnerAdmissionWire.Hash("strogo.proof.v0.2/artifact", bytes) != manifest.ProofDigest)
             throw Refuse("PackageProofDigestMismatch");
+        G02StoredProofArtifacts.Check(snapshot, root);
     }
 
     private static ModuleException Refuse(string code) => ModulesExceptionFactory.Error("package", code);

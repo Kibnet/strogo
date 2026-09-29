@@ -287,6 +287,7 @@ if (OperatingSystem.IsWindows())
         "modules-v0.2", "owner-empty-sequence-module.json")));
     var identityContent = manifestFiles.ToDictionary(file => file.Path,
         file => Encoding.UTF8.GetBytes(file.Role), StringComparer.Ordinal);
+    identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method M() {}\n");
     identityContent["content/module.json"] = canonicalModule.CanonicalSource;
     identityContent["content/bundle.json"] = parsedBundle.CanonicalBytes;
     identityContent["content/approval.json"] = signedProposal;
@@ -299,12 +300,34 @@ if (OperatingSystem.IsWindows())
         ["toolchainDigest"] = new string('e', 64),
         ["closureDigest"] = new string('f', 64)
     };
+    string ProofSourcesDigest() => Hex(Hash("strogo.proof.v0.2/proof-sources", JsonSerializer.SerializeToUtf8Bytes(manifestFiles
+        .Where(file => file.Role == "proof-source")
+        .Select(file => Fields(("path", file.Path),
+            ("sha256", Hex(SHA256.HashData(identityContent[file.Path]))),
+            ("length", identityContent[file.Path].LongLength), ("role", file.Role))).ToArray())));
+    byte[] Transcript(string evidenceDigest, string diagnosticCode = "verified") => Encode(Fields(
+        ("schemaVersion", "strogo.proof-transcript.v0.2"),
+        ("toolchainDigest", identities["toolchainDigest"]),
+        ("proofSourcesDigest", ProofSourcesDigest()), ("outcome", "Verified"),
+        ("records", new[] { Fields(("obligationId", "entry.1"), ("kind", "postcondition"),
+            ("status", "Verified"), ("diagnosticCode", diagnosticCode),
+            ("evidenceDigest", evidenceDigest)) })));
+    identityContent["content/source-map.json"] = Encode(Fields(("entries", Array.Empty<object>())));
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    Check(ProofSourcesDigest() == "9fe0504c0d0a1224314d5320fb631110dd4b52412e78869c6dc94d0a6edc16ee" &&
+          Hex(Hash("strogo.proof.v0.2/transcript", identityContent["content/transcript.json"])) ==
+          "f32a13a6389d316e75630a1a7dfde7f7e4f2623e2adc86f03ead65149fd0b895" &&
+          Hex(Hash("strogo.proof.v0.2/source-map", identityContent["content/source-map.json"])) ==
+          "9636615613cc4707412b5541f6d321630b31ef96ea05d4c721aca264198bc87e",
+          "independently calculated frozen G02 proof artifact digest vectors");
     byte[] Proof(string moduleDigest, string contractDigest) => Encode(Fields(
         ("schemaVersion", "strogo.proof.v0.2"), ("moduleDigest", moduleDigest),
         ("bundleDigest", parsedBundle.BundleDigest), ("contractApprovalDigest", contractDigest),
         ("toolchainDigest", identities["toolchainDigest"]), ("closureDigest", identities["closureDigest"]),
-        ("proofSourcesDigest", new string('1', 64)), ("transcriptDigest", new string('2', 64)),
-        ("sourceMapDigest", new string('3', 64)), ("outcome", "Verified"),
+        ("proofSourcesDigest", ProofSourcesDigest()),
+        ("transcriptDigest", Hex(Hash("strogo.proof.v0.2/transcript", identityContent["content/transcript.json"]))),
+        ("sourceMapDigest", Hex(Hash("strogo.proof.v0.2/source-map", identityContent["content/source-map.json"]))),
+        ("outcome", "Verified"),
         ("obligations", new[] { Fields(("obligationId", "entry.1"), ("kind", "postcondition"),
             ("status", "Verified"), ("evidenceDigest", new string('4', 64))) })));
     void WriteIdentityPackage()
@@ -321,7 +344,58 @@ if (OperatingSystem.IsWindows())
     using (var identityTrust = new OwnerTrust(publicKey, keyId))
         Check(G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
             parsedBundle.BundleDigest, now).ContractApproval.ArtifactDigest == approvalDigest,
-            "held module, bundle, approval and stored proof metadata bind to one manifest");
+            "held module, bundle, approval, proof sources, transcript and source map bind to one manifest");
+    var originalProof = identityContent["content/proof.json"];
+    var originalSource = identityContent["content/candidate.dfy"];
+    identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("changed proof source\n");
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofSourcesDigestMismatch");
+    identityContent["content/candidate.dfy"] = originalSource;
+    identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method M() {}\r\n");
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    identityContent["content/proof.json"] = Proof(canonicalModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofSourceNonCanonical");
+    identityContent["content/candidate.dfy"] = originalSource;
+    identityContent["content/proof.json"] = originalProof;
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    var originalTranscript = identityContent["content/transcript.json"];
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64), "changed");
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofTranscriptDigestMismatch");
+    identityContent["content/proof.json"] = Proof(canonicalModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofTranscriptDiagnosticInvalid");
+    identityContent["content/transcript.json"] = Transcript(new string('5', 64));
+    identityContent["content/proof.json"] = Proof(canonicalModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofTranscriptVectorMismatch");
+    identityContent["content/transcript.json"] = originalTranscript;
+    identityContent["content/proof.json"] = originalProof;
+    var originalSourceMap = identityContent["content/source-map.json"];
+    identityContent["content/source-map.json"] = Encode(Fields(("entries", new[] { "forged" })));
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofSourceMapDigestMismatch");
+    identityContent["content/source-map.json"] = originalSourceMap;
+    WriteIdentityPackage();
     using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
     using (var identityTrust = new OwnerTrust(publicKey, keyId))
         Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
