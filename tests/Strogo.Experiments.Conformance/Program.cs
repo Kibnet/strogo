@@ -5,6 +5,13 @@ using Strogo.Experiments;
 
 var failures = new List<string>();
 void Check(bool condition, string name) { if (!condition) failures.Add(name); }
+if (args.Contains("--g03-only", StringComparer.Ordinal))
+{
+    G03Cases.Run(failures);
+    if (failures.Count > 0) { Console.Error.WriteLine(string.Join("\n", failures)); return 1; }
+    Console.WriteLine("G03 PASS: catalog, threshold, evidence, and refusal controls");
+    return 0;
+}
 
 var corpus = CalibrationCorpus.Create();
 Check(corpus.Length == 12, "12 positive vectors");
@@ -45,6 +52,7 @@ var unknown = CalibrationEvaluator.Evaluate(corpus[0], "unknown-arm");
 Check(unknown.Status == "Refused" && unknown.Stages.All(s => s.Stage != "graph-validator"), "unknown arm stops before graph");
 
 E10Cases.Run(failures);
+G03Cases.Run(failures);
 
 var outPath = args.FirstOrDefault(a => a.StartsWith("--report=", StringComparison.Ordinal))?.Split('=', 2)[1];
 if (outPath is not null) { Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!); File.WriteAllBytes(outPath, first); }

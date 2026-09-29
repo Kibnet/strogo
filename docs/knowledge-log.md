@@ -2267,3 +2267,45 @@
 - Утверждение: terminal report может корректно переместить evidence root в quarantine как после раннего failed run, так и после завершения всех planned runs. Обе ветки оркестратора должны извлекать `quarantineDirectory`, проверять `pilot-report.json` уже в terminal root и только затем возвращать terminal status.
 - Evidence: live failure branch выявила фактический move root; post-EXEC inspection обнаружил, что all-runs branch всё ещё использовала `Invoke-Checked` и исходный `$outputRoot`, поэтому могла оборваться до проверки созданного quarantined report.
 - Последствие: по статическому review обе ветки сохраняют canonical terminal evidence и сообщают его фактическое расположение; non-success status по-прежнему возвращается как ошибка и не превращается в успешный эксперимент. Frozen E10 report не изменялся и live pilot после этой правки не перезапускался.
+
+## K-G03-001
+
+- Дата / фаза: 2026-09-29 / G03 SPEC approval и EXEC.
+- Тип / статус: Human approval receipt / подтверждено для exact revision.
+- Утверждение: владелец подтвердил точной фразой «Спеку подтверждаю» G03 SPEC на commit `b50004e184904ec37846dc3f78312daf29fde212`, blob `1fedb3ae2c141a9738c5e5ae0c0a22508bbd4ba1`, SHA-256 файла `7206D8CE851B94FD692B288A4780331A817FBC27295AA23A77C706CA55221638`. Receipt внесён в Unlimotion execution question `153beea2-2b0b-4a89-92a9-2ad149f66d74` задачи `de82f5c1-21aa-4a10-989e-b04fe8b487f9`; ответ CLI `success=true`, state `Active`.
+- Последствие: разрешена реализация этой revision; источник SPEC не редактируется после approval.
+
+## K-G03-002
+
+- Дата / фаза: 2026-09-29 / G03 source inventory и catalogue.
+- Тип / статус: Evidence synthesis / frozen methodology, target prevalence unknown.
+- Утверждение: S01–S08 дают 117 явно учтённых source rows с разной единицей наблюдения: defect type, Java fix pattern/action, mutant operator, CVE/CWE rank, concurrency cause, database bug category/root cause и distributed failure symptom/error-handling leaf. Их проценты и ранги несопоставимы; взвешивать 12 semantic families по ним нельзя. Особенно MITRE CWE Top 25 отражает CVE, а не частоту обычных ошибок в ограниченных прикладных модулях.
+- Решение: нормативный manifest фиксирует 117 ordered rows и digest каждого source inventory; каталог фиксирует 12 якорных families, 45 merges, 19 outside-envelope, 2 requirement/harness и 39 deferred decisions. Равновесный порог 7/12 является заранее выбранным правилом проверки приоритетного каталога, а не доказательством «большинства частых ошибок» в реальном распределении.
+- Evidence: `docs/research/g03-evidence-register-v0.1.md`, `fixtures/g03-error-catalog/v0.1/source-row-manifest.json` SHA-256 `b809f086225737024e91b9527291bcd8ad30006b80b5f26fe9b43beeb3811a82`, `catalog.json` SHA-256 `38364febcc77a98b19775ab5853c3d98ee8a240f8f9c1faf40d918604b4a5e12`.
+- Последствие: G03 нельзя объявить достигнутой по synthetic control report или одному catalogue score; нужны выбранные реальные домены и отдельное исследование prevalence.
+
+## K-G03-003
+
+- Дата / фаза: 2026-09-29 / G03 evaluator design.
+- Тип / статус: Anti-vacuity and provenance invariant / implemented for synthetic controls.
+- Утверждение: запретить ошибочную программу недостаточно, если язык также отвергает правильную полезную операцию. `CoveredCell` требует все matched positive specimens с `AcceptedEquivalent` и проверенное обобщение; `RuntimeDetected`, `UnsupportedUsefulTask`, `FalseRejection`, missing/refuted proof не дают покрытия. Проверка отдельных примеров без universal rule также не даёт покрытия.
+- Реализация: closed JSON schemas и deterministic validator/scorer проверяют идентичности manifest/catalog/registry/plan/observations, content-addressed raw receipts, один terminal attempt, один разрешённый pre-exposure whole-cohort retry и полное включение зарегистрированных domain×family cells. Синтетический `domain-floor` показывает 7 глобально покрытых семейств при провале 4/8 во втором домене; `runtime-all` не засчитывает ни одно из 72 runtime-only negatives.
+- Ограничение: синтетические proof receipts и identities проверяют только механику scorer, не действительное доказательство свойств Strogo. Реальный registry, specimens и независимая проверка generalization остаются следующими экспериментами.
+
+## K-G03-004
+
+- Дата / фаза: 2026-09-29 / G03 post-EXEC review и исправление.
+- Тип / статус: Adversarial findings / исправлены в текущем EXEC, re-review пройден по затронутым контрактам.
+- Контрпример: прежний scorer проверял только digest универсального синтетического raw файла. Derived observation можно было поменять на успешный outcome при том же raw digest; это нарушало приоритет raw над derived data. Кроме того, retry допускался после любого pre-exposure `Incomplete`, а не только `InfrastructureFailure`; CLI missing argument и cross-artifact digest не соответствовали типизированному контракту; отчёт не перечислял schema digests.
+- Исправление: каждый raw specimen receipt теперь канонически привязан к exact planned specimen, evaluator, attempt и observed outcome; конфликт делает cohort `EvaluationIncomplete`. Content-addressed candidate/contract/input/oracle и registry evidence проверяются на существование и digest. Retry проверяет причину, candidate/generation/arm/oracle identities и raw attempt receipt. CLI выдаёт `Refused/G03SchemaInvalid` на стадии `Invocation`; cross-artifact refusal содержит digest карты всех прочитанных inputs; отчёт включает шесть schema digests.
+- Evidence: G03 conformance проверяет подмену derived outcome, retry после `OracleAmbiguous`, arm drift, row replacement, полную карту cross-digests и schema closure; manual CLI check подтвердил canonical invocation refusal. Full build и conformance повторно проверяются после этих исправлений.
+- Ограничение: reviewer не имел технически read-only sandbox (`danger-full-access`), поэтому review является advisory и дополнен отдельными adversarial controls. Файлы reviewer не изменял. Синтетические receipts всё ещё не являются независимым доказательством реального исполнения или универсального свойства.
+
+## K-G03-005
+
+- Дата / фаза: 2026-09-29 / G03 second adversarial review.
+- Тип / статус: False terminal-claim risk / bounded for v0.1; real evaluation deferred.
+- Контрпример: даже структурно связанные raw receipts могли быть созданы тем же автором, что и derived observations, без независимого execution trace, verifier/checker result и свидетельства `InfrastructureFailure`. Пересчёт всех hashes не делает их правдивыми.
+- Решение: `g03 score` v0.1 принимает только два exact заранее созданных synthetic control registry/plan pairs; иной даже schema-valid план получает `G03EvidenceInvalid` без report. Каждый отчёт имеет `evidenceScope=SyntheticControlOnly`. CLI `g03 validate` остаётся общим structural validator, но не выдаёт terminal оценку реального домена. Это делает границу способности инструмента машинно явной, а не только текстовым предупреждением.
+- Evidence: immutable digest allowlist в scorer, conformance case «structurally valid new plan refused», `report.schema.json` и golden reports. Advisory reviewer повторно указал на отсутствие независимого trusted evidence; эта часть не объявлена исправленной.
+- Последствие: для реальной G03-evaluation нужна новая утверждённая SPEC с независимым raw-evidence contract, checker output, правами записи receipts и pre-exposure process failure proof. Только после её реализации можно расширить scorer за пределы `SyntheticControlOnly`.

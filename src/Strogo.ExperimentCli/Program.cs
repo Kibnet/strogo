@@ -9,6 +9,11 @@ try
 {
     return Run(args);
 }
+catch (G03RefusalException error)
+{
+    Console.Error.WriteLine(Encoding.UTF8.GetString(error.OutputBytes));
+    return 1;
+}
 catch (KernelException error)
 {
     Console.Error.WriteLine(error.Error.Code);
@@ -64,7 +69,43 @@ static int Run(string[] args)
             _ => Usage()
         };
     }
+    if (args[0] == "g03")
+    {
+        if (args.Length < 2) throw G03InvocationFailure();
+        return args[1] switch
+        {
+            "validate" => G03Validate(args),
+            "score" => G03Score(args),
+            _ => throw G03InvocationFailure()
+        };
+    }
     return Usage();
+}
+
+static G03ValidationResult G03Inputs(string[] args) => G03Catalog.Validate(
+    G03Required(args, "source-row-manifest"), G03Required(args, "catalog"),
+    G03Required(args, "domain-registry"), G03Required(args, "evaluation-plan"));
+
+static G03RefusalException G03InvocationFailure() => new("G03SchemaInvalid", "Invocation", CanonicalJson.RawDigest([]));
+static string G03Required(string[] args, string name) => Option(args, name) is { Length: > 0 } value ? value : throw G03InvocationFailure();
+
+static int G03Validate(string[] args)
+{
+    var result = G03Inputs(args);
+    Console.WriteLine(Encoding.UTF8.GetString(result.OutputBytes));
+    return 0;
+}
+
+static int G03Score(string[] args)
+{
+    string output = G03Required(args, "report");
+    string observations = G03Required(args, "observations");
+    var inputs = G03Inputs(args);
+    var result = G03Catalog.Score(inputs, observations, G03Required(args, "catalog"));
+    Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output))!);
+    File.WriteAllBytes(output, result.ReportBytes);
+    Console.WriteLine(Encoding.UTF8.GetString(result.OutputBytes));
+    return result.ExitCode;
 }
 
 static int Prepare(string[] args)
@@ -218,6 +259,6 @@ static string Digest(string path) => File.Exists(path) ? CanonicalJson.RawDigest
 
 static int Usage()
 {
-    Console.Error.WriteLine("Usage: calibrate [--report PATH] | export --case R01-baseline [--arm graph-json|strogo-notation] [--directory PATH] | pilot prepare|identity-check|receipt|evaluate|abort-remaining|prompt-check|report ...");
+    Console.Error.WriteLine("Usage: calibrate [--report PATH] | export --case R01-baseline [--arm graph-json|strogo-notation] [--directory PATH] | pilot prepare|identity-check|receipt|evaluate|abort-remaining|prompt-check|report ... | g03 validate|score --source-row-manifest PATH --catalog PATH --domain-registry PATH --evaluation-plan PATH [--observations PATH --report PATH]");
     return 2;
 }
