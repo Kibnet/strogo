@@ -1,6 +1,6 @@
 # G02: первая owner-операция допуска
 
-`Strogo.Modules.Owner.Cli approve-contract` создаёт `contract-approval.json` только после проверки подписанного owner state, строгого разбора owner bundle v0.4 и интерактивного ввода **полного** payload digest. Это первая из двух человеческих операций допуска. Команды `admit`, `state advance-epoch`, `check`, `build` и `run` пока не реализованы; текущий checkpoint не запускает модуль.
+`Strogo.Modules.Owner.Cli approve-contract` создаёт `contract-approval.json` только после проверки подписанного owner state, строгого разбора owner bundle v0.4 и интерактивного ввода **полного** payload digest. Это первая из двух человеческих операций допуска. `state advance-epoch` повышает общий revocation epoch; команды `admit`, `check`, `build` и `run` пока не реализованы. Текущий checkpoint не запускает модуль.
 
 Оператор заранее размещает вне репозитория RSA public key в DER SubjectPublicKeyInfo, зашифрованный PKCS#8 private key и подписанный `owner-state.json` в защищённом каталоге. `keyId` — lowercase SHA-256 public SPKI bytes. CLI не создаёт ключ и не принимает пароль из аргумента, переменной окружения или файла.
 
@@ -24,4 +24,12 @@ dotnet run --project src/Strogo.Modules.Owner.Cli -c Release -- approve-contract
 
 Команда требует терминал для ввода и вывода. Сначала она показывает весь canonical owner bundle, payload будущего approval и `payloadDigest`; затем владелец вводит этот digest без сокращения и пароль ключа без эха. До совпадения digest ключ не открывается. Перед подписью CLI повторно читает state и отказывает при смене его artifact digest. Результат записывается через временный файл и atomic move; существующий `--out` не перезаписывается. Отказ возвращает JSON `status=Refused`, `stage=owner`, `code=...` и ненулевой код выхода.
 
-Conformance с одноразовым fixture key проверяет подготовку/подпись, отказ при неверном digest и ключе, интерактивное создание approval и независимую проверку artifact. Этот fixture не является согласием владельца на D02 bundle или выпуск исполняемого пакета. Требования полного admission и runtime описаны в [G02 SPEC](../specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md).
+Для отзыва всех approvals и admissions прежней эпохи оператор отдельно запускает:
+
+```powershell
+dotnet run --project src/Strogo.Modules.Owner.Cli -c Release -- state advance-epoch --trust-config <host-owned.json> --signer-config <operator-owned.json> --expected-epoch <N>
+```
+
+CLI берёт эксклюзивный lock в `ownerStateStore`, проверяет подпись и exact `expected-epoch`, показывает canonical payload следующего состояния и требует его полный digest. После ввода пароля он повторно читает текущее состояние, подписывает только переход `N → N+1`, записывает новый файл с flush на диск и атомарно заменяет `owner-state.json`. Lock удерживается до завершения. Старый файл после успешной замены не проходит проверку process-local high-water, а прежние approval/admission получают отказ из-за epoch mismatch. Целостность operator-owned state store после перезапуска процесса остаётся частью TCB; CLI не создаёт production key и не гарантирует защиту от произвольной записи тем же OS-пользователем.
+
+Conformance с одноразовым fixture key проверяет подготовку/подпись, отказ при неверном digest и ключе, интерактивное создание approval, повышение эпохи и независимую проверку artifacts. Этот fixture не является согласием владельца на D02 bundle или выпуск исполняемого пакета. Требования полного admission и runtime описаны в [G02 SPEC](../specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md).

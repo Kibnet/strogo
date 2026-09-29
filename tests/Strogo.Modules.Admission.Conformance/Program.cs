@@ -154,6 +154,22 @@ Refuse(() => trust.VerifyOwnerState(state0), "OwnerStateRollbackDetected");
 Refuse(() => trust.VerifyContractApproval(approval0, state1, bundleDigest, now), "ApprovalEpochMismatch");
 Refuse(() => VerifyRelease(admission0, state1, verified), "AdmissionEpochMismatch");
 Refuse(() => proposal.Sign(owner, proposal.PayloadDigest, state1, now), "OwnerStateChanged");
+using (var epochTrust = new OwnerTrust(publicKey, keyId))
+{
+    var epochProposal = OwnerStateEpochProposal.Prepare(epochTrust, state0, 0, now);
+    Refuse(() => OwnerStateEpochProposal.Prepare(epochTrust, state0, 1, now), "ApprovalEpochMismatch");
+    Refuse(() => epochProposal.Sign(owner, epochProposal.PayloadDigest[..^1] +
+        (epochProposal.PayloadDigest[^1] == '0' ? "1" : "0"), state0), "OwnerConfirmationMismatch");
+    Refuse(() => epochProposal.Sign(impostor, epochProposal.PayloadDigest, state0), "SignerKeyMismatch");
+    var advanced = epochProposal.Sign(owner, epochProposal.PayloadDigest, state0);
+    Check(epochTrust.VerifyOwnerState(advanced).ApprovalEpoch == 1, "signed state advances epoch exactly once");
+    Refuse(() => epochTrust.VerifyOwnerState(state0), "OwnerStateRollbackDetected");
+    Refuse(() => epochTrust.VerifyContractApproval(approval0, advanced, bundleDigest, now), "ApprovalEpochMismatch");
+    using var oldDocument = JsonDocument.Parse(state0);
+    using var nextDocument = JsonDocument.Parse(advanced);
+    Check(oldDocument.RootElement.GetProperty("policyDigest").GetString() ==
+          nextDocument.RootElement.GetProperty("policyDigest").GetString(), "epoch advance preserves policy");
+}
 if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
 {
     var directory = Path.GetFullPath(args[1]);
@@ -166,7 +182,9 @@ if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
     File.WriteAllText(keyPath, owner.ExportEncryptedPkcs8PrivateKeyPem("disposable-test-passphrase",
         new PbeParameters(PbeEncryptionAlgorithm.Aes256Cbc, HashAlgorithmName.SHA256, 100_000)));
     File.WriteAllBytes(publicPath, publicKey);
-    File.WriteAllBytes(Path.Combine(stateStore, "owner-state.json"), State(0));
+    var initialState = State(0);
+    File.WriteAllBytes(Path.Combine(stateStore, "owner-state.json"), initialState);
+    File.WriteAllBytes(Path.Combine(directory, "initial-owner-state.json"), initialState);
     File.WriteAllText(Path.Combine(directory, "host-owned.json"), JsonSerializer.Serialize(new
     {
         schemaVersion = "strogo.owner-trust-config.v0.1", keyId,
@@ -198,5 +216,21 @@ if (args.Length == 2 && args[0] == "--verify-cli-fixture")
     Check(receipt.BundleDigest == parsedBundle.BundleDigest && receipt.ApprovalEpoch == 0,
         "interactive CLI artifact independently verifies against fixture owner bundle");
     Console.WriteLine("CLI contract-approval verified digest=" + receipt.ArtifactDigest);
+}
+if (args.Length == 2 && args[0] == "--verify-epoch-fixture")
+{
+    var directory = Path.GetFullPath(args[1]);
+    var fixturePublicKey = File.ReadAllBytes(Path.Combine(directory, "owner-public.spki"));
+    var oldState = File.ReadAllBytes(Path.Combine(directory, "initial-owner-state.json"));
+    var nextState = File.ReadAllBytes(Path.Combine(directory, "state-store", "owner-state.json"));
+    using var independentTrust = new OwnerTrust(fixturePublicKey, Hex(SHA256.HashData(fixturePublicKey)));
+    var oldReceipt = independentTrust.VerifyOwnerState(oldState);
+    var nextReceipt = independentTrust.VerifyOwnerState(nextState);
+    Check(oldReceipt.ApprovalEpoch == 0 && nextReceipt.ApprovalEpoch == 1 &&
+          oldReceipt.PolicyDigest == nextReceipt.PolicyDigest &&
+          oldReceipt.ArtifactDigest != nextReceipt.ArtifactDigest,
+        "interactive CLI advanced signed state and preserved policy");
+    Refuse(() => independentTrust.VerifyOwnerState(oldState), "OwnerStateRollbackDetected");
+    Console.WriteLine("CLI owner-state advanced digest=" + nextReceipt.ArtifactDigest);
 }
 Console.WriteLine($"PASS owner admission trust checks={checks}");

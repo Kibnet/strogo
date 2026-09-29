@@ -15,10 +15,14 @@ static int Run(string[] args)
         if (args.Length == 1 && args[0] == "--help")
         {
             Console.WriteLine("approve-contract --trust-config <host-owned.json> --signer-config <operator-owned.json> --bundle <bundle.json> --approved-by <id> --provenance <provenance.json> --valid-until <UTC> --out <contract-approval.json>");
+            Console.WriteLine("state advance-epoch --trust-config <host-owned.json> --signer-config <operator-owned.json> --expected-epoch <N>");
             return 0;
         }
+        if (args.Length > 1 && args[0] == "state" && args[1] == "advance-epoch")
+            return AdvanceEpoch(args);
         if (args.Length == 0 || args[0] != "approve-contract") return Refusal("UnknownOwnerCommand");
-        var options = Options(args);
+        var options = Options(args, 1, "trust-config", "signer-config", "bundle", "approved-by",
+            "provenance", "valid-until", "out");
         if (Console.IsInputRedirected || Console.IsOutputRedirected)
             return Refusal("InteractiveTerminalRequired");
 
@@ -83,15 +87,56 @@ static int Run(string[] args)
     }
 }
 
-static Dictionary<string, string> Options(string[] args)
+static int AdvanceEpoch(string[] args)
 {
-    var allowed = new HashSet<string>(StringComparer.Ordinal)
+    var options = Options(args, 2, "trust-config", "signer-config", "expected-epoch");
+    if (Console.IsInputRedirected || Console.IsOutputRedirected)
+        return Refusal("InteractiveTerminalRequired");
+    if (!long.TryParse(options["expected-epoch"], NumberStyles.None, CultureInfo.InvariantCulture,
+            out var expectedEpoch) || expectedEpoch.ToString(CultureInfo.InvariantCulture) != options["expected-epoch"])
+        return Refusal("InvalidExpectedEpoch");
+    var trustConfig = Config(options["trust-config"], "schemaVersion", "keyId", "publicKeyPath", "ownerStateStore");
+    Required(trustConfig, "schemaVersion", "strogo.owner-trust-config.v0.1");
+    var stateDirectory = AbsolutePath(trustConfig, "ownerStateStore");
+    var statePath = Path.Combine(stateDirectory, "owner-state.json");
+    var publicKey = File.ReadAllBytes(AbsolutePath(trustConfig, "publicKeyPath"));
+    using var trust = new OwnerTrust(publicKey, String(trustConfig, "keyId"));
+    var signerConfig = Config(options["signer-config"], "schemaVersion", "keyId", "publicKeyDigest", "encryptedPrivateKeyPath");
+    Required(signerConfig, "schemaVersion", "strogo.owner-signer-config.v0.1");
+    Required(signerConfig, "keyId", trust.KeyId);
+    Required(signerConfig, "publicKeyDigest", trust.KeyId);
+
+    // All cooperating state writers acquire this host-owned lock before reading the snapshot.
+    using var stateLock = new FileStream(Path.Combine(stateDirectory, "owner-state.lock"),
+        FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+    var stateBytes = File.ReadAllBytes(statePath);
+    var issuedAt = new DateTimeOffset(DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond * TimeSpan.TicksPerMillisecond, TimeSpan.Zero);
+    var proposal = OwnerStateEpochProposal.Prepare(trust, stateBytes, expectedEpoch, issuedAt);
+    Console.WriteLine(proposal.Projection);
+    Console.WriteLine("payloadDigest=" + proposal.PayloadDigest);
+    Console.Write("Введите полный payloadDigest для повышения эпохи: ");
+    var entered = Console.ReadLine();
+    if (entered is null || entered != proposal.PayloadDigest) return Refusal("OwnerConfirmationMismatch");
+    Console.Write("Пароль зашифрованного ключа: ");
+    var password = ReadPassword();
+    try
     {
-        "trust-config", "signer-config", "bundle", "approved-by", "provenance", "valid-until", "out"
-    };
-    if (args.Length != 1 + allowed.Count * 2) throw new ArgumentException("Owner option count");
+        using var signer = RSA.Create();
+        signer.ImportFromEncryptedPem(File.ReadAllText(AbsolutePath(signerConfig, "encryptedPrivateKeyPath"), new UTF8Encoding(false, true)), password);
+        var next = proposal.Sign(signer, entered, File.ReadAllBytes(statePath));
+        ReplaceAtomically(statePath, next);
+        Console.WriteLine("ownerStateArtifactDigest=" + DomainHash("strogo.owner-state.v0.2/artifact", next));
+        return 0;
+    }
+    finally { Array.Clear(password); }
+}
+
+static Dictionary<string, string> Options(string[] args, int offset, params string[] names)
+{
+    var allowed = new HashSet<string>(names, StringComparer.Ordinal);
+    if (args.Length != offset + allowed.Count * 2) throw new ArgumentException("Owner option count");
     var result = new Dictionary<string, string>(StringComparer.Ordinal);
-    for (var index = 1; index < args.Length; index += 2)
+    for (var index = offset; index < args.Length; index += 2)
     {
         var name = args[index];
         if (!name.StartsWith("--", StringComparison.Ordinal) || !allowed.Contains(name[2..]) ||
@@ -171,6 +216,25 @@ static void WriteNewAtomically(string path, byte[] artifact)
             stream.Flush(flushToDisk: true);
         }
         File.Move(temporary, path, overwrite: false);
+    }
+    finally
+    {
+        if (File.Exists(temporary)) File.Delete(temporary);
+    }
+}
+
+static void ReplaceAtomically(string path, byte[] artifact)
+{
+    var directory = Path.GetDirectoryName(path) ?? throw new ArgumentException("State directory missing");
+    var temporary = Path.Combine(directory, ".strogo-owner-state-" + Guid.NewGuid().ToString("N") + ".tmp");
+    try
+    {
+        using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            stream.Write(artifact);
+            stream.Flush(flushToDisk: true);
+        }
+        File.Replace(temporary, path, null);
     }
     finally
     {
