@@ -194,15 +194,17 @@ var manifestFiles = new (string Path, string Role)[]
     ("content/transcript.json", "proof-transcript")
 };
 byte[] Manifest((string Path, string Role)[] files, string rid = "win-x64",
-    IReadOnlyDictionary<string, byte[]>? content = null)
+    IReadOnlyDictionary<string, byte[]>? content = null, IReadOnlyDictionary<string, string>? identities = null)
 {
+    string Identity(string field, char fallback) => identities is not null && identities.TryGetValue(field, out var value)
+        ? value : new string(fallback, 64);
     var declared = files.Select(file => Fields(("path", file.Path),
         ("sha256", content is null ? new string('a', 64) : Hex(SHA256.HashData(content[file.Path]))),
         ("length", content is null ? 1L : content[file.Path].LongLength), ("role", file.Role))).ToArray();
     var payload = Fields(("schemaVersion", "strogo.build-manifest.v0.2"),
-        ("moduleDigest", new string('a', 64)), ("bundleDigest", new string('b', 64)),
-        ("contractApprovalDigest", new string('c', 64)), ("proofDigest", new string('d', 64)),
-        ("toolchainDigest", new string('e', 64)), ("closureDigest", new string('f', 64)),
+        ("moduleDigest", Identity("moduleDigest", 'a')), ("bundleDigest", Identity("bundleDigest", 'b')),
+        ("contractApprovalDigest", Identity("contractApprovalDigest", 'c')), ("proofDigest", Identity("proofDigest", 'd')),
+        ("toolchainDigest", Identity("toolchainDigest", 'e')), ("closureDigest", Identity("closureDigest", 'f')),
         ("runtimeIdentifier", rid), ("entryAssemblyPath", "content/generated.dll"), ("files", declared));
     payload.Add("packageDigest", Hex(Hash("strogo.package.v0.2/manifest-payload", Encode(payload))));
     return Encode(payload);
@@ -277,6 +279,93 @@ if (OperatingSystem.IsWindows())
         File.Move(path, path + ".original");
         File.CreateSymbolicLink(path, outside);
     }), "PackageHandleTypeInvalid");
+
+    var identityRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+        "package-identity-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(Path.Combine(identityRoot, "content"));
+    var canonicalModule = ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(repoRoot, "fixtures",
+        "modules-v0.2", "owner-empty-sequence-module.json")));
+    var identityContent = manifestFiles.ToDictionary(file => file.Path,
+        file => Encoding.UTF8.GetBytes(file.Role), StringComparer.Ordinal);
+    identityContent["content/module.json"] = canonicalModule.CanonicalSource;
+    identityContent["content/bundle.json"] = parsedBundle.CanonicalBytes;
+    identityContent["content/approval.json"] = signedProposal;
+    var approvalDigest = Hex(Hash("strogo.contract-approval.v0.2/artifact", signedProposal));
+    var identities = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["moduleDigest"] = canonicalModule.SourceDigest,
+        ["bundleDigest"] = parsedBundle.BundleDigest,
+        ["contractApprovalDigest"] = approvalDigest,
+        ["toolchainDigest"] = new string('e', 64),
+        ["closureDigest"] = new string('f', 64)
+    };
+    byte[] Proof(string moduleDigest, string contractDigest) => Encode(Fields(
+        ("schemaVersion", "strogo.proof.v0.2"), ("moduleDigest", moduleDigest),
+        ("bundleDigest", parsedBundle.BundleDigest), ("contractApprovalDigest", contractDigest),
+        ("toolchainDigest", identities["toolchainDigest"]), ("closureDigest", identities["closureDigest"]),
+        ("proofSourcesDigest", new string('1', 64)), ("transcriptDigest", new string('2', 64)),
+        ("sourceMapDigest", new string('3', 64)), ("outcome", "Verified"),
+        ("obligations", new[] { Fields(("obligationId", "entry.1"), ("kind", "postcondition"),
+            ("status", "Verified"), ("evidenceDigest", new string('4', 64))) })));
+    void WriteIdentityPackage()
+    {
+        foreach (var (path, bytes) in identityContent)
+            File.WriteAllBytes(Path.Combine(identityRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+        identities["proofDigest"] = Hex(Hash("strogo.proof.v0.2/artifact", identityContent["content/proof.json"]));
+        File.WriteAllBytes(Path.Combine(identityRoot, "build-manifest.json"),
+            Manifest(manifestFiles, content: identityContent, identities: identities));
+    }
+    identityContent["content/proof.json"] = Proof(canonicalModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Check(G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now).ContractApproval.ArtifactDigest == approvalDigest,
+            "held module, bundle, approval and stored proof metadata bind to one manifest");
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now.AddHours(2)), "ContractApprovalExpired");
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state1,
+            parsedBundle.BundleDigest, now), "ApprovalEpochMismatch");
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+    {
+        identityTrust.VerifyOwnerState(state1);
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "OwnerStateRollbackDetected");
+    }
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            new string('0', 64), now), "ContractApprovalDigestMismatch");
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state1,
+            new string('0', 64), now), "ApprovalEpochMismatch");
+    identities["moduleDigest"] = new string('0', 64);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageModuleDigestMismatch");
+    identities["moduleDigest"] = canonicalModule.SourceDigest;
+    identityContent["content/proof.json"] = Proof(new string('0', 64), approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        RefusePackage(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "PackageProofIdentityMismatch");
+    identityContent["content/proof.json"] = Proof(canonicalModule.SourceDigest, approvalDigest);
+    identityContent["content/approval.json"] = approval0;
+    identities["contractApprovalDigest"] = Hex(Hash("strogo.contract-approval.v0.2/artifact", approval0));
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+        Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
+            parsedBundle.BundleDigest, now), "ContractApprovalDigestMismatch");
 }
 if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
 {
