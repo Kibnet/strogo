@@ -2309,3 +2309,21 @@
 - Решение: `g03 score` v0.1 принимает только два exact заранее созданных synthetic control registry/plan pairs; иной даже schema-valid план получает `G03EvidenceInvalid` без report. Каждый отчёт имеет `evidenceScope=SyntheticControlOnly`. CLI `g03 validate` остаётся общим structural validator, но не выдаёт terminal оценку реального домена. Это делает границу способности инструмента машинно явной, а не только текстовым предупреждением.
 - Evidence: immutable digest allowlist в scorer, conformance case «structurally valid new plan refused», `report.schema.json` и golden reports. Advisory reviewer повторно указал на отсутствие независимого trusted evidence; эта часть не объявлена исправленной.
 - Последствие: для реальной G03-evaluation нужна новая утверждённая SPEC с независимым raw-evidence contract, checker output, правами записи receipts и pre-exposure process failure proof. Только после её реализации можно расширить scorer за пределы `SyntheticControlOnly`.
+
+## K-G02-001
+
+- Дата / фаза: 2026-09-29 / G02 SPEC approval → EXEC.
+- Тип / статус: Human approval receipt / подтверждено для exact G02 revision.
+- Утверждение: владелец ответил «Спеку подтверждаю» на последнюю G02 SPEC, записанную в commit `5869f592666f3107a74ca64f10d0ac10f47e11cf` (`origin/main`), blob `b89624a70bd9ea48b4600640b5d8d60255ba700a`, SHA-256 файла `82726A76D3D61EA6F00203A6BF1C3965C096EEFBF69BFD533BE852FB7B0AC216`.
+- Область: механизм .NET ReadyToRun backend и fixture-key validation по `specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md`; это не подтверждение D02 SPEC, exact owner bundle или release admission конкретного package.
+- Evidence: точная фраза пользователя в текущем диалоге, Git commit/blob и SHA-256 исходной SPEC.
+- Последствие: разрешён G02 EXEC в утверждённых границах, а финальные AC2–4/G02 ждут самостоятельных human decisions по D02 и package.
+
+## K-G02-002
+
+- Дата / фаза: 2026-09-29 / G02 EXEC, первый trust checkpoint.
+- Тип / статус: Реализованный механизм / частично проверено локально.
+- Утверждение: доверенная библиотечная проверка signed owner-state, contract-approval и external admission может связывать pinned RSA SubjectPublicKeyInfo, domain-separated hashes, strict canonical JSON, policy/lifetime, approval epoch и точные digest-поля без доступа agent module к private key. `VerifiedContractApproval` создаётся только проверяющим `OwnerTrust` и удерживает его identity; иначе подставленный объект мог бы обойти связь между первым и вторым human gate.
+- Evidence: `src/Strogo.Modules/OwnerAdmissionTrust.cs`, `tests/Strogo.Modules.Admission.Conformance/Program.cs`; targeted run `PASS owner admission trust checks=24` на закреплённом .NET SDK 10.0.400. Проверены правильная цепочка и отказы при forged signatures/key, tampered policy/bundle/package, expiry, duplicate/extra/noncanonical fields, чужом approval/trust и epoch rollback. Locked restore и solution build прошли без warnings/errors; регрессии: Modules 362, Graph 141, Kernel 29/29 (10904 assertions), Notation 143, Portability 253, Experiments E09 12 positive pairs / 21 negative categories. Graph conformance требует закрепить локальный SDK также в `PATH` для вложенных вызовов `dotnet`; первый запуск с системным SDK 10.0.401 остановился на `CLI build`, второй с pinned `PATH` прошёл. Тест перезаписал historical `artifacts/e04/conformance.json`; файл восстановлен из HEAD, локальные отчёты — под игнорируемым `artifacts/local-validation/g02/`.
+- Ограничение: conformance использует одноразовый локальный ключ и синтетические digest identities; owner CLI, proof replay, file closure, actual package load, direct generated execution и R2R evidence пока отсутствуют. Эти 22 проверки не подтверждают A-AC1–A-AC9 или G02 целиком.
+- Последствие: следующий checkpoint — интерактивные owner operations и проверка immutable package/proof до admission, затем runtime facade; полный регрессионный набор и post-EXEC review обязательны перед соответствующим закрытием.

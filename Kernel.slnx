@@ -15,6 +15,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Kernel.Conformance/Kernel.Conformance.csproj" />
     <Project Path="tests/Kernel.Graph.Conformance/Kernel.Graph.Conformance.csproj" />
+    <Project Path="tests/Strogo.Modules.Admission.Conformance/Strogo.Modules.Admission.Conformance.csproj" />
     <Project Path="tests/Strogo.Modules.Conformance/Strogo.Modules.Conformance.csproj" />
     <Project Path="tests/Strogo.Notation.Conformance/Strogo.Notation.Conformance.csproj" />
     <Project Path="tests/Strogo.Modules.Portability.Conformance/Strogo.Modules.Portability.Conformance.csproj" />
