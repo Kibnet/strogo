@@ -85,6 +85,29 @@ void Refuse(Action action, string code)
 }
 
 var state0 = State(0);
+var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+var bundleBytes = File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "owner-fold-sum-valid-v0.4.json"));
+var parsedBundle = OwnerBundleV04Parser.Parse(bundleBytes);
+var provenance = new OwnerDecisionProvenance("spec", "specs/g02.md", new string('b', 64));
+var proposal = OwnerContractApprovalProposal.Prepare(trust, state0, bundleBytes, "review.2", "owner",
+    provenance, now, now.AddHours(1));
+Check(proposal.Projection.Contains(parsedBundle.BundleDigest, StringComparison.Ordinal) &&
+    proposal.PayloadDigest.Length == 64, "canonical owner projection and payload identity");
+var secondProposal = OwnerContractApprovalProposal.Prepare(trust, state0, bundleBytes, "review.2", "owner",
+    provenance, now, now.AddHours(1));
+Check(secondProposal.PayloadDigest == proposal.PayloadDigest, "same inputs give same pre-signature identity");
+Refuse(() => proposal.Sign(owner, new string('0', 64), state0, now), "OwnerConfirmationMismatch");
+Refuse(() => proposal.Sign(impostor, proposal.PayloadDigest, state0, now), "SignerKeyMismatch");
+var signedProposal = proposal.Sign(owner, proposal.PayloadDigest, state0, now);
+Check(trust.VerifyContractApproval(signedProposal, state0, parsedBundle.BundleDigest, now).BundleDigest ==
+    parsedBundle.BundleDigest, "fixture-key approval is independently verified");
+using (var issuedDocument = JsonDocument.Parse(signedProposal))
+    Check(!issuedDocument.RootElement.TryGetProperty("candidateDigest", out _) &&
+        !issuedDocument.RootElement.TryGetProperty("proofDigest", out _), "semantic approval excludes candidate and proof identities");
+Refuse(() => OwnerContractApprovalProposal.Prepare(trust, state0, bundleBytes, "Review.2", "owner",
+    provenance, now, now.AddHours(1)), "InvalidId");
+Refuse(() => OwnerContractApprovalProposal.Prepare(trust, state0, bundleBytes, "review.3", "owner",
+    provenance, now, now.AddHours(3)), "ContractApprovalExpired");
 var approval0 = Approval(state0, 0);
 var verified = trust.VerifyContractApproval(approval0, state0, bundleDigest, now);
 Check(verified.BundleDigest == bundleDigest && verified.ApprovalEpoch == 0, "approved bundle identity");
@@ -130,4 +153,50 @@ Check(trust.VerifyOwnerState(state1).ApprovalEpoch == 1, "epoch advance");
 Refuse(() => trust.VerifyOwnerState(state0), "OwnerStateRollbackDetected");
 Refuse(() => trust.VerifyContractApproval(approval0, state1, bundleDigest, now), "ApprovalEpochMismatch");
 Refuse(() => VerifyRelease(admission0, state1, verified), "AdmissionEpochMismatch");
+Refuse(() => proposal.Sign(owner, proposal.PayloadDigest, state1, now), "OwnerStateChanged");
+if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
+{
+    var directory = Path.GetFullPath(args[1]);
+    if (Directory.Exists(directory)) throw new Exception("CLI fixture directory exists");
+    Directory.CreateDirectory(directory);
+    var keyPath = Path.Combine(directory, "owner-key.encrypted.pem");
+    var publicPath = Path.Combine(directory, "owner-public.spki");
+    var stateStore = Path.Combine(directory, "state-store");
+    Directory.CreateDirectory(stateStore);
+    File.WriteAllText(keyPath, owner.ExportEncryptedPkcs8PrivateKeyPem("disposable-test-passphrase",
+        new PbeParameters(PbeEncryptionAlgorithm.Aes256Cbc, HashAlgorithmName.SHA256, 100_000)));
+    File.WriteAllBytes(publicPath, publicKey);
+    File.WriteAllBytes(Path.Combine(stateStore, "owner-state.json"), State(0));
+    File.WriteAllText(Path.Combine(directory, "host-owned.json"), JsonSerializer.Serialize(new
+    {
+        schemaVersion = "strogo.owner-trust-config.v0.1", keyId,
+        publicKeyPath = publicPath, ownerStateStore = stateStore
+    }));
+    File.WriteAllText(Path.Combine(directory, "operator-owned.json"), JsonSerializer.Serialize(new
+    {
+        schemaVersion = "strogo.owner-signer-config.v0.1", keyId, publicKeyDigest = keyId,
+        encryptedPrivateKeyPath = keyPath
+    }));
+    File.WriteAllText(Path.Combine(directory, "provenance.json"), JsonSerializer.Serialize(new
+    {
+        kind = "git.commit-path-blob",
+        reference = "5869f592666f3107a74ca64f10d0ac10f47e11cf:specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md:b89624a70bd9ea48b4600640b5d8d60255ba700a",
+        digest = "82726a76d3d61ea6f00203a6bf1c3965c096eefbf69bfd533be852fb7b0ac216"
+    }));
+    File.WriteAllText(Path.Combine(directory, "valid-until.txt"), DateTimeOffset.UtcNow.AddHours(1)
+        .ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
+    Console.WriteLine("CLI fixture directory=" + directory);
+}
+if (args.Length == 2 && args[0] == "--verify-cli-fixture")
+{
+    var directory = Path.GetFullPath(args[1]);
+    var approvalBytes = File.ReadAllBytes(Path.Combine(directory, "contract-approval.json"));
+    var stateBytes = File.ReadAllBytes(Path.Combine(directory, "state-store", "owner-state.json"));
+    var fixturePublicKey = File.ReadAllBytes(Path.Combine(directory, "owner-public.spki"));
+    using var independentTrust = new OwnerTrust(fixturePublicKey, Hex(SHA256.HashData(fixturePublicKey)));
+    var receipt = independentTrust.VerifyContractApproval(approvalBytes, stateBytes, parsedBundle.BundleDigest, DateTimeOffset.UtcNow);
+    Check(receipt.BundleDigest == parsedBundle.BundleDigest && receipt.ApprovalEpoch == 0,
+        "interactive CLI artifact independently verifies against fixture owner bundle");
+    Console.WriteLine("CLI contract-approval verified digest=" + receipt.ArtifactDigest);
+}
 Console.WriteLine($"PASS owner admission trust checks={checks}");

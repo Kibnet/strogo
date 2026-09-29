@@ -10,6 +10,7 @@
     <Project Path="src/Strogo.ExperimentCli/Strogo.ExperimentCli.csproj" />
     <Project Path="tests/Strogo.Experiments.Conformance/Strogo.Experiments.Conformance.csproj" />
     <Project Path="src/Strogo.Notation/Strogo.Notation.csproj" />
+    <Project Path="src/Strogo.Modules.Owner.Cli/Strogo.Modules.Owner.Cli.csproj" />
     <Project Path="src/Strogo.Modules.Portability/Strogo.Modules.Portability.csproj" />
   </Folder>
   <Folder Name="/tests/">

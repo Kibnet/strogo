@@ -290,6 +290,15 @@ internal static class OwnerAdmissionWire
     internal static byte[] CanonicalWithout(JsonElement root, string removed) => Write(root, removed, null);
     internal static byte[] CanonicalSubset(JsonElement root, params string[] fields) => Write(root, null, fields);
 
+    internal static byte[] CanonicalWithString(JsonElement root, string field, string value)
+    {
+        if (root.ValueKind != JsonValueKind.Object || root.TryGetProperty(field, out _)) throw Refuse("ArtifactFieldInvalid");
+        var payload = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        foreach (var item in root.EnumerateObject()) payload.Add(item.Name, item.Value.Clone());
+        payload.Add(field, JsonSerializer.SerializeToElement(value));
+        return Canonical(JsonSerializer.SerializeToElement(payload));
+    }
+
     private static byte[] Write(JsonElement value, string? removed, string[]? fields)
     {
         using var stream = new MemoryStream();
@@ -348,10 +357,16 @@ internal static class OwnerAdmissionWire
     internal static string Id(JsonElement root, string field)
     {
         var value = NonEmpty(root, field);
-        if (value.Length > 64 || !(value[0] is >= 'a' and <= 'z' or >= '0' and <= '9') ||
+        RequireId(value);
+        return value;
+    }
+
+    internal static void RequireId(string value)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length > 64 ||
+            !(value[0] is >= 'a' and <= 'z' or >= '0' and <= '9') ||
             value.Skip(1).Any(c => !(c is >= 'a' and <= 'z' or >= '0' and <= '9' or '.' or '_' or '-')))
             throw Refuse("InvalidId");
-        return value;
     }
 
     internal static bool IsDigest(string value) => value.Length == 64 && value.All(c => c is >= '0' and <= '9' or >= 'a' and <= 'f');

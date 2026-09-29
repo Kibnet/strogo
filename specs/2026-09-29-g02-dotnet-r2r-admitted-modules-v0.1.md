@@ -2,7 +2,7 @@
 
 ## 0. Метаданные
 
-- Статус: рабочая SPEC; **не утверждена**. Ни код, ни инфраструктура G02 в этом этапе пока не меняются.
+- Статус: утверждена для G02 EXEC точным ответом владельца на revision commit `5869f59`; исходный blob/hash и границы approval записаны в журнале действий ниже. D02 bundle и выпуск конкретного пакета требуют самостоятельных решений.
 - Профиль: `delivery-task` / QUEST / `product-system-design`; масштаб large, multi-module, trust/admission и публичный ABI. Владелец смысла и допуска: Kibnet; проект SPEC: Codex.
 - Задача Unlimotion `c390006e-dbe7-4823-868e-9e662ff59e61`, родительская цель `3295d388-0d24-45f8-b8be-b0eaf24e2cc5`; ветка `main`. Изменения только после exact approval этой ревизии.
 - Instruction stack: central `AGENTS.md`, `creator-vibe-lens`, `model-behavior-baseline`, `tool-execution-baseline`, `collaboration-baseline`, `quest-governance`, `quest-mode`, `testing-baseline`, `testing-dotnet`, `product-system-design`, `spec-linter`, `spec-rubric`, `review-loops` и локальный `AGENTS.md`. Шаблон — центральный `templates/specs/_template.md`. Full `creator-vibe` не применяется к точному техническому контракту.
@@ -222,7 +222,14 @@ Reviewer boundary: subagent был поведенчески read-only, но sand
 
 ### Post-EXEC review
 
-Не выполнен: EXEC не начат.
+Полный post-EXEC review G02 **не выполнен**: AC1–6 ещё не закрыты. Промежуточный owner-CLI checkpoint проверен по текущему diff, положительному/отрицательному терминальному fixture, independent advisory review и регрессиям; это не решение о завершении EXEC.
+
+| Severity | Area | Finding | Required action | Status |
+| --- | --- | --- | --- | --- |
+| MEDIUM | provenance | Первоначальная CLI могла подписать заявленный digest без сверки `reference`; промежуточный `file.sha256` не связывал его с неизменной утверждённой версией SPEC | Разрешить только `git.commit-path-blob`; дважды проверить commit:path→blob и SHA-256 bytes | fixed для текущей CLI; fixture artifact проверен, human D02 gate открыт |
+| MEDIUM | owner CLI negatives | Первоначальные проверки не охватывали неправильную provenance, существующий output, пароль и state drift | Добавить refusal probes; full AC1/AC3 не объявлять по fixture | частично: provenance/output/password проверены CLI, state drift — library; полный integration matrix впереди |
+
+Reviewer был поведенчески read-only, но фактическая sandbox `danger-full-access`, поэтому независимость технически не обеспечена. Повторное targeted review последнего Git resolver не обнаружило HIGH и указало на устаревшие записи о `file.sha256`; они обновлены. No-finding claim для всего G02 отсутствует. Scope: этот approved SPEC, diff в `OwnerAdmissionTrust`, `OwnerContractApprovalProposal`, Owner CLI, conformance, docs/knowledge log; locked restore/build, 33 library checks, positive CLI artifact + независимая проверка (34), redirected/bad-provenance/existing-output/wrong-password refusals и Git blob/digest refusals. Остаток: `state advance-epoch`, `admit`, proof replay, immutable package, runtime/direct method и D02 human gates.
 
 ## Журнал действий агента
 
@@ -233,3 +240,5 @@ Reviewer boundary: subagent был поведенчески read-only, но sand
 | SPEC review | Advisory reviewer нашёл шесть gap в identity, API, generality, JIT causality, corpus и D02 gate; исправлены | §10 findings, повторная проверка затронутых областей | Freeze commit/hash и запрос exact approval | Ожидается |
 | SPEC approval → EXEC | Владелец ответил «Спеку подтверждаю» на эту последнюю G02 revision; исходный blob `b89624a70bd9ea48b4600640b5d8d60255ba700a`, файл SHA-256 `82726A76D3D61EA6F00203A6BF1C3965C096EEFBF69BFD533BE852FB7B0AC216` | commit `5869f592666f3107a74ca64f10d0ac10f47e11cf`, `origin/main`; текущий диалог | EXEC: сначала signed owner trust/state и fixture-key validation; D02 gate остаётся самостоятельным | Утверждено для G02 mechanism/fixture EXEC; точные D02 bundle и package ещё не подтверждены |
 | EXEC trust checkpoint | Реализована проверка state/contract approval/admission на disposable fixture key; это ещё не facade или machine execution | `OwnerAdmissionTrust.cs`, 24 targeted checks, K-G02-002 | Owner CLI, replay/proof/package gate и полный AC3 | Дополнительное решение владельца для fixture validation не требуется |
+| EXEC owner CLI checkpoint | Добавлена интерактивная первая операция `approve-contract`; full digest и encrypted signer проверены fixture-key прогоном, результат проверен независимым consumer | `OwnerContractApprovalProposal.cs`, `Strogo.Modules.Owner.Cli`, 33 trust checks, redirected-terminal refusal, K-G02-003 | Package verifier и `admit`; state epoch CAS; затем `check/build/run` | Реальное human semantic approval D02 не подменено fixture |
+| EXEC checkpoint review | Advisory reviewer выявил неподтверждённый provenance digest; промежуточный `file.sha256` затем признан недостаточным для связи с утверждённой SPEC. CLI теперь дважды проверяет Git commit:path:blob и SHA-256 bytes | §10 findings, K-G02-004/005; новый fixture approval independently verified | Расширить integration matrix при package/admission EXEC; не закрывать G02 | D02 и release approval всё ещё отдельные human gates |
