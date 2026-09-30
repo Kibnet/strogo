@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -95,6 +96,44 @@ void RefusePackage(Action action, string code)
     }
     throw new Exception("Expected package refusal: " + code);
 }
+
+var replayObligations = ImmutableArray.Create(
+    new DafnyProofObligation("entry.2", "function.2", "postcondition", 7),
+    new DafnyProofObligation("entry.1", "function.1", "postcondition", 5));
+var replayStdout = Encoding.UTF8.GetBytes("\r\nDafny program verifier finished with 4 verified, 0 errors\r\n");
+var normalized = G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), replayObligations);
+Check(normalized.VerifiedUnits == 4 && normalized.EvidenceDigest ==
+      "efa441ff0a8b21a1f432303197a08e3794e0f32da63cf5763680ad3247e45572" &&
+      Encoding.UTF8.GetString(normalized.ObligationVectorBytes).IndexOf("entry.1", StringComparison.Ordinal) <
+      Encoding.UTF8.GetString(normalized.ObligationVectorBytes).IndexOf("entry.2", StringComparison.Ordinal),
+    "real Windows Dafny summary normalizes with independently fixed evidence digest and ordered obligations");
+var lfNormalized = G02ProofTranscript.NormalizeVerified(0, false, false,
+    Encoding.UTF8.GetBytes("\nDafny program verifier finished with 4 verified, 0 errors\n"), [],
+    new string('e', 64), new string('f', 64), replayObligations);
+Check(normalized.TranscriptBytes.SequenceEqual(lfNormalized.TranscriptBytes),
+    "CRLF and LF framing produce identical normative transcript");
+var changedUnits = G02ProofTranscript.NormalizeVerified(0, false, false,
+    Encoding.UTF8.GetBytes("\r\nDafny program verifier finished with 5 verified, 0 errors\r\n"), [],
+    new string('e', 64), new string('f', 64), replayObligations);
+Check(!normalized.TranscriptBytes.SequenceEqual(changedUnits.TranscriptBytes),
+    "verified unit count changes the normative transcript");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false,
+    Encoding.UTF8.GetBytes("warning\r\nDafny program verifier finished with 4 verified, 0 errors\r\n"), [],
+    new string('e', 64), new string('f', 64), replayObligations), "VerifierOutputUnrecognized");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false,
+    Encoding.UTF8.GetBytes("Dafny program verifier finished with 0 verified, 0 errors\r\n"), [],
+    new string('e', 64), new string('f', 64), replayObligations), "VerifierOutputUnrecognized");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout,
+    Encoding.UTF8.GetBytes("warning"), new string('e', 64), new string('f', 64), replayObligations),
+    "VerifierOutputUnrecognized");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(1, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), replayObligations), "VerifierFailed");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, true, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), replayObligations), "VerifierFailed");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), ImmutableArray<DafnyProofObligation>.Empty),
+    "ProofObligationsInvalid");
 
 var state0 = State(0);
 var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
