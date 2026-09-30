@@ -26,6 +26,8 @@ internal static class G02ProofSourceRegenerator
         ArgumentNullException.ThrowIfNull(snapshot);
         var sources = snapshot.Manifest.Files.Where(file => file.Role == "proof-source").ToArray();
         if (sources.Length != 1) throw Refuse("ProofSourceCountUnsupported");
+        // The approved producer/replay profile binds exactly this one manifest path.
+        if (sources[0].Path != "content/candidate.dfy") throw Refuse("ProofSourcePathUnsupported");
         var moduleBytes = ReadRole(snapshot, "module");
         var bundleBytes = ReadRole(snapshot, "bundle");
         DafnyFoldLoweringResult lowering;

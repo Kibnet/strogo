@@ -3,7 +3,7 @@
 ## 0. Метаданные
 
 - QUEST expanded: изменение нормативных proof identities; security/public artifact contract. Владелец Kibnet; профиль dotnet-backend-api; Codex desktop, Windows x64; medium; main.
-- Статус: SPEC, не утверждена. Canonical template: центральный `templates/specs/_template.md`; central QUEST/review/commit policies и repository AGENTS.
+- Статус: EXEC; текущая инструкция цели «Для изменений в рамках задачи Спеку подтверждаю» подтверждает опубликованную revision df2245ea7f896345e99cf39afdd34f4bd5b75228, blob fc36ab2590f5d579c0ff4c904f31fc029dca8729, SHA-256 1C76CCB5FE005AAFB67FC8C413EF6642DBD28AEED47FD997285A80956C356D24. Exact identity проверена до изменений; D02/release decisions отдельные. Canonical template: центральный `templates/specs/_template.md`; central QUEST/review/commit policies и repository AGENTS.
 - Связи: [replay SPEC](2026-09-30-g02-fresh-dafny-replay-v0.2.md), [proof wire](2026-09-30-g02-proof-artifact-wire-v0.2.md), [E05](2026-09-07-e05-two-stage-admission-amendment.md), K-G02-017. Цели G02/G04; модель агента не часть proof identity, SDK10.0.400/Dafny4.11.0 остаются закреплены.
 
 ## 1. Overview / цель
@@ -133,7 +133,7 @@ Rubric: цель/границы5 (§1/5), AS-IS5 (реальный отказ и
 | MEDIUM | expanded approval gate | Прежняя редакция не содержала полного ledger/linter/role verdicts | Дополнить доказуемыми решениями и evidence | Исправлено; targeted independent re-review PASS |
 | MEDIUM | collision evidence | Guard test нельзя выдавать за реальную SHA collision | Отделить structural guard review от executable negative probes | Исправлено §7 |
 
-Depth checklist: scope только obligation identities; AC/tests §7; objections §9; unsupported claims/TCB §5/8; regression/compatibility §6.2; docs/KB K-G02-017; hidden behavior change явно §6.2; manual challenge — wire sorting отличается от raw sorting, source map не хранит literal raw IDs. No-findings justification: independent targeted re-review подтвердил отсутствие оставшихся BLOCKER/HIGH/MEDIUM в SPEC scope, 4/4 Python vectors совпали, контракт и границы evidence определены. Это не выполнение EXEC. Post-EXEC не выполнялся; полная цель не достигнута.
+Depth checklist: scope только obligation identities; AC/tests §7; objections §9; unsupported claims/TCB §5/8; regression/compatibility §6.2; docs/KB K-G02-017; hidden behavior change явно §6.2; manual challenge — wire sorting отличается от raw sorting, source map не хранит literal raw IDs. No-findings justification: independent targeted re-review подтвердил отсутствие оставшихся BLOCKER/HIGH/MEDIUM в SPEC scope, 4/4 Python vectors совпали, контракт и границы evidence определены. Это не выполнение EXEC. Post-EXEC выполнен для этого checkpoint: K-G02-019 и журнал ниже; обязательные production gates общей G02 остаются открытыми, полная цель не достигнута.
 
 ## 12. Журнал действий агента
 
@@ -141,3 +141,5 @@ Depth checklist: scope только obligation identities; AC/tests §7; objecti
 | --- | --- | --- | --- |
 | EXEC counterexample → SPEC | K-G02-017: real scalar composition отказал из-за raw uppercase IDs; candidate сохранён | Independent review mapping, затем exact approval | Mapping ещё не утверждён |
 | SPEC review/fix | Python 4/4 vectors совпали; expanded audit и collision evidence уточнены; independent targeted re-review PASS | ASK-HUMAN: подтвердить выбранное mapping, затем EXEC | Ожидается |
+| EXEC owner entry | Exact published df2245e/blob/SHA совпали; текущая инструкция цели подтверждает SPEC | K-G02-018; D02/release не утверждены | Mapping и восстановленный composition candidate | Спеку подтверждаю в текущем поручении цели |
+| EXEC checkpoint review | Mapping и обе composed shapes проходят; forged self-consistent metadata отвергается свежим replay | K-G02-019; final143; full362/141/29-10904/143/253/E09 12/21; independent targeted review без remaining B/H/M | Host-owned state/ACL, public orchestration и runtime; placeholder closure не admission | Новое approval для checkpoint не требуется |

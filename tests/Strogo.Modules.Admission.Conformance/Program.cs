@@ -228,10 +228,12 @@ var replayObligations = ImmutableArray.Create(
 var replayStdout = Encoding.UTF8.GetBytes("\r\nDafny program verifier finished with 4 verified, 0 errors\r\n");
 var normalized = G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
     new string('e', 64), new string('f', 64), replayObligations);
+using var normalizedVectorDocument = JsonDocument.Parse(normalized.ObligationVectorBytes);
 Check(normalized.VerifiedUnits == 4 && normalized.EvidenceDigest ==
       "efa441ff0a8b21a1f432303197a08e3794e0f32da63cf5763680ad3247e45572" &&
-      Encoding.UTF8.GetString(normalized.ObligationVectorBytes).IndexOf("entry.1", StringComparison.Ordinal) <
-      Encoding.UTF8.GetString(normalized.ObligationVectorBytes).IndexOf("entry.2", StringComparison.Ordinal),
+      normalizedVectorDocument.RootElement.EnumerateArray()
+          .Select(item => item.GetProperty("obligationId").GetString()!).SequenceEqual(
+              replayObligations.Select(item => G02ProofTranscript.WireObligationId(item.Id)).Order(StringComparer.Ordinal)),
     "real Windows Dafny summary normalizes with independently fixed evidence digest and ordered obligations");
 var lfNormalized = G02ProofTranscript.NormalizeVerified(0, false, false,
     Encoding.UTF8.GetBytes("\nDafny program verifier finished with 4 verified, 0 errors\n"), [],
@@ -259,6 +261,33 @@ RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, true, false, replayS
 RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
     new string('e', 64), new string('f', 64), ImmutableArray<DafnyProofObligation>.Empty),
     "ProofObligationsInvalid");
+
+foreach (var (rawId, wireId) in new[]
+{
+    ("candidate-postcondition-addOne", "7776a82e85daee1a37321b77e98935487d3f03be8617fe9787be0528521c8f99"),
+    ("range-addOne-sum", "a0539ccdd1ce04a5b6fb2992470ab29c170712a055ddd5e110eda03891fe75f2"),
+    ("candidate-postcondition-addone", "124a7d37b9fa14dbb51f93bde4c4cbcffa6299bef9442174c549244537db44fa"),
+    ("candidate-postcondition", "811905e8890e80ecf094b4c174f34bc1e2eb1bcfe4c4fa656ecfcdd1c2b10dfe")
+}) Check(G02ProofTranscript.WireObligationId(rawId) == wireId, "independent obligation ID fixed vector");
+var caseOrdered = G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), ImmutableArray.Create(
+        new DafnyProofObligation("candidate-postcondition-addOne", "upper", "postcondition", 1),
+        new DafnyProofObligation("candidate-postcondition-addone", "lower", "postcondition", 2)));
+using var caseVector = JsonDocument.Parse(caseOrdered.ObligationVectorBytes);
+Check(caseVector.RootElement.EnumerateArray().Select(item => item.GetProperty("obligationId").GetString()).SequenceEqual(new[]
+{
+    "124a7d37b9fa14dbb51f93bde4c4cbcffa6299bef9442174c549244537db44fa",
+    "7776a82e85daee1a37321b77e98935487d3f03be8617fe9787be0528521c8f99"
+}), "wire ordering follows independent mapped IDs rather than case-sensitive raw ordering");
+Check(G02ProofTranscript.WireObligationId(new string('X', 100)).Length == 64, "long raw ID fits exact E05 bound");
+Check(G02ProofTranscript.WireObligationId(new string('X', 100)) !=
+      G02ProofTranscript.WireObligationId(new string('X', 99) + "Y"), "distinct long raw IDs remain distinct wire identities");
+RefusePackage(() => G02ProofTranscript.WireObligationId("\ud800"), "ProofObligationsInvalid");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), ImmutableArray.Create(replayObligations[0], replayObligations[0])), "ProofObligationsInvalid");
+RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replayStdout, [],
+    new string('e', 64), new string('f', 64), ImmutableArray.Create(
+        new DafnyProofObligation("raw", "locus", "InvalidKind", 1))), "ProofObligationsInvalid");
 
 var state0 = State(0);
 var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
@@ -669,6 +698,126 @@ if (OperatingSystem.IsWindows())
         File.WriteAllBytes(Path.Combine(replayEvidence, shape, "candidate.dfy"), positiveInputs.SourceBytes);
         File.WriteAllBytes(Path.Combine(replayEvidence, shape, "source-map.json"), positiveInputs.SourceMapBytes);
         File.WriteAllBytes(Path.Combine(replayEvidence, shape, "obligations.json"), firstReplay.Verified.ObligationVectorBytes);
+        var packageRoot = Path.Combine(replayEvidence, shape, "held-package");
+        Directory.CreateDirectory(Path.Combine(packageRoot, "content"));
+        var positiveOwner = shape == "scalar" ? scalarOwner : allocationOwner;
+        var positiveModule = ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(repoRoot, "fixtures",
+            "modules-v0.2", shape == "scalar" ? "math-add-valid.json" : "fold-allocation-primary.json")));
+        using var signingTrust = new OwnerTrust(publicKey, keyId);
+        var positiveProposal = OwnerContractApprovalProposal.Prepare(signingTrust, state0,
+            positiveOwner.CanonicalBytes, "review.fixture", "owner", provenance, now, now.AddHours(1));
+        var positiveApproval = positiveProposal.Sign(owner, positiveProposal.PayloadDigest, state0, now);
+        var replayContent = identityContent.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+        replayContent["content/module.json"] = positiveModule.CanonicalSource;
+        replayContent["content/bundle.json"] = positiveOwner.CanonicalBytes;
+        replayContent["content/approval.json"] = positiveApproval;
+        replayContent["content/candidate.dfy"] = positiveInputs.SourceBytes;
+        replayContent["content/source-map.json"] = positiveInputs.SourceMapBytes;
+        replayContent["content/transcript.json"] = firstReplay.Verified.TranscriptBytes;
+        var packageIds = new Dictionary<string, string>(identities, StringComparer.Ordinal)
+        {
+            ["moduleDigest"] = positiveModule.SourceDigest, ["bundleDigest"] = positiveOwner.BundleDigest,
+            ["contractApprovalDigest"] = Hex(Hash("strogo.contract-approval.v0.2/artifact", positiveApproval)),
+            ["toolchainDigest"] = tool.Digest
+        };
+        var vectorBytes = firstReplay.Verified.ObligationVectorBytes;
+        void WriteReplayPackage()
+        {
+            using var transcriptDocument = JsonDocument.Parse(replayContent["content/transcript.json"]);
+            using var vectorDocument = JsonDocument.Parse(vectorBytes);
+            replayContent["content/proof.json"] = Encode(Fields(
+                ("schemaVersion", "strogo.proof.v0.2"), ("moduleDigest", packageIds["moduleDigest"]),
+                ("bundleDigest", packageIds["bundleDigest"]), ("contractApprovalDigest", packageIds["contractApprovalDigest"]),
+                ("toolchainDigest", packageIds["toolchainDigest"]), ("closureDigest", packageIds["closureDigest"]),
+                ("proofSourcesDigest", transcriptDocument.RootElement.GetProperty("proofSourcesDigest").GetString()!),
+                ("transcriptDigest", Hex(Hash("strogo.proof.v0.2/transcript", replayContent["content/transcript.json"]))),
+                ("sourceMapDigest", Hex(Hash("strogo.proof.v0.2/source-map", replayContent["content/source-map.json"]))),
+                ("outcome", "Verified"), ("obligations", vectorDocument.RootElement.Clone())));
+            packageIds["proofDigest"] = Hex(Hash("strogo.proof.v0.2/artifact", replayContent["content/proof.json"]));
+            foreach (var (path, bytes) in replayContent)
+                File.WriteAllBytes(Path.Combine(packageRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+            File.WriteAllBytes(Path.Combine(packageRoot, "build-manifest.json"), Manifest(manifestFiles, content: replayContent, identities: packageIds));
+        }
+        WriteReplayPackage();
+        var toolOpens = 0;
+        G02DafnyToolchain OpenTool() { toolOpens++; return G02DafnyToolchain.Open(repoRoot); }
+        using (var snapshot = G02PackageSnapshot.OpenStructural(packageRoot))
+        using (var packageTrust = new OwnerTrust(publicKey, keyId))
+        {
+            var actual = await G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust, state0,
+                positiveOwner.BundleDigest, now, OpenTool, Path.Combine(replayEvidence, shape, "composed"));
+            Check(actual.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) && toolOpens == 1,
+                "held signed fixture package passes composed regeneration and two real replay comparisons");
+        }
+        foreach (var negative in new[] { "expired", "epoch", "signature" })
+        {
+            replayContent["content/approval.json"] = negative == "signature"
+                ? Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(positiveApproval).Replace("\"approvedBy\":\"owner\"", "\"approvedBy\":\"agent\"", StringComparison.Ordinal))
+                : positiveApproval;
+            WriteReplayPackage();
+            toolOpens = 0;
+            using var snapshot = G02PackageSnapshot.OpenStructural(packageRoot);
+            using var packageTrust = new OwnerTrust(publicKey, keyId);
+            Refuse(() => G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust,
+                negative == "epoch" ? state1 : state0, positiveOwner.BundleDigest,
+                negative == "expired" ? now.AddHours(2) : now, OpenTool,
+                Path.Combine(replayEvidence, shape, "refused-" + negative)).GetAwaiter().GetResult(),
+                negative == "epoch" ? "ApprovalEpochMismatch" : negative == "expired" ? "ContractApprovalExpired" : "InvalidOwnerSignature");
+            Check(toolOpens == 0, "invalid owner gate refuses before verifier closure is opened");
+        }
+        replayContent["content/approval.json"] = positiveApproval;
+        replayContent["content/transcript.json"] = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(firstReplay.Verified.TranscriptBytes)
+            .Replace(firstReplay.Verified.EvidenceDigest, new string('6', 64), StringComparison.Ordinal));
+        vectorBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(firstReplay.Verified.ObligationVectorBytes)
+            .Replace(firstReplay.Verified.EvidenceDigest, new string('6', 64), StringComparison.Ordinal));
+        WriteReplayPackage();
+        var forgedRoot = Path.Combine(replayEvidence, shape, "forged-package");
+        Directory.CreateDirectory(Path.Combine(forgedRoot, "content"));
+        foreach (var (path, bytes) in replayContent)
+            File.WriteAllBytes(Path.Combine(forgedRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+        File.Copy(Path.Combine(packageRoot, "build-manifest.json"), Path.Combine(forgedRoot, "build-manifest.json"));
+        using (var snapshot = G02PackageSnapshot.OpenStructural(packageRoot))
+        using (var packageTrust = new OwnerTrust(publicKey, keyId))
+        {
+            _ = G02StoredIdentityVerifier.Verify(snapshot, packageTrust, state0, positiveOwner.BundleDigest, now);
+            Check(true, "self-consistent forged transcript and vector pass stored identity checks");
+            RefusePackage(() => G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust, state0,
+                positiveOwner.BundleDigest, now, OpenTool, Path.Combine(replayEvidence, shape, "forged"))
+                .GetAwaiter().GetResult(), "ProofReplayTranscriptMismatch");
+        }
+        vectorBytes = firstReplay.Verified.ObligationVectorBytes;
+        replayContent["content/transcript.json"] = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(firstReplay.Verified.TranscriptBytes)
+            .Replace(tool.Digest, new string('0', 64), StringComparison.Ordinal));
+        packageIds["toolchainDigest"] = new string('0', 64);
+        WriteReplayPackage();
+        toolOpens = 0;
+        var wrongToolDiagnostics = Path.Combine(replayEvidence, shape, "wrong-tool");
+        using (var snapshot = G02PackageSnapshot.OpenStructural(packageRoot))
+        using (var packageTrust = new OwnerTrust(publicKey, keyId))
+        {
+            RefusePackage(() => G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust, state0,
+                positiveOwner.BundleDigest, now, OpenTool, wrongToolDiagnostics).GetAwaiter().GetResult(),
+                "PackageToolchainDigestMismatch");
+            Check(toolOpens == 1 && !Directory.Exists(wrongToolDiagnostics),
+                "self-consistent wrong package toolchain is refused before any replay diagnostics");
+        }
+        var alternateRoot = Path.Combine(replayEvidence, shape, "alternate-source-path");
+        Directory.CreateDirectory(Path.Combine(alternateRoot, "content"));
+        var alternateContent = replayContent.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+        alternateContent["content/other.dfy"] = alternateContent["content/candidate.dfy"];
+        alternateContent.Remove("content/candidate.dfy");
+        var alternateFiles = manifestFiles.Select(file =>
+            (Path: file.Path == "content/candidate.dfy" ? "content/other.dfy" : file.Path, file.Role))
+            .OrderBy(file => file.Path, StringComparer.Ordinal).ToArray();
+        foreach (var (path, bytes) in alternateContent)
+            File.WriteAllBytes(Path.Combine(alternateRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+        File.WriteAllBytes(Path.Combine(alternateRoot, "build-manifest.json"),
+            Manifest(alternateFiles, content: alternateContent, identities: packageIds));
+        using (var snapshot = G02PackageSnapshot.OpenStructural(alternateRoot))
+            RefusePackage(() => G02ProofSourceRegenerator.Verify(snapshot), "ProofSourcePathUnsupported");
+        packageIds["toolchainDigest"] = tool.Digest;
+        replayContent["content/transcript.json"] = firstReplay.Verified.TranscriptBytes;
+        WriteReplayPackage(); // Retain the original positive package alongside each separate negative artifact.
         }
     }
     identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method Fake() {}\n");

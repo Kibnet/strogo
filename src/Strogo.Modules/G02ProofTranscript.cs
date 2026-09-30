@@ -40,7 +40,12 @@ internal static partial class G02ProofTranscript
 
         var evidenceBytes = Canonical(new { verifiedUnits = units });
         var evidenceDigest = OwnerAdmissionWire.Hash("strogo.proof.v0.2/evidence", evidenceBytes);
-        var ordered = obligations.OrderBy(item => item.Id, StringComparer.Ordinal).ToArray();
+        var mapped = obligations.Select(item => (Id: WireObligationId(item.Id), item.Kind)).ToArray();
+        try { foreach (var item in mapped) OwnerAdmissionWire.RequireId(item.Kind); }
+        catch (ModuleException) { throw Refuse("ProofObligationsInvalid"); }
+        if (mapped.Select(item => item.Id).Distinct(StringComparer.Ordinal).Count() != mapped.Length)
+            throw Refuse("ProofObligationsInvalid");
+        var ordered = mapped.OrderBy(item => item.Id, StringComparer.Ordinal).ToArray();
         var records = ordered.Select(item => new
         {
             obligationId = item.Id, kind = item.Kind, status = "Verified",
@@ -72,6 +77,13 @@ internal static partial class G02ProofTranscript
 
     internal static byte[] Canonical(object value)
         => OwnerAdmissionWire.Canonical(JsonSerializer.SerializeToElement(value));
+
+    internal static string WireObligationId(string rawId)
+    {
+        if (string.IsNullOrEmpty(rawId)) throw Refuse("ProofObligationsInvalid");
+        try { return OwnerAdmissionWire.Hash("strogo.proof.v0.2/obligation-id", StrictUtf8.GetBytes(rawId)); }
+        catch (EncoderFallbackException) { throw Refuse("ProofObligationsInvalid"); }
+    }
 
     private static ModuleException Refuse(string code) => ModulesExceptionFactory.Error("package", code);
 }

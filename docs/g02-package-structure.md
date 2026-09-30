@@ -29,3 +29,9 @@
 Для process containment Windows x64 runner теперь использует atomic job-list startup с kill-on-close и без breakaway. Job termination охватывает descendants даже после завершения parent; bounded drain выполняется до успешного результата. Process-spy и границы evidence описаны в K-G02-015. Это не закрывает оставшиеся timeout/overflow/environment/ACL/package admission gates.
 
 Общий `G02VerifierProcess` проверен реальными timeout/child, stdout/stderr overflow и exact-boundary probes. Environment child целиком сверяется с пятью разрешёнными переменными; test-only сокращение deadline не меняет production 55+5 секунд. Evidence и ограничения — K-G02-016. Проверенный набор process boundaries не заменяет signed package/current-state или ACL admission gates.
+
+## Composed held fixture replay
+
+`G02PackageProofReplay` объединяет owner/stored proof identity, deterministic regeneration и два свежих pinned replay с побайтовой сверкой held transcript/vector. Wire obligation IDs вычисляются по [утверждённой поправке](../specs/2026-09-30-g02-obligation-id-erratum-v0.2.md); source map и lowerer остаются прежними. Проверенный producer profile использует ровно `content/candidate.dfy`; альтернативный путь явно отказывает.
+
+Положительные scalar/allocation fixtures и самосогласованные forged packages проверены отдельно (K-G02-019). Их compiled DLL/deps/closure остаются заглушками, owner подписи — disposable conformance signatures. Эта internal цепочка не предоставляет runtime admission: реальные host state freshness/ACL, compiled closure, public orchestration и отдельные D02/release решения ещё обязательны.
