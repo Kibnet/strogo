@@ -1,0 +1,154 @@
+{
+  "schema": "strogo.g02.reproducibility-research.v1",
+  "date": "2026-09-30",
+  "repositoryRevision": "03a8bb093cbe78a4046d4fb2dc3a228b9ebdbe36",
+  "purpose": "research-only-not-admitted",
+  "sdk": "10.0.400",
+  "runtime": "10.0.11",
+  "target": "win-x64",
+  "rawEvidence": "artifacts/local-validation/g02/clean-build-0af7abe292794683b10bd994f2f94b46",
+  "sourceEvidence": "artifacts/local-validation/g02/r2r-probe-ee897114baaf4c29835699a5f107e22a",
+  "pathMap": "$(MSBuildProjectDirectory)=/_/strogo/g02",
+  "inheritedDirectoryBuildPropsSha256": "856c0d9855d32b1933b4f8cd5429e32a894199800d98cff2a79fd0d98b2a035c",
+  "inventoryEncoding": "SHA256 of UTF8 ordinal-sorted path TAB lowercase-file-SHA256 TAB decimal-length records, LF-separated without trailing LF; private research encoding, not package wire",
+  "results": [
+    {
+      "shape": "scalar",
+      "outputs": [
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "43d23b97a95d12439f5ecae9fb540d4f068a24ed56284943003ce95b60af81f1",
+          "pdbSha256": "7bfcb6fb87d1b9732907c95cbc4d6f6cf384d79cb7b241ff0d10bc94959508b3",
+          "dllSha256": "683909bda6cfa04680571aef3e185af6975def4b4524064f27562d2b9b453f11",
+          "variant": "root-a",
+          "publishFileCount": 190,
+          "publishInventorySha256": "c5eec2ee89eb77cfb43c12001b870d1c49fe8be37321f06d9d0d48bde273b9d5",
+          "generatedCsSha256": "8d7b7f2bbee363d84130311a5fd1ee79f73d23f3736214aa73e5c93614b854f6"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "43d23b97a95d12439f5ecae9fb540d4f068a24ed56284943003ce95b60af81f1",
+          "pdbSha256": "0be5261c2de588a7eaf109cafcf3e0947d3d5654bc7058187f1688bcb290cc1f",
+          "dllSha256": "6c6525385d53d8102d32a6ef8ea55878c116e11a1b8198931c56951c79eea9a9",
+          "variant": "root-b",
+          "publishFileCount": 190,
+          "publishInventorySha256": "d5eb68adf6eee044b63150ccabd18f67adfbf8d6890a84ed288193073c5f539b",
+          "generatedCsSha256": "8d7b7f2bbee363d84130311a5fd1ee79f73d23f3736214aa73e5c93614b854f6"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "ca90c9317db1f84e8fd38c4f86a3057b035eaf2aa4de847f19d357922e02b357",
+          "pdbSha256": "f52b01cfd48cb99e600d6cf1d9fe14cc426ffdd21ef2db485dd7921ca295f616",
+          "dllSha256": "b7937125eb5fa3e9922863971965b5be75bc62e591c690c77d1244ed9c5afff4",
+          "variant": "mapped-a",
+          "publishFileCount": 190,
+          "publishInventorySha256": "bc34c3f9162e0d4aa6ac6d2a3c776fb2f238498fa2759fa1afaf217f70f20b2a",
+          "generatedCsSha256": "8d7b7f2bbee363d84130311a5fd1ee79f73d23f3736214aa73e5c93614b854f6"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "ca90c9317db1f84e8fd38c4f86a3057b035eaf2aa4de847f19d357922e02b357",
+          "pdbSha256": "f52b01cfd48cb99e600d6cf1d9fe14cc426ffdd21ef2db485dd7921ca295f616",
+          "dllSha256": "b7937125eb5fa3e9922863971965b5be75bc62e591c690c77d1244ed9c5afff4",
+          "variant": "mapped-b",
+          "publishFileCount": 190,
+          "publishInventorySha256": "bc34c3f9162e0d4aa6ac6d2a3c776fb2f238498fa2759fa1afaf217f70f20b2a",
+          "generatedCsSha256": "8d7b7f2bbee363d84130311a5fd1ee79f73d23f3736214aa73e5c93614b854f6"
+        }
+      ],
+      "baselineChangedFiles": [
+        "Strogo.Probe.scalar.dll",
+        "Strogo.Probe.scalar.pdb"
+      ],
+      "mappedChangedFiles": []
+    },
+    {
+      "shape": "allocation",
+      "outputs": [
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "cd3eed4fa8c62068019bea043f50154fdddf72ffaa3c12b29cde790b8d6ee7e0",
+          "pdbSha256": "3f5c810dd16cc89eea28c0fcda64937154123903dc634f01f8c82536a2abbe0c",
+          "dllSha256": "30a7d3c299b7f3eb755744e94058d63fc2eee7a7f6c9a8fe8da3147c11d63466",
+          "variant": "root-a",
+          "publishFileCount": 190,
+          "publishInventorySha256": "7607b4fc8d427eb1711095902c659efac30da4e39dc8dc8b2a05d1fd5c5f6a78",
+          "generatedCsSha256": "0b3d1a0632e9adef6a1a47b49b636da67e2b1bae77c3ee04c0f1766226110fb5"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "cd3eed4fa8c62068019bea043f50154fdddf72ffaa3c12b29cde790b8d6ee7e0",
+          "pdbSha256": "6cca568fc9f6bc9ecaecea28159bb458b4cbe3ecf71ab6ffa4fdef3f526a82d9",
+          "dllSha256": "a4671e72e0bcfecf2050dfd0915a06b7a344d9eb72acd83fd55e99102600bbfc",
+          "variant": "root-b",
+          "publishFileCount": 190,
+          "publishInventorySha256": "2b2108e5de345db0f498a297279e87dd329f37ca91159299017340f63f72de53",
+          "generatedCsSha256": "0b3d1a0632e9adef6a1a47b49b636da67e2b1bae77c3ee04c0f1766226110fb5"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "341b09003e25abc701045e19668ca1350815cec6b08347f029902a6e67b6f6b6",
+          "pdbSha256": "bd956f8ab4233e8cc9410b975df0675b58dc125e4f668bb4c56ca59475881681",
+          "dllSha256": "1906c0ff160d8c94640585c97c19da1bc489b04ec1c6d3df8c8972b488852c22",
+          "variant": "mapped-a",
+          "publishFileCount": 190,
+          "publishInventorySha256": "01c496b9af3a6397d695e07e6029f5a8dd86a736e234a8b5a87cff0ab053be3d",
+          "generatedCsSha256": "0b3d1a0632e9adef6a1a47b49b636da67e2b1bae77c3ee04c0f1766226110fb5"
+        },
+        {
+          "lockSha256": "cd97f644c24bb2cd8c96d92c519036a65133ab22cafc294d07b527626ad20e84",
+          "projectSha256": "341b09003e25abc701045e19668ca1350815cec6b08347f029902a6e67b6f6b6",
+          "pdbSha256": "bd956f8ab4233e8cc9410b975df0675b58dc125e4f668bb4c56ca59475881681",
+          "dllSha256": "1906c0ff160d8c94640585c97c19da1bc489b04ec1c6d3df8c8972b488852c22",
+          "variant": "mapped-b",
+          "publishFileCount": 190,
+          "publishInventorySha256": "01c496b9af3a6397d695e07e6029f5a8dd86a736e234a8b5a87cff0ab053be3d",
+          "generatedCsSha256": "0b3d1a0632e9adef6a1a47b49b636da67e2b1bae77c3ee04c0f1766226110fb5"
+        }
+      ],
+      "baselineChangedFiles": [
+        "Strogo.Probe.allocation.dll",
+        "Strogo.Probe.allocation.pdb"
+      ],
+      "mappedChangedFiles": []
+    }
+  ],
+  "sdkClosure": {
+    "files": 5577,
+    "inventoryDigestEncoding": "H(strogo.build.v0.2/sdk-files,C(ordinal-sorted array of {path,sha256})); same H/C primitives as proof wire, private SDK pin",
+    "archiveSha256": "83fbf0699a984d08063579b06edfc8c327af62234b1aaeeadc5d7ae7f5a0514a",
+    "archiveContentVerification": "Every extracted regular file hash matched its ZIP entry; 5577 files in both inventories.",
+    "inventoryDigest": "cb488e756dab841e56cd23f28550fa59d3c443540537648321dfc15a6af9e9d6",
+    "installationEmptyDirectories": [
+      "metadata"
+    ],
+    "directoryNote": "Installed SDK additionally has one explicitly pinned empty metadata directory, absent from ZIP file-parent inventory; no unlisted files or other directories are permitted."
+  },
+  "reference": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/advanced#pathmap",
+  "limitations": [
+    "Same machine, shared package cache and SDK; not independent-host or cold-cache evidence.",
+    "Only generated C# inputs are copied; this does not establish two clean source-to-proof-to-translation-to-package builds.",
+    "PathMap is a research finding, not yet a production recipe/admission integration.",
+    "SDK closure checker is internal preparation; its diagnostic identity is not a new package wire field.",
+    "Consumers and native method execution were not repeated on these mapped DLLs in this checkpoint."
+  ],
+  "review": {
+    "kind": "independent-agent advisory, not technically read-only",
+    "sandbox": "danger-full-access",
+    "fixed": [
+      "mappedChangedFiles null-array serialization",
+      "typed post-execution revalidation IO refusal"
+    ],
+    "productionAdmission": "not established"
+  },
+  "sdkProbe": {
+    "rawEvidence": "artifacts/local-validation/g02/sdk-probe-2e59976bfcdb43dea8e11843b535ef7a",
+    "identitySha256": "e7d057380b82cfc61821c3c491f0bb851b1511106f1a56900d1f839e924846c2",
+    "stdout": "10.0.400",
+    "stderrLength": 0,
+    "finalAdmissionChecks": 154,
+    "solutionBuildWarnings": 0,
+    "solutionBuildErrors": 0,
+    "fullOtherSuitesRepeated": false
+  }
+}

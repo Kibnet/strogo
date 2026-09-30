@@ -291,6 +291,56 @@ RefusePackage(() => G02ProofTranscript.NormalizeVerified(0, false, false, replay
 
 var state0 = State(0);
 var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+if (OperatingSystem.IsWindows())
+{
+    var sdkInventoryBytes = File.ReadAllBytes(Path.Combine(repoRoot, "tools", "dotnet-sdk-files.json"));
+    RefusePackage(() => G02DotNetToolchain.Open(Path.Combine(Path.GetTempPath(), "g02-missing-" + Guid.NewGuid().ToString("N"))),
+        "BuildToolchainIoRefused");
+    var sdkInventory = G02DotNetToolchain.ParsePinnedInventory(sdkInventoryBytes);
+    Check(sdkInventory.Length == 5577 && sdkInventory.Select(file => file.Path)
+        .SequenceEqual(sdkInventory.Select(file => file.Path).Order(StringComparer.Ordinal)),
+        "SDK closure uses the archive-derived ordinal inventory");
+    RefusePackage(() => G02DotNetToolchain.CheckInventoryDigest(new string('0', 64)),
+        "BuildToolchainInventoryMismatch");
+    byte[] ChangedSdkInventory(bool duplicate) => JsonSerializer.SerializeToUtf8Bytes(sdkInventory.Select((file, index) =>
+        new { path = duplicate && index == 1 ? sdkInventory[0].Path : file.Path,
+            sha256 = !duplicate && index == 0 ? new string('0', 64) : file.Sha256 }));
+    RefusePackage(() => G02DotNetToolchain.ParsePinnedInventory(ChangedSdkInventory(false)),
+        "BuildToolchainInventoryMismatch");
+    RefusePackage(() => G02DotNetToolchain.ParsePinnedInventory(ChangedSdkInventory(true)),
+        "BuildToolchainInventoryMismatch");
+    var sdkDocument = Path.Combine(repoRoot, ".tools", "dotnet-sdk-10.0.400", "ThirdPartyNotices.txt");
+    using (var permitted = new FileStream(sdkDocument, FileMode.Open, FileAccess.Write, FileShare.Read))
+        Check(permitted.CanWrite, "SDK document write-open is permitted before holding closure (no bytes written)");
+    using var sdk = G02DotNetToolchain.Open(repoRoot);
+    var writeDenied = false;
+    try { using var writer = new FileStream(sdkDocument, FileMode.Open, FileAccess.Write, FileShare.Read); }
+    catch (IOException) { writeDenied = true; }
+    catch (UnauthorizedAccessException) { writeDenied = true; }
+    Check(writeDenied, "held SDK closure denies the previously permitted document write-open");
+    var extraDirectory = Path.Combine(sdk.DirectoryPath, "g02-extra-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(extraDirectory);
+    try { RefusePackage(sdk.Revalidate, "BuildToolchainInventoryMismatch"); }
+    finally { Directory.Delete(extraDirectory); }
+    var metadataProbe = Path.Combine(sdk.DirectoryPath, "metadata", "g02-unlisted-" + Guid.NewGuid().ToString("N"));
+    File.WriteAllText(metadataProbe, "not-part-of-sdk");
+    try { RefusePackage(sdk.Revalidate, "BuildToolchainInventoryMismatch"); }
+    finally { File.Delete(metadataProbe); }
+    var sdkProbe = Path.Combine(repoRoot, "artifacts", "local-validation", "g02", "sdk-probe-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(sdkProbe);
+    var start = new ProcessStartInfo(sdk.ExecutablePath) { WorkingDirectory = sdkProbe, ArgumentList = { "--version" } };
+    G02VerifierProcess.ConfigureEnvironment(start, sdk.DirectoryPath, sdkProbe);
+    var output = await G02VerifierProcess.RunAsync(start);
+    File.WriteAllBytes(Path.Combine(sdkProbe, "identity.json"), sdk.IdentityBytes);
+    File.WriteAllBytes(Path.Combine(sdkProbe, "stdout.log"), output.Stdout);
+    File.WriteAllBytes(Path.Combine(sdkProbe, "stderr.log"), output.Stderr);
+    Check(output.ExitCode == 0 && output.Stderr.Length == 0 &&
+        Encoding.UTF8.GetString(output.Stdout).Trim() == G02DotNetToolchain.SdkVersion,
+        "actual pinned SDK runs while its complete closure is held");
+    sdk.Revalidate();
+    Check(sdk.Digest == Hex(Hash("strogo.build.v0.2/sdk-closure", sdk.IdentityBytes)),
+        "private SDK closure diagnostic identity remains stable after execution");
+}
 var bundleBytes = File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "owner-fold-sum-valid-v0.4.json"));
 var parsedBundle = OwnerBundleV04Parser.Parse(bundleBytes);
 var provenance = new OwnerDecisionProvenance("spec", "specs/g02.md", new string('b', 64));
