@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Kernel.Core;
 using Strogo.Modules;
 
 using var owner = RSA.Create(2048);
@@ -440,6 +441,50 @@ if (OperatingSystem.IsWindows())
     using (var identityTrust = new OwnerTrust(publicKey, keyId))
         Refuse(() => G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0,
             parsedBundle.BundleDigest, now), "ContractApprovalDigestMismatch");
+
+    var foldModule = ModulesParser.ParseModule(File.ReadAllBytes(Path.Combine(repoRoot, "fixtures",
+        "modules-v0.2", "fold-sum-valid.json")));
+    var lowering = ModulesDafnyLowerer.Lower(ModulesCompiler.Compile(foldModule), parsedBundle);
+    identityContent["content/module.json"] = foldModule.CanonicalSource;
+    identityContent["content/approval.json"] = signedProposal;
+    identityContent["content/candidate.dfy"] = lowering.SourceBytes;
+    identityContent["content/source-map.json"] = CanonicalJson.Encode(lowering.SourceMap);
+    identities["moduleDigest"] = foldModule.SourceDigest;
+    identities["contractApprovalDigest"] = approvalDigest;
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    identityContent["content/proof.json"] = Proof(foldModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+    {
+        _ = G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0, parsedBundle.BundleDigest, now);
+        var regenerated = G02ProofSourceRegenerator.Verify(identitySnapshot);
+        Check(regenerated.SourceBytes.SequenceEqual(lowering.SourceBytes) &&
+              regenerated.SourceMapBytes.SequenceEqual(identityContent["content/source-map.json"]) &&
+              regenerated.Obligations.SequenceEqual(lowering.Obligations),
+            "proof source and source map regenerate from held module and owner bytes");
+    }
+    identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method Fake() {}\n");
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    identityContent["content/proof.json"] = Proof(foldModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+    {
+        _ = G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0, parsedBundle.BundleDigest, now);
+        RefusePackage(() => G02ProofSourceRegenerator.Verify(identitySnapshot), "ProofSourceGenerationMismatch");
+    }
+    identityContent["content/candidate.dfy"] = lowering.SourceBytes;
+    identityContent["content/source-map.json"] = Encode(Fields(("entries", Array.Empty<object>())));
+    identityContent["content/transcript.json"] = Transcript(new string('4', 64));
+    identityContent["content/proof.json"] = Proof(foldModule.SourceDigest, approvalDigest);
+    WriteIdentityPackage();
+    using (var identitySnapshot = G02PackageSnapshot.OpenStructural(identityRoot))
+    using (var identityTrust = new OwnerTrust(publicKey, keyId))
+    {
+        _ = G02StoredIdentityVerifier.Verify(identitySnapshot, identityTrust, state0, parsedBundle.BundleDigest, now);
+        RefusePackage(() => G02ProofSourceRegenerator.Verify(identitySnapshot), "ProofSourceMapGenerationMismatch");
+    }
 }
 if (args.Length == 2 && args[0] == "--prepare-cli-fixture")
 {
