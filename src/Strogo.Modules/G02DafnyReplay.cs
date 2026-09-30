@@ -35,42 +35,15 @@ internal static class G02DafnyReplay
                 RedirectStandardOutput = true, RedirectStandardError = true
             };
             foreach (var argument in G02DafnyToolchain.VerifierArguments) start.ArgumentList.Add(argument);
-            start.Environment.Clear();
-            var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-            start.Environment["SystemRoot"] = windows;
-            start.Environment["WINDIR"] = windows;
-            start.Environment["TEMP"] = scratch;
-            start.Environment["TMP"] = scratch;
-            start.Environment["PATH"] = tool.DirectoryPath + Path.PathSeparator + Path.Combine(windows, "System32");
-            using var contained = G02ContainedProcess.Start(start);
-            var process = contained.Process;
-            void Kill() => contained.Kill();
-            // Reserve five seconds of the 60-second process budget for bounded termination.
-            using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(55));
-            var stdoutTask = ReadBounded(contained.Stdout, Kill, deadline.Token);
-            var stderrTask = ReadBounded(contained.Stderr, Kill, deadline.Token);
-            try
-            {
-                await Task.WhenAll(process.WaitForExitAsync(deadline.Token), stdoutTask, stderrTask)
-                    .WaitAsync(deadline.Token);
-            }
-            catch
-            {
-                Kill();
-                await contained.TerminateAndDrainAsync();
-                contained.Stdout.Dispose();
-                contained.Stderr.Dispose();
-                if (deadline.IsCancellationRequested) throw Refuse("VerifierFailed");
-                throw;
-            }
-            var stdout = await stdoutTask;
-            var stderr = await stderrTask;
-            await contained.TerminateAndDrainAsync();
+            G02VerifierProcess.ConfigureEnvironment(start, tool.DirectoryPath, scratch);
+            var output = await G02VerifierProcess.RunAsync(start);
+            var stdout = output.Stdout;
+            var stderr = output.Stderr;
             Directory.CreateDirectory(diagnosticDirectory);
             await File.WriteAllBytesAsync(Path.Combine(diagnosticDirectory, "stdout.bin"), stdout);
             await File.WriteAllBytesAsync(Path.Combine(diagnosticDirectory, "stderr.bin"), stderr);
             await File.WriteAllBytesAsync(Path.Combine(diagnosticDirectory, "process.json"),
-                G02ProofTranscript.Canonical(new { exitCode = process.ExitCode, timeout = false }));
+                G02ProofTranscript.Canonical(new { exitCode = output.ExitCode, timeout = false }));
             tool.Revalidate();
             if (!Directory.EnumerateFileSystemEntries(work).Select(Path.GetFileName)
                     .SequenceEqual(new[] { "candidate.dfy" }, StringComparer.Ordinal))
@@ -81,7 +54,7 @@ internal static class G02DafnyReplay
                 sha256 = Convert.ToHexStringLower(SHA256.HashData(inputs.SourceBytes))
             } });
             var sourcesDigest = OwnerAdmissionWire.Hash("strogo.proof.v0.2/proof-sources", inventory);
-            var verified = G02ProofTranscript.NormalizeVerified(process.ExitCode, false, false,
+            var verified = G02ProofTranscript.NormalizeVerified(output.ExitCode, false, false,
                 stdout, stderr, tool.Digest, sourcesDigest, inputs.Obligations);
             completed = true;
             return new(verified, stdout, stderr);
@@ -101,23 +74,6 @@ internal static class G02DafnyReplay
                 // Preserve an existing proof refusal; cleanup failure also prevents a successful receipt.
                 if (cleanupFailed && completed) throw Refuse("VerifierCleanupFailed");
             }
-        }
-    }
-
-    private static async Task<byte[]> ReadBounded(Stream stream, Action kill, CancellationToken cancellationToken)
-    {
-        using var output = new MemoryStream();
-        var buffer = new byte[4096];
-        while (true)
-        {
-            var count = await stream.ReadAsync(buffer.AsMemory(), cancellationToken);
-            if (count == 0) return output.ToArray();
-            if (output.Length + count > 1_048_576)
-            {
-                kill();
-                throw Refuse("VerifierOutputLimitExceeded");
-            }
-            output.Write(buffer, 0, count);
         }
     }
 

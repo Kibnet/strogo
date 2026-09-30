@@ -27,3 +27,5 @@
 Этот runner пока не участвует в production admission. Необходимо связать его со signed held package и текущим owner state, сравнить сохранённые proof artifacts, обеспечить host-owned ACL и containment всего дерева процессов. Проверки fixture не заменяют отдельные D02 и release решения владельца.
 
 Для process containment Windows x64 runner теперь использует atomic job-list startup с kill-on-close и без breakaway. Job termination охватывает descendants даже после завершения parent; bounded drain выполняется до успешного результата. Process-spy и границы evidence описаны в K-G02-015. Это не закрывает оставшиеся timeout/overflow/environment/ACL/package admission gates.
+
+Общий `G02VerifierProcess` проверен реальными timeout/child, stdout/stderr overflow и exact-boundary probes. Environment child целиком сверяется с пятью разрешёнными переменными; test-only сокращение deadline не меняет production 55+5 секунд. Evidence и ограничения — K-G02-016. Проверенный набор process boundaries не заменяет signed package/current-state или ACL admission gates.

@@ -20,6 +20,28 @@ if (args is ["--g02-contained-parent"])
     Console.WriteLine(child.Id);
     return;
 }
+if (args is ["--g02-process-probe", var helperMode, var helperSpyPath])
+{
+    if (helperMode == "hang")
+    {
+        using var child = Process.Start(new ProcessStartInfo(Environment.ProcessPath!)
+        { UseShellExecute = false, ArgumentList = { "--g02-contained-child" } })!;
+        File.WriteAllText(helperSpyPath, $"{Environment.ProcessId}\n{child.Id}");
+        Thread.Sleep(TimeSpan.FromMinutes(1));
+    }
+    else if (helperMode is "stdout-overflow" or "stderr-overflow" or "boundary")
+    {
+        File.WriteAllText(helperSpyPath, Environment.ProcessId.ToString());
+        using var stream = helperMode == "stderr-overflow" ? Console.OpenStandardError() : Console.OpenStandardOutput();
+        stream.Write(new byte[helperMode == "boundary" ? 1_048_576 : 1_048_577]);
+        stream.Flush();
+        if (helperMode != "boundary") Thread.Sleep(TimeSpan.FromMinutes(1));
+    }
+    else if (helperMode == "environment")
+        Console.Write(JsonSerializer.Serialize(Environment.GetEnvironmentVariables()
+            .Cast<System.Collections.DictionaryEntry>().ToDictionary(entry => (string)entry.Key, entry => (string?)entry.Value)));
+    return;
+}
 
 using var owner = RSA.Create(2048);
 using var impostor = RSA.Create(2048);
@@ -58,6 +80,62 @@ if (OperatingSystem.IsWindows())
             contained.Dispose();
             descendant?.Dispose();
         }
+    }
+    var probeDirectory = Path.Combine(Path.GetTempPath(), "strogo-g02-probes-" + Guid.NewGuid().ToString("N"));
+    Directory.CreateDirectory(probeDirectory);
+    var probesCompleted = false;
+    try
+    {
+        foreach (var mode in new[] { "hang", "stdout-overflow", "stderr-overflow", "boundary", "environment" })
+        {
+            var spyPath = Path.Combine(probeDirectory, mode + ".txt");
+            var start = new ProcessStartInfo(Environment.ProcessPath!)
+            { WorkingDirectory = probeDirectory, ArgumentList = { "--g02-process-probe", mode, spyPath } };
+            start.Environment["DOTNET_ROOT"] = "untrusted-dotnet";
+            start.Environment["DAFNY_PROBE"] = "injected";
+            start.Environment["G02_PARENT_POISON"] = "injected";
+            G02VerifierProcess.ConfigureEnvironment(start, Path.GetDirectoryName(Environment.ProcessPath!)!, probeDirectory);
+            var watch = Stopwatch.StartNew();
+            if (mode is "hang" or "stdout-overflow" or "stderr-overflow")
+            {
+                RefusePackage(() => G02VerifierProcess.RunAsync(start,
+                    TimeSpan.FromSeconds(mode == "hang" ? 2 : 10)).GetAwaiter().GetResult(),
+                    mode == "hang" ? "VerifierFailed" : "VerifierOutputLimitExceeded");
+                Check(watch.Elapsed < TimeSpan.FromSeconds(mode == "hang" ? 8 : 16), "process refusal stays within execution plus drain budget");
+                foreach (var pid in File.ReadAllLines(spyPath).Select(int.Parse))
+                {
+                    var alive = false;
+                    try { using var observed = Process.GetProcessById(pid); alive = !observed.HasExited; }
+                    catch (ArgumentException) { }
+                    Check(!alive, "failed verifier leaves no process-spy parent or descendant alive");
+                }
+            }
+            else
+            {
+                var output = await G02VerifierProcess.RunAsync(start, TimeSpan.FromSeconds(10));
+                Check(output.ExitCode == 0 && output.Stderr.Length == 0, "bounded helper completes successfully");
+                if (mode == "boundary") Check(output.Stdout.Length == 1_048_576, "exact output limit is accepted");
+                else
+                {
+                    var environment = JsonSerializer.Deserialize<Dictionary<string, string?>>(output.Stdout)!;
+                    Check(environment["TEMP"] == probeDirectory && environment["TMP"] == probeDirectory &&
+                        environment["SystemRoot"] == Environment.GetFolderPath(Environment.SpecialFolder.Windows) &&
+                        environment["WINDIR"] == environment["SystemRoot"] &&
+                        environment["PATH"] == Path.GetDirectoryName(Environment.ProcessPath!) + Path.PathSeparator +
+                            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32") &&
+                        environment.Keys.Order(StringComparer.Ordinal).SequenceEqual(
+                            new[] { "PATH", "SystemRoot", "TEMP", "TMP", "WINDIR" }.Order(StringComparer.Ordinal)) &&
+                        new[] { "DOTNET_ROOT", "HOME", "USERPROFILE", "DAFNY_PROBE", "G02_PARENT_POISON" }
+                            .All(name => !environment.ContainsKey(name)), "child receives trusted explicit environment without injected or inherited variables");
+                }
+            }
+        }
+        probesCompleted = true;
+    }
+    finally
+    {
+        try { Directory.Delete(probeDirectory, recursive: true); }
+        catch (Exception error) when (!probesCompleted && (error is IOException or UnauthorizedAccessException)) { }
     }
 }
 
