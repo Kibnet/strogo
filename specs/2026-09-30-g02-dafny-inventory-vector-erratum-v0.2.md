@@ -2,7 +2,7 @@
 
 ## 0. Метаданные
 
-- Тип: `delivery-task` / QUEST / expanded public security contract correction. Владелец решения: Kibnet. Статус: **post-SPEC PASS → ASK-HUMAN; точное подтверждение ещё не дано**.
+- Тип: `delivery-task` / QUEST / expanded public security contract correction. Владелец решения: Kibnet. Статус: **EXEC** по текущему поручению выполнить цель и подтверждению изменений «Спеку подтверждаю». Точная исходная revision: commit `7855d526663e2c4cb056205502d3438d64c6b96e`, blob `f8b12453bafe2c2bef23312c8455ba6eedff1362`, SHA-256 `B89284B9CB9BC2434EEE49FDA98E8D105DABCE81CF6B22ABA6E3C808F0727E22`; значения сверены до изменения статуса.
 - Основание: [G02 fresh replay SPEC](2026-09-30-g02-fresh-dafny-replay-v0.2.md), утверждённая по commit `1281ef3cc631f0f874e2cce4ee38ba039d78aee3`, blob `a4dbc26610e156c50c00cb1c368abb077c114232`, SHA-256 `A0DBEAB7A13E4EB610FF682BEF44D8A81AE2AAD8DBB660C022509947F72DAEB1`; K-G02-013 и частичный EXEC commit `561a80b`.
 - Профиль: G02 / `delivery-task`, security and public artifact identity. Target Windows x64, pinned Dafny 4.11.0, .NET SDK 10.0.400; ветка `main`. Effective agent runtime не участвует в hash. Eval baseline — 290 entries текущей pinned distribution; это не модельный eval и не G02 proof evidence.
 - Предлагаемая область approval: **только** ожидаемый digest ordinal-sorted `dafnyFiles` inventory. Остальная утверждённая replay SPEC, E05 и proof-wire неизменны. Никакого автоматического approval D02 owner bundle или release package.

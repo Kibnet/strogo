@@ -502,6 +502,46 @@ if (OperatingSystem.IsWindows())
               regenerated.SourceMapBytes.SequenceEqual(identityContent["content/source-map.json"]) &&
               regenerated.Obligations.SequenceEqual(lowering.Obligations),
             "proof source and source map regenerate from held module and owner bytes");
+        var pinned = G02DafnyToolchain.ParsePinnedInventory(File.ReadAllBytes(Path.Combine(repoRoot, "tools", "dafny-files.json")));
+        Check(pinned.Length == 290 && pinned[0].Path == "Boogie.AbstractInterpretation.dll" &&
+              pinned[^1].Path == "z3/bin/z3-4.14.1.exe", "pinned inventory uses exact ordinal path ordering");
+        RefusePackage(() => G02DafnyToolchain.CheckInventoryDigest(
+            "f992c066b3d27e34a59d1cb18ce8c899260e9c446722d9dc533704d3f328980e"), "ToolchainInventoryMismatch");
+        RefusePackage(() => G02DafnyToolchain.CheckInventoryDigest(
+            "b61281cb0111a05b0554e395c3839b7150731c257629eeafafeeeec56c50b83e"), "ToolchainInventoryMismatch");
+        using var tool = G02DafnyToolchain.Open(repoRoot);
+        var toolWriteDenied = false;
+        try { using var writer = new FileStream(Path.Combine(tool.DirectoryPath, pinned[0].Path), FileMode.Open, FileAccess.Write); }
+        catch (IOException) { toolWriteDenied = true; }
+        Check(toolWriteDenied, "held tool closure denies file writes before and during replay");
+        var extraToolDirectory = Path.Combine(tool.DirectoryPath, "g02-extra-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(extraToolDirectory);
+        try { RefusePackage(tool.Revalidate, "ToolchainInventoryMismatch"); }
+        finally { Directory.Delete(extraToolDirectory); }
+        var replayEvidence = Path.Combine(repoRoot, "artifacts", "local-validation", "g02", "fresh-replay-" + Guid.NewGuid().ToString("N"));
+        RefusePackage(() => G02DafnyReplay.RunFixtureAsync(tool, regenerated,
+            Path.Combine(replayEvidence, "unproven-fold")).GetAwaiter().GetResult(), "VerifierFailed");
+        var scalarOwner = OwnerBundleV04Parser.Parse(OwnerBundleMigrator.MigrateV03ToV04(
+            File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "owner-add-one-valid.json"))));
+        var scalarLowering = ModulesDafnyLowerer.Lower(ModulesCompiler.Compile(ModulesParser.ParseModule(
+            File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "math-add-valid.json")))), scalarOwner);
+        var allocationOwner = OwnerBundleV04Parser.Parse(File.ReadAllBytes(Path.Combine(repoRoot,
+            "fixtures", "modules-v0.2", "owner-fold-allocation-v0.4.json")));
+        var allocationLowering = ModulesDafnyLowerer.Lower(ModulesCompiler.Compile(ModulesParser.ParseModule(
+            File.ReadAllBytes(Path.Combine(repoRoot, "fixtures", "modules-v0.2", "fold-allocation-primary.json")))), allocationOwner);
+        foreach (var (shape, positive) in new[] { ("scalar", scalarLowering), ("allocation", allocationLowering) })
+        {
+        var positiveInputs = new G02RegeneratedProofInputs(positive.SourceBytes,
+            CanonicalJson.Encode(positive.SourceMap), positive.Obligations);
+        var firstReplay = await G02DafnyReplay.RunFixtureAsync(tool, positiveInputs, Path.Combine(replayEvidence, shape, "first"));
+        var secondReplay = await G02DafnyReplay.RunFixtureAsync(tool, positiveInputs, Path.Combine(replayEvidence, shape, "second"));
+        Check(firstReplay.Verified.TranscriptBytes.SequenceEqual(secondReplay.Verified.TranscriptBytes) &&
+              firstReplay.Verified.ObligationVectorBytes.SequenceEqual(secondReplay.Verified.ObligationVectorBytes),
+            "two fresh pinned Dafny fixture runs produce byte-equal normative transcript and obligations");
+        Directory.CreateDirectory(replayEvidence);
+        File.WriteAllBytes(Path.Combine(replayEvidence, "toolchain.json"), tool.IdentityBytes);
+        File.WriteAllBytes(Path.Combine(replayEvidence, shape, "transcript.json"), firstReplay.Verified.TranscriptBytes);
+        }
     }
     identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method Fake() {}\n");
     identityContent["content/transcript.json"] = Transcript(new string('4', 64));
