@@ -1,9 +1,25 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
+
+if (args is ["--g02-contained-child"])
+{
+    Thread.Sleep(TimeSpan.FromMinutes(1));
+    return;
+}
+if (args is ["--g02-contained-parent"])
+{
+    using var child = Process.Start(new ProcessStartInfo(Environment.ProcessPath!)
+    {
+        UseShellExecute = false, ArgumentList = { "--g02-contained-child" }
+    })!;
+    Console.WriteLine(child.Id);
+    return;
+}
 
 using var owner = RSA.Create(2048);
 using var impostor = RSA.Create(2048);
@@ -13,6 +29,37 @@ using var trust = new OwnerTrust(publicKey, keyId);
 var now = new DateTimeOffset(2026, 9, 29, 12, 0, 0, TimeSpan.Zero);
 var bundleDigest = new string('a', 64);
 var checks = 0;
+
+if (OperatingSystem.IsWindows())
+{
+    foreach (var explicitKill in new[] { true, false })
+    {
+        var probeStart = new ProcessStartInfo(Environment.ProcessPath!)
+        {
+            WorkingDirectory = Environment.CurrentDirectory,
+            ArgumentList = { "--g02-contained-parent" }
+        };
+        var contained = G02ContainedProcess.Start(probeStart);
+        Process? descendant = null;
+        try
+        {
+            using var reader = new StreamReader(contained.Stdout, leaveOpen: true);
+            var line = await reader.ReadLineAsync().WaitAsync(TimeSpan.FromSeconds(10));
+            descendant = Process.GetProcessById(int.Parse(line!));
+            await contained.Process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(10));
+            Check(!descendant.HasExited, "process-spy observes live descendant after parent exit");
+            if (explicitKill) await contained.TerminateAndDrainAsync();
+            else contained.Dispose();
+            await descendant.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5));
+            Check(descendant.HasExited, "job kill/disposal terminates descendant after parent exit");
+        }
+        finally
+        {
+            contained.Dispose();
+            descendant?.Dispose();
+        }
+    }
+}
 
 string Hex(byte[] bytes) => Convert.ToHexStringLower(bytes);
 byte[] Encode(SortedDictionary<string, object> value) => JsonSerializer.SerializeToUtf8Bytes(value);
@@ -541,6 +588,9 @@ if (OperatingSystem.IsWindows())
         Directory.CreateDirectory(replayEvidence);
         File.WriteAllBytes(Path.Combine(replayEvidence, "toolchain.json"), tool.IdentityBytes);
         File.WriteAllBytes(Path.Combine(replayEvidence, shape, "transcript.json"), firstReplay.Verified.TranscriptBytes);
+        File.WriteAllBytes(Path.Combine(replayEvidence, shape, "candidate.dfy"), positiveInputs.SourceBytes);
+        File.WriteAllBytes(Path.Combine(replayEvidence, shape, "source-map.json"), positiveInputs.SourceMapBytes);
+        File.WriteAllBytes(Path.Combine(replayEvidence, shape, "obligations.json"), firstReplay.Verified.ObligationVectorBytes);
         }
     }
     identityContent["content/candidate.dfy"] = Encoding.UTF8.GetBytes("method Fake() {}\n");

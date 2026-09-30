@@ -42,18 +42,13 @@ internal static class G02DafnyReplay
             start.Environment["TEMP"] = scratch;
             start.Environment["TMP"] = scratch;
             start.Environment["PATH"] = tool.DirectoryPath + Path.PathSeparator + Path.Combine(windows, "System32");
-            using var process = new Process { StartInfo = start };
-            if (!process.Start()) throw Refuse("VerifierFailed");
-            void Kill()
-            {
-                try { if (!process.HasExited) process.Kill(entireProcessTree: true); }
-                catch (InvalidOperationException) { }
-                catch (System.ComponentModel.Win32Exception) { throw Refuse("VerifierTerminationFailed"); }
-            }
+            using var contained = G02ContainedProcess.Start(start);
+            var process = contained.Process;
+            void Kill() => contained.Kill();
             // Reserve five seconds of the 60-second process budget for bounded termination.
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(55));
-            var stdoutTask = ReadBounded(process.StandardOutput.BaseStream, Kill, deadline.Token);
-            var stderrTask = ReadBounded(process.StandardError.BaseStream, Kill, deadline.Token);
+            var stdoutTask = ReadBounded(contained.Stdout, Kill, deadline.Token);
+            var stderrTask = ReadBounded(contained.Stderr, Kill, deadline.Token);
             try
             {
                 await Task.WhenAll(process.WaitForExitAsync(deadline.Token), stdoutTask, stderrTask)
@@ -61,16 +56,16 @@ internal static class G02DafnyReplay
             }
             catch
             {
-                process.StandardOutput.Dispose();
-                process.StandardError.Dispose();
                 Kill();
-                try { await process.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(5)); }
-                catch (TimeoutException) { throw Refuse("VerifierTerminationFailed"); }
+                await contained.TerminateAndDrainAsync();
+                contained.Stdout.Dispose();
+                contained.Stderr.Dispose();
                 if (deadline.IsCancellationRequested) throw Refuse("VerifierFailed");
                 throw;
             }
             var stdout = await stdoutTask;
             var stderr = await stderrTask;
+            await contained.TerminateAndDrainAsync();
             Directory.CreateDirectory(diagnosticDirectory);
             await File.WriteAllBytesAsync(Path.Combine(diagnosticDirectory, "stdout.bin"), stdout);
             await File.WriteAllBytesAsync(Path.Combine(diagnosticDirectory, "stderr.bin"), stderr);
