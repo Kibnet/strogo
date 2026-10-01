@@ -1,0 +1,9 @@
+  Определение проектов для восстановления...
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-count-4733848526d640dfb3a3e9b4f5c7a001\consumer\CountProbe.csproj (за 102 мс).
+  CountProbe -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-count-4733848526d640dfb3a3e9b4f5c7a001\consumer\bin\Release\net10.0\CountProbe.dll
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:01.96

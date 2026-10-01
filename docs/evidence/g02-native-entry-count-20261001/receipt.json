@@ -1,0 +1,181 @@
+{
+  "results": [
+    {
+      "traceAccepted": true,
+      "mode": "sequential",
+      "controlPassed": true,
+      "entries": 2,
+      "reads": [
+        {
+          "id": "null-pointer",
+          "hresult": -2147467261,
+          "count": null
+        },
+        {
+          "id": "before",
+          "hresult": 0,
+          "count": 0
+        },
+        {
+          "id": "first",
+          "hresult": 0,
+          "count": 1
+        },
+        {
+          "id": "second",
+          "hresult": 0,
+          "count": 2
+        }
+      ]
+    },
+    {
+      "traceAccepted": true,
+      "mode": "no-call",
+      "controlPassed": true,
+      "entries": 0,
+      "reads": [
+        {
+          "id": "null-pointer",
+          "hresult": -2147467261,
+          "count": null
+        },
+        {
+          "id": "before",
+          "hresult": 0,
+          "count": 0
+        },
+        {
+          "id": "decoy",
+          "hresult": 0,
+          "count": 0
+        }
+      ]
+    },
+    {
+      "traceAccepted": true,
+      "mode": "parallel",
+      "controlPassed": true,
+      "entries": 1024,
+      "reads": [
+        {
+          "id": "null-pointer",
+          "hresult": -2147467261,
+          "count": null
+        },
+        {
+          "id": "before",
+          "hresult": 0,
+          "count": 0
+        },
+        {
+          "id": "joined",
+          "hresult": 0,
+          "count": 1024
+        }
+      ]
+    },
+    {
+      "traceAccepted": false,
+      "mode": "overflow",
+      "controlPassed": true,
+      "entries": 4096,
+      "reads": [
+        {
+          "id": "null-pointer",
+          "hresult": -2147467261,
+          "count": null
+        },
+        {
+          "id": "before",
+          "hresult": 0,
+          "count": 0
+        },
+        {
+          "id": "capacity",
+          "hresult": 0,
+          "count": 4096
+        },
+        {
+          "id": "overflow",
+          "hresult": -2147467259,
+          "count": 0
+        }
+      ]
+    },
+    {
+      "traceAccepted": false,
+      "mode": "inactive",
+      "controlPassed": true,
+      "reads": [
+        {
+          "id": "inactive",
+          "hresult": -2147418113,
+          "count": 0
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "cf2596358590b92c039251946e87722d7174005feeebfe3ac98112b24a186469",
+      "path": "tools/g02-native-observer/Run-CountObserver.ps1"
+    },
+    {
+      "sha256": "e3892bd82719d2e6f998da715ab76b0818d94d0e4e261a511fd5eb6065832ec6",
+      "path": "tools/g02-native-observer/Observer.cpp"
+    },
+    {
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f",
+      "path": "tools/g02-native-observer/Enter.asm"
+    },
+    {
+      "sha256": "aa511a010ec0e10a80684b8fa2bdbc71274344c9b97f1396209ed06967f36b53",
+      "path": "tools/g02-native-observer/Observer.def"
+    },
+    {
+      "sha256": "4f8c1c096a9dd3e5f8f5385d9b097955dac3b69e7f114cf80c2d3aefa7f92c68",
+      "path": "tools/g02-native-observer/CountProbe/CountProbe.csproj"
+    },
+    {
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef",
+      "path": "tools/g02-native-observer/CountProbe/NuGet.Config"
+    },
+    {
+      "sha256": "91bbf52f4b073f6b02e061751b07629888d441e7c8fd71a60039c9cc511d432b",
+      "path": "tools/g02-native-observer/CountProbe/Program.cs"
+    }
+  ],
+  "limits": [
+    "No signed fixture session/native file identity in this probe",
+    "Snapshot, not concurrent lease",
+    "Final trace failure invalidates earlier successful counts",
+    "Timeout/Shutdown race branches not exercised"
+  ],
+  "purpose": "quiescent-native-entry-count-not-signed-admission",
+  "binaries": [
+    {
+      "sha256": "6e1d809bb27beb806c9680928848611b717d88deea99696763b66deb3337ae40",
+      "path": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/Observer.dll"
+    },
+    {
+      "sha256": "19cf02ad8f9b3594ae37efeb4fe1f231774dbc2c6b954bb60d778c92780b696a",
+      "path": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/consumer/bin/Release/net10.0/CountProbe.deps.json"
+    },
+    {
+      "sha256": "a178f0429d6eb4b2a7d688844d0872cdb7b2a01eed25b0125832e0059dedbf4e",
+      "path": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/consumer/bin/Release/net10.0/CountProbe.dll"
+    },
+    {
+      "sha256": "5c91d74382a70fe091abc7088704a612ad41e2b3eec98e3d9a284ff987137422",
+      "path": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/consumer/bin/Release/net10.0/CountProbe.exe"
+    },
+    {
+      "sha256": "3c2cdb490f8fc74fafe5fdadaf87a2f0c5b7b0e19a7f20ab4d38021d40a415c4",
+      "path": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/consumer/bin/Release/net10.0/CountProbe.pdb"
+    },
+    {
+      "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097",
+      "path": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/consumer/bin/Release/net10.0/CountProbe.runtimeconfig.json"
+    }
+  ]
+}

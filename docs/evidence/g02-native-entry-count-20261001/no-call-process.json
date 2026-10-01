@@ -1,0 +1,8 @@
+{
+  "mode": "no-call",
+  "pid": 333644,
+  "exitCode": 0,
+  "timedOut": false,
+  "stdout": "{\"purpose\":\"native-count-prefix-not-admission\",\"mode\":\"no-call\",\"targetCalls\":0,\"rows\":[{\"id\":\"null-pointer\",\"hresult\":-2147467261,\"count\":null},{\"id\":\"before\",\"hresult\":0,\"count\":0},{\"id\":\"decoy\",\"hresult\":0,\"count\":0}]}\r\n",
+  "stderr": ""
+}

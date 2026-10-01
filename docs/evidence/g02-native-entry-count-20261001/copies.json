@@ -1,0 +1,127 @@
+[
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/receipt.json",
+    "sha256": "5cb5b4771dcb715f50d85f972b652bb03bb7398764ae77690cc471ab5a566910",
+    "target": "baseline/receipt.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/native-build.txt",
+    "sha256": "ec12e25fac00601795713233d87453ab638382932c81a03a2456088fd38999dd",
+    "target": "baseline/native-build.txt"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/managed-build.txt",
+    "sha256": "7e62b4f92080d1c2c354536e4a864b15d1b15e1586832de7c8f12b504dbe9175",
+    "target": "baseline/managed-build.txt"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/call-process.json",
+    "sha256": "6c8b528ef1f93bda79979852342bd74fc34c892748fd779a0e9d15d0fd874a46",
+    "target": "baseline/call-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/call-trace.jsonl",
+    "sha256": "cf52d20720766246f9f6b313e5b23946aeca3fa6b3debd9a96ff2cdba431abd4",
+    "target": "baseline/call-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/no-call-process.json",
+    "sha256": "5ee5f0f6a6028c0df3c513f03912ef2245834012ea1afd3654ed4dce65a66624",
+    "target": "baseline/no-call-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/no-call-trace.jsonl",
+    "sha256": "20e9bcc7ec69e357b9f7d4bf286429f0d1a60e88ab3f4e4c44d3fa50299e9e0b",
+    "target": "baseline/no-call-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/parallel-process.json",
+    "sha256": "e3cf822659130733db03b95df4a5d880394a846eaeda9016a2b3c1bcab7a18a6",
+    "target": "baseline/parallel-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/parallel-trace.jsonl",
+    "sha256": "863b055e5562256b5d804e9b718daf0338b87d0ac04317b10d437470bdbde1e8",
+    "target": "baseline/parallel-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/overflow-process.json",
+    "sha256": "2e56546dc907c1e4e87bc336f9e350dae4c4afd8c80e8d46b366ee71a5afcc3a",
+    "target": "baseline/overflow-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/overflow-trace.jsonl",
+    "sha256": "28853573e45279d8ca79c9efadb1de06fa164b66a993e8668ebb5a6f47557562",
+    "target": "baseline/overflow-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/receipt.json",
+    "sha256": "4cc137a0292153a9e52164228ac8dbf40b6eda8a8d7b7828574614f0c50e45fc",
+    "target": "receipt.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/build.txt",
+    "sha256": "29e1e02d4a001484b822aa70b6fdaf2e86fb13e84091c9fa399ce9af3e30eb7e",
+    "target": "build.txt"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/sequential-process.json",
+    "sha256": "8361611b7f85de3554f47949d29e3f22a3e40d58724a52ae99f21790e8c1b353",
+    "target": "sequential-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/sequential-trace.jsonl",
+    "sha256": "a3cce5bd3e6aced19e0e74752d443adc7d9b588cea6056808d2cf1f9b5a47232",
+    "target": "sequential-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/no-call-process.json",
+    "sha256": "b5fcceed96b9e34d67c93dd934c0ec76d6ac891da5a729556cd563c2e533330b",
+    "target": "no-call-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/no-call-trace.jsonl",
+    "sha256": "87db51ca43a87cc209f8acae45a834d7b505248a64403f9fa59a401d65975589",
+    "target": "no-call-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/parallel-process.json",
+    "sha256": "be9f3147e22a5da803505465f02306b99bec555abf69a5633b3175e9ded5a6ac",
+    "target": "parallel-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/parallel-trace.jsonl",
+    "sha256": "722d8c90a141ac16e741ce5e0db32959ed5953845a5393817661aad9898e9164",
+    "target": "parallel-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/overflow-process.json",
+    "sha256": "15232f95d572a8bb4c51069ea2ec2b3e0094f19fc2f4ef2f82a380162d778216",
+    "target": "overflow-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/overflow-trace.jsonl",
+    "sha256": "29b37307ba530fb7a53ab71665c0f276c9403ae00b61921272d68cf938215944",
+    "target": "overflow-trace.jsonl"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-32fc283db9164ce184249bf9984859cf/inactive-process.json",
+    "sha256": "9d1d9055c9622634be6bf721c9e5bab80a234719a1447404232021c09245af31",
+    "target": "inactive-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-4733848526d640dfb3a3e9b4f5c7a001/build.txt",
+    "sha256": "d14485aaf4bd18c4a34fb9a4ad48d246e60e32c767d3e302bb607aa84250b2b7",
+    "target": "history/build.txt"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-4733848526d640dfb3a3e9b4f5c7a001/sequential-process.json",
+    "sha256": "ff3bfb1ba5d54e3b28ea0a3ffaf703f2cd9cafb9b3266b61f0a9b183a6df9464",
+    "target": "history/sequential-process.json"
+  },
+  {
+    "source": "artifacts/local-validation/g02/native-count-4733848526d640dfb3a3e9b4f5c7a001/sequential-trace.jsonl",
+    "sha256": "845a555e3ecfd79f3b2961535a6d5717211b63460dde9276e62965a1becb7b33",
+    "target": "history/sequential-trace.jsonl"
+  }
+]

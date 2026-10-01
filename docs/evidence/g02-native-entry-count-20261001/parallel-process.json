@@ -1,0 +1,8 @@
+{
+  "mode": "parallel",
+  "pid": 331176,
+  "exitCode": 0,
+  "timedOut": false,
+  "stdout": "{\"purpose\":\"native-count-prefix-not-admission\",\"mode\":\"parallel\",\"targetCalls\":1024,\"rows\":[{\"id\":\"null-pointer\",\"hresult\":-2147467261,\"count\":null},{\"id\":\"before\",\"hresult\":0,\"count\":0},{\"id\":\"joined\",\"hresult\":0,\"count\":1024}]}\r\n",
+  "stderr": ""
+}

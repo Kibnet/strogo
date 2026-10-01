@@ -64,6 +64,29 @@ extern "C" {
   volatile LONG ObserverReady[4096] = {};
   void ObserverEnter(FunctionIDOrClientID id);
 }
+// Diagnostic host reads only between synchronous invocations; this is not a concurrent lease.
+extern "C" __declspec(dllexport) HRESULT __stdcall StrogoObserverReadEntryCount(unsigned* count) {
+  if (!count) return E_POINTER;
+  *count = 0;
+  MapperLease lifecycle;
+  if (InterlockedCompareExchange(&ObserverActive,0,0) != 1) return E_UNEXPECTED;
+  struct TraceReadLease {
+    TraceReadLease() { AcquireSRWLockShared(&traceLock); }
+    ~TraceReadLease() { ReleaseSRWLockShared(&traceLock); }
+  } traceRead;
+  if (traceFailed || InterlockedCompareExchange(&ObserverHooks,0,0) != 0 ||
+      InterlockedCompareExchange(&ObserverOverflow,0,0) != 0) return E_FAIL;
+  const LONG64 observed = InterlockedCompareExchange64(&ObserverCount,0,0);
+  if (observed < 0 || observed > 4096) return E_FAIL;
+  for (LONG64 i=0; i<observed; ++i)
+    if (InterlockedCompareExchange(&ObserverReady[static_cast<unsigned>(i)],0,0) != 1) return E_FAIL;
+  if (traceFailed || InterlockedCompareExchange(&ObserverHooks,0,0) != 0 ||
+      InterlockedCompareExchange64(&ObserverCount,0,0) != observed ||
+      InterlockedCompareExchange(&ObserverOverflow,0,0) != 0) return E_FAIL;
+  if (InterlockedCompareExchange(&ObserverActive,0,0) != 1) return E_UNEXPECTED;
+  *count = static_cast<unsigned>(observed);
+  return S_OK;
+}
 class Observer final : public ICorProfilerCallback2 {
   LONG refs = 1;
 public:

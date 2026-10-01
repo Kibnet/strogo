@@ -1,0 +1,145 @@
+{
+  "purpose": "diagnostic-native-profiler-startup",
+  "results": [
+    {
+      "mode": "call",
+      "pid": 328756,
+      "exitCode": 0,
+      "stdout": "42\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 1
+    },
+    {
+      "mode": "no-call",
+      "pid": 332468,
+      "exitCode": 0,
+      "stdout": "42\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 0
+    },
+    {
+      "mode": "parallel",
+      "pid": 327288,
+      "exitCode": 0,
+      "stdout": "1024\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 1024
+    },
+    {
+      "mode": "overflow",
+      "pid": 326184,
+      "exitCode": 0,
+      "stdout": "4097\r\n",
+      "stderr": "",
+      "traceFailed": true,
+      "entries": 4096
+    }
+  ],
+  "hashes": [
+    {
+      "sha256": "6e1d809bb27beb806c9680928848611b717d88deea99696763b66deb3337ae40",
+      "name": "Observer.dll"
+    },
+    {
+      "sha256": "11a7459252380b22fa95c81c2f2b21f601d85154be233727dbe86dadd586152e",
+      "name": "Probe.dll"
+    },
+    {
+      "sha256": "ab1b71fd3dd71062e074c9fab8312081a81b7f2b3e0327c48c4d249c8d1a3135",
+      "name": "dotnet.exe"
+    },
+    {
+      "sha256": "88c8344236a27a6e727e0a8edc49aaa2690bdc7a9464b9d18cc7abe70a9f1c0d",
+      "name": "cl.exe"
+    },
+    {
+      "sha256": "a776cf32777d2df2e201a769bb5bd6502bb72bac98f60c6f53a4bfcecd0db8ed",
+      "name": "ml64.exe"
+    },
+    {
+      "sha256": "a6e3b3b22b7fe8ce2c9245816126723eaa13f43b9f591883e59959a2d409426a",
+      "name": "cmd.exe"
+    },
+    {
+      "sha256": "f31c250fee70a0f207fba94a50160534543e50048c6f45aab391d2c953fe4bf0",
+      "name": "corprof.h"
+    },
+    {
+      "sha256": "22570f374a12eadbc12c7ac61358374db161cd90b43d5bfdb485ab1b791a5cec",
+      "name": "cor.h"
+    },
+    {
+      "sha256": "b1c115c1c8e1d37ef51c25ce4cb8f24a43e2bb31ae7acddd803071f22253ba19",
+      "name": "CallbackStubs.inc"
+    },
+    {
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f",
+      "name": "Enter.asm"
+    },
+    {
+      "sha256": "3fdd2a75821f1ac1ebcab14383d748f423c683e4bb4be7617357b0c50858f010",
+      "name": "ModuleFile.inc"
+    },
+    {
+      "sha256": "e3892bd82719d2e6f998da715ab76b0818d94d0e4e261a511fd5eb6065832ec6",
+      "name": "Observer.cpp"
+    },
+    {
+      "sha256": "aa511a010ec0e10a80684b8fa2bdbc71274344c9b97f1396209ed06967f36b53",
+      "name": "Observer.def"
+    },
+    {
+      "sha256": "1c895a75ae09cf718125e56d534fbb09481a7c5ceddf2574fe171676da84a673",
+      "name": "Preflight.cpp"
+    },
+    {
+      "sha256": "6d767dc7dd5ef8d192093bd8ed392fe68d11e727955f3dc3324b12f0431c5150",
+      "name": "README.md"
+    },
+    {
+      "sha256": "cd5aa1a9d9a3791e55add6fd56e33f820ba69a212a4fd12534dc8502b83acd04",
+      "name": "Run-CountObserver.ps1"
+    },
+    {
+      "sha256": "b2f5b4770f85f51e3c38f407794be171a0a099da8dc57eeb1b21ee229d4add70",
+      "name": "Run-DispatchObserver.ps1"
+    },
+    {
+      "sha256": "f128d32d1c2e59390d12566def02fc947935e5fc178b6a229a6b0c8ebc023e26",
+      "name": "Run-GeneratedObserver.ps1"
+    },
+    {
+      "sha256": "cbaddd48b0c264df5ddd5f9b8e8036e469856db94003d352ef4a876638c99f95",
+      "name": "Run-LoaderLifetime.ps1"
+    },
+    {
+      "sha256": "329b29101d756239f569200d50e5b8a0c35da4caa1f136cd298c44ce14f494a3",
+      "name": "Run-Observer.ps1"
+    },
+    {
+      "sha256": "05cbd0bc4efcf3a911169794ab1fc0b42fc4d5a1412cfa5e101546708259df42",
+      "name": "Run-Preflight.ps1"
+    },
+    {
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef",
+      "name": "NuGet.Config"
+    },
+    {
+      "sha256": "77ccabb8f2c8918989973346b44370adbfd548ec917b92dee921e568d7853b7d",
+      "name": "Probe.csproj"
+    },
+    {
+      "sha256": "d4329fd0c687484d4a8c76992902fa9e5525b4738456bc09f6bba93b57510a56",
+      "name": "Program.cs"
+    }
+  ],
+  "limits": [
+    "No generated module digest or source-map binding",
+    "No public admission",
+    "Forced JIT only",
+    "Partial toolchain identities, no immutable closure"
+  ]
+}

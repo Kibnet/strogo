@@ -1,0 +1,8 @@
+{
+  "mode": "sequential",
+  "pid": 326404,
+  "exitCode": 0,
+  "timedOut": false,
+  "stdout": "{\"purpose\":\"native-count-prefix-not-admission\",\"mode\":\"sequential\",\"targetCalls\":2,\"rows\":[{\"id\":\"null-pointer\",\"hresult\":-2147467261,\"count\":null},{\"id\":\"before\",\"hresult\":0,\"count\":0},{\"id\":\"first\",\"hresult\":0,\"count\":1},{\"id\":\"second\",\"hresult\":0,\"count\":2}]}\r\n",
+  "stderr": ""
+}

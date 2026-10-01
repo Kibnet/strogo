@@ -1,0 +1,8 @@
+{
+  "mode": "inactive",
+  "pid": 291696,
+  "exitCode": 0,
+  "timedOut": false,
+  "stdout": "{\"purpose\":\"native-count-prefix-not-admission\",\"mode\":\"inactive\",\"targetCalls\":0,\"rows\":[{\"id\":\"inactive\",\"hresult\":-2147418113,\"count\":0}]}\r\n",
+  "stderr": ""
+}

@@ -37,3 +37,5 @@ Add `-JsonTransport` to invoke the same generated methods through the internal s
 Loader lifecycle prerequisite: [G02 loader lifetime](../../docs/g02-loader-lifetime.md). Run-LoaderLifetime.ps1 compares stream/file-retained/file-released against actual copied fixture DLLs. It does not enable native profiler or establish proof/admission. Ordinary loader is unchanged.
 
 Внутренний signed file-backed вход и его process-bound lifetime описаны в [g02-observer-session](../../docs/g02-observer-session.md). Существующий ObserverFixture пока использует retained unsigned fixture; новый вход ещё не подключён к native trace.
+
+Quiescent native count: [g02-native-entry-count](../../docs/g02-native-entry-count.md). Run-CountObserver.ps1 -ObserverDirectory <fresh-output> checks interval snapshots and final trace. Signed module integration remains pending.
