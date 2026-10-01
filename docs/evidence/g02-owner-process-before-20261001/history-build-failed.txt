@@ -1,0 +1,4 @@
+C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\.tools\dotnet-sdk-10.0.400\sdk\10.0.400\Microsoft.Common.CurrentVersion.targets(2205,5): warning MSB9008: указанный проект ../../../../../src/Strogo.Modules/Strogo.Modules.csproj не существует. [C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\OwnerProcessProbe.csproj]
+C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\Program.cs(3,7): error CS0246: Не удалось найти тип или имя пространства имен "Strogo" (возможно, отсутствует директива using или ссылка на сборку). [C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\OwnerProcessProbe.csproj]
+
+Ошибка сборки. Устраните ошибки сборки и повторите попытку.

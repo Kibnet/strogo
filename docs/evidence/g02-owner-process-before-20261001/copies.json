@@ -1,0 +1,62 @@
+[
+  {
+    "target": "Program.cs",
+    "sha256": "0b94337dfb5cdb8c7ffbf7a9e6af78826e4caca6715d918ac11057a26f6881ec",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/Program.cs"
+  },
+  {
+    "target": "OwnerProcessProbe.csproj",
+    "sha256": "b6c018c4e100e1b8ddad12ace6eb0e92a33ed99b814a141da848a760b44c7ce6",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/OwnerProcessProbe.csproj"
+  },
+  {
+    "target": "report.json",
+    "sha256": "d14e42752a23823a5552c2697815268126465b590359f68a9620def0358d74f0",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/report.json"
+  },
+  {
+    "target": "run.txt",
+    "sha256": "15b53be48114ad007709ce46b1f0a894780d937bb1e9279c9508a12e4c582bab",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/run.txt"
+  },
+  {
+    "target": "exit-code.txt",
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/exit-code.txt"
+  },
+  {
+    "target": "source-binary-audit.json",
+    "sha256": "ce8ea8eaed72505f823254a559f060d293fb9986395f41eb0d737a3e7d814329",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/source-binary-audit.json"
+  },
+  {
+    "target": "history-build-failed.txt",
+    "sha256": "d7a3389c5c93ab5ffa10237bd92a2ec8e2259119aea59df941f409c2cdffd6d5",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/history-build-failed.txt"
+  },
+  {
+    "target": "public-key.der",
+    "sha256": "2198d198337e40b6d9e2511b9049df8e42b927db2f5b1fb843cb98ca78056c8c",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/public-key.der"
+  },
+  {
+    "target": "host.json",
+    "sha256": "9ae098d8310c2c3ad97722905ca08509b9cfd25cb5f51ce805e7b66bf0affa2b",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/host.json"
+  },
+  {
+    "target": "store/owner-state.json",
+    "sha256": "470d2f6c9aa34b6e15cbda33fa5ee88dd8d1e3816c86b867ef5e67ce1f01d736",
+    "source": "artifacts/local-validation/g02/owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2/store/owner-state.json"
+  },
+  {
+    "sha256": "470d2f6c9aa34b6e15cbda33fa5ee88dd8d1e3816c86b867ef5e67ce1f01d736",
+    "source": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/initial-state.json",
+    "target": "initial-state.json"
+  },
+  {
+    "sha256": "6d43358ab096e1eaf169ff8a1d297421151b8d2ef0029425430979aaee267bc3",
+    "source": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/next-state.json",
+    "target": "next-state.json"
+  }
+]

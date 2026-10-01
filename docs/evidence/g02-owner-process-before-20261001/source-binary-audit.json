@@ -1,0 +1,22 @@
+[
+  {
+    "sha256": "0b94337dfb5cdb8c7ffbf7a9e6af78826e4caca6715d918ac11057a26f6881ec",
+    "path": "artifacts\\local-validation\\g02\\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\\Program.cs"
+  },
+  {
+    "sha256": "b6c018c4e100e1b8ddad12ace6eb0e92a33ed99b814a141da848a760b44c7ce6",
+    "path": "artifacts\\local-validation\\g02\\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\\OwnerProcessProbe.csproj"
+  },
+  {
+    "sha256": "85f8b011cda67987ea178b31b7b9a02ae7373e94f6be29a84f99061c7575a87e",
+    "path": "src\\Strogo.Modules\\OwnerAdmissionTrust.cs"
+  },
+  {
+    "sha256": "17f1bf4b476e3d735b77046e156b5796847b15f164a735e63170f9adb3e77472",
+    "path": "src\\Strogo.Modules\\OwnerHostContext.cs"
+  },
+  {
+    "sha256": "bcd0d8a4a84499b111f3180ad3fa3e7ca0a9f77f867c6f997919a5d6b4197f48",
+    "path": "artifacts\\local-validation\\g02\\owner-process-before-6c0dbfa2f5f74fd7b0a467ab45b452b2\\bin\\Debug\\net10.0\\Strogo.Modules.dll"
+  }
+]
