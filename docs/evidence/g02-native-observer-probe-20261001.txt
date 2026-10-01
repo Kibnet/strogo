@@ -1,0 +1,1 @@
+{"purpose":"declaration-preflight-only","architecture":"x64","pointerBytes":8,"functionIdBytes":8,"enterHooks3Declared":true,"idMapper2Declared":true,"clrLoaded":false}
