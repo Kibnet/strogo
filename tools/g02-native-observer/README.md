@@ -35,3 +35,5 @@ This friend-only consumer uses the same internal G02CompiledDispatch as G02Compi
 Add `-JsonTransport` to invoke the same generated methods through the internal strict invocation transport described in [g02-invocation-transport](../../docs/g02-invocation-transport.md). Without that switch the original typed invocation path is used. The transport result has no package/admission identity envelope and does not establish a public admitted runtime.
 
 Loader lifecycle prerequisite: [G02 loader lifetime](../../docs/g02-loader-lifetime.md). Run-LoaderLifetime.ps1 compares stream/file-retained/file-released against actual copied fixture DLLs. It does not enable native profiler or establish proof/admission. Ordinary loader is unchanged.
+
+Внутренний signed file-backed вход и его process-bound lifetime описаны в [g02-observer-session](../../docs/g02-observer-session.md). Существующий ObserverFixture пока использует retained unsigned fixture; новый вход ещё не подключён к native trace.

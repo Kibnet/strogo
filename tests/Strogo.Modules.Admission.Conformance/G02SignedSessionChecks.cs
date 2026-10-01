@@ -217,6 +217,95 @@ internal static class G02SignedSessionChecks
                 captureFailure=false;
             }
             ExclusiveReopen("final-cleanup");
+            var diagnosticRoot = Path.Combine(directory, "observer-session-package");
+            Directory.CreateDirectory(diagnosticRoot);
+            foreach (var file in Directory.GetFiles(sourcePackage, "*", SearchOption.AllDirectories))
+            {
+                var target = Path.Combine(diagnosticRoot, Path.GetRelativePath(sourcePackage, file));
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!); File.Copy(file, target);
+            }
+            var diagnosticPath = Path.GetFullPath(Path.Combine(diagnosticRoot, manifest.EntryAssemblyPath));
+            string? diagnosticLocation = null;
+            AssemblyLoadEventHandler locationObserver = (_, args) =>
+            {
+                if (args.LoadedAssembly.GetName().Name == assemblyName) diagnosticLocation = args.LoadedAssembly.Location;
+            };
+            AppDomain.CurrentDomain.AssemblyLoad += locationObserver;
+            try
+            {
+                void NoDiagnosticLoad(string id, Func<byte[]> provider, byte[] admission, G02RuntimeBinding observedRuntime, string expected)
+                {
+                    using var diagnosticTrust = new OwnerTrust(publicKey, keyId);
+                    var before = loads; string? code = null;
+                    try { using var unexpected = G02SignedFixtureSession.OpenForObserver(diagnosticRoot, verified,
+                        diagnosticTrust, provider, admission, binding.Bundle.BundleDigest, new Clock(now), observedRuntime); }
+                    catch (ModuleException error) { code = error.Code; }
+                    Check(code == expected && loads == before && diagnosticLocation is null, "observer-no-load-" + id);
+                    using var reopened = File.Open(diagnosticPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+                    Check(reopened.CanWrite, "observer-no-load-cleanup-" + id);
+                    rows.Add(new { id = "observer-no-load-" + id, code, assemblyLoads = loads - before, exclusiveReopen = true });
+                }
+                NoDiagnosticLoad("signature", () => state0, Release(impostor), runtime, "InvalidOwnerSignature");
+                NoDiagnosticLoad("digest", () => state0, Release(packageDigest: new string('a', 64)), runtime, "ReleaseAdmissionDigestMismatch");
+                NoDiagnosticLoad("expiry", () => state0, Release(until: now.AddMinutes(-1)), runtime, "ReleaseAdmissionExpired");
+                NoDiagnosticLoad("epoch", () => state1, Release(), runtime, "ApprovalEpochMismatch");
+                NoDiagnosticLoad("provider", () => throw new IOException("fixture unavailable"), Release(), runtime, "OwnerStateUnavailable");
+                runtimeObservation = liveRuntime with { CoreLibPath = Path.Combine(directory, "System.Private.CoreLib.dll") };
+                NoDiagnosticLoad("runtime", () => state0, Release(), controlledRuntime, "RuntimeBindingMismatch");
+                runtimeObservation = liveRuntime;
+                using var diagnosticTrust = new OwnerTrust(publicKey, keyId);
+                var diagnosticState = state0; var diagnosticReads = 0; var brokenProvider = false;
+                byte[] DiagnosticProvider() { diagnosticReads++; if (brokenProvider) throw new IOException("fixture unavailable"); return diagnosticState; }
+                var diagnosticClock = new Clock(now); var beforeLoad = loads; var diagnosticRelease = Release();
+                using var diagnosticSession = G02SignedFixtureSession.OpenForObserver(diagnosticRoot, verified,
+                    diagnosticTrust, DiagnosticProvider, diagnosticRelease, binding.Bundle.BundleDigest, diagnosticClock, controlledRuntime);
+                File.WriteAllBytes(Path.Combine(directory, "observer-load.json"), CanonicalJson.Encode(new {
+                    purpose = "fixture-load-location-not-native-entry", expectedPath = diagnosticPath,
+                    actualLocation = diagnosticLocation, assemblyLoads = loads - beforeLoad, providerReads = diagnosticReads }));
+                Check(loads == beforeLoad + 1 && diagnosticReads == 1 &&
+                    string.Equals(diagnosticLocation, diagnosticPath, StringComparison.OrdinalIgnoreCase), "observer-physical-load");
+                using (var success = JsonDocument.Parse(diagnosticSession.InvokeJson(request)))
+                {
+                    var envelope = success.RootElement; var nested = envelope.GetProperty("result");
+                    var reference = ModulesReferenceEvaluator.Invoke(binding.Module, entry.Function.Id,
+                        entry.Function.Parameters.Select(parameter => byId[parameter.Id]).ToArray()).Value;
+                    Check(nested.GetProperty("status").GetString() == "Returned" && diagnosticSession.DispatchAttempts == 1 && diagnosticReads == 2 &&
+                        CanonicalJson.Encode(nested.GetProperty("value")).SequenceEqual(CanonicalJson.Encode(OwnerBundleCodec.ValuePayload(witness.ModelResult, entry.Function.ReturnType))) &&
+                        OwnerContractEvaluator.StructuralEquals(reference, witness.ModelResult), "observer-owner-reference");
+                    Check(envelope.GetProperty("validationOnly").GetBoolean() && envelope.GetProperty("packageDigest").GetString() == manifest.PackageDigest &&
+                        envelope.GetProperty("buildManifestDigest").GetString() == manifest.ArtifactDigest &&
+                        envelope.GetProperty("contractApprovalDigest").GetString() == manifest.ContractApprovalDigest &&
+                        envelope.GetProperty("releaseAdmissionDigest").GetString() == OwnerAdmissionWire.Hash("strogo.admission.v0.2/artifact", diagnosticRelease), "observer-identities");
+                    rows.Add(new { id = "observer-valid-json", location = diagnosticLocation, response = envelope.Clone(),
+                        providerReads = diagnosticReads, dispatchAttempts = diagnosticSession.DispatchAttempts, ownerReferenceMatch = true });
+                }
+                void DiagnosticRefused(byte[] input, string expected, bool readState = true)
+                {
+                    var attempts = diagnosticSession.DispatchAttempts; var priorReads = diagnosticReads;
+                    using var response = JsonDocument.Parse(diagnosticSession.InvokeJson(input)); var nested = response.RootElement.GetProperty("result");
+                    Check(nested.GetProperty("status").GetString() == "Refused" && nested.GetProperty("error").GetProperty("code").GetString() == expected &&
+                        diagnosticSession.DispatchAttempts == attempts && diagnosticReads == priorReads + (readState ? 1 : 0), "observer-late-" + expected);
+                    rows.Add(new { id = "observer-late-" + expected, response = response.RootElement.Clone(),
+                        providerReadsDelta = diagnosticReads - priorReads, dispatchAttemptsDelta = diagnosticSession.DispatchAttempts - attempts });
+                }
+                DiagnosticRefused(Encoding.UTF8.GetBytes("{}"), "SchemaInvalid", false);
+                brokenProvider = true; DiagnosticRefused(request, "OwnerStateUnavailable"); brokenProvider = false;
+                runtimeObservation = liveRuntime with { CoreLibPath = Path.Combine(directory, "System.Private.CoreLib.dll") };
+                DiagnosticRefused(request, "RuntimeBindingMismatch"); runtimeObservation = liveRuntime;
+                diagnosticClock.Now = now.AddMinutes(11); DiagnosticRefused(request, "ReleaseAdmissionExpired"); diagnosticClock.Now = now;
+                using (var restored = JsonDocument.Parse(diagnosticSession.InvokeJson(request)))
+                {
+                    Check(restored.RootElement.GetProperty("result").GetProperty("status").GetString() == "Returned" && diagnosticSession.DispatchAttempts == 2, "observer-restored");
+                    rows.Add(new { id = "observer-restored", response = restored.RootElement.Clone(), dispatchAttempts = diagnosticSession.DispatchAttempts });
+                }
+                diagnosticState = state1; DiagnosticRefused(request, "ApprovalEpochMismatch");
+                diagnosticState = state0; DiagnosticRefused(request, "OwnerStateRollbackDetected");
+                diagnosticSession.Dispose(); DiagnosticRefused(request, "CompiledFixtureDisposed", false);
+                DiagnosticRefused(Encoding.UTF8.GetBytes("{}"), "CompiledFixtureDisposed", false);
+                // Dispose releases owned snapshot handles; rooted CLR mappings have process-bound lifetime.
+                GC.KeepAlive(diagnosticSession);
+            }
+            finally { AppDomain.CurrentDomain.AssemblyLoad -= locationObserver; }
         }
         finally { AppDomain.CurrentDomain.AssemblyLoad -= observer; }
         File.WriteAllBytes(Path.Combine(directory,"signed-session.json"),CanonicalJson.Encode(new { purpose="disposable-test-key-session-not-public-admission",checks,rows }));

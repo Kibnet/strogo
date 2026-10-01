@@ -1,0 +1,9 @@
+{
+  "warnings": 0,
+  "exitCode": 0,
+  "sdk": "10.0.400",
+  "errors": 0,
+  "evidence": "terminal session65588 completed; this is a summary, not a raw console copy",
+  "elapsed": "00:00:18.70",
+  "command": "dotnet build Kernel.slnx --no-restore"
+}

@@ -9,7 +9,7 @@ internal sealed class G02CompiledFixture : IDisposable
     private readonly G02CompiledDispatch dispatch;
     private bool disposed;
 
-    private G02CompiledFixture(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified)
+    private G02CompiledFixture(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified, bool forObserver)
     {
         G02PackageProofReplay.VerifyEntryArtifactsFixture(snapshot, verified.Build);
         G02ProofTranscript.VerifyHeld(snapshot, verified.Proof);
@@ -22,7 +22,10 @@ internal sealed class G02CompiledFixture : IDisposable
         try
         {
             using var bytes = new MemoryStream(verified.Build.AssemblyBytes, writable: false);
-            var assembly = context.LoadFromStream(bytes);
+            var assembly = forObserver
+                ? context.LoadFromAssemblyPath(snapshot.EntryAssemblyPathForObserver())
+                : context.LoadFromStream(bytes);
+            if (forObserver) snapshot.Revalidate();
             dispatch = new G02CompiledDispatch(assembly, module, bundle);
         }
         catch
@@ -33,7 +36,11 @@ internal sealed class G02CompiledFixture : IDisposable
     }
 
     internal static G02CompiledFixture Open(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified)
-        => new(snapshot, verified);
+        => new(snapshot, verified, forObserver: false);
+
+    // File mappings may survive Dispose; observer hosts must use a dedicated process lifetime.
+    internal static G02CompiledFixture OpenForObserver(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified)
+        => new(snapshot, verified, forObserver: true);
 
     internal ModuleValue Invoke(string functionId, IReadOnlyList<ModuleValue> arguments)
         => dispatch.Invoke(functionId, arguments);

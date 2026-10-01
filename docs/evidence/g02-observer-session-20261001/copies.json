@@ -1,0 +1,52 @@
+[
+  {
+    "source": "artifacts/local-validation/g02/observer-session-22417cffbb9c41dd8ef5ff495926f36c/build.txt",
+    "target": "build.txt",
+    "sha256": "3539d8f498dff122f294fccb2ac9fa405ab5a24c9b6faa5f4ec017f5817cfc42"
+  },
+  {
+    "source": "artifacts/local-validation/g02/observer-session-22417cffbb9c41dd8ef5ff495926f36c/admission.txt",
+    "target": "admission.txt",
+    "sha256": "d5cf77c5d25e4c36764708839b60b6bca3da3b537183808a424660081954f6cf"
+  },
+  {
+    "source": "artifacts/local-validation/g02/observer-session-22417cffbb9c41dd8ef5ff495926f36c/exit-code.txt",
+    "target": "exit-code.txt",
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  {
+    "source": "artifacts/local-validation/g02/fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620/scalar/signed-session.json",
+    "target": "scalar-signed-session.json",
+    "sha256": "198d8a056fd734973909f6e83e80792edfde4a5730bd89cb5906607a4202598d"
+  },
+  {
+    "source": "artifacts/local-validation/g02/fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620/scalar/observer-load.json",
+    "target": "scalar-observer-load.json",
+    "sha256": "937cb181bfc50d3630cb955387d8c273031b567c788b4412a71697bbaecac0aa"
+  },
+  {
+    "source": "artifacts/local-validation/g02/fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620/allocation/signed-session.json",
+    "target": "allocation-signed-session.json",
+    "sha256": "c084b29e2b3cdd8f1ebb9929c065fd758b1809c8b2fc27822c6789da33d7a97a"
+  },
+  {
+    "source": "artifacts/local-validation/g02/fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620/allocation/observer-load.json",
+    "target": "allocation-observer-load.json",
+    "sha256": "e5d626a605f5becbd9b96b9449b7903280aa48589030370ad9e304de3d18b413"
+  },
+  {
+    "source": "artifacts/local-validation/g02/observer-session-468afe2755444abdbac9940814d3b826/admission.txt",
+    "target": "history/admission.txt",
+    "sha256": "fb42ddee657549eb0a65c24a1d57905dcc9459cc6834bab56e43a615d689f7f6"
+  },
+  {
+    "source": "artifacts/local-validation/g02/observer-session-468afe2755444abdbac9940814d3b826/exit-code.txt",
+    "target": "history/exit-code.txt",
+    "sha256": "e4e7851eff84375b526b7f4fcb50db23a941ff4d35de163fda833cfde6e5ec3e"
+  },
+  {
+    "source": "artifacts/local-validation/g02/observer-session-468afe2755444abdbac9940814d3b826/build-summary.json",
+    "target": "history/build-summary.json",
+    "sha256": "3b70f81263e1677240c4bb1f3f015df3f3d0342ed6bba4a75ced60b8295da52c"
+  }
+]

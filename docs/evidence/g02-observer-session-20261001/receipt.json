@@ -1,0 +1,72 @@
+{
+  "purpose": "internal-signed-file-backed-fixture-not-public-admission-or-native-trace",
+  "fullAdmissionChecks": 492,
+  "exitCode": 0,
+  "buildWarnings": 0,
+  "buildErrors": 0,
+  "sourceBase": "dfd8debf9a53ab87339ba17df2f510854db2a14a",
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs",
+      "sha256": "15b3469a48e8a3f6afd0d22f2fad6212babdbf56369dcde119639a9d6a3c14b3"
+    },
+    {
+      "path": "src/Strogo.Modules/G02PackageSnapshot.cs",
+      "sha256": "86eb28e59cbe74a7152953082938753e8f043e58380047a198d99a1b1fb285ef"
+    },
+    {
+      "path": "src/Strogo.Modules/G02SignedFixtureSession.cs",
+      "sha256": "b76130e68ed9fc3224b187c8c82f234bd96272d124c0800fa4b1c791857353cf"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs",
+      "sha256": "c2f56c59eb4684d8940cd7c9c9e603d512ed6b97d653078cc85cc565dad6a7d3"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/bin/Debug/net10.0/Strogo.Modules.Admission.Conformance.exe",
+      "sha256": "e5d1c91b1609344a6449ba6d8b5520fc727cba15aee29dcba456c611b8f02b27"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/bin/Debug/net10.0/Strogo.Modules.Admission.Conformance.dll",
+      "sha256": "4d831039d5d6d2305bf3ea9a9830e22a15a2588dfc96c3234a1ac1239cbddc5d"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/bin/Debug/net10.0/Strogo.Modules.dll",
+      "sha256": "3878dfc1b21b3e055d5faa4df07fea8d297571affb27c1fb0b6150da3840dae4"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/bin/Debug/net10.0/Kernel.Core.dll",
+      "sha256": "c75e4d7fcdb87a7916e8a65f11f46bf2ebd19b424782b2277a8eaeec0117a681"
+    }
+  ],
+  "shapes": [
+    {
+      "shape": "scalar",
+      "checks": 82,
+      "rows": 49,
+      "diagnosticRows": 16,
+      "noLoadControls": 6,
+      "actualLocation": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620\\scalar\\observer-session-package\\content\\generated.dll",
+      "loadCount": 1,
+      "ownerReferenceMatch": true
+    },
+    {
+      "shape": "allocation",
+      "checks": 82,
+      "rows": 49,
+      "diagnosticRows": 16,
+      "noLoadControls": 6,
+      "actualLocation": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\fresh-replay-5360a75c13b84d8a8dc48ddcc1d65620\\allocation\\observer-session-package\\content\\generated.dll",
+      "loadCount": 1,
+      "ownerReferenceMatch": true
+    }
+  ],
+  "limits": [
+    "Adapter count is not native callback evidence",
+    "Disposable test keys, not human release approval",
+    "CLR mappings may survive Dispose; diagnostic host requires separate process",
+    "Ancestor namespace is trusted, Revalidate is serialized checkpoint"
+  ]
+}

@@ -26,6 +26,12 @@ public sealed class G02PackageSnapshot : IDisposable
 
     public G02BuildManifest Manifest { get; }
 
+    internal string EntryAssemblyPathForObserver()
+    {
+        Revalidate();
+        return Path.Combine(rootDirectory, Manifest.EntryAssemblyPath.Replace('/', Path.DirectorySeparatorChar));
+    }
+
     public static G02PackageSnapshot OpenStructural(string packageDirectory)
         => OpenStructural(packageDirectory, null);
 

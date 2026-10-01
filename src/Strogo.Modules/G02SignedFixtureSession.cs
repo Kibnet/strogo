@@ -22,7 +22,7 @@ internal sealed class G02SignedFixtureSession : IDisposable
     internal int DispatchAttempts { get; private set; } // Diagnostic adapter count, not native-entry evidence.
 
     private G02SignedFixtureSession(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified,
-        OwnerTrust trust, Func<byte[]> stateProvider, byte[] releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime)
+        OwnerTrust trust, Func<byte[]> stateProvider, byte[] releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime, bool forObserver)
     {
         this.snapshot = snapshot;
         this.trust = trust;
@@ -38,11 +38,20 @@ internal sealed class G02SignedFixtureSession : IDisposable
         snapshot.Revalidate();
         runtime.Verify(sdkDigest);
         module = ModulesCompiler.Compile(ModulesParser.ParseModule(snapshot.ReadHeld(snapshot.Manifest.Files.Single(value => value.Role == "module").Path)));
-        fixture = G02CompiledFixture.Open(snapshot, verified);
+        fixture = forObserver ? G02CompiledFixture.OpenForObserver(snapshot, verified) : G02CompiledFixture.Open(snapshot, verified);
     }
 
     internal static G02SignedFixtureSession Open(string packagePath, G02VerifiedFixtureBuild verified,
         OwnerTrust trust, Func<byte[]> stateProvider, ReadOnlySpan<byte> releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime)
+        => OpenCore(packagePath, verified, trust, stateProvider, releaseBytes, bundleDigest, clock, runtime, forObserver: false);
+
+    /// <summary>Same fixture gates; CLR file mapping lifetime belongs to the diagnostic process.</summary>
+    internal static G02SignedFixtureSession OpenForObserver(string packagePath, G02VerifiedFixtureBuild verified,
+        OwnerTrust trust, Func<byte[]> stateProvider, ReadOnlySpan<byte> releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime)
+        => OpenCore(packagePath, verified, trust, stateProvider, releaseBytes, bundleDigest, clock, runtime, forObserver: true);
+
+    private static G02SignedFixtureSession OpenCore(string packagePath, G02VerifiedFixtureBuild verified,
+        OwnerTrust trust, Func<byte[]> stateProvider, ReadOnlySpan<byte> releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime, bool forObserver)
     {
         ArgumentNullException.ThrowIfNull(verified);
         ArgumentNullException.ThrowIfNull(trust);
@@ -52,7 +61,7 @@ internal sealed class G02SignedFixtureSession : IDisposable
         if (releaseBytes.Length > 65536) throw Refuse("ReleaseAdmissionLimitExceeded");
         var immutableRelease = releaseBytes.ToArray();
         var snapshot = G02PackageSnapshot.OpenStructural(packagePath);
-        try { return new(snapshot, verified, trust, stateProvider, immutableRelease, bundleDigest, clock, runtime); }
+        try { return new(snapshot, verified, trust, stateProvider, immutableRelease, bundleDigest, clock, runtime, forObserver); }
         catch { snapshot.Dispose(); throw; }
     }
 
