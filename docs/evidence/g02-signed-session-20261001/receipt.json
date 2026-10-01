@@ -1,0 +1,123 @@
+{
+  "results": {
+    "buildWarnings": 0,
+    "exitCode": 0,
+    "admissionChecks": 343,
+    "buildErrors": 0,
+    "sessionChecksPerShape": 26
+  },
+  "purpose": "signed-fixture-session-not-public-admission",
+  "rawReplay": "artifacts/local-validation/g02/fresh-replay-6eef1590b3344c32a551628a25c1e39d",
+  "baseCommit": "33f27bc3eaec8a6c529cd58afb3eca5ee6dc2647",
+  "limitations": [
+    "disposable test keys; no human admission",
+    "adapter counter is not native method entry",
+    "physical closure and public runtime remain open"
+  ],
+  "copies": [
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\build.txt",
+      "sha256": "d6e9bd19d94acb17bc3cd0cf3c388b7f93525e6afcf69fd2404e926f5472fc61",
+      "source": "artifacts\\local-validation\\g02\\signed-session-validation-634ceb764ad84e6fa3a6e4dc29bc3456\\build.txt"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\conformance.txt",
+      "sha256": "87baf7758e6d27c0086c79538fa7bede372d8ae312e8b041d33986a6c05a38d4",
+      "source": "artifacts\\local-validation\\g02\\signed-session-validation-634ceb764ad84e6fa3a6e4dc29bc3456\\conformance.txt"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\result.json",
+      "sha256": "0a18db2a94c1fb85de31637b0fdda53b235476895fdf4bd95a54dab1020f7ea9",
+      "source": "artifacts\\local-validation\\g02\\signed-session-validation-634ceb764ad84e6fa3a6e4dc29bc3456\\result.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\scalar\\signed-session.json",
+      "sha256": "78e23c94ffd6ec1e11e410531869b57d7739980b7f068f35072e28b2f373118e",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\scalar\\signed-session.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\scalar\\compiled-invocations.json",
+      "sha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\scalar\\compiled-invocations.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\scalar\\transcript.json",
+      "sha256": "cacee79190abfbf26b82d421bcd254b98b77e48402b313f7582b20fd338bb6a1",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\scalar\\transcript.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\scalar\\source-map.json",
+      "sha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\scalar\\source-map.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\scalar\\obligations.json",
+      "sha256": "4623d6ae109d3bcc799e3e9af9eff7589760be31ae721c0313d1e002ef7546d9",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\scalar\\obligations.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\allocation\\signed-session.json",
+      "sha256": "fd40bb51f5105eb53a8577fc5fa80da4ce2b88a3f123be89a25e21072d444f03",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\allocation\\signed-session.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\allocation\\compiled-invocations.json",
+      "sha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\allocation\\compiled-invocations.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\allocation\\transcript.json",
+      "sha256": "9bdd1ffb04f36fcba0e6e786db5650af38fbb508b9a9bdabe3ba11ab0fdc8b15",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\allocation\\transcript.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\allocation\\source-map.json",
+      "sha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\allocation\\source-map.json"
+    },
+    {
+      "target": "docs\\evidence\\g02-signed-session-20261001\\allocation\\obligations.json",
+      "sha256": "e2c34a528015e2c5bcb64448dc3793691a33669ba787ca8488734aeaa3368e14",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-6eef1590b3344c32a551628a25c1e39d\\allocation\\obligations.json"
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/G02SignedFixtureSession.cs",
+      "sha256": "3a35f7d6714e2b427634f91ef54c9f82534678702653c99f378e06cbcec2b3b7"
+    },
+    {
+      "path": "src/Strogo.Modules/G02InvocationCodec.cs",
+      "sha256": "450df9de26dccc2c4171662f0fc873c68057af65aef865f7cd373b33558d90cc"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs",
+      "sha256": "c8e2c2b3c1c2c3a7af4da76ff8433f86c69bfaaeb6d464961fd8d1b4c911ab80"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "src/Strogo.Modules/G02StoredIdentity.cs",
+      "sha256": "3471b39e37e497a2b14f70845b28893f9aa8bfdf9aad9409dbb33fe73bf025cc"
+    },
+    {
+      "path": "src/Strogo.Modules/OwnerAdmissionTrust.cs",
+      "sha256": "85f8b011cda67987ea178b31b7b9a02ae7373e94f6be29a84f99061c7575a87e"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs",
+      "sha256": "517b0435954f4afafb4e22d2a8a4cd92fc54f13a89cd98a11b6f6951fbddf861"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02InvocationChecks.cs",
+      "sha256": "97997e8d5609bdb89532c26e6170fa76eef587351b3803f7f18944df87292ce5"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs",
+      "sha256": "c68cefaba063ff4d070f020986da8fa724bb597b5082d9f4e7d047c1c0c6e667"
+    }
+  ],
+  "rawValidation": "artifacts/local-validation/g02/signed-session-validation-634ceb764ad84e6fa3a6e4dc29bc3456"
+}

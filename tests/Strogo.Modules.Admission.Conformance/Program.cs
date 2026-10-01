@@ -949,6 +949,8 @@ if (OperatingSystem.IsWindows())
             using var compiled = G02CompiledFixture.Open(snapshot, actual);
             var compiledIr = ModulesCompiler.Compile(positiveModule);
             var binding = OwnerContractBinderV04.Bind(compiledIr, positiveOwner);
+            checks += G02SignedSessionChecks.Run(Path.Combine(replayEvidence, shape), packageRoot, actual,
+                owner, impostor, publicKey, keyId, state0, state1, State(0, maxLifetime:3600), binding, now);
             var invocationRows = new List<object>();
             foreach (var entry in binding.Entries)
             {

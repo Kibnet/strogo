@@ -79,9 +79,12 @@ internal static class G02InvocationCodec
         }
         catch (ModuleException error)
         {
-            return CanonicalJson.Encode(new { schemaVersion = ResultVersion, functionId, status = "Refused", error = new { error.Stage, error.Code, error.EntityId } });
+            return Refusal(functionId, error);
         }
     }
+
+    internal static byte[] Refusal(string? functionId, ModuleException error)
+        => CanonicalJson.Encode(new { schemaVersion = ResultVersion, functionId, status = "Refused", error = new { error.Stage, error.Code, error.EntityId } });
 
     private static void ValidateOutput(ModuleValue? value, TypeRef type, IReadOnlyDictionary<string, TypeDecl> types, int depth, ref int count)
     {
