@@ -940,6 +940,61 @@ if (OperatingSystem.IsWindows())
                   actual.Build.PublishedFiles.SequenceEqual(compiledFixture.PublishedFiles) &&
                   actual.Build.PublishInventoryDigest == compiledFixture.PublishInventoryDigest,
                 "held signed fixture package passes fresh proof, translation, build and entry/deps comparison");
+            using var compiled = G02CompiledFixture.Open(snapshot, actual);
+            var compiledIr = ModulesCompiler.Compile(positiveModule);
+            var binding = OwnerContractBinderV04.Bind(compiledIr, positiveOwner);
+            var invocationRows = new List<object>();
+            foreach (var entry in binding.Entries)
+            {
+                foreach (var witness in entry.Witnesses)
+                {
+                    var byId = witness.Arguments.ToDictionary(argument => argument.ParameterId, argument => argument.Value);
+                    var arguments = entry.Function.Parameters.Select(parameter => byId[parameter.Id]).ToArray();
+                    var result = compiled.Invoke(entry.Function.Id, arguments);
+                    var reference = ModulesReferenceEvaluator.Invoke(compiledIr, entry.Function.Id, arguments).Value;
+                    Check(OwnerContractEvaluator.StructuralEquals(result, witness.ModelResult) &&
+                          OwnerContractEvaluator.StructuralEquals(result, reference),
+                        "direct generated method matches owner witness and reference " + shape + "/" + witness.Id);
+                    invocationRows.Add(new { purpose = "fixture-only-not-admitted", functionId = entry.Function.Id,
+                        vectorId = witness.Id, oracle = "owner-model-witness-and-reference",
+                        arguments = arguments.Select((argument, index) => OwnerBundleCodec.ValuePayload(argument, entry.Function.Parameters[index].Type)).ToArray(),
+                        expectedOwner = OwnerBundleCodec.ValuePayload(witness.ModelResult, entry.Function.ReturnType),
+                        expectedReference = OwnerBundleCodec.ValuePayload(reference, entry.Function.ReturnType),
+                        output = OwnerBundleCodec.ValuePayload(result, entry.Function.ReturnType) });
+                }
+                if (shape == "scalar")
+                {
+                    foreach (var value in new[] { long.MinValue, 0L, long.MaxValue - 1 })
+                        Check(compiled.Invoke(entry.Function.Id, [new ModuleI64(value)]) is ModuleI64 number && number.Value == value + 1,
+                            "compiled scalar boundary " + value);
+                    RefusePackage(() => compiled.Invoke(entry.Function.Id, [new ModuleI64(long.MaxValue)]), "CompiledPreconditionFailed");
+                    RefusePackage(() => compiled.Invoke(entry.Function.Id, [new ModuleBool(true)]), "CompiledInputMismatch");
+                }
+                else
+                {
+                    foreach (var length in new[] { 0, 256 })
+                    {
+                        ModuleValue[] arguments = [new ModuleSequence(new TypeRef("I64"), 256,
+                            Enumerable.Repeat<ModuleValue>(new ModuleI64(1), length)), new ModuleI64(length)];
+                        Check(OwnerContractEvaluator.StructuralEquals(compiled.Invoke(entry.Function.Id, arguments),
+                            ModulesReferenceEvaluator.Invoke(compiledIr, entry.Function.Id, arguments).Value),
+                            "compiled bounded sequence/record boundary " + length);
+                    }
+                    RefusePackage(() => compiled.Invoke(entry.Function.Id, [new ModuleSequence(new TypeRef("I64"), 256,
+                        Enumerable.Repeat<ModuleValue>(new ModuleI64(0), 257)), new ModuleI64(0)]), "CompiledInputMismatch");
+                    RefusePackage(() => compiled.Invoke(entry.Function.Id, [new ModuleSequence(new TypeRef("I64"), 256,
+                        Array.Empty<ModuleValue>()), new ModuleI64(-1)]), "CompiledPreconditionFailed");
+                    RefusePackage(() => compiled.Invoke(entry.Function.Id, [new ModuleSequence(new TypeRef("I64"), 256,
+                        new ModuleValue[] { new ModuleI64(0) }), new ModuleI64(1)]), "CompiledPreconditionFailed");
+                }
+                RefusePackage(() => compiled.Invoke(entry.Function.Id, Array.Empty<ModuleValue>()), "CompiledInputMismatch");
+            }
+            RefusePackage(() => compiled.Invoke(compiledIr.Exports[0], null!), "CompiledInputMismatch");
+            RefusePackage(() => compiled.Invoke(null!, Array.Empty<ModuleValue>()), "CompiledExportMissing");
+            RefusePackage(() => compiled.Invoke("not-an-export", Array.Empty<ModuleValue>()), "CompiledExportMissing");
+            await File.WriteAllBytesAsync(Path.Combine(replayEvidence, shape, "compiled-invocations.json"), CanonicalJson.Encode(invocationRows));
+            compiled.Dispose();
+            RefusePackage(() => compiled.Invoke(compiledIr.Exports[0], Array.Empty<ModuleValue>()), "CompiledFixtureDisposed");
         }
         foreach (var stage in shape == "scalar" ? new[] { "proof", "build" } : new[] { "proof" })
         {

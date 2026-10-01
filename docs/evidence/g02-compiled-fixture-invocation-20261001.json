@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "strogo.local-validation.v0.1",
+  "date": "2026-10-01",
+  "checkpoint": "K-G02-029",
+  "build": {
+    "warnings": 0,
+    "exitCode": 0,
+    "errors": 0
+  },
+  "admission": {
+    "checks": 233,
+    "stdout": "g02-compiled-fixture-validation-20261001.txt",
+    "exitCode": 0,
+    "stdoutSha256": "da085f7cce5109a575e97cdc8288400e604b4cc0868d2045a2c0a28ea2364d6d"
+  },
+  "rawRoot": "artifacts/local-validation/g02/fresh-replay-4dc194ff524443a3b8f8904fad715a96",
+  "sourceSha256": {
+    "src/Strogo.Modules/G02CompiledFixture.cs": "b2da88f4fd5ac4ddac7f4345008b8ef6002b43f4192c12132a15349641bbde65",
+    "tests/Strogo.Modules.Admission.Conformance/Program.cs": "d90017393645eac5b6dec313b73889d8b06599b72b09ba5adce829bd5b1bf7ee"
+  },
+  "shapes": [
+    {
+      "shape": "scalar",
+      "ownerWitnessCount": 1,
+      "invocations": "g02-compiled-invocations-scalar-20261001.json",
+      "invocationsSha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b",
+      "assemblySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "boundaryChecks": [
+        "I64 MIN",
+        "0",
+        "I64 MAX-1",
+        "MAX refuses precondition",
+        "Bool input rejected"
+      ]
+    },
+    {
+      "shape": "allocation",
+      "ownerWitnessCount": 3,
+      "invocations": "g02-compiled-invocations-allocation-20261001.json",
+      "invocationsSha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7",
+      "assemblySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "sourceMapSha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "boundaryChecks": [
+        "empty sequence budget0",
+        "full256 ones budget256",
+        "capacity257 rejected",
+        "negative budget rejected",
+        "zero request rejected"
+      ]
+    }
+  ],
+  "firstFailedRun": {
+    "cause": "Out-of-domain test request0 rejected by compiled Q; changed valid vector, retained refusal control",
+    "stdout": "artifacts/local-validation/g02/compiled-fixture-invocation-invalid-vector-20261001.txt",
+    "exitCode": -532462766,
+    "rawRoot": "artifacts/local-validation/g02/fresh-replay-a13923cc41dc404c9669114ef6041c62"
+  },
+  "limits": [
+    "Internal trusted composed record, provenance not established by constructor",
+    "Not admission or pinned platform runtime closure",
+    "Not public canonical JSON ABI",
+    "No profiler evidence of executed ReadyToRun native body",
+    "No dual-candidate/arbitrary-ID/Bool-record-input execution coverage",
+    "Unload requested, GC reclamation not established"
+  ],
+  "review": "Advisory static review; danger-full-access sandbox; read-only behavior"
+}
