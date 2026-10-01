@@ -1,0 +1,1 @@
+[{"arguments":[{"type":"I64","value":"0"}],"expectedOwner":{"type":"I64","value":"1"},"expectedReference":{"type":"I64","value":"1"},"functionId":"addOne","oracle":"owner-model-witness-and-reference","output":{"type":"I64","value":"1"},"purpose":"fixture-only-not-admitted","vectorId":"zero-v1"}]

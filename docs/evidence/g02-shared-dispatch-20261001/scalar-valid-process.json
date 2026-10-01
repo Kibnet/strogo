@@ -1,0 +1,10 @@
+{
+  "fixture": "scalar",
+  "mode": "valid",
+  "pid": 231416,
+  "exitCode": 0,
+  "stdout": "{\"purpose\":\"retained-fixture-dispatch-not-admitted\",\"mode\":\"valid\",\"functionId\":\"addOne\",\"entrySha256\":\"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a\",\"methods\":[{\"kind\":\"Q\",\"symbol\":\"Q000\",\"token\":100663304,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\"},{\"kind\":\"F\",\"symbol\":\"F000\",\"token\":100663306,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\"}],\"expectedEnters\":[\"Q\",\"F\",\"Q\",\"F\",\"Q\",\"F\",\"Q\",\"F\"],\"rows\":[{\"Id\":\"zero-v1\",\"refusal\":null,\"input\":[{\"type\":\"I64\",\"value\":\"0\"}],\"output\":{\"type\":\"I64\",\"value\":\"1\"},\"expected\":{\"type\":\"I64\",\"value\":\"1\"}},{\"Id\":\"boundary--9223372036854775808\",\"refusal\":null,\"input\":[{\"type\":\"I64\",\"value\":\"-9223372036854775808\"}],\"output\":{\"type\":\"I64\",\"value\":\"-9223372036854775807\"},\"expected\":{\"type\":\"I64\",\"value\":\"-9223372036854775807\"}},{\"Id\":\"boundary-0\",\"refusal\":null,\"input\":[{\"type\":\"I64\",\"value\":\"0\"}],\"output\":{\"type\":\"I64\",\"value\":\"1\"},\"expected\":{\"type\":\"I64\",\"value\":\"1\"}},{\"Id\":\"boundary-9223372036854775806\",\"refusal\":null,\"input\":[{\"type\":\"I64\",\"value\":\"9223372036854775806\"}],\"output\":{\"type\":\"I64\",\"value\":\"9223372036854775807\"},\"expected\":{\"type\":\"I64\",\"value\":\"9223372036854775807\"}}]}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1932
+}

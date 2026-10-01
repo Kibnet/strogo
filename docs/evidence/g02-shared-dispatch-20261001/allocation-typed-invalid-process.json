@@ -1,0 +1,10 @@
+{
+  "fixture": "allocation",
+  "mode": "typed-invalid",
+  "pid": 95080,
+  "exitCode": 0,
+  "stdout": "{\"purpose\":\"retained-fixture-dispatch-not-admitted\",\"mode\":\"typed-invalid\",\"functionId\":\"allocate\",\"entrySha256\":\"393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b\",\"methods\":[{\"kind\":\"Q\",\"symbol\":\"Q000\",\"token\":100663305,\"mvid\":\"637286d2-3f59-4a1d-a791-43be3124f122\"},{\"kind\":\"F\",\"symbol\":\"F000\",\"token\":100663307,\"mvid\":\"637286d2-3f59-4a1d-a791-43be3124f122\"}],\"expectedEnters\":[],\"rows\":[{\"Id\":\"typed-invalid\",\"refusal\":\"CompiledInputMismatch\",\"input\":[{\"type\":\"Bool\",\"value\":true},{\"type\":\"I64\",\"value\":\"5\"}],\"output\":null,\"expected\":null}]}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1913
+}

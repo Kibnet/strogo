@@ -15,7 +15,7 @@ static HANDLE trace = INVALID_HANDLE_VALUE;
 static SRWLOCK traceLock = SRWLOCK_INIT;
 static unsigned bytesWritten = 0, entries = 0;
 static bool traceFailed = false;
-static wchar_t targetType[256], targetMethod[256];
+static wchar_t targetType[256], targetMethod[256], targetMethod2[256];
 static void Write(const char* text) {
   AcquireSRWLockExclusive(&traceLock);
   const size_t length = strlen(text);
@@ -44,7 +44,7 @@ static UINT_PTR __stdcall Map(FunctionID id, void*, BOOL* hook) {
   GUID mvid={};
   if (SUCCEEDED(hr)) hr = metadata->GetScopeProps(nullptr,0,nullptr,&mvid);
   metadata->Release();
-  if (FAILED(hr) || chars == 0 || chars > 256 || wcscmp(methodName,targetMethod) || wcscmp(typeName,targetType)) return 0;
+  if (FAILED(hr) || chars == 0 || chars > 256 || (wcscmp(methodName,targetMethod) && wcscmp(methodName,targetMethod2)) || wcscmp(typeName,targetType)) return 0;
   LPCBYTE base=nullptr; AssemblyID assembly=0; DWORD flags=0; ULONG pathChars=0;
   if(FAILED(info->GetModuleInfo2(module,&base,0,&pathChars,nullptr,&assembly,&flags))) return 0;
   char line[512];
@@ -78,7 +78,8 @@ public:
     const DWORD n=GetEnvironmentVariableW(L"STROGO_OBSERVER_TRACE",path,32768);
     const DWORD a=GetEnvironmentVariableW(L"STROGO_OBSERVER_TYPE",targetType,256);
     const DWORD b=GetEnvironmentVariableW(L"STROGO_OBSERVER_METHOD",targetMethod,256);
-    if(!n || n>=32768 || !a || a>=256 || !b || b>=256) return E_INVALIDARG;
+    const DWORD c=GetEnvironmentVariableW(L"STROGO_OBSERVER_METHOD_2",targetMethod2,256);
+    if(!n || n>=32768 || !a || a>=256 || !b || b>=256 || c>=256) return E_INVALIDARG;
     wchar_t fileMode[2]={};const DWORD modeChars=GetEnvironmentVariableW(L"STROGO_OBSERVER_FILE_IDENTITY",fileMode,2);
     if(modeChars && (modeChars!=1 || fileMode[0]!=L'1')) return E_INVALIDARG;
     fileIdentityEnabled=modeChars==1;

@@ -1,0 +1,137 @@
+{
+  "purpose": "diagnostic-native-profiler-startup",
+  "results": [
+    {
+      "mode": "call",
+      "pid": 231204,
+      "exitCode": 0,
+      "stdout": "42\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 1
+    },
+    {
+      "mode": "no-call",
+      "pid": 231252,
+      "exitCode": 0,
+      "stdout": "42\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 0
+    },
+    {
+      "mode": "parallel",
+      "pid": 231292,
+      "exitCode": 0,
+      "stdout": "1024\r\n",
+      "stderr": "",
+      "traceFailed": false,
+      "entries": 1024
+    },
+    {
+      "mode": "overflow",
+      "pid": 231352,
+      "exitCode": 0,
+      "stdout": "4097\r\n",
+      "stderr": "",
+      "traceFailed": true,
+      "entries": 4096
+    }
+  ],
+  "hashes": [
+    {
+      "sha256": "460825572c6a9b4467e0652158a5d7aed71b19da9f6c663509bd34040aa4b733",
+      "name": "Observer.dll"
+    },
+    {
+      "sha256": "fd62e85ac18b51285e2da80a8b980dc0c670237e8bd3adb69c8df54db881cb16",
+      "name": "Probe.dll"
+    },
+    {
+      "sha256": "ab1b71fd3dd71062e074c9fab8312081a81b7f2b3e0327c48c4d249c8d1a3135",
+      "name": "dotnet.exe"
+    },
+    {
+      "sha256": "88c8344236a27a6e727e0a8edc49aaa2690bdc7a9464b9d18cc7abe70a9f1c0d",
+      "name": "cl.exe"
+    },
+    {
+      "sha256": "a776cf32777d2df2e201a769bb5bd6502bb72bac98f60c6f53a4bfcecd0db8ed",
+      "name": "ml64.exe"
+    },
+    {
+      "sha256": "a6e3b3b22b7fe8ce2c9245816126723eaa13f43b9f591883e59959a2d409426a",
+      "name": "cmd.exe"
+    },
+    {
+      "sha256": "f31c250fee70a0f207fba94a50160534543e50048c6f45aab391d2c953fe4bf0",
+      "name": "corprof.h"
+    },
+    {
+      "sha256": "22570f374a12eadbc12c7ac61358374db161cd90b43d5bfdb485ab1b791a5cec",
+      "name": "cor.h"
+    },
+    {
+      "sha256": "b1c115c1c8e1d37ef51c25ce4cb8f24a43e2bb31ae7acddd803071f22253ba19",
+      "name": "CallbackStubs.inc"
+    },
+    {
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f",
+      "name": "Enter.asm"
+    },
+    {
+      "sha256": "3fdd2a75821f1ac1ebcab14383d748f423c683e4bb4be7617357b0c50858f010",
+      "name": "ModuleFile.inc"
+    },
+    {
+      "sha256": "018296a21c358490ad9f690e7b1f10db74ed3619e18013ff12e5348ac1be872f",
+      "name": "Observer.cpp"
+    },
+    {
+      "sha256": "aa511a010ec0e10a80684b8fa2bdbc71274344c9b97f1396209ed06967f36b53",
+      "name": "Observer.def"
+    },
+    {
+      "sha256": "1c895a75ae09cf718125e56d534fbb09481a7c5ceddf2574fe171676da84a673",
+      "name": "Preflight.cpp"
+    },
+    {
+      "sha256": "54f36b1bb039b82bb8bc76e34e256e2a7953ef0bd557d564f269d7d0fa6bf30c",
+      "name": "README.md"
+    },
+    {
+      "sha256": "9d5f298b985be5ee884fcd84279b5f1c9679cab7741d1feef7a9494f17d3f16e",
+      "name": "Run-DispatchObserver.ps1"
+    },
+    {
+      "sha256": "f128d32d1c2e59390d12566def02fc947935e5fc178b6a229a6b0c8ebc023e26",
+      "name": "Run-GeneratedObserver.ps1"
+    },
+    {
+      "sha256": "329b29101d756239f569200d50e5b8a0c35da4caa1f136cd298c44ce14f494a3",
+      "name": "Run-Observer.ps1"
+    },
+    {
+      "sha256": "05cbd0bc4efcf3a911169794ab1fc0b42fc4d5a1412cfa5e101546708259df42",
+      "name": "Run-Preflight.ps1"
+    },
+    {
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef",
+      "name": "NuGet.Config"
+    },
+    {
+      "sha256": "77ccabb8f2c8918989973346b44370adbfd548ec917b92dee921e568d7853b7d",
+      "name": "Probe.csproj"
+    },
+    {
+      "sha256": "d4329fd0c687484d4a8c76992902fa9e5525b4738456bc09f6bba93b57510a56",
+      "name": "Program.cs"
+    }
+  ],
+  "limits": [
+    "No generated module digest or source-map binding",
+    "No public admission",
+    "Forced JIT only",
+    "Partial toolchain identities, no immutable closure"
+  ]
+}

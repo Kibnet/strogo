@@ -1,0 +1,8 @@
+**********************************************************************
+** Visual Studio 2022 Developer Command Prompt v17.14.35
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+ Assembling: C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tools\g02-native-observer\Enter.asm
+Observer.cpp
+   Создается библиотека C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-observer-50d11f9939e34c1885381e6ef697d3f2\Observer.lib и объект C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-observer-50d11f9939e34c1885381e6ef697d3f2\Observer.exp
