@@ -1,0 +1,32 @@
+{
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/G02InvocationCodec.cs",
+      "sha256": "2cd16374f0f5e07bb0242e2c1da1c6faedb5bfe9b525a8afcd679fb5cf6fb861"
+    },
+    {
+      "path": "src/Strogo.Modules/OwnerBundleParser.cs",
+      "sha256": "51bda7c9a6f401cbd2275528424ecd6d63da740482e63cec958beb201419f449"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02InvocationChecks.cs",
+      "sha256": "97997e8d5609bdb89532c26e6170fa76eef587351b3803f7f18944df87292ce5"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs",
+      "sha256": "d60eb1a0ee3d759a669e41a748d560952c425c9b8aa366e61246cb0efc10102f"
+    },
+    {
+      "path": "docs/g02-invocation-transport.md",
+      "sha256": "d326f22ee45184f473e488119edb86325de212b7dc777976ffd29f3333d81a83"
+    }
+  ],
+  "checks": 58,
+  "modulesChecks": 362,
+  "purpose": "strict-wire-targeted-conformance",
+  "exitCode": 0
+}

@@ -1,0 +1,10 @@
+{
+  "fixture": "scalar",
+  "mode": "typed-invalid",
+  "pid": 215084,
+  "exitCode": 0,
+  "stdout": "{\"purpose\":\"retained-fixture-dispatch-not-admitted\",\"transport\":\"json\",\"mode\":\"typed-invalid\",\"functionId\":\"addOne\",\"entrySha256\":\"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a\",\"methods\":[{\"kind\":\"Q\",\"symbol\":\"Q000\",\"token\":100663304,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\"},{\"kind\":\"F\",\"symbol\":\"F000\",\"token\":100663306,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\"}],\"expectedEnters\":[],\"rows\":[{\"Id\":\"typed-invalid\",\"refusal\":\"InputTypeMismatch\",\"wireRequest\":\"{\\u0022arguments\\u0022:[{\\u0022parameterId\\u0022:\\u0022x\\u0022,\\u0022value\\u0022:{\\u0022type\\u0022:\\u0022Bool\\u0022,\\u0022value\\u0022:true}}],\\u0022functionId\\u0022:\\u0022addOne\\u0022,\\u0022schemaVersion\\u0022:\\u0022strogo.invoke.v0.1\\u0022}\",\"wireResult\":\"{\\u0022error\\u0022:{\\u0022code\\u0022:\\u0022InputTypeMismatch\\u0022,\\u0022entityId\\u0022:\\u0022x\\u0022,\\u0022stage\\u0022:\\u0022invoke\\u0022},\\u0022functionId\\u0022:\\u0022addOne\\u0022,\\u0022schemaVersion\\u0022:\\u0022strogo.invoke-result.v0.1\\u0022,\\u0022status\\u0022:\\u0022Refused\\u0022}\",\"input\":[{\"type\":\"Bool\",\"value\":true}],\"output\":null,\"expected\":null}]}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1296
+}

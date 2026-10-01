@@ -1,0 +1,10 @@
+{
+  "fixture": "allocation",
+  "mode": "requires-invalid",
+  "pid": 238240,
+  "exitCode": 0,
+  "stdout": "{\"purpose\":\"retained-fixture-dispatch-not-admitted\",\"transport\":\"json\",\"mode\":\"requires-invalid\",\"functionId\":\"allocate\",\"entrySha256\":\"393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b\",\"methods\":[{\"kind\":\"Q\",\"symbol\":\"Q000\",\"token\":100663305,\"mvid\":\"637286d2-3f59-4a1d-a791-43be3124f122\"},{\"kind\":\"F\",\"symbol\":\"F000\",\"token\":100663307,\"mvid\":\"637286d2-3f59-4a1d-a791-43be3124f122\"}],\"expectedEnters\":[\"Q\"],\"rows\":[{\"Id\":\"requires-invalid\",\"refusal\":\"CompiledPreconditionFailed\",\"wireRequest\":\"{\\u0022arguments\\u0022:[{\\u0022parameterId\\u0022:\\u0022available\\u0022,\\u0022value\\u0022:{\\u0022type\\u0022:\\u0022I64\\u0022,\\u0022value\\u0022:\\u0022-1\\u0022}},{\\u0022parameterId\\u0022:\\u0022requests\\u0022,\\u0022value\\u0022:{\\u0022type\\u0022:{\\u0022capacity\\u0022:\\u0022256\\u0022,\\u0022elementType\\u0022:\\u0022I64\\u0022,\\u0022kind\\u0022:\\u0022Seq\\u0022},\\u0022value\\u0022:[]}}],\\u0022functionId\\u0022:\\u0022allocate\\u0022,\\u0022schemaVersion\\u0022:\\u0022strogo.invoke.v0.1\\u0022}\",\"wireResult\":\"{\\u0022error\\u0022:{\\u0022code\\u0022:\\u0022CompiledPreconditionFailed\\u0022,\\u0022entityId\\u0022:null,\\u0022stage\\u0022:\\u0022package\\u0022},\\u0022functionId\\u0022:\\u0022allocate\\u0022,\\u0022schemaVersion\\u0022:\\u0022strogo.invoke-result.v0.1\\u0022,\\u0022status\\u0022:\\u0022Refused\\u0022}\",\"input\":[{\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"256\"},\"value\":[]},{\"type\":\"I64\",\"value\":\"-1\"}],\"output\":null,\"expected\":null}]}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1933
+}

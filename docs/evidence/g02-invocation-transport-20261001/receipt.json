@@ -1,0 +1,215 @@
+{
+  "results": [
+    {
+      "accepted": true,
+      "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expected": [
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F"
+      ],
+      "vectors": 4,
+      "observed": [
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F"
+      ],
+      "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "mode": "valid",
+      "fixture": "scalar"
+    },
+    {
+      "accepted": true,
+      "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expected": [
+        "Q"
+      ],
+      "vectors": 1,
+      "observed": [
+        "Q"
+      ],
+      "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "mode": "requires-invalid",
+      "fixture": "scalar"
+    },
+    {
+      "accepted": true,
+      "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expected": [],
+      "vectors": 1,
+      "observed": [],
+      "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "mode": "typed-invalid",
+      "fixture": "scalar"
+    },
+    {
+      "accepted": true,
+      "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "expected": [
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F"
+      ],
+      "vectors": 5,
+      "observed": [
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F",
+        "Q",
+        "F"
+      ],
+      "sourceMapSha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "mode": "valid",
+      "fixture": "allocation"
+    },
+    {
+      "accepted": true,
+      "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "expected": [
+        "Q"
+      ],
+      "vectors": 1,
+      "observed": [
+        "Q"
+      ],
+      "sourceMapSha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "mode": "requires-invalid",
+      "fixture": "allocation"
+    },
+    {
+      "accepted": true,
+      "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "expected": [],
+      "vectors": 1,
+      "observed": [],
+      "sourceMapSha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "mode": "typed-invalid",
+      "fixture": "allocation"
+    }
+  ],
+  "limits": [
+    "Structural/source regeneration over retained fixtures; no fresh proof or public admission in this consumer",
+    "Two fixture vector profiles; no full language/ABI generality",
+    "Forced JIT; held CLR-reported file identity, not native R2R or mapped-memory identity"
+  ],
+  "transport": "json",
+  "binaries": [
+    {
+      "name": "Observer.dll",
+      "sha256": "fe0245828744829676e604c88982fb386f57c54ceb50414c4987cfb2d7d8270a"
+    },
+    {
+      "name": "Kernel.Core.dll",
+      "sha256": "f945fb6e4895dc88efa660cbe07e47d63ce07a8d0b94996534e6115265f43498"
+    },
+    {
+      "name": "Kernel.Core.pdb",
+      "sha256": "dde74041d697ea2e2c66d70082f40036e8710502f485aedd0f31f3da13da9465"
+    },
+    {
+      "name": "Strogo.Modules.dll",
+      "sha256": "876f6c62ea468ddbccd708e71e502aad7d02a8b65fb5e9621c863200a81d6caf"
+    },
+    {
+      "name": "Strogo.Modules.ObserverFixture.deps.json",
+      "sha256": "499db1e5a827de5cc6bd5935d756d2ee8a3d753d0b092c7e8cea9e6019ac8ef3"
+    },
+    {
+      "name": "Strogo.Modules.ObserverFixture.dll",
+      "sha256": "5bfe2ca50da61d5238b99c8016f580f18bb8c6f49d0596e9094271ebc822d57a"
+    },
+    {
+      "name": "Strogo.Modules.ObserverFixture.exe",
+      "sha256": "e601bad322a0866a6c2bf9d1551b3639e8a45ce2e1d19f430f22f837e584e713"
+    },
+    {
+      "name": "Strogo.Modules.ObserverFixture.pdb",
+      "sha256": "dee3ab579e0f8e4ea51b1866e5d0dac21b4996572dc825fe3f3d386d2c04cf6b"
+    },
+    {
+      "name": "Strogo.Modules.ObserverFixture.runtimeconfig.json",
+      "sha256": "256dda2706e1151bb95987b6b5be610bf68d64e058285b19e7e958222fc90414"
+    },
+    {
+      "name": "Strogo.Modules.pdb",
+      "sha256": "eaeef29ce0ea73c26d8f7c2d91b59816ea27c9d77fd834db3280a7eaa1b8aade"
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/g02-native-observer/Run-DispatchObserver.ps1",
+      "sha256": "b2f5b4770f85f51e3c38f407794be171a0a099da8dc57eeb1b21ee229d4add70"
+    },
+    {
+      "path": "tools/g02-native-observer/Observer.cpp",
+      "sha256": "018296a21c358490ad9f690e7b1f10db74ed3619e18013ff12e5348ac1be872f"
+    },
+    {
+      "path": "tools/g02-native-observer/Enter.asm",
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f"
+    },
+    {
+      "path": "tools/g02-native-observer/ModuleFile.inc",
+      "sha256": "3fdd2a75821f1ac1ebcab14383d748f423c683e4bb4be7617357b0c50858f010"
+    },
+    {
+      "path": "tools/g02-native-observer/ObserverFixture/NuGet.Config",
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef"
+    },
+    {
+      "path": "tools/g02-native-observer/ObserverFixture/ObserverFixture.csproj",
+      "sha256": "ac738c0f1ddbbce0f665ee0ae18fc8aa24b1779c1ff1f713f8b7f022e1c8f12e"
+    },
+    {
+      "path": "tools/g02-native-observer/ObserverFixture/packages.lock.json",
+      "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a"
+    },
+    {
+      "path": "tools/g02-native-observer/ObserverFixture/Program.cs",
+      "sha256": "8c565859674b27cb937add4e5f017c182d9e397916a938e1cda1a8a375bad0cc"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs",
+      "sha256": "c8e2c2b3c1c2c3a7af4da76ff8433f86c69bfaaeb6d464961fd8d1b4c911ab80"
+    },
+    {
+      "path": "src/Strogo.Modules/Properties/AssemblyInfo.cs",
+      "sha256": "9048844d60658bfec11c72641401ed0751dd7c2842338e18fdd0bd79333de933"
+    },
+    {
+      "path": "src/Strogo.Modules/G02InvocationCodec.cs",
+      "sha256": "2cd16374f0f5e07bb0242e2c1da1c6faedb5bfe9b525a8afcd679fb5cf6fb861"
+    },
+    {
+      "path": "src/Strogo.Modules/OwnerBundleParser.cs",
+      "sha256": "51bda7c9a6f401cbd2275528424ecd6d63da740482e63cec958beb201419f449"
+    }
+  ],
+  "purpose": "shared-dispatch-Q-before-F-retained-fixtures"
+}

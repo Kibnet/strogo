@@ -6,6 +6,12 @@ using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
 
+if (args is ["--g02-wire-only"])
+{
+    Console.WriteLine($"PASS strict invocation transport checks={G02InvocationChecks.Run()}");
+    return;
+}
+
 if (args is ["--g02-contained-child"])
 {
     Thread.Sleep(TimeSpan.FromMinutes(1));
@@ -50,7 +56,7 @@ var keyId = Hex(SHA256.HashData(publicKey));
 using var trust = new OwnerTrust(publicKey, keyId);
 var now = new DateTimeOffset(2026, 9, 29, 12, 0, 0, TimeSpan.Zero);
 var bundleDigest = new string('a', 64);
-var checks = 0;
+var checks = G02InvocationChecks.Run();
 
 if (OperatingSystem.IsWindows())
 {

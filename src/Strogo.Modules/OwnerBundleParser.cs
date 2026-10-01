@@ -207,7 +207,7 @@ public static class OwnerBundleParser
         return result.ToImmutable();
     }
 
-    private static ModuleValue ParseValue(
+    internal static ModuleValue ParseValue(
         JsonElement value,
         TypeRef expectedType,
         IReadOnlyDictionary<string, TypeDecl> types,

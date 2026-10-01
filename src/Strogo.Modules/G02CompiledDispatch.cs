@@ -48,6 +48,8 @@ internal sealed class G02CompiledDispatch : IDisposable
         catch (TargetInvocationException) { throw Refuse("CompiledInvocationFailed"); }
     }
 
+    internal byte[] InvokeJson(byte[] request) => G02InvocationCodec.Invoke(module, request, Invoke);
+
     private string Symbol(string entity)
         => symbols.TryGetValue(entity, out var symbol) ? symbol : throw Refuse("CompiledBindingMismatch");
 
