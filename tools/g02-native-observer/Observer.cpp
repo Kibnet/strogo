@@ -25,6 +25,7 @@ static void Write(const char* text) {
   else bytesWritten += written;
   ReleaseSRWLockExclusive(&traceLock);
 }
+#include "ModuleFile.inc"
 static SRWLOCK lifecycleLock = SRWLOCK_INIT;
 struct MapperLease { MapperLease() { AcquireSRWLockShared(&lifecycleLock); } ~MapperLease() { ReleaseSRWLockShared(&lifecycleLock); } };
 extern "C" volatile LONG ObserverActive;
@@ -49,6 +50,11 @@ static UINT_PTR __stdcall Map(FunctionID id, void*, BOOL* hook) {
   char line[512];
   sprintf_s(line,"{\"event\":\"map\",\"pid\":%lu,\"functionId\":\"%llu\",\"moduleId\":\"%llu\",\"token\":%u,\"mvid\":\"%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\",\"moduleFlags\":%lu,\"baseAddress\":\"%llu\",\"pathChars\":%lu}\n",GetCurrentProcessId(),static_cast<unsigned long long>(id),static_cast<unsigned long long>(module),token,mvid.Data1,mvid.Data2,mvid.Data3,mvid.Data4[0],mvid.Data4[1],mvid.Data4[2],mvid.Data4[3],mvid.Data4[4],mvid.Data4[5],mvid.Data4[6],mvid.Data4[7],flags,static_cast<unsigned long long>(reinterpret_cast<UINT_PTR>(base)),pathChars);
   Write(line);
+  if(fileIdentityEnabled) {
+    wchar_t path[32768]={}; ULONG actualChars=0;
+    if(pathChars==0 || pathChars>32768 || FAILED(info->GetModuleInfo2(module,&base,32768,&actualChars,path,&assembly,&flags)) || actualChars==0 || actualChars>32768) { RecordModuleFile(module,L"",id);return 0; }
+    if(!RecordModuleFile(module,path,id)) return 0;
+  }
   *hook = TRUE; return id;
 }
 extern "C" {
@@ -73,6 +79,9 @@ public:
     const DWORD a=GetEnvironmentVariableW(L"STROGO_OBSERVER_TYPE",targetType,256);
     const DWORD b=GetEnvironmentVariableW(L"STROGO_OBSERVER_METHOD",targetMethod,256);
     if(!n || n>=32768 || !a || a>=256 || !b || b>=256) return E_INVALIDARG;
+    wchar_t fileMode[2]={};const DWORD modeChars=GetEnvironmentVariableW(L"STROGO_OBSERVER_FILE_IDENTITY",fileMode,2);
+    if(modeChars && (modeChars!=1 || fileMode[0]!=L'1')) return E_INVALIDARG;
+    fileIdentityEnabled=modeChars==1;
     trace=CreateFileW(path,GENERIC_WRITE,FILE_SHARE_READ,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
     if(trace==INVALID_HANDLE_VALUE) return HRESULT_FROM_WIN32(GetLastError());
     HRESULT hr=unknown->QueryInterface(__uuidof(ICorProfilerInfo3),reinterpret_cast<void**>(&info));
@@ -98,6 +107,7 @@ public:
       char row[160];sprintf_s(row,"{\"event\":\"enter\",\"pid\":%lu,\"functionId\":\"%llu\"}\n",GetCurrentProcessId(),static_cast<unsigned long long>(ObserverSlots[i]));Write(row);
     }
     char line[180]; sprintf_s(line,"{\"event\":\"shutdown\",\"pid\":%lu,\"entries\":%u,\"traceFailed\":%s}\n",GetCurrentProcessId(),entries,traceFailed?"true":"false"); Write(line);
+    CloseModuleFiles();
     if(info) {info->Release(); info=nullptr;} if(trace!=INVALID_HANDLE_VALUE) {CloseHandle(trace);trace=INVALID_HANDLE_VALUE;} ReleaseSRWLockExclusive(&lifecycleLock); return S_OK;
   }
 #include "CallbackStubs.inc"

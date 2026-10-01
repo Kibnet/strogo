@@ -1,0 +1,9 @@
+{
+  "mode": "file-oversize",
+  "pid": 225872,
+  "exitCode": 0,
+  "stdout": "{\"mode\":\"file-call\",\"output\":42,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\",\"token\":100663306,\"sha256\":\"f1a3616bdf4be0970fb257d8dd7d2ecbfc617ce52ad20224e6019840f87d469a\"}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1097
+}

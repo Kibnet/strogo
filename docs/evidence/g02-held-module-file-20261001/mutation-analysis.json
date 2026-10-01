@@ -1,0 +1,10 @@
+{
+  "originalLength": 372736,
+  "mutatedLength": 372736,
+  "changedOffsets": [
+    78
+  ],
+  "oldByte": 84,
+  "newByte": 116,
+  "peHeaderOffset": 128
+}

@@ -1,0 +1,4 @@
+{"event":"initialize","pid":225872,"hresult":0}
+{"event":"map","pid":225872,"functionId":"140728640240032","moduleId":"140728640192528","token":100663306,"mvid":"27ae86a0-d59e-429a-8c8e-d109ca3e3954","moduleFlags":9,"baseAddress":"140733095608320","pathChars":151}
+{"event":"module-file","functionId":"140728640240032","pid":225872,"moduleId":"140728640192528","available":false,"length":0,"sha256":"","volume":0,"fileIdHigh":0,"fileIdLow":0}
+{"event":"shutdown","pid":225872,"entries":0,"traceFailed":true}

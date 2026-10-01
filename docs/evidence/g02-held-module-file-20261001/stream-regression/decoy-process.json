@@ -1,0 +1,9 @@
+{
+  "mode": "decoy",
+  "pid": 225072,
+  "exitCode": 0,
+  "stdout": "{\"mode\":\"decoy\",\"output\":42,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\",\"token\":100663306,\"sha256\":\"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a\"}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1271
+}

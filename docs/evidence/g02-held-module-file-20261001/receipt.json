@@ -1,0 +1,1031 @@
+{
+  "purpose": "generated-scalar-profiler-file-identity",
+  "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+  "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+  "entity": "function/addOne",
+  "symbol": "F000",
+  "observerSha256": "80a470caa2c23c056067dccfe19a501c5e70a306742c5d014fc078d13738c12a",
+  "consumerSha256": "ee2f2b6051e0a7036c2753560d21459d4edb04783e37e175dc02dab05998ae22",
+  "sources": [
+    {
+      "name": "Run-GeneratedObserver.ps1",
+      "sha256": "f128d32d1c2e59390d12566def02fc947935e5fc178b6a229a6b0c8ebc023e26"
+    },
+    {
+      "name": "Observer.cpp",
+      "sha256": "ed4778c5c38634ef57edbd096298b5013f99940f862274fd29a5558949efe653"
+    },
+    {
+      "name": "Enter.asm",
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f"
+    },
+    {
+      "name": "ModuleFile.inc",
+      "sha256": "3fdd2a75821f1ac1ebcab14383d748f423c683e4bb4be7617357b0c50858f010"
+    },
+    {
+      "name": "GeneratedProbe.csproj",
+      "sha256": "77ccabb8f2c8918989973346b44370adbfd548ec917b92dee921e568d7853b7d"
+    },
+    {
+      "name": "NuGet.Config",
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef"
+    },
+    {
+      "name": "Program.cs",
+      "sha256": "055d175ba8fdf92162114de3c564440c740ead6436e7a27d0e06ac33bb6462ec"
+    }
+  ],
+  "results": [
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 1,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728640240032",
+          "pid": 225192,
+          "moduleId": "140728640192528",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 225192,
+          "functionId": "140728640240032",
+          "moduleId": "140728640192528",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        }
+      ],
+      "mode": "file-call",
+      "accepted": true,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 0,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [],
+      "observedMaps": [],
+      "mode": "file-no-call",
+      "accepted": false,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 0,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728639092224",
+          "pid": 225352,
+          "moduleId": "140728638778264",
+          "available": true,
+          "length": 10752,
+          "sha256": "ee2f2b6051e0a7036c2753560d21459d4edb04783e37e175dc02dab05998ae22",
+          "volume": 1255240662,
+          "fileIdHigh": 786432,
+          "fileIdLow": 4047962
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 225352,
+          "functionId": "140728639092224",
+          "moduleId": "140728638778264",
+          "token": 100663308,
+          "mvid": "63608b55-908f-472f-8d86-fd2e2a61fd46",
+          "moduleFlags": 1,
+          "baseAddress": "2388261601280",
+          "pathChars": 181
+        }
+      ],
+      "mode": "file-decoy",
+      "accepted": false,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 1,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728640305568",
+          "pid": 222700,
+          "moduleId": "140728640258064",
+          "available": true,
+          "length": 372736,
+          "sha256": "8388647f41b3ebfd0fbc48d254b1671be08fdf50ce789dd39289ae6887b7cd5b",
+          "volume": 1255240662,
+          "fileIdHigh": 786432,
+          "fileIdLow": 4047983
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 222700,
+          "functionId": "140728640305568",
+          "moduleId": "140728640258064",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 150
+        }
+      ],
+      "mode": "file-mutated",
+      "accepted": false,
+      "inputSha256": "8388647f41b3ebfd0fbc48d254b1671be08fdf50ce789dd39289ae6887b7cd5b",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 1,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728640240032",
+          "pid": 225872,
+          "moduleId": "140728640192528",
+          "available": false,
+          "length": 0,
+          "sha256": "",
+          "volume": 0,
+          "fileIdHigh": 0,
+          "fileIdLow": 0
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 225872,
+          "functionId": "140728640240032",
+          "moduleId": "140728640192528",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 151
+        }
+      ],
+      "mode": "file-oversize",
+      "accepted": false,
+      "inputSha256": "f1a3616bdf4be0970fb257d8dd7d2ecbfc617ce52ad20224e6019840f87d469a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 1,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728640371104",
+          "pid": 130076,
+          "moduleId": "140728640323600",
+          "available": false,
+          "length": 0,
+          "sha256": "",
+          "volume": 0,
+          "fileIdHigh": 0,
+          "fileIdLow": 0
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 130076,
+          "functionId": "140728640371104",
+          "moduleId": "140728640323600",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 8,
+          "baseAddress": "3183849963520",
+          "pathChars": 21
+        }
+      ],
+      "mode": "stream-unavailable",
+      "accepted": false,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    },
+    {
+      "accepted": false,
+      "mode": "file-hang",
+      "elapsedMs": 20362,
+      "timedOut": true
+    },
+    {
+      "wrongMvidAccepted": 0,
+      "expectedToken": 100663306,
+      "metadataMatches": 33,
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "observedFiles": [
+        {
+          "event": "module-file",
+          "functionId": "140728640305568",
+          "pid": 221796,
+          "moduleId": "140728640192528",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728640895392",
+          "pid": 221796,
+          "moduleId": "140728640847888",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728641092000",
+          "pid": 221796,
+          "moduleId": "140728641044496",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728641288608",
+          "pid": 221796,
+          "moduleId": "140728641241104",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728641485216",
+          "pid": 221796,
+          "moduleId": "140728641437712",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728641681824",
+          "pid": 221796,
+          "moduleId": "140728641634320",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728641878432",
+          "pid": 221796,
+          "moduleId": "140728641830928",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728642075040",
+          "pid": 221796,
+          "moduleId": "140728642027536",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728642271648",
+          "pid": 221796,
+          "moduleId": "140728642224144",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728642468256",
+          "pid": 221796,
+          "moduleId": "140728642420752",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728642664864",
+          "pid": 221796,
+          "moduleId": "140728642617360",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728642861472",
+          "pid": 221796,
+          "moduleId": "140728642813968",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728643058080",
+          "pid": 221796,
+          "moduleId": "140728643010576",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728643254688",
+          "pid": 221796,
+          "moduleId": "140728643207184",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728643451296",
+          "pid": 221796,
+          "moduleId": "140728643403792",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728643647904",
+          "pid": 221796,
+          "moduleId": "140728643600400",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728643844512",
+          "pid": 221796,
+          "moduleId": "140728643797008",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728644041120",
+          "pid": 221796,
+          "moduleId": "140728643993616",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728644237728",
+          "pid": 221796,
+          "moduleId": "140728644190224",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728644434336",
+          "pid": 221796,
+          "moduleId": "140728644386832",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728644630944",
+          "pid": 221796,
+          "moduleId": "140728644583440",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728644827552",
+          "pid": 221796,
+          "moduleId": "140728644780048",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728645024160",
+          "pid": 221796,
+          "moduleId": "140728644976656",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728645220768",
+          "pid": 221796,
+          "moduleId": "140728645173264",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728645417376",
+          "pid": 221796,
+          "moduleId": "140728645369872",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728645613984",
+          "pid": 221796,
+          "moduleId": "140728645566480",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728645810592",
+          "pid": 221796,
+          "moduleId": "140728645763088",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646007200",
+          "pid": 221796,
+          "moduleId": "140728645959696",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646203808",
+          "pid": 221796,
+          "moduleId": "140728646156304",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646400416",
+          "pid": 221796,
+          "moduleId": "140728646352912",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646597024",
+          "pid": 221796,
+          "moduleId": "140728646549520",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646793632",
+          "pid": 221796,
+          "moduleId": "140728646746128",
+          "available": true,
+          "length": 372736,
+          "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "volume": 1255240662,
+          "fileIdHigh": 196608,
+          "fileIdLow": 4016547
+        },
+        {
+          "event": "module-file",
+          "functionId": "140728646990240",
+          "pid": 221796,
+          "moduleId": "140728646942736",
+          "available": false,
+          "length": 0,
+          "sha256": "",
+          "volume": 0,
+          "fileIdHigh": 0,
+          "fileIdLow": 0
+        }
+      ],
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728640305568",
+          "moduleId": "140728640192528",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728640895392",
+          "moduleId": "140728640847888",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728641092000",
+          "moduleId": "140728641044496",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728641288608",
+          "moduleId": "140728641241104",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728641485216",
+          "moduleId": "140728641437712",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728641681824",
+          "moduleId": "140728641634320",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728641878432",
+          "moduleId": "140728641830928",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728642075040",
+          "moduleId": "140728642027536",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728642271648",
+          "moduleId": "140728642224144",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728642468256",
+          "moduleId": "140728642420752",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728642664864",
+          "moduleId": "140728642617360",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728642861472",
+          "moduleId": "140728642813968",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728643058080",
+          "moduleId": "140728643010576",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728643254688",
+          "moduleId": "140728643207184",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728643451296",
+          "moduleId": "140728643403792",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728643647904",
+          "moduleId": "140728643600400",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728643844512",
+          "moduleId": "140728643797008",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728644041120",
+          "moduleId": "140728643993616",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728644237728",
+          "moduleId": "140728644190224",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728644434336",
+          "moduleId": "140728644386832",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728644630944",
+          "moduleId": "140728644583440",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728644827552",
+          "moduleId": "140728644780048",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728645024160",
+          "moduleId": "140728644976656",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728645220768",
+          "moduleId": "140728645173264",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728645417376",
+          "moduleId": "140728645369872",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728645613984",
+          "moduleId": "140728645566480",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728645810592",
+          "moduleId": "140728645763088",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646007200",
+          "moduleId": "140728645959696",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646203808",
+          "moduleId": "140728646156304",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646400416",
+          "moduleId": "140728646352912",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646597024",
+          "moduleId": "140728646549520",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646793632",
+          "moduleId": "140728646746128",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        },
+        {
+          "event": "map",
+          "pid": 221796,
+          "functionId": "140728646990240",
+          "moduleId": "140728646942736",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 9,
+          "baseAddress": "140733095608320",
+          "pathChars": 169
+        }
+      ],
+      "mode": "file-many",
+      "accepted": false,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954"
+    }
+  ],
+  "limits": [
+    "Fixture only, no admission or Q dispatch",
+    "CLR-reported held file identity is not a mapped-memory digest or lifetime code immutability",
+    "Source map provenance belongs to prior trusted replay",
+    "Forced JIT, not native R2R evidence",
+    "Scalar fixture, not full ABI generality"
+  ]
+}

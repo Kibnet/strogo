@@ -1,0 +1,9 @@
+{
+  "mode": "file-mutated",
+  "pid": 222700,
+  "exitCode": 0,
+  "stdout": "{\"mode\":\"file-call\",\"output\":42,\"mvid\":\"27ae86a0-d59e-429a-8c8e-d109ca3e3954\",\"token\":100663306,\"sha256\":\"8388647f41b3ebfd0fbc48d254b1671be08fdf50ce789dd39289ae6887b7cd5b\"}\r\n",
+  "stderr": "",
+  "timedOut": false,
+  "elapsedMs": 1374
+}

@@ -1,0 +1,111 @@
+{
+  "purpose": "generated-scalar-profiler-metadata-join",
+  "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+  "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+  "entity": "function/addOne",
+  "symbol": "F000",
+  "observerSha256": "80a470caa2c23c056067dccfe19a501c5e70a306742c5d014fc078d13738c12a",
+  "consumerSha256": "90f601f172a88754fcc0dcbfded50d690dad59cd7ea65324286122a76f3cc83c",
+  "sources": [
+    {
+      "name": "Run-GeneratedObserver.ps1",
+      "sha256": "f128d32d1c2e59390d12566def02fc947935e5fc178b6a229a6b0c8ebc023e26"
+    },
+    {
+      "name": "Observer.cpp",
+      "sha256": "ed4778c5c38634ef57edbd096298b5013f99940f862274fd29a5558949efe653"
+    },
+    {
+      "name": "Enter.asm",
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f"
+    },
+    {
+      "name": "ModuleFile.inc",
+      "sha256": "3fdd2a75821f1ac1ebcab14383d748f423c683e4bb4be7617357b0c50858f010"
+    },
+    {
+      "name": "GeneratedProbe.csproj",
+      "sha256": "77ccabb8f2c8918989973346b44370adbfd548ec917b92dee921e568d7853b7d"
+    },
+    {
+      "name": "NuGet.Config",
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef"
+    },
+    {
+      "name": "Program.cs",
+      "sha256": "055d175ba8fdf92162114de3c564440c740ead6436e7a27d0e06ac33bb6462ec"
+    }
+  ],
+  "results": [
+    {
+      "observedFiles": [],
+      "output": 42,
+      "metadataMatches": 1,
+      "mode": "call",
+      "expectedToken": 100663306,
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "accepted": true,
+      "wrongMvidAccepted": 0,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "wrongTokenAccepted": 0,
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 156604,
+          "functionId": "140728640371104",
+          "moduleId": "140728640323600",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 8,
+          "baseAddress": "2834929156096",
+          "pathChars": 21
+        }
+      ]
+    },
+    {
+      "observedFiles": [],
+      "output": 42,
+      "metadataMatches": 0,
+      "mode": "no-call",
+      "expectedToken": 100663306,
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "accepted": false,
+      "wrongMvidAccepted": 0,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "wrongTokenAccepted": 0,
+      "observedMaps": []
+    },
+    {
+      "observedFiles": [],
+      "output": 42,
+      "metadataMatches": 0,
+      "mode": "decoy",
+      "expectedToken": 100663306,
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "accepted": false,
+      "wrongMvidAccepted": 0,
+      "inputSha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "wrongTokenAccepted": 0,
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 225072,
+          "functionId": "140728639026688",
+          "moduleId": "140728638712728",
+          "token": 100663308,
+          "mvid": "34143cbb-0c81-456f-abe2-b08b07a36243",
+          "moduleFlags": 1,
+          "baseAddress": "2271762120704",
+          "pathChars": 181
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Fixture only, no admission or Q dispatch",
+    "CLR-reported held file identity is not a mapped-memory digest or lifetime code immutability",
+    "Source map provenance belongs to prior trusted replay",
+    "Forced JIT, not native R2R evidence",
+    "Scalar fixture, not full ABI generality"
+  ]
+}

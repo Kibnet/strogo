@@ -1,0 +1,4 @@
+{"event":"initialize","pid":225072,"hresult":0}
+{"event":"map","pid":225072,"functionId":"140728639026688","moduleId":"140728638712728","token":100663308,"mvid":"34143cbb-0c81-456f-abe2-b08b07a36243","moduleFlags":1,"baseAddress":"2271762120704","pathChars":181}
+{"event":"enter","pid":225072,"functionId":"140728639026688"}
+{"event":"shutdown","pid":225072,"entries":1,"traceFailed":false}
