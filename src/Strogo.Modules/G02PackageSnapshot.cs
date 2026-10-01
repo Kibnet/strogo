@@ -10,14 +10,18 @@ public sealed class G02PackageSnapshot : IDisposable
 {
     private readonly Dictionary<string, FileStream> handles;
     private readonly List<SafeFileHandle> directoryHandles;
+    private readonly string rootDirectory;
+    private readonly string finalRoot;
     private bool disposed;
 
     private G02PackageSnapshot(G02BuildManifest manifest, Dictionary<string, FileStream> handles,
-        List<SafeFileHandle> directoryHandles)
+        List<SafeFileHandle> directoryHandles, string rootDirectory, string finalRoot)
     {
         Manifest = manifest;
         this.handles = handles;
         this.directoryHandles = directoryHandles;
+        this.rootDirectory = rootDirectory;
+        this.finalRoot = finalRoot;
     }
 
     public G02BuildManifest Manifest { get; }
@@ -80,7 +84,9 @@ public sealed class G02PackageSnapshot : IDisposable
                 if (stream.Length != file.Length || HashHeld(stream) != file.Sha256)
                     throw Refuse("PackageContentDigestMismatch");
             }
-            return new(manifest, handles, directoryHandles);
+            // Persistent additions between enumeration and file holding must not leave a stale closed inventory.
+            CheckClosedInventory(root, finalRoot, manifest, directoryHandles);
+            return new(manifest, handles, directoryHandles, root, finalRoot);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
@@ -98,10 +104,52 @@ public sealed class G02PackageSnapshot : IDisposable
 
     public byte[] ReadHeld(string manifestPath)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        if (disposed) throw Refuse("PackageSnapshotDisposed");
         if (!handles.TryGetValue(manifestPath, out var stream)) throw Refuse("PackageFileNotListed");
         if (stream.Length > 64 * 1024 * 1024) throw Refuse("PackageFileTooLargeForMemory");
         return ReadBounded(stream, 64 * 1024 * 1024);
+    }
+
+    /// <summary>Serialized-caller checkpoint only; not a concurrent lease, host ACL or admission check.</summary>
+    public void Revalidate()
+    {
+        if (disposed) throw Refuse("PackageSnapshotDisposed");
+        try
+        {
+            using var current = OpenStructural(rootDirectory);
+            if (!current.finalRoot.Equals(finalRoot, StringComparison.OrdinalIgnoreCase))
+                throw Refuse("PackageRootIdentityMismatch");
+            if (current.Manifest.ArtifactDigest != Manifest.ArtifactDigest)
+                throw Refuse("PackageManifestChanged");
+            foreach (var file in Manifest.Files)
+                if (handles[file.Path].Length != file.Length || HashHeld(handles[file.Path]) != file.Sha256)
+                    throw Refuse("PackageContentDigestMismatch");
+            if (disposed) throw Refuse("PackageSnapshotDisposed");
+        }
+        catch (ObjectDisposedException) { throw Refuse("PackageSnapshotDisposed"); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        { throw Refuse("PackageIoRefused"); }
+    }
+
+    private static void CheckClosedInventory(string root, string finalRoot, G02BuildManifest manifest,
+        List<SafeFileHandle> directoryHandles)
+    {
+        var rootNames = Directory.EnumerateFileSystemEntries(root).Select(Path.GetFileName).Order(StringComparer.Ordinal);
+        if (!rootNames.SequenceEqual(new[] { "build-manifest.json", "content" }, StringComparer.Ordinal))
+            throw Refuse("PackageRootInvalid");
+        var files = new List<string>();
+        var directories = new List<string> { "content" };
+        Enumerate(Path.Combine(root, "content"), root, finalRoot, files, directories, directoryHandles);
+        if (!files.Order(StringComparer.Ordinal).SequenceEqual(manifest.Files.Select(file => file.Path), StringComparer.Ordinal))
+            throw Refuse("PackageInventoryMismatch");
+        var expected = new HashSet<string>(StringComparer.Ordinal) { "content" };
+        foreach (var file in manifest.Files)
+        {
+            var segments = file.Path.Split('/');
+            for (var count = 2; count < segments.Length; count++) expected.Add(string.Join('/', segments.Take(count)));
+        }
+        if (!directories.Order(StringComparer.Ordinal).SequenceEqual(expected.Order(StringComparer.Ordinal), StringComparer.Ordinal))
+            throw Refuse("PackageDirectoryClosureInvalid");
     }
 
     private static void Enumerate(string directory, string root, string finalRoot, List<string> files,

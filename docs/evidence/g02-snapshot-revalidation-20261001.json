@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "strogo.local-validation.v0.1",
+  "date": "2026-10-01",
+  "checkpoint": "K-G02-027",
+  "build": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "admission": {
+    "exitCode": 0,
+    "stdout": "g02-snapshot-revalidation-validation-20261001.txt",
+    "stdoutSha256": "7fc11b432dd3b869c9372c6ea6997eba7d74bb222b1c818d25fcbf3bdba69970",
+    "checks": 200
+  },
+  "sourceSha256": {
+    "src/Strogo.Modules/G02PackageProofReplay.cs": "19b52d88334f8ce803af5952edbf7b17bb27401a0fa4282c11cb69bab6775281",
+    "src/Strogo.Modules/G02PackageSnapshot.cs": "21b14a3ac8cf5430b29a7b88e1d71ae56634e25e5e4666d43f99be14b26b4382",
+    "tests/Strogo.Modules.Admission.Conformance/Program.cs": "487f04fa9d4c1b0b4b9e69497bbe40ad34dc2c190cc0c46fc81d0572c32f6f9a"
+  },
+  "rawRoot": "artifacts/local-validation/g02/fresh-replay-c145904a52364c6f8a55ec8a60a4d2ad",
+  "controls": [
+    "unchanged snapshot",
+    "initial scan-to-hold file addition",
+    "late content file",
+    "late root file",
+    "late empty directory",
+    "disposed read and revalidation"
+  ],
+  "review": {
+    "severityFindings": [],
+    "mode": "advisory read-only behavior; danger-full-access sandbox"
+  },
+  "limits": [
+    "No actual await mutation injection",
+    "No concurrent lifetime guarantee",
+    "No host ACL or transient mutation exclusion",
+    "No admission or public closureDigest implementation"
+  ]
+}

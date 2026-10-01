@@ -556,6 +556,37 @@ if (OperatingSystem.IsWindows())
         catch (UnauthorizedAccessException) { writeDenied = true; }
         Check(writeDenied, "held package handle denies content mutation");
     }
+    foreach (var control in new[] { "content", "directory", "root", "initial-race", "disposed" })
+    {
+        var probeRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+            "snapshot-revalidation-" + control + "-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(probeRoot, "content"));
+        foreach (var (path, _) in manifestFiles)
+            File.WriteAllBytes(Path.Combine(probeRoot, path.Replace('/', Path.DirectorySeparatorChar)), content[path]);
+        File.WriteAllBytes(Path.Combine(probeRoot, "build-manifest.json"), Manifest(manifestFiles, content: content));
+        if (control == "initial-race")
+        {
+            RefusePackage(() => G02PackageSnapshot.OpenStructural(probeRoot,
+                () => File.WriteAllText(Path.Combine(probeRoot, "content", "late.txt"), "late")),
+                "PackageInventoryMismatch");
+            continue;
+        }
+        using var held = G02PackageSnapshot.OpenStructural(probeRoot);
+        held.Revalidate();
+        Check(held.ReadHeld("content/module.json").SequenceEqual(content["content/module.json"]),
+            "unchanged snapshot revalidation " + control);
+        if (control == "disposed")
+        {
+            held.Dispose();
+            RefusePackage(held.Revalidate, "PackageSnapshotDisposed");
+            RefusePackage(() => held.ReadHeld("content/module.json"), "PackageSnapshotDisposed");
+            continue;
+        }
+        if (control == "directory") Directory.CreateDirectory(Path.Combine(probeRoot, "content", "late"));
+        else File.WriteAllText(Path.Combine(probeRoot, control == "root" ? "late.txt" : "content/late.txt"), "late");
+        RefusePackage(held.Revalidate, control == "directory" ? "PackageDirectoryClosureInvalid" :
+            control == "root" ? "PackageRootInvalid" : "PackageInventoryMismatch");
+    }
     File.WriteAllText(Path.Combine(snapshotRoot, "content", "module.json"), "tampered");
     RefusePackage(() => G02PackageSnapshot.OpenStructural(snapshotRoot), "PackageContentDigestMismatch");
     File.WriteAllBytes(Path.Combine(snapshotRoot, "content", "module.json"), content["content/module.json"]);

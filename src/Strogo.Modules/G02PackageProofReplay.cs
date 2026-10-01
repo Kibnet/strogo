@@ -18,6 +18,7 @@ internal static class G02PackageProofReplay
             throw ModulesExceptionFactory.Error("package", "PackageToolchainDigestMismatch");
         var translation = await G02DafnyReplay.TranslateFixtureAsync(tool, inputs,
             Path.Combine(diagnosticDirectory, "translation"));
+        snapshot.Revalidate();
         G02ProofTranscript.VerifyHeld(snapshot, translation.Verified);
         if (!proof.TranscriptBytes.AsSpan().SequenceEqual(translation.Verified.TranscriptBytes) ||
             !proof.ObligationVectorBytes.AsSpan().SequenceEqual(translation.Verified.ObligationVectorBytes))
@@ -25,6 +26,7 @@ internal static class G02PackageProofReplay
         using var sdk = openTrustedSdk();
         var build = await G02OfflineFixtureBuild.RunAsync(sdk, translation, hostPackageCache,
             Path.Combine(diagnosticDirectory, "build"));
+        snapshot.Revalidate();
         VerifyEntryArtifactsFixture(snapshot, build);
         return new(proof, build);
     }
@@ -33,6 +35,7 @@ internal static class G02PackageProofReplay
     // It covers entry assembly/deps only, not the runtime-dependency closure or closureDigest.
     internal static void VerifyEntryArtifactsFixture(G02PackageSnapshot snapshot, G02FixtureBuild regenerated)
     {
+        snapshot.Revalidate();
         if (!snapshot.ReadHeld(snapshot.Manifest.EntryAssemblyPath).AsSpan().SequenceEqual(regenerated.AssemblyBytes))
             throw ModulesExceptionFactory.Error("package", "CompiledEntryReplayMismatch");
         var deps = snapshot.Manifest.Files.Single(file => file.Role == "deps");
@@ -45,14 +48,17 @@ internal static class G02PackageProofReplay
         Func<G02DafnyToolchain> openTrustedTool, string diagnosticDirectory)
     {
         // Check owner approval and held proof metadata before opening the host verifier closure.
+        snapshot.Revalidate();
         _ = G02StoredIdentityVerifier.Verify(snapshot, trust, currentState.Span, expectedBundleDigest, now);
         var inputs = G02ProofSourceRegenerator.Verify(snapshot);
         using var tool = openTrustedTool();
         if (snapshot.Manifest.ToolchainDigest != tool.Digest)
             throw ModulesExceptionFactory.Error("package", "PackageToolchainDigestMismatch");
         var first = await G02DafnyReplay.RunFixtureAsync(tool, inputs, Path.Combine(diagnosticDirectory, "first"));
+        snapshot.Revalidate();
         G02ProofTranscript.VerifyHeld(snapshot, first.Verified);
         var second = await G02DafnyReplay.RunFixtureAsync(tool, inputs, Path.Combine(diagnosticDirectory, "second"));
+        snapshot.Revalidate();
         if (!first.Verified.TranscriptBytes.AsSpan().SequenceEqual(second.Verified.TranscriptBytes) ||
             !first.Verified.ObligationVectorBytes.AsSpan().SequenceEqual(second.Verified.ObligationVectorBytes))
             throw ModulesExceptionFactory.Error("package", "NonDeterministicVerifierOutput");
