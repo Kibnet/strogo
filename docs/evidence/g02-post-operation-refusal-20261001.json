@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "strogo.local-validation.v0.1",
+  "checkpoint": "K-G02-028",
+  "date": "2026-10-01",
+  "build": {
+    "errors": 0,
+    "exitCode": 0,
+    "warnings": 0
+  },
+  "admission": {
+    "checks": 209,
+    "stdoutSha256": "afd65ace5c539fe87372a48b520919765128fac144da1e627e1fafac6f1bedec",
+    "stdout": "g02-post-operation-refusal-validation-20261001.txt",
+    "exitCode": 0
+  },
+  "sourceSha256": {
+    "src/Strogo.Modules/G02PackageProofReplay.cs": "19b52d88334f8ce803af5952edbf7b17bb27401a0fa4282c11cb69bab6775281",
+    "tests/Strogo.Modules.Admission.Conformance/Program.cs": "1789724ba3b1dff26faa9b07e241482fbc35235208d9417970807fa898f273e0",
+    "src/Strogo.Modules/G02PackageSnapshot.cs": "21b14a3ac8cf5430b29a7b88e1d71ae56634e25e5e4666d43f99be14b26b4382"
+  },
+  "controls": [
+    {
+      "shape": "scalar",
+      "stage": "proof",
+      "refusal": "PackageInventoryMismatch",
+      "package": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\scalar\\late-proof-package",
+      "diagnostics": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\scalar\\late-proof-diagnostics",
+      "firstProofExitCode": 0,
+      "firstProcessSha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+      "secondProofExists": false,
+      "lateFileSha256": "9b05440e4de076c429832f3415ca410ec984f2d6c189ecdd879dc220f794e8ea"
+    },
+    {
+      "shape": "scalar",
+      "stage": "build",
+      "refusal": "PackageInventoryMismatch",
+      "package": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\scalar\\late-build-package",
+      "diagnostics": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\scalar\\late-build-diagnostics",
+      "firstProofExitCode": 0,
+      "firstProcessSha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+      "secondProofExists": true,
+      "lateFileSha256": "9b05440e4de076c429832f3415ca410ec984f2d6c189ecdd879dc220f794e8ea",
+      "publishExitCode": 0,
+      "publishInventoryCount": 190,
+      "independentlyHashedFiles": 190,
+      "receiptSha256": "56f4fdb6b8190d433cc4486a4075298ca782a5793064a7ac71d44267a302c89a",
+      "publishInventoryDigest": "fec7cedbe4f93216e70281cf274af240b45294f9c08b64155597b7b9ee98fd8d"
+    },
+    {
+      "shape": "allocation",
+      "stage": "proof",
+      "refusal": "PackageInventoryMismatch",
+      "package": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\allocation\\late-proof-package",
+      "diagnostics": "artifacts\\local-validation\\g02\\fresh-replay-7f0288ca8bbf4fc488204f622119c55d\\allocation\\late-proof-diagnostics",
+      "firstProofExitCode": 0,
+      "firstProcessSha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+      "secondProofExists": false,
+      "lateFileSha256": "9b05440e4de076c429832f3415ca410ec984f2d6c189ecdd879dc220f794e8ea"
+    }
+  ],
+  "limits": [
+    "Injected before subprocess, after initial validation",
+    "No concurrent mutation during subprocess established",
+    "No concurrent lifetime or host ACL",
+    "No admission/native execution"
+  ],
+  "review": "Advisory static review, danger-full-access sandbox, read-only behavior"
+}

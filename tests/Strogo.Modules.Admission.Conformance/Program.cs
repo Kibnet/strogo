@@ -941,6 +941,60 @@ if (OperatingSystem.IsWindows())
                   actual.Build.PublishInventoryDigest == compiledFixture.PublishInventoryDigest,
                 "held signed fixture package passes fresh proof, translation, build and entry/deps comparison");
         }
+        foreach (var stage in shape == "scalar" ? new[] { "proof", "build" } : new[] { "proof" })
+        {
+            var mutationRoot = Path.Combine(replayEvidence, shape, "late-" + stage + "-package");
+            var mutationDiagnostics = Path.Combine(replayEvidence, shape, "late-" + stage + "-diagnostics");
+            Directory.CreateDirectory(Path.Combine(mutationRoot, "content"));
+            foreach (var (path, bytes) in replayContent)
+                File.WriteAllBytes(Path.Combine(mutationRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+            File.Copy(Path.Combine(packageRoot, "build-manifest.json"), Path.Combine(mutationRoot, "build-manifest.json"));
+            var mutationToolOpens = 0;
+            var mutationSdkOpens = 0;
+            var mutationWrites = 0;
+            void InjectLateFile()
+            {
+                File.WriteAllText(Path.Combine(mutationRoot, "content", "late.txt"), "post-initial-check control");
+                mutationWrites++;
+            }
+            G02DafnyToolchain OpenMutationTool()
+            {
+                mutationToolOpens++;
+                if (stage == "proof") InjectLateFile();
+                return G02DafnyToolchain.Open(repoRoot);
+            }
+            G02DotNetToolchain OpenMutationSdk()
+            {
+                mutationSdkOpens++;
+                InjectLateFile();
+                return G02DotNetToolchain.Open(repoRoot);
+            }
+            using var mutationSnapshot = G02PackageSnapshot.OpenStructural(mutationRoot);
+            using var mutationTrust = new OwnerTrust(publicKey, keyId);
+            RefusePackage(() => G02PackageProofReplay.VerifyBuildFixtureAsync(mutationSnapshot, mutationTrust,
+                state0, positiveOwner.BundleDigest, now, OpenMutationTool, OpenMutationSdk,
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
+                mutationDiagnostics).GetAwaiter().GetResult(), "PackageInventoryMismatch");
+            using var firstProcess = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(mutationDiagnostics,
+                "proof", "first", "process.json")));
+            Check(firstProcess.RootElement.GetProperty("exitCode").GetInt32() == 0 && mutationWrites == 1,
+                "actual successful proof precedes structural mutation refusal " + stage);
+            if (stage == "proof")
+                Check(mutationToolOpens == 1 && mutationSdkOpens == 0 &&
+                    !Directory.Exists(Path.Combine(mutationDiagnostics, "proof", "second")) &&
+                    !Directory.Exists(Path.Combine(mutationDiagnostics, "translation")),
+                    "late proof inventory refuses before second replay, translation and SDK");
+            else
+            {
+                var buildRoot = Directory.GetDirectories(Path.Combine(mutationDiagnostics, "build")).Single();
+                using var publishProcess = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(buildRoot, "publish-process.json")));
+                using var receipt = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(buildRoot, "receipt.json")));
+                Check(mutationToolOpens == 2 && mutationSdkOpens == 1 &&
+                    publishProcess.RootElement.GetProperty("exitCode").GetInt32() == 0 &&
+                    receipt.RootElement.GetProperty("publishInventory").GetArrayLength() == 190,
+                    "actual successful complete build precedes post-build inventory refusal");
+            }
+        }
         foreach (var artifact in new[] { "content/generated.dll", "content/generated.deps.json" })
         {
             var original = replayContent[artifact];

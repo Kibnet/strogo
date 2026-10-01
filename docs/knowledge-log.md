@@ -2583,3 +2583,14 @@
 - Граница: последовательное использование API; нет concurrent lifetime/lease, host ACL, защиты от transient insert/remove между checkpoints или owner-state freshness. Это не admission и не завершение G02. Нормативная public identity требует отдельной реализации.
 
 - Final validation: solution build0warnings/errors; Admission200PASS, exit0, stdout captured directly. Ordinary composed scalar/allocation proof/translation/build regressions pass with checkpoints. [Evidence](evidence/g02-snapshot-revalidation-20261001.json), [stdout](evidence/g02-snapshot-revalidation-validation-20261001.txt). Significant findings recorded in indexed Obsidian note; vault synchronization not checked.
+
+## K-G02-028
+
+- Дата / фаза: 2026-10-01 / actual post-operation structural refusal controls.
+- Проверяемое утверждение: лишний файл, добавленный trusted fixture factory после initial package validation, не должен пережить checkpoint после успешного реального verifier/build. Proof control выполняется для scalar/allocation; SDK build control для scalar.
+- Evidence requirement: process exit0, затем PackageInventoryMismatch; proof path не создаёт second/translation diagnostics и не открывает SDK. Build path должен сохранить publish exit0 и полный receipt190 до отказа. Просто отказ до запуска не считается успехом пробы.
+- Граница: injection происходит перед subprocess, после initial snapshot check. Это не свидетельство конкурентной записи во время процесса, не concurrent lifetime/host ACL и не admission. Production code не изменяется. Результат actual suite ожидается.
+
+- Final validation: Debug solution build0warnings/errors; Admission209 PASS, exit0. Scalar/allocation actual first proof exit0 -> PackageInventoryMismatch without second replay; scalar complete SDK publish exit0/receipt190 -> same refusal. Independently checked all190 raw publish file hashes/lengths for the negative build. [Evidence](evidence/g02-post-operation-refusal-20261001.json), [direct stdout](evidence/g02-post-operation-refusal-validation-20261001.txt). Indexed Obsidian note updated; G02 remains Active.
+
+- Final evidence audit: independent reviewer reproduced stdout/source hashes, three proof process receipt hashes, late-file hashes and second replay presence/absence; independently hashed all190 scalar build publish files, zero mismatches. No B/H/M/L findings. Build/suite exit codes are retained from parent live tool terminal results, not inferred from stdout. Reviewer did not run SDK/suite; danger-full-access sandbox, read-only behavior.
