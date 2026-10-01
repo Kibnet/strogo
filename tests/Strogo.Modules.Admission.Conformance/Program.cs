@@ -745,6 +745,7 @@ if (OperatingSystem.IsWindows())
               translation.Verified.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) &&
               translation.Verified.ObligationVectorBytes.SequenceEqual(firstReplay.Verified.ObligationVectorBytes),
             "held-source Dafny translation re-verifies the same normalized proof result");
+        G02FixtureBuild compiledFixture;
         using (var sdk = G02DotNetToolchain.Open(repoRoot))
         {
             RefusePackage(() => G02OfflineFixtureBuild.RunAsync(sdk, firstReplay, "unused",
@@ -762,6 +763,7 @@ if (OperatingSystem.IsWindows())
             var compiled = await G02OfflineFixtureBuild.RunAsync(sdk, translation,
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
                 Path.Combine(replayEvidence, shape, "compiled"));
+            compiledFixture = compiled;
             Check(compiled.AssemblyBytes.Length > 0 && compiled.DepsBytes.Length > 0 && compiled.SdkClosureDigest == sdk.Digest,
                 "held SDK and pinned offline packs compile the translated fixture to a real ReadyToRun DLL");
             var translationSecond = await G02DafnyReplay.TranslateFixtureAsync(tool, positiveInputs,
@@ -801,6 +803,8 @@ if (OperatingSystem.IsWindows())
         replayContent["content/candidate.dfy"] = positiveInputs.SourceBytes;
         replayContent["content/source-map.json"] = positiveInputs.SourceMapBytes;
         replayContent["content/transcript.json"] = firstReplay.Verified.TranscriptBytes;
+        replayContent["content/generated.dll"] = compiledFixture.AssemblyBytes;
+        replayContent["content/generated.deps.json"] = compiledFixture.DepsBytes;
         var packageIds = new Dictionary<string, string>(identities, StringComparer.Ordinal)
         {
             ["moduleDigest"] = positiveModule.SourceDigest, ["bundleDigest"] = positiveOwner.BundleDigest,
@@ -831,11 +835,39 @@ if (OperatingSystem.IsWindows())
         using (var snapshot = G02PackageSnapshot.OpenStructural(packageRoot))
         using (var packageTrust = new OwnerTrust(publicKey, keyId))
         {
-            var actual = await G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust, state0,
-                positiveOwner.BundleDigest, now, OpenTool, Path.Combine(replayEvidence, shape, "composed"));
-            Check(actual.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) && toolOpens == 1,
-                "held signed fixture package passes composed regeneration and two real replay comparisons");
+            var actual = await G02PackageProofReplay.VerifyBuildFixtureAsync(snapshot, packageTrust, state0,
+                positiveOwner.BundleDigest, now, OpenTool, () => G02DotNetToolchain.Open(repoRoot),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
+                Path.Combine(replayEvidence, shape, "composed"));
+            Check(actual.Proof.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) && toolOpens == 2 &&
+                  actual.Build.AssemblyBytes.SequenceEqual(compiledFixture.AssemblyBytes) &&
+                  actual.Build.DepsBytes.SequenceEqual(compiledFixture.DepsBytes),
+                "held signed fixture package passes fresh proof, translation, build and entry/deps comparison");
         }
+        foreach (var artifact in new[] { "content/generated.dll", "content/generated.deps.json" })
+        {
+            var original = replayContent[artifact];
+            var changed = original.ToArray();
+            changed[^1] ^= 1;
+            replayContent[artifact] = changed;
+            WriteReplayPackage(); // Recompute all manifest content hashes and package identity.
+            var substitutionRoot = Path.Combine(replayEvidence, shape,
+                artifact.EndsWith(".dll", StringComparison.Ordinal) ? "rehashed-entry" : "rehashed-deps");
+            Directory.CreateDirectory(Path.Combine(substitutionRoot, "content"));
+            foreach (var (path, bytes) in replayContent)
+                File.WriteAllBytes(Path.Combine(substitutionRoot, path.Replace('/', Path.DirectorySeparatorChar)), bytes);
+            File.Copy(Path.Combine(packageRoot, "build-manifest.json"), Path.Combine(substitutionRoot, "build-manifest.json"));
+            using (var snapshot = G02PackageSnapshot.OpenStructural(substitutionRoot))
+            using (var packageTrust = new OwnerTrust(publicKey, keyId))
+            {
+                _ = G02StoredIdentityVerifier.Verify(snapshot, packageTrust, state0, positiveOwner.BundleDigest, now);
+                Check(true, "self-consistent compiled artifact substitution passes stored identity checks");
+                RefusePackage(() => G02PackageProofReplay.VerifyEntryArtifactsFixture(snapshot, compiledFixture),
+                    artifact.EndsWith(".dll", StringComparison.Ordinal) ? "CompiledEntryReplayMismatch" : "CompiledDepsReplayMismatch");
+            }
+            replayContent[artifact] = original;
+        }
+        WriteReplayPackage();
         foreach (var negative in new[] { "expired", "epoch", "signature" })
         {
             replayContent["content/approval.json"] = negative == "signature"
@@ -843,14 +875,16 @@ if (OperatingSystem.IsWindows())
                 : positiveApproval;
             WriteReplayPackage();
             toolOpens = 0;
+            var sdkOpens = 0;
             using var snapshot = G02PackageSnapshot.OpenStructural(packageRoot);
             using var packageTrust = new OwnerTrust(publicKey, keyId);
-            Refuse(() => G02PackageProofReplay.VerifyFixtureAsync(snapshot, packageTrust,
+            Refuse(() => G02PackageProofReplay.VerifyBuildFixtureAsync(snapshot, packageTrust,
                 negative == "epoch" ? state1 : state0, positiveOwner.BundleDigest,
                 negative == "expired" ? now.AddHours(2) : now, OpenTool,
+                () => { sdkOpens++; return G02DotNetToolchain.Open(repoRoot); }, "unused",
                 Path.Combine(replayEvidence, shape, "refused-" + negative)).GetAwaiter().GetResult(),
                 negative == "epoch" ? "ApprovalEpochMismatch" : negative == "expired" ? "ContractApprovalExpired" : "InvalidOwnerSignature");
-            Check(toolOpens == 0, "invalid owner gate refuses before verifier closure is opened");
+            Check(toolOpens == 0 && sdkOpens == 0, "invalid owner gate refuses before verifier or SDK closure is opened");
         }
         replayContent["content/approval.json"] = positiveApproval;
         replayContent["content/transcript.json"] = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(firstReplay.Verified.TranscriptBytes)

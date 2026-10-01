@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "strogo.research.compiled-entry-replay.v0.1",
+  "date": "2026-10-01",
+  "purpose": "fixture-only-not-admitted",
+  "baseRevision": "3841c85931534617e55c4ad8cda265c4780d1f07",
+  "rawRoot": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd",
+  "suite": {
+    "rawValidationDirectory": "artifacts/local-validation/g02/compiled-entry-validation-a52536e50ee64a41bb3a1dc9f1fefc13",
+    "checks": 176,
+    "exitCode": 0,
+    "stdoutFile": "g02-compiled-entry-validation-20261001.txt",
+    "captureMode": "PowerShell Tee-Object stdout",
+    "command": ".tools/dotnet-sdk-10.0.400/dotnet.exe run --project tests/Strogo.Modules.Admission.Conformance --no-build"
+  },
+  "build": {
+    "warnings": 0,
+    "exitCode": 0,
+    "restore": "--no-restore",
+    "errors": 0,
+    "configuration": "Debug"
+  },
+  "implementationHashes": {
+    "conformanceProgram": "d164889313d9f62f2bf2c95adda8cce18e75f3432c7e130d7682ff2e88ab1aae",
+    "packageProofReplay": "56c4260bb526ede70d2b1a34bcd2aa1e8a23f67fb9bf000f4cccc9ecbcd46bc9"
+  },
+  "shapes": [
+    {
+      "negativeControls": [
+        {
+          "fileHashesAndLengthsMatch": true,
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/scalar/rehashed-entry",
+          "expectedRefusal": "CompiledEntryReplayMismatch",
+          "refusalEvidence": "Admission suite assertions on internal trusted-record comparison helper; not a repeated full negative build",
+          "entrySha256": "f1d4fa8e0ec94da98380b95d2b993ecc620d103826f0b2737a0e67cc3f2cfcab",
+          "packageDigest": "e54c438e3bb3c89565bb7c335dcad02291bb032626a1578932ff1bada3193af5",
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed"
+        },
+        {
+          "fileHashesAndLengthsMatch": true,
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/scalar/rehashed-deps",
+          "expectedRefusal": "CompiledDepsReplayMismatch",
+          "refusalEvidence": "Admission suite assertions on internal trusted-record comparison helper; not a repeated full negative build",
+          "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+          "packageDigest": "dfaf662693b31ff5ed9bf1e76615ae45e505e3bb501cae63c292441589ce5bfa",
+          "depsSha256": "d7fd596c7db8aa9c114e8001fc0be89207ccd7b5955d953fe813e92f387981c4"
+        }
+      ],
+      "composedBuildReceipt": {
+        "assemblySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+        "generatedSourceSha256": "8e07c8c121645ce5b20ff4c8fc15d5ddf576cc6f357599f22e219937d2c85a5a",
+        "packs": [
+          {
+            "name": "microsoft.aspnetcore.app.runtime.win-x64",
+            "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+          },
+          {
+            "name": "microsoft.netcore.app.crossgen2.win-x64",
+            "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+          },
+          {
+            "name": "microsoft.netcore.app.runtime.win-x64",
+            "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+          },
+          {
+            "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+            "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+          }
+        ],
+        "purpose": "fixture-only-not-admitted",
+        "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+        "transcriptSha256": "f49173f88f32028b663a7442a090e25cb78bdf5e4adfb50782032ba5b33b5ef9"
+      },
+      "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+      "depsMatchFreshBuild": true,
+      "manifestClosureDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "packageDigest": "8f2e0ab59a25435b08df11f9bafd691ded633be62942ed0af4c95667935b057a",
+      "runtimeClosureRegenerated": false,
+      "entryMatchesFreshBuild": true,
+      "shape": "scalar",
+      "composedBuildDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/scalar/composed/build/sgb-7c5bd3fb3c7b45ce9e55b4e12302390e"
+    },
+    {
+      "negativeControls": [
+        {
+          "fileHashesAndLengthsMatch": true,
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/allocation/rehashed-entry",
+          "expectedRefusal": "CompiledEntryReplayMismatch",
+          "refusalEvidence": "Admission suite assertions on internal trusted-record comparison helper; not a repeated full negative build",
+          "entrySha256": "d2e14c84a896b9443f1a2a733de8450201db655a0dfe373dcc0b08cdb870bc51",
+          "packageDigest": "a8eb289c0ae3f78bcfd9a31ae7df750512c2992d8df06a3067e8fb2c61aa665a",
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed"
+        },
+        {
+          "fileHashesAndLengthsMatch": true,
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/allocation/rehashed-deps",
+          "expectedRefusal": "CompiledDepsReplayMismatch",
+          "refusalEvidence": "Admission suite assertions on internal trusted-record comparison helper; not a repeated full negative build",
+          "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+          "packageDigest": "b8e628918c2b99ae62462686c04d7806a8e66a2a6bfd5aebb979cf6b826fd8be",
+          "depsSha256": "d7fd596c7db8aa9c114e8001fc0be89207ccd7b5955d953fe813e92f387981c4"
+        }
+      ],
+      "composedBuildReceipt": {
+        "assemblySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+        "generatedSourceSha256": "3f5b0deabaa3e2589fa45084757b752d0a2d074e1445aafd757ecb5faf3d4286",
+        "packs": [
+          {
+            "name": "microsoft.aspnetcore.app.runtime.win-x64",
+            "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+          },
+          {
+            "name": "microsoft.netcore.app.crossgen2.win-x64",
+            "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+          },
+          {
+            "name": "microsoft.netcore.app.runtime.win-x64",
+            "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+          },
+          {
+            "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+            "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+          }
+        ],
+        "purpose": "fixture-only-not-admitted",
+        "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+        "transcriptSha256": "2eb5fe2ee122733abc97bdcfa4c408730c6a306b364065814c2251d4b39ca5c9"
+      },
+      "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+      "depsMatchFreshBuild": true,
+      "manifestClosureDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "packageDigest": "e0d2318a4d91e98765efb5dec04d19ff82a77cac2ef8965c5d88808f30c86375",
+      "runtimeClosureRegenerated": false,
+      "entryMatchesFreshBuild": true,
+      "shape": "allocation",
+      "composedBuildDirectory": "artifacts/local-validation/g02/fresh-replay-7bf813f7d20546799d1be308e76eaafd/allocation/composed/build/sgb-bd6beeeb66874f918415ccd444be973a"
+    }
+  ],
+  "limits": [
+    "Fixture owner approvals use disposable RSA test key, not actual D02 semantic consent.",
+    "Entry DLL/deps only. runtime-dependency closure and physical closureDigest are not regenerated; fixture closureDigest remains placeholder.",
+    "No executable load, ABI, release admission or native method entry evidence.",
+    "Trusted fixture caller supplies snapshot lifetime, current owner state, now, pinned tool/SDK factories and host archive cache.",
+    "No host ACL, OS network isolation, disk/memory quota or concurrent snapshot-use guarantee.",
+    "Other conformance suites were not rerun; G02 and full project goal remain active."
+  ]
+}
