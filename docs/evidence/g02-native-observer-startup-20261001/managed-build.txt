@@ -1,0 +1,9 @@
+  Определение проектов для восстановления...
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-observer-47726a716a7e4a56add71cd8fe0730eb\consumer\Probe.csproj (за 119 мс).
+  Probe -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\native-observer-47726a716a7e4a56add71cd8fe0730eb\consumer\bin\Release\net10.0\Probe.dll
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:01.89
