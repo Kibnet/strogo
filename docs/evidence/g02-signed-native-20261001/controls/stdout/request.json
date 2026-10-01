@@ -1,0 +1,16 @@
+{
+  "Environment": {
+    "TMP": "C:\\Users\\Kibnet\\AppData\\Local\\Temp",
+    "DOTNET_ROOT": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400",
+    "SystemRoot": "C:\\Windows",
+    "WINDIR": "C:\\Windows",
+    "TEMP": "C:\\Users\\Kibnet\\AppData\\Local\\Temp"
+  },
+  "WorkingDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo",
+  "Arguments": [
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tools\\g02-native-observer\\SignedObserverFixture\\bin\\Debug\\net10.0\\Strogo.Modules.ObserverFixture.dll",
+    "--output-probe",
+    "stdout"
+  ],
+  "FileName": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\dotnet.exe"
+}

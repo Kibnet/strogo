@@ -1,0 +1,51 @@
+{
+  "sources": [
+    {
+      "sha256": "20726e74955e26f2379bdcba6d2d82c90bdf25d02f3f1ad9170259be14f46788",
+      "path": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tools\\g02-native-observer\\Run-ContainedOutputProbe.ps1"
+    },
+    {
+      "sha256": "4120e4cadcdd63e5e9c8c1e86f697ce7b851c64207f65be65724cd0643027cbe",
+      "path": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tools\\g02-native-observer\\SignedObserverFixture\\ContainedLauncher.cs"
+    },
+    {
+      "sha256": "74f05eeeefcb972c255fead69dac61c7f82087da922fc69ba8b724dad17c7c31",
+      "path": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tools\\g02-native-observer\\SignedObserverFixture\\Program.cs"
+    }
+  ],
+  "purpose": "contained-output-controls",
+  "rows": [
+    {
+      "mode": "normal",
+      "descendantObservedLive": false,
+      "descendantTerminated": null,
+      "accepted": true,
+      "exitCode": 0,
+      "originalParentExited": null
+    },
+    {
+      "mode": "stdout",
+      "descendantObservedLive": false,
+      "descendantTerminated": null,
+      "accepted": true,
+      "exitCode": -532462766,
+      "originalParentExited": null
+    },
+    {
+      "mode": "stderr",
+      "descendantObservedLive": false,
+      "descendantTerminated": null,
+      "accepted": true,
+      "exitCode": -532462766,
+      "originalParentExited": null
+    },
+    {
+      "mode": "orphan",
+      "descendantObservedLive": true,
+      "descendantTerminated": true,
+      "accepted": true,
+      "exitCode": -532462766,
+      "originalParentExited": true
+    }
+  ]
+}

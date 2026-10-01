@@ -225,6 +225,30 @@ internal static class G02SignedSessionChecks
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!); File.Copy(file, target);
             }
             var diagnosticPath = Path.GetFullPath(Path.Combine(diagnosticRoot, manifest.EntryAssemblyPath));
+            var hostRoot = Path.Combine(directory, "signed-observer-host");
+            var stateStore = Path.Combine(hostRoot, "state-store");
+            Directory.CreateDirectory(stateStore);
+            void Export(string path, byte[] bytes)
+            {
+                using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                output.Write(bytes);
+            }
+            var publicKeyPath = Path.Combine(hostRoot, "public-key.der");
+            var initialStatePath = Path.Combine(hostRoot, "initial-state.json");
+            var nextStatePath = Path.Combine(hostRoot, "next-state.json");
+            var releasePath = Path.Combine(hostRoot, "release.json");
+            var badReleasePath = Path.Combine(hostRoot, "bad-release.json");
+            var configPath = Path.Combine(hostRoot, "operator-config.json");
+            Export(publicKeyPath, publicKey); Export(initialStatePath, state0); Export(nextStatePath, state1);
+            Export(Path.Combine(stateStore, "owner-state.json"), state0);
+            Export(releasePath, Release()); Export(badReleasePath, Release(impostor));
+            Export(configPath, JsonSerializer.SerializeToUtf8Bytes(new {
+                schemaVersion = "strogo.owner-trust-config.v0.1", keyId, publicKeyPath, ownerStateStore = stateStore }));
+            Export(Path.Combine(hostRoot, "fixture.json"), JsonSerializer.SerializeToUtf8Bytes(new {
+                schemaVersion = "strogo.signed-observer-fixture.v0.1", purpose = "disposable-test-key-not-public-admission",
+                now = now.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"), bundleDigest = binding.Bundle.BundleDigest,
+                packagePath = diagnosticRoot, operatorConfigPath = configPath, releasePath, badReleasePath,
+                initialStatePath, nextStatePath }));
             string? diagnosticLocation = null;
             AssemblyLoadEventHandler locationObserver = (_, args) =>
             {

@@ -1,0 +1,1 @@
+{"arguments":["publish","Generated.csproj","-c","Release","--no-restore","-o","publish","-p:ImportDirectoryBuildProps=false","-p:ImportDirectoryBuildTargets=false","-p:ImportDirectoryPackagesProps=false","-p:UseSharedCompilation=false","-nr:false","-v:minimal"],"exitCode":0}

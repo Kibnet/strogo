@@ -1,0 +1,392 @@
+[
+  {
+    "sha256": "b7993ebe7c8caab55c0e57feef1130ab22ed74e791d13ba5f52ec5423c83a1a7",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/receipt.json",
+    "target": "current/receipt.json"
+  },
+  {
+    "sha256": "5aebc81428b0fcf502da716a51d5e766dfe91fbf3eccf87a535b995dd74923ec",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/build.txt",
+    "target": "current/build.txt"
+  },
+  {
+    "sha256": "6898b076b5ef5263e0969a48ad0b06deedd3a844d520834c1c5c98a9e990296c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/process.json",
+    "target": "current/scalar/process.json"
+  },
+  {
+    "sha256": "53d20dbcdf1774111a36cd3057b8d55ca9ed4084742c0b6447d44aae54231673",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/contained-process.json",
+    "target": "current/scalar/contained-process.json"
+  },
+  {
+    "sha256": "3acc85b65eec33e4c9b1055fabafaa89769b4b358e85ac064457ef0b7c856e65",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/trace.jsonl",
+    "target": "current/scalar/trace.jsonl"
+  },
+  {
+    "sha256": "1699af5f8a49b8f914bb2adbcfbf6520fac9fbee127d557bc470e3eb110e1bb8",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/launch-request.json",
+    "target": "current/scalar/launch-request.json"
+  },
+  {
+    "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/first/process.json",
+    "target": "current/scalar/fresh-composed/proof/first/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/first/stderr.bin",
+    "target": "current/scalar/fresh-composed/proof/first/stderr.bin"
+  },
+  {
+    "sha256": "64002233af73209a09c1c478ffa3d06ad9aad607616af6055c50820053f0e544",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/first/stdout.bin",
+    "target": "current/scalar/fresh-composed/proof/first/stdout.bin"
+  },
+  {
+    "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/second/process.json",
+    "target": "current/scalar/fresh-composed/proof/second/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/second/stderr.bin",
+    "target": "current/scalar/fresh-composed/proof/second/stderr.bin"
+  },
+  {
+    "sha256": "64002233af73209a09c1c478ffa3d06ad9aad607616af6055c50820053f0e544",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/proof/second/stdout.bin",
+    "target": "current/scalar/fresh-composed/proof/second/stdout.bin"
+  },
+  {
+    "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/translation/process.json",
+    "target": "current/scalar/fresh-composed/translation/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/translation/stderr.bin",
+    "target": "current/scalar/fresh-composed/translation/stderr.bin"
+  },
+  {
+    "sha256": "64002233af73209a09c1c478ffa3d06ad9aad607616af6055c50820053f0e544",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/translation/stdout.bin",
+    "target": "current/scalar/fresh-composed/translation/stdout.bin"
+  },
+  {
+    "sha256": "f1f765b3216aa4fedf905142c874298b49706642119e513043a624d6d3a51de4",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/translation/translation-record.dtr",
+    "target": "current/scalar/fresh-composed/translation/translation-record.dtr"
+  },
+  {
+    "sha256": "634dbeeeca87a529f841ed2f15a01d0caab5c3469440782da35cfe8a68682c33",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/process.json",
+    "target": "current/allocation/process.json"
+  },
+  {
+    "sha256": "8ea4e917581f4afa2f1f26be4b3b00b06e168bf7b4b9da3a40e76802ef0c8cb6",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/contained-process.json",
+    "target": "current/allocation/contained-process.json"
+  },
+  {
+    "sha256": "5b91d48b7d44e3835c1ee264c5ba45394e7830f590aa16ad704b6e21fed7693e",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/trace.jsonl",
+    "target": "current/allocation/trace.jsonl"
+  },
+  {
+    "sha256": "61a42a9979d577e7890aacf720f9a1c3e525c0805819600daed38492cd0e542c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/launch-request.json",
+    "target": "current/allocation/launch-request.json"
+  },
+  {
+    "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/first/process.json",
+    "target": "current/allocation/fresh-composed/proof/first/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/first/stderr.bin",
+    "target": "current/allocation/fresh-composed/proof/first/stderr.bin"
+  },
+  {
+    "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/first/stdout.bin",
+    "target": "current/allocation/fresh-composed/proof/first/stdout.bin"
+  },
+  {
+    "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/second/process.json",
+    "target": "current/allocation/fresh-composed/proof/second/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/second/stderr.bin",
+    "target": "current/allocation/fresh-composed/proof/second/stderr.bin"
+  },
+  {
+    "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/proof/second/stdout.bin",
+    "target": "current/allocation/fresh-composed/proof/second/stdout.bin"
+  },
+  {
+    "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/translation/process.json",
+    "target": "current/allocation/fresh-composed/translation/process.json"
+  },
+  {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/translation/stderr.bin",
+    "target": "current/allocation/fresh-composed/translation/stderr.bin"
+  },
+  {
+    "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/translation/stdout.bin",
+    "target": "current/allocation/fresh-composed/translation/stdout.bin"
+  },
+  {
+    "sha256": "f1f765b3216aa4fedf905142c874298b49706642119e513043a624d6d3a51de4",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/translation/translation-record.dtr",
+    "target": "current/allocation/fresh-composed/translation/translation-record.dtr"
+  },
+  {
+    "sha256": "286eb9c8bbe20ca5c0d246c27467d21b71a3d8b1572fe00dc95a8676185cf2da",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/receipt.json",
+    "target": "controls/receipt.json"
+  },
+  {
+    "sha256": "2bcdc8072f3e28385ffa70102be8ed0c390e02fda6edd57b6fe8f97c2f1df814",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/normal/request.json",
+    "target": "controls/normal/request.json"
+  },
+  {
+    "sha256": "0b364ccf50b9e58824498e5c65c2d92b946382c50e34d2d2771315ce56173fff",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/normal/result.json",
+    "target": "controls/normal/result.json"
+  },
+  {
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/normal/stderr.txt",
+    "target": "controls/normal/stderr.txt"
+  },
+  {
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/normal/stdout.txt",
+    "target": "controls/normal/stdout.txt"
+  },
+  {
+    "sha256": "0eaf3ef713e8ff64ea01e996518021c22e4d899378b6603ee42d4694fc36f546",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/orphan/descendant.pid",
+    "target": "controls/orphan/descendant.pid"
+  },
+  {
+    "sha256": "ec4ba042ff34cf4b476e2ade973a80499e154ed3cafc531eb63a4d60f97d9f65",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/orphan/request.json",
+    "target": "controls/orphan/request.json"
+  },
+  {
+    "sha256": "54a3ef3d380c95d5700648d00ec8a3661645cc1ab9f80a5ca42d92f763c3833a",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/orphan/stderr.txt",
+    "target": "controls/orphan/stderr.txt"
+  },
+  {
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/orphan/stdout.txt",
+    "target": "controls/orphan/stdout.txt"
+  },
+  {
+    "sha256": "2efa221ea96ba3201b58f547b9fbc59c87dabc78e27d7d891090276f8c1b1a58",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stderr/request.json",
+    "target": "controls/stderr/request.json"
+  },
+  {
+    "sha256": "90676e836b461a2a25769ffd1d3b82a9ec55ccaa7f4f085d326e89faeb5eb7a5",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stderr/stderr.txt",
+    "target": "controls/stderr/stderr.txt"
+  },
+  {
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stderr/stdout.txt",
+    "target": "controls/stderr/stdout.txt"
+  },
+  {
+    "sha256": "37d26a36b3b408d502cdb7dfdf8a72fef4dcf8166c1cf3fdd2e6991e1b6b6320",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stdout/request.json",
+    "target": "controls/stdout/request.json"
+  },
+  {
+    "sha256": "90676e836b461a2a25769ffd1d3b82a9ec55ccaa7f4f085d326e89faeb5eb7a5",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stdout/stderr.txt",
+    "target": "controls/stdout/stderr.txt"
+  },
+  {
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+    "source": "artifacts/local-validation/g02/contained-output-922c41eee4cb46b3bccd870229881a0e/stdout/stdout.txt",
+    "target": "controls/stdout/stdout.txt"
+  },
+  {
+    "sha256": "025f246f28f82622c7faa8c066d140c34f75729ac3f7e1d5442372449462d995",
+    "source": "artifacts/local-validation/g02/signed-native-export-fc43f15346554ff9b4ac541852654fa8/build.txt",
+    "target": "export/build.txt"
+  },
+  {
+    "sha256": "aa06eadf49c47ded3192c1489efe15b9805f626cbe6c5c332b119f0309c3e85c",
+    "source": "artifacts/local-validation/g02/signed-native-export-fc43f15346554ff9b4ac541852654fa8/admission.txt",
+    "target": "export/admission.txt"
+  },
+  {
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "source": "artifacts/local-validation/g02/signed-native-export-fc43f15346554ff9b4ac541852654fa8/exit-code.txt",
+    "target": "export/exit-code.txt"
+  },
+  {
+    "sha256": "4b31f516054da9e1139b755d30c6ab8bc413ca545c5637d7b3476a4ed3a2ca34",
+    "source": "artifacts/local-validation/g02/signed-native-2d9a64ac62f444e68888c3410e739529/receipt.json",
+    "target": "history/signed-native-2d9a64ac62f444e68888c3410e739529/receipt.json"
+  },
+  {
+    "sha256": "eb8522dc9722333b94716f75c3823f066da15165c0d29e1bc23edeacc4c30c87",
+    "source": "artifacts/local-validation/g02/signed-native-2d9a64ac62f444e68888c3410e739529/scalar/process.json",
+    "target": "history/signed-native-2d9a64ac62f444e68888c3410e739529/scalar/process.json"
+  },
+  {
+    "sha256": "0daed5a19b620c76116dd5b99c1f4d36b4ad8b982178d3dccda456ee786162eb",
+    "source": "artifacts/local-validation/g02/signed-native-2d9a64ac62f444e68888c3410e739529/scalar/trace.jsonl",
+    "target": "history/signed-native-2d9a64ac62f444e68888c3410e739529/scalar/trace.jsonl"
+  },
+  {
+    "sha256": "2539caad9717c828a457dd1308b46e01adcd5741a89c324c245c9ee3ea445a8e",
+    "source": "artifacts/local-validation/g02/signed-native-2d9a64ac62f444e68888c3410e739529/allocation/process.json",
+    "target": "history/signed-native-2d9a64ac62f444e68888c3410e739529/allocation/process.json"
+  },
+  {
+    "sha256": "138f2175e021c89082a915caf6c894b02e428e710f8118afdfce1d64ff20d111",
+    "source": "artifacts/local-validation/g02/signed-native-2d9a64ac62f444e68888c3410e739529/allocation/trace.jsonl",
+    "target": "history/signed-native-2d9a64ac62f444e68888c3410e739529/allocation/trace.jsonl"
+  },
+  {
+    "sha256": "e8c94a86435d0dabf22683e3658b4c1e2f5deac1f9d1e2119c06e8f8aa0a875b",
+    "source": "artifacts/local-validation/g02/signed-native-24d9e5e915114a2db87e80c44cc2361d/receipt.json",
+    "target": "history/signed-native-24d9e5e915114a2db87e80c44cc2361d/receipt.json"
+  },
+  {
+    "sha256": "831eb77b9410e11b1cd5d41ef4c692a5a4218c3b812479a003f0e9f7bdec34f1",
+    "source": "artifacts/local-validation/g02/signed-native-24d9e5e915114a2db87e80c44cc2361d/scalar/process.json",
+    "target": "history/signed-native-24d9e5e915114a2db87e80c44cc2361d/scalar/process.json"
+  },
+  {
+    "sha256": "86edbb3b479de1bcfb98c424c5de454d4b76467b85f36a4b1f1eee42afc0fe13",
+    "source": "artifacts/local-validation/g02/signed-native-24d9e5e915114a2db87e80c44cc2361d/scalar/trace.jsonl",
+    "target": "history/signed-native-24d9e5e915114a2db87e80c44cc2361d/scalar/trace.jsonl"
+  },
+  {
+    "sha256": "caad557811a2ba9db715e4d5450cb87b8205b2d2bd77fea48fde0645bfedd57f",
+    "source": "artifacts/local-validation/g02/signed-native-24d9e5e915114a2db87e80c44cc2361d/allocation/process.json",
+    "target": "history/signed-native-24d9e5e915114a2db87e80c44cc2361d/allocation/process.json"
+  },
+  {
+    "sha256": "13da3c99ced5968444b3e2e0ef8012f56dd3b8012310296d024478551e21126c",
+    "source": "artifacts/local-validation/g02/signed-native-24d9e5e915114a2db87e80c44cc2361d/allocation/trace.jsonl",
+    "target": "history/signed-native-24d9e5e915114a2db87e80c44cc2361d/allocation/trace.jsonl"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-process.json",
+    "sha256": "fae9b978be29657b7f2bc280c0194256f3e1c23bc2d897ae04a3589654927b74",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-process.json"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-stderr.bin"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-stdout.bin",
+    "sha256": "3add3a2751fa136e99bda9ac2f470fe9ee40976444295ae402a4d2c4403ea56d",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/locked-restore-stdout.bin"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-process.json",
+    "sha256": "27a8000042573ef508a2ba32c483ad6998f56e79236ab28fb3116fd0b14775f2",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-process.json"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-stderr.bin"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-stdout.bin",
+    "sha256": "49ffdc3dbcb41a1e4ae0096f04cbb7638680bd7ac7ecf3b03ecc16bcaebbcb2c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/publish-stdout.bin"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/receipt.json",
+    "sha256": "774019c65314112979cb7057bc53074ba7541e11150dbb8df6e4b29d46da108c",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/receipt.json"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-process.json",
+    "sha256": "dbf2bf101d0bfaeb3eafb92a7954f54b1a9647751b825299368f2d98b181dfcc",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-process.json"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-stderr.bin"
+  },
+  {
+    "target": "current/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-stdout.bin",
+    "sha256": "08c0b56c5beb69e2ea388ee77441e7216a409463027a3374c2d9f67e518c706b",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/scalar/fresh-composed/build/sgb-9f15bc3966374b42a4f89895405e9785/restore-stdout.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-process.json",
+    "sha256": "fae9b978be29657b7f2bc280c0194256f3e1c23bc2d897ae04a3589654927b74",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-process.json"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-stderr.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-stdout.bin",
+    "sha256": "556746264ed1c92755d27d5d958cbf1d51fe4aec354ab87e2945f65fe6416449",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/locked-restore-stdout.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-process.json",
+    "sha256": "27a8000042573ef508a2ba32c483ad6998f56e79236ab28fb3116fd0b14775f2",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-process.json"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-stderr.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-stdout.bin",
+    "sha256": "94fd32444210a1976dcb775724575bc2cfdf2321cfe9847d16e1b39eea430835",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/publish-stdout.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/receipt.json",
+    "sha256": "36d028b257e7a8fcb6cb5da359c8a6d2076b907e04f9e8141c94357081b7acfe",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/receipt.json"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-process.json",
+    "sha256": "dbf2bf101d0bfaeb3eafb92a7954f54b1a9647751b825299368f2d98b181dfcc",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-process.json"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-stderr.bin"
+  },
+  {
+    "target": "current/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-stdout.bin",
+    "sha256": "918f89cf0aaef37861542eb5f7c207f4eb9d13a53ebc72caadb1c7d707c776df",
+    "source": "artifacts/local-validation/g02/signed-native-2d230cd49ac54d9bb88cf31a8afbe20c/allocation/fresh-composed/build/sgb-dea1a7cb436c4c77952ad03b79e1e4c4/restore-stdout.bin"
+  }
+]

@@ -1,0 +1,11 @@
+{"event":"initialize","pid":335368,"hresult":0}
+{"event":"map","pid":335368,"functionId":"140729515145568","moduleId":"140729515098128","token":100663304,"mvid":"27ae86a0-d59e-429a-8c8e-d109ca3e3954","moduleFlags":9,"baseAddress":"140734052171776","pathChars":181}
+{"event":"module-file","functionId":"140729515145568","pid":335368,"moduleId":"140729515098128","available":true,"length":372736,"sha256":"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a","volume":1255240662,"fileIdHigh":65536,"fileIdLow":4198768}
+{"event":"map","pid":335368,"functionId":"140729515145632","moduleId":"140729515098128","token":100663306,"mvid":"27ae86a0-d59e-429a-8c8e-d109ca3e3954","moduleFlags":9,"baseAddress":"140734052171776","pathChars":181}
+{"event":"module-file","functionId":"140729515145632","pid":335368,"moduleId":"140729515098128","available":true,"length":372736,"sha256":"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a","volume":1255240662,"fileIdHigh":65536,"fileIdLow":4198768}
+{"event":"enter","pid":335368,"functionId":"140729515145568"}
+{"event":"enter","pid":335368,"functionId":"140729515145632"}
+{"event":"enter","pid":335368,"functionId":"140729515145568"}
+{"event":"enter","pid":335368,"functionId":"140729515145568"}
+{"event":"enter","pid":335368,"functionId":"140729515145632"}
+{"event":"shutdown","pid":335368,"entries":5,"traceFailed":false}

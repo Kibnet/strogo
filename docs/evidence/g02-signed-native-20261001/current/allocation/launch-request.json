@@ -1,0 +1,28 @@
+{
+  "WorkingDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo",
+  "Arguments": [
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tools\\g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.dll",
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo",
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\fresh-replay-274a65902ae54d5fb22bd287bab61b29\\allocation\\signed-observer-host\\fixture.json",
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\native-observer-44b994c9f07f427d9ca5357832d3fc49\\Observer.dll",
+    "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\signed-native-2d230cd49ac54d9bb88cf31a8afbe20c\\allocation",
+    "C:\\Users\\Kibnet\\.nuget\\packages"
+  ],
+  "Environment": {
+    "TEMP": "C:\\Users\\Kibnet\\AppData\\Local\\Temp",
+    "STROGO_OBSERVER_FILE_IDENTITY": "1",
+    "SystemRoot": "C:\\Windows",
+    "STROGO_OBSERVER_METHOD": "F000",
+    "WINDIR": "C:\\Windows",
+    "CORECLR_PROFILER_PATH": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\native-observer-44b994c9f07f427d9ca5357832d3fc49\\Observer.dll",
+    "DOTNET_ReadyToRun": "0",
+    "STROGO_OBSERVER_TRACE": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\signed-native-2d230cd49ac54d9bb88cf31a8afbe20c\\allocation\\trace.jsonl",
+    "STROGO_OBSERVER_METHOD_2": "Q000",
+    "CORECLR_PROFILER": "{486D81E7-F308-4E40-9142-58290B2A6E11}",
+    "CORECLR_ENABLE_PROFILING": "1",
+    "DOTNET_ROOT": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400",
+    "TMP": "C:\\Users\\Kibnet\\AppData\\Local\\Temp",
+    "STROGO_OBSERVER_TYPE": "Candidate.__default"
+  },
+  "FileName": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\dotnet.exe"
+}

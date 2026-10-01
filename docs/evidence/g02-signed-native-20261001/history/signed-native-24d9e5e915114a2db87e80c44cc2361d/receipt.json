@@ -1,0 +1,259 @@
+{
+  "purpose": "signed-fixture-native-file-and-interval-binding-not-public-admission",
+  "sources": [
+    {
+      "sha256": "35c67d0b65ce55b131d1c1883b1fb89a67b2054d8ae0ede9c5c9ccaab7159e54",
+      "path": "tools/g02-native-observer/Run-SignedObserver.ps1"
+    },
+    {
+      "sha256": "a6e37c485589185683cc031f439ab519b5a43790c4d3854f2c9e5da248d78d49",
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs"
+    },
+    {
+      "sha256": "b76130e68ed9fc3224b187c8c82f234bd96272d124c0800fa4b1c791857353cf",
+      "path": "src/Strogo.Modules/G02SignedFixtureSession.cs"
+    },
+    {
+      "sha256": "15b3469a48e8a3f6afd0d22f2fad6212babdbf56369dcde119639a9d6a3c14b3",
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs"
+    },
+    {
+      "sha256": "17f1bf4b476e3d735b77046e156b5796847b15f164a735e63170f9adb3e77472",
+      "path": "src/Strogo.Modules/OwnerHostContext.cs"
+    },
+    {
+      "sha256": "e3892bd82719d2e6f998da715ab76b0818d94d0e4e261a511fd5eb6065832ec6",
+      "path": "tools/g02-native-observer/Observer.cpp"
+    },
+    {
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f",
+      "path": "tools/g02-native-observer/Enter.asm"
+    },
+    {
+      "sha256": "61e49306dce14e8a9b69d7170c6173aa7842d65fc6679ec8d55deb73fa1f3201",
+      "path": "tools/g02-native-observer/BoundedProcessOutput.cs"
+    },
+    {
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef",
+      "path": "tools/g02-native-observer/SignedObserverFixture/NuGet.Config"
+    },
+    {
+      "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a",
+      "path": "tools/g02-native-observer/SignedObserverFixture/packages.lock.json"
+    },
+    {
+      "sha256": "48384b70781adc058c38e0c104817eaf49300751a2f6d52d729822f63449d089",
+      "path": "tools/g02-native-observer/SignedObserverFixture/Program.cs"
+    },
+    {
+      "sha256": "ac738c0f1ddbbce0f665ee0ae18fc8aa24b1779c1ff1f713f8b7f022e1c8f12e",
+      "path": "tools/g02-native-observer/SignedObserverFixture/SignedObserverFixture.csproj"
+    }
+  ],
+  "limits": [
+    "Disposable test keys and fixed test clock",
+    "Forced JIT and CLR-reported immutable file artifact, not mapped/R2R instruction digest",
+    "Synthetic provider/runtime/expiry controls; actual fixture state File.Replace epoch/rollback",
+    "No public closure/human release/D02/G05/G06 claim",
+    "Timeout/kill branch not exercised"
+  ],
+  "results": [
+    {
+      "contractApprovalDigest": "98dcda7dd0b675b06a7e7e88161e9c2b05012929802c440d1eb5209cf15b8817",
+      "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "releaseAdmissionDigest": "7d2b7097bcd39da17e50fe85caff227c841b29f5969c0f6b1db518482c28be5b",
+      "rows": 15,
+      "packageDigest": "9fe7acaec64466d44c5b2c620abdcd88a66be2826be22db620199ace6e6715a6",
+      "observed": [
+        "Q",
+        "F",
+        "Q",
+        "Q",
+        "F"
+      ],
+      "nativeEntries": 5,
+      "accepted": true,
+      "buildManifestDigest": "43f5c9895d868d7f33d7af4459d1f77e109b97d39bcc9b5efa405608af43451d",
+      "shape": "scalar",
+      "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a"
+    },
+    {
+      "contractApprovalDigest": "213f6d728cb19f272f36cf35e5fd67678a9087c877de4a3056d3f4295dfa31b3",
+      "sourceMapSha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "releaseAdmissionDigest": "0b2c7cfb97667963ce52c73b24a3c873028eb7818da3aae8c5f0016a3830b2ea",
+      "rows": 15,
+      "packageDigest": "a9da99110ca793ceaa1f5cde01a40af7ad7d83673b06f3d4b4be2aa7b2dccca9",
+      "observed": [
+        "Q",
+        "F",
+        "Q",
+        "Q",
+        "F"
+      ],
+      "nativeEntries": 5,
+      "accepted": true,
+      "buildManifestDigest": "231b5dc9653cca79bab063c0c621a412714a1fd569d1b35d885def246aca54d4",
+      "shape": "allocation",
+      "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/Observer.dll",
+      "sha256": "6e1d809bb27beb806c9680928848611b717d88deea99696763b66deb3337ae40",
+      "length": 23552
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/fixture.json",
+      "sha256": "6984cb6f6beab8db3ece0b28b175ccef2e500f662372cec3cc848b40ab99139e",
+      "length": 1433
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/operator-config.json",
+      "sha256": "740f7d6793ca70477167502e04b10afc31cd94a3cd2649d3cdfbe6ce17af5882",
+      "length": 526
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/public-key.der",
+      "sha256": "2198d198337e40b6d9e2511b9049df8e42b927db2f5b1fb843cb98ca78056c8c",
+      "length": 294
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/release.json",
+      "sha256": "986620b71afb8aef9a8c9cbeab78b48dfff54b4c1cc11941e4bd9bee76141c83",
+      "length": 1174
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/bad-release.json",
+      "sha256": "91bbbd91ba5c8926ce4519a8158626203e3210000b719befbaeb80b785c7146b",
+      "length": 1174
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/initial-state.json",
+      "sha256": "470d2f6c9aa34b6e15cbda33fa5ee88dd8d1e3816c86b867ef5e67ce1f01d736",
+      "length": 761
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/signed-observer-host/next-state.json",
+      "sha256": "6d43358ab096e1eaf169ff8a1d297421151b8d2ef0029425430979aaee267bc3",
+      "length": 761
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/observer-session-package/build-manifest.json",
+      "sha256": "80de39f4213ace92aab987cd7b2b232d48b5178d32de2fd565cbcc605656b34c",
+      "length": 2006
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/observer-session-package/content/generated.dll",
+      "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "length": 372736
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/observer-session-package/content/source-map.json",
+      "sha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "length": 389
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/scalar/observer-session-package/content/module.json",
+      "sha256": "b54225f11352ae23b669b1530e89de828cfca5c6f8d4d8172c73df674d94b7a7",
+      "length": 397
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/fixture.json",
+      "sha256": "b28af84a68b0a0be2115430bb8827098655f87c109c0a94421c6eb78150198cb",
+      "length": 1457
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/operator-config.json",
+      "sha256": "bf0fe97d3092a8e961bed9ed4ecc782c359c785e91a615295c5f122ac73cc576",
+      "length": 534
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/public-key.der",
+      "sha256": "2198d198337e40b6d9e2511b9049df8e42b927db2f5b1fb843cb98ca78056c8c",
+      "length": 294
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/release.json",
+      "sha256": "93e5f58eb1c247f3a9535e67e0dfa6b2092d47c2d7805866c5fef72c5a82397b",
+      "length": 1174
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/bad-release.json",
+      "sha256": "7ec6c7a5b29307a1ea584585530f72687f5b2d789ff53db5c52a3729d70831bd",
+      "length": 1174
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/initial-state.json",
+      "sha256": "470d2f6c9aa34b6e15cbda33fa5ee88dd8d1e3816c86b867ef5e67ce1f01d736",
+      "length": 761
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/signed-observer-host/next-state.json",
+      "sha256": "6d43358ab096e1eaf169ff8a1d297421151b8d2ef0029425430979aaee267bc3",
+      "length": 761
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/observer-session-package/build-manifest.json",
+      "sha256": "2ec86ea38e942d589a7197bad5166fe34290e8acd4d549592c3e2c54c190bff3",
+      "length": 2010
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/observer-session-package/content/generated.dll",
+      "sha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "length": 409600
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/observer-session-package/content/source-map.json",
+      "sha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "length": 1856
+    },
+    {
+      "path": "artifacts/local-validation/g02/fresh-replay-274a65902ae54d5fb22bd287bab61b29/allocation/observer-session-package/content/module.json",
+      "sha256": "bd6c62da396b021b7087590cfcdcb4ccfcb47acdf8746a19f2f19afed485dee7",
+      "length": 3191
+    }
+  ],
+  "binaries": [
+    {
+      "sha256": "6e1d809bb27beb806c9680928848611b717d88deea99696763b66deb3337ae40",
+      "path": "artifacts/local-validation/g02/native-observer-44b994c9f07f427d9ca5357832d3fc49/Observer.dll"
+    },
+    {
+      "sha256": "c000a357bb09e5c871a1ea09c2d8c375e6f703cc21780572b9c5c1aef859e9b3",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Kernel.Core.dll"
+    },
+    {
+      "sha256": "dbb40758e6fc1da6af04f5ebf0bf64668a8833db09f64c35ff0cb341fe1aa603",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Kernel.Core.pdb"
+    },
+    {
+      "sha256": "e09d550e671adccd88871fecf3baa9c8e78e8c706ee7c554d3d3fcb4517fe56d",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.dll"
+    },
+    {
+      "sha256": "499db1e5a827de5cc6bd5935d756d2ee8a3d753d0b092c7e8cea9e6019ac8ef3",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.deps.json"
+    },
+    {
+      "sha256": "4d11865b466ca6dcd3cfa83e8a0efe28e3f0eda978adccf011a9ef8100374e65",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.dll"
+    },
+    {
+      "sha256": "357b3ba31ed89265ea7a742cd777ab7c2af0c772a60b3b26a75ee431c7d6e0d6",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.exe"
+    },
+    {
+      "sha256": "ccd99dc0b19db6732cabc7c0216706e6f685f0ff411ed7c0edf417c6c6358666",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.pdb"
+    },
+    {
+      "sha256": "256dda2706e1151bb95987b6b5be610bf68d64e058285b19e7e958222fc90414",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.ObserverFixture.runtimeconfig.json"
+    },
+    {
+      "sha256": "750cc2d3c27ca279fa08a9b13750bb50f11f74aa2a42a7cc1e38035a51f6ee9c",
+      "path": "tools/g02-native-observer/SignedObserverFixture/bin/Debug/net10.0/Strogo.Modules.pdb"
+    }
+  ]
+}

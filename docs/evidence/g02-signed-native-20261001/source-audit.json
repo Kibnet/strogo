@@ -1,0 +1,30 @@
+[
+  {
+    "path": "tools/g02-native-observer/Run-SignedObserver.ps1",
+    "sha256": "ddc476f5bb4c73cec53e0247829c7b40ff0b98d4c5f332e1f723c7ec1b655fca"
+  },
+  {
+    "path": "tools/g02-native-observer/Run-ContainedOutputProbe.ps1",
+    "sha256": "20726e74955e26f2379bdcba6d2d82c90bdf25d02f3f1ad9170259be14f46788"
+  },
+  {
+    "path": "tools/g02-native-observer/SignedObserverFixture/ContainedLauncher.cs",
+    "sha256": "4120e4cadcdd63e5e9c8c1e86f697ce7b851c64207f65be65724cd0643027cbe"
+  },
+  {
+    "path": "tools/g02-native-observer/SignedObserverFixture/Program.cs",
+    "sha256": "74f05eeeefcb972c255fead69dac61c7f82087da922fc69ba8b724dad17c7c31"
+  },
+  {
+    "path": "src/Strogo.Modules/G02ContainedProcess.cs",
+    "sha256": "09ccf4b93422de39bd1e545fe16c582d810e470cacb2e2bf36aed6c36ecaeb6d"
+  },
+  {
+    "path": "src/Strogo.Modules/G02RuntimeBinding.cs",
+    "sha256": "fc679c47c18f8364d0984a78321201ec0a1984f3602e99940393469be5dc1af3"
+  },
+  {
+    "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs",
+    "sha256": "a6e37c485589185683cc031f439ab519b5a43790c4d3854f2c9e5da248d78d49"
+  }
+]
