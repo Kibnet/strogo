@@ -474,8 +474,69 @@ var duplicatedManifestField = Encoding.UTF8.GetString(goodManifestBytes).Replace
 RefusePackage(() => G02BuildManifest.Parse(Encoding.UTF8.GetBytes(duplicatedManifestField)), "DuplicateField");
 RefusePackage(() => G02BuildManifest.Parse(Encoding.UTF8.GetBytes(" " + Encoding.UTF8.GetString(goodManifestBytes))),
     "ArtifactNotCanonical");
+G02PublishedFile[] publishVector =
+[
+    new("a.dll", 1, new string('a', 64)),
+    new("strogo.generated.deps.json", 2, new string('b', 64)),
+    new("strogo.generated.dll", 3, new string('c', 64))
+];
+var vectorDigest = G02PublishInventory.DiagnosticDigest(publishVector);
+Check(vectorDigest == "5b735a4c391f299989df69fc594b2b3e61415e69208f9774f6991f3d724a9e0e",
+    "private physical inventory matches independently frozen canonical digest vector");
+Check(G02PublishInventory.DiagnosticDigest(publishVector.Reverse()) == vectorDigest,
+    "private inventory has one canonical name ordering");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Append(publishVector[0])), "BuildPublishInventoryDuplicate");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Select(file =>
+    file.Name == "a.dll" ? file with { Name = "nested/a.dll" } : file)), "BuildPublishNameInvalid");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Select(file =>
+    file.Name == "a.dll" ? file with { Name = "A.dll" } : file)), "BuildPublishNameInvalid");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Select(file =>
+    file.Name == "a.dll" ? file with { Length = -1 } : file)), "BuildPublishIdentityInvalid");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Select(file =>
+    file.Name == "a.dll" ? file with { Sha256 = new string('z', 64) } : file)), "BuildPublishIdentityInvalid");
+RefusePackage(() => G02PublishInventory.DiagnosticDigest(publishVector.Take(2)), "BuildPublishEntryMissing");
+Check(G02PublishInventory.DiagnosticDigest(publishVector.Select(file => file.Name == "a.dll" ? file with { Length = 2 } : file)) != vectorDigest &&
+      G02PublishInventory.DiagnosticDigest(publishVector.Select(file => file.Name == "a.dll" ? file with { Sha256 = new string('d', 64) } : file)) != vectorDigest &&
+      G02PublishInventory.DiagnosticDigest(publishVector.Select(file => file.Name == "a.dll" ? file with { Name = "b.dll" } : file)) != vectorDigest,
+    "name, length and bytes identity each affect private publish diagnostic digest");
 if (OperatingSystem.IsWindows())
 {
+    var publishProbeRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
+        "publish-inventory-probes-" + Guid.NewGuid().ToString("N"));
+    var validPublish = Path.Combine(publishProbeRoot, "valid");
+    Directory.CreateDirectory(validPublish);
+    File.WriteAllText(Path.Combine(validPublish, "Strogo.Generated.dll"), "fixture-only dll");
+    File.WriteAllText(Path.Combine(validPublish, "strogo.generated.deps.json"), "fixture-only deps");
+    var publishHandles = new List<FileStream>();
+    try
+    {
+        var captured = G02PublishInventory.CaptureFixture(validPublish, publishHandles);
+        Check(captured.Length == 2 && captured[1].Name == "strogo.generated.dll" &&
+              captured[1].Sha256 == Hex(SHA256.HashData(Encoding.UTF8.GetBytes("fixture-only dll"))),
+            "physical capture canonicalizes names and hashes held bytes without claiming executable output");
+        var denied = false;
+        try { using var writer = new FileStream(Path.Combine(validPublish, "Strogo.Generated.dll"), FileMode.Open, FileAccess.Write); }
+        catch (IOException) { denied = true; }
+        Check(denied, "captured publish files remain no-write held until caller closes handles");
+    }
+    finally { foreach (var file in publishHandles) file.Dispose(); publishHandles.Clear(); }
+    foreach (var control in new[] { "nested", "ads", "reparse" })
+    {
+        var root = Path.Combine(publishProbeRoot, control);
+        Directory.CreateDirectory(root);
+        File.WriteAllText(Path.Combine(root, "strogo.generated.deps.json"), "fixture-only deps");
+        if (control == "reparse")
+            File.CreateSymbolicLink(Path.Combine(root, "strogo.generated.dll"), Path.Combine(validPublish, "Strogo.Generated.dll"));
+        else File.WriteAllText(Path.Combine(root, "strogo.generated.dll"), "fixture-only dll");
+        if (control == "nested") Directory.CreateDirectory(Path.Combine(root, "child"));
+        if (control == "ads") File.WriteAllText(Path.Combine(root, "strogo.generated.dll") + ":extra", "unexpected stream");
+        try
+        {
+            RefusePackage(() => G02PublishInventory.CaptureFixture(root, publishHandles),
+                control == "ads" ? "PackageAlternateStreamRejected" : "BuildPublishLayoutInvalid");
+        }
+        finally { foreach (var file in publishHandles) file.Dispose(); publishHandles.Clear(); }
+    }
     var snapshotRoot = Path.Combine(repoRoot, "artifacts", "local-validation", "g02",
         "package-snapshot-" + Guid.NewGuid().ToString("N"));
     Directory.CreateDirectory(Path.Combine(snapshotRoot, "content"));
@@ -764,8 +825,9 @@ if (OperatingSystem.IsWindows())
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
                 Path.Combine(replayEvidence, shape, "compiled"));
             compiledFixture = compiled;
-            Check(compiled.AssemblyBytes.Length > 0 && compiled.DepsBytes.Length > 0 && compiled.SdkClosureDigest == sdk.Digest,
-                "held SDK and pinned offline packs compile the translated fixture to a real ReadyToRun DLL");
+            Check(compiled.AssemblyBytes.Length > 0 && compiled.DepsBytes.Length > 0 && compiled.SdkClosureDigest == sdk.Digest &&
+                  compiled.PublishedFiles.Length == 190 && compiled.PublishInventoryDigest == G02PublishInventory.DiagnosticDigest(compiled.PublishedFiles),
+                "held offline SDK builds real ReadyToRun with all190 physical publish files in private inventory");
             var translationSecond = await G02DafnyReplay.TranslateFixtureAsync(tool, positiveInputs,
                 Path.Combine(replayEvidence, shape, "translation-second"));
             Check(translationSecond.GeneratedSourceBytes!.SequenceEqual(translation.GeneratedSourceBytes!) &&
@@ -775,8 +837,10 @@ if (OperatingSystem.IsWindows())
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
                 Path.Combine(replayEvidence, shape, "compiled-second"));
             Check(compiled.AssemblyBytes.SequenceEqual(compiledSecond.AssemblyBytes) &&
-                  compiled.DepsBytes.SequenceEqual(compiledSecond.DepsBytes),
-                "two fresh translation/build roots and private caches produce byte-equal DLL and deps");
+                  compiled.DepsBytes.SequenceEqual(compiledSecond.DepsBytes) &&
+                  compiled.PublishedFiles.SequenceEqual(compiledSecond.PublishedFiles) &&
+                  compiled.PublishInventoryDigest == compiledSecond.PublishInventoryDigest,
+                "two fresh translation/build roots and private caches produce equal complete physical publish inventories");
         }
         Check(firstReplay.Verified.TranscriptBytes.SequenceEqual(secondReplay.Verified.TranscriptBytes) &&
               firstReplay.Verified.ObligationVectorBytes.SequenceEqual(secondReplay.Verified.ObligationVectorBytes),
@@ -841,7 +905,9 @@ if (OperatingSystem.IsWindows())
                 Path.Combine(replayEvidence, shape, "composed"));
             Check(actual.Proof.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) && toolOpens == 2 &&
                   actual.Build.AssemblyBytes.SequenceEqual(compiledFixture.AssemblyBytes) &&
-                  actual.Build.DepsBytes.SequenceEqual(compiledFixture.DepsBytes),
+                  actual.Build.DepsBytes.SequenceEqual(compiledFixture.DepsBytes) &&
+                  actual.Build.PublishedFiles.SequenceEqual(compiledFixture.PublishedFiles) &&
+                  actual.Build.PublishInventoryDigest == compiledFixture.PublishInventoryDigest,
                 "held signed fixture package passes fresh proof, translation, build and entry/deps comparison");
         }
         foreach (var artifact in new[] { "content/generated.dll", "content/generated.deps.json" })

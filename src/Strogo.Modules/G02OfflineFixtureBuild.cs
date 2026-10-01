@@ -6,7 +6,8 @@ using System.Text;
 
 namespace Strogo.Modules;
 
-internal sealed record G02FixtureBuild(byte[] AssemblyBytes, byte[] DepsBytes, string SdkClosureDigest);
+internal sealed record G02FixtureBuild(byte[] AssemblyBytes, byte[] DepsBytes, string SdkClosureDigest,
+    ImmutableArray<G02PublishedFile> PublishedFiles, string PublishInventoryDigest);
 
 /// <summary>Offline fixture compilation only. This is not a public producer, package or admission.</summary>
 internal static class G02OfflineFixtureBuild
@@ -129,8 +130,13 @@ internal static class G02OfflineFixtureBuild
                 if (step == "restore") held.Add(new FileStream(Path.Combine(work, "packages.lock.json"),
                     FileMode.Open, FileAccess.Read, FileShare.Read));
             }
+            var published = G02PublishInventory.CaptureFixture(Path.Combine(work, "publish"), held);
+            var publishInventoryDigest = G02PublishInventory.DiagnosticDigest(published);
             var assembly = ReadBounded(Path.Combine(work, "publish", "strogo.generated.dll"), 16_777_216);
             var deps = ReadBounded(Path.Combine(work, "publish", "strogo.generated.deps.json"), 1_048_576);
+            if (Convert.ToHexStringLower(SHA256.HashData(assembly)) != published.Single(file => file.Name == "strogo.generated.dll").Sha256 ||
+                Convert.ToHexStringLower(SHA256.HashData(deps)) != published.Single(file => file.Name == "strogo.generated.deps.json").Sha256)
+                throw Refuse("BuildPublishEntryChanged");
             using var pe = new PEReader(new MemoryStream(assembly, writable: false));
             var native = pe.PEHeaders.CorHeader?.ManagedNativeHeaderDirectory ?? default;
             if (native.Size < 4 || native.RelativeVirtualAddress == 0 ||
@@ -142,10 +148,12 @@ internal static class G02OfflineFixtureBuild
                 transcriptSha256 = Convert.ToHexStringLower(SHA256.HashData(translation.Verified.TranscriptBytes)),
                 generatedSourceSha256 = Convert.ToHexStringLower(SHA256.HashData(generated)),
                 assemblySha256 = Convert.ToHexStringLower(SHA256.HashData(assembly)),
-                packs = Packs.Select(pack => new { name = pack.Name, sha256 = pack.Sha256 }).ToArray()
+                packs = Packs.Select(pack => new { name = pack.Name, sha256 = pack.Sha256 }).ToArray(),
+                publishInventoryDigest,
+                publishInventory = published.Select(file => new { name = file.Name, sha256 = file.Sha256, length = file.Length }).ToArray()
             }));
             completed = true;
-            return new(assembly, deps, sdk.Digest);
+            return new(assembly, deps, sdk.Digest, published, publishInventoryDigest);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         { throw Refuse("BuildIoRefused"); }
