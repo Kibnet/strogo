@@ -1,0 +1,98 @@
+{
+  "purpose": "generated-scalar-profiler-metadata-join",
+  "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+  "sourceMapSha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+  "entity": "function/addOne",
+  "symbol": "F000",
+  "observerSha256": "4b8088e755fed3f2f7428dad3dc9779b9327801c263bd57d9475b286c39c1fd7",
+  "consumerSha256": "b3c6ee3b6110adc9e83af556bac95f925ab05d313a48f191e1f251e0d070e3f8",
+  "sources": [
+    {
+      "name": "Run-GeneratedObserver.ps1",
+      "sha256": "894d9f148ef8c382f189bffd315c9d1de9ff0d35c92174eb42b30e83e913f946"
+    },
+    {
+      "name": "Observer.cpp",
+      "sha256": "e50ed2e62b17ff641ad49b1085f093dc20a1c01b6b430bed934f685d0d6faea0"
+    },
+    {
+      "name": "Enter.asm",
+      "sha256": "ff755aec4082e2c8e7f34a93e2a0603b5737ccae0cb912b59d56f3b571804f6f"
+    },
+    {
+      "name": "GeneratedProbe.csproj",
+      "sha256": "77ccabb8f2c8918989973346b44370adbfd548ec917b92dee921e568d7853b7d"
+    },
+    {
+      "name": "NuGet.Config",
+      "sha256": "d240b9affa63e3d05d49f0463bc05947ed2ff1d6c97159e1a4ce73fec946d5ef"
+    },
+    {
+      "name": "Program.cs",
+      "sha256": "6dc1bb2f2d92b92585659eeb4309959b3607df23310bf47d4aa7e5cb5fa6652e"
+    }
+  ],
+  "results": [
+    {
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "expectedToken": 100663306,
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 217292,
+          "functionId": "140728640240032",
+          "moduleId": "140728640192528",
+          "token": 100663306,
+          "mvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+          "moduleFlags": 8,
+          "baseAddress": "2413799604224",
+          "pathChars": 21
+        }
+      ],
+      "wrongMvidAccepted": 0,
+      "metadataAccepted": true,
+      "mode": "call"
+    },
+    {
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "expectedToken": 100663306,
+      "observedMaps": [],
+      "wrongMvidAccepted": 0,
+      "metadataAccepted": false,
+      "mode": "no-call"
+    },
+    {
+      "expectedMvid": "27ae86a0-d59e-429a-8c8e-d109ca3e3954",
+      "wrongTokenAccepted": 0,
+      "output": 42,
+      "expectedToken": 100663306,
+      "observedMaps": [
+        {
+          "event": "map",
+          "pid": 219180,
+          "functionId": "140728639143840",
+          "moduleId": "140728638843800",
+          "token": 100663308,
+          "mvid": "83b05d38-2fc7-458f-b3e8-10b55be03a8e",
+          "moduleFlags": 1,
+          "baseAddress": "1408924319744",
+          "pathChars": 181
+        }
+      ],
+      "wrongMvidAccepted": 0,
+      "metadataAccepted": false,
+      "mode": "decoy"
+    }
+  ],
+  "limits": [
+    "Fixture only, no admission or Q dispatch",
+    "MVID/token are not a loaded-image byte digest",
+    "Source map provenance belongs to prior trusted replay",
+    "Forced JIT, not native R2R evidence",
+    "Scalar fixture, not full ABI generality"
+  ]
+}

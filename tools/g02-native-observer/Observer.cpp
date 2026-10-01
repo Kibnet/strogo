@@ -40,11 +40,16 @@ static UINT_PTR __stdcall Map(FunctionID id, void*, BOOL* hook) {
   HRESULT hr = metadata->GetMethodProps(token,&type,methodName,256,&chars,nullptr,nullptr,nullptr,nullptr,nullptr);
   if (SUCCEEDED(hr) && (chars == 0 || chars > 256)) hr=E_INVALIDARG;
   if (SUCCEEDED(hr)) hr = metadata->GetTypeDefProps(type,typeName,256,&chars,nullptr,nullptr);
+  GUID mvid={};
+  if (SUCCEEDED(hr)) hr = metadata->GetScopeProps(nullptr,0,nullptr,&mvid);
   metadata->Release();
   if (FAILED(hr) || chars == 0 || chars > 256 || wcscmp(methodName,targetMethod) || wcscmp(typeName,targetType)) return 0;
-  char line[256];
-  sprintf_s(line,"{\"event\":\"map\",\"pid\":%lu,\"functionId\":\"%llu\",\"moduleId\":\"%llu\",\"token\":%u}\n",GetCurrentProcessId(),static_cast<unsigned long long>(id),static_cast<unsigned long long>(module),token);
-  Write(line); *hook = TRUE; return id;
+  LPCBYTE base=nullptr; AssemblyID assembly=0; DWORD flags=0; ULONG pathChars=0;
+  if(FAILED(info->GetModuleInfo2(module,&base,0,&pathChars,nullptr,&assembly,&flags))) return 0;
+  char line[512];
+  sprintf_s(line,"{\"event\":\"map\",\"pid\":%lu,\"functionId\":\"%llu\",\"moduleId\":\"%llu\",\"token\":%u,\"mvid\":\"%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x\",\"moduleFlags\":%lu,\"baseAddress\":\"%llu\",\"pathChars\":%lu}\n",GetCurrentProcessId(),static_cast<unsigned long long>(id),static_cast<unsigned long long>(module),token,mvid.Data1,mvid.Data2,mvid.Data3,mvid.Data4[0],mvid.Data4[1],mvid.Data4[2],mvid.Data4[3],mvid.Data4[4],mvid.Data4[5],mvid.Data4[6],mvid.Data4[7],flags,static_cast<unsigned long long>(reinterpret_cast<UINT_PTR>(base)),pathChars);
+  Write(line);
+  *hook = TRUE; return id;
 }
 extern "C" {
   alignas(8) volatile LONG64 ObserverCount = 0;

@@ -310,3 +310,7 @@ Acceptance: оба существующих fixture shapes выполняют di
 ### EXEC extension 2026-10-01: native observer startup and entry probe
 
 Implement diagnostic-only callback2 COM DLL with Info3 mapper/Enter3 registration, fixed-size bounded native trace, host-provided target metadata name and CREATE_NEW trace path. Initial standalone managed Probe.Target/no-call consumer verifies actual CLR startup QueryInterface/registration and independent entry callbacks versus zero-entry negative. No registry writes; profiler environment scoped to child only. Source/observed build identities and raw trace retained. This is observer machinery, not generated-module attribution/admission/ordinary R2R instruction provenance; full module/hash/token/source-map binding and decoy controls remain mandatory for AC5. Production package schemas unchanged.
+
+### EXEC extension 2026-10-01: generated scalar observer metadata join
+
+Extend diagnostic trace with runtime MVID and module flags/base/path length; standalone consumer invokes source-map-selected generated scalar symbol from retained exact DLL bytes via LoadFromStream. Host independently compares PE metadata MVID/token plus bytes SHA/source-map with native mapper and enter PID. Call/no-call and wrong expected MVID/token controls required. This proves metadata join, not byte digest of actual mapped image; MVID is forgeable and must not substitute for eventual loaded assembly digest. No admission or public runtime changes.

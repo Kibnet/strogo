@@ -1,0 +1,9 @@
+  Определение проектов для восстановления...
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\generated-observer-cae63fb021cd48eea2e87ba3f5c11a5d\consumer\GeneratedProbe.csproj (за 92 мс).
+  GeneratedProbe -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\generated-observer-cae63fb021cd48eea2e87ba3f5c11a5d\consumer\bin\Release\net10.0\GeneratedProbe.dll
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:01.62
