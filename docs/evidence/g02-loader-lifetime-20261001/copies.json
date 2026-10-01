@@ -1,0 +1,90 @@
+{
+  "copies": [
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/allocation-file-released-process.json",
+      "path": "allocation-file-released-process.json",
+      "sha256": "6113162b2974c7ccc2421688d8d81ca6cfa4bbee65031431fc6c7b3551cb8b05"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/allocation-file-retained-process.json",
+      "path": "allocation-file-retained-process.json",
+      "sha256": "90da9c62ad4286bb20e687f11fe6a6fa7474c84d3f05c453d198e565425c3ebb"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/allocation-stream-process.json",
+      "path": "allocation-stream-process.json",
+      "sha256": "f815cb19f7dcc8b19e4e5635f465a035e72af776e70d66765933672e0c531fae"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/build.txt",
+      "path": "build.txt",
+      "sha256": "9c2f03952c436bb9df7a7c8e3ac42a2f3c8efd0932b0a69c5c0e0080ef7a5c3b"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/pin-check.json",
+      "path": "pin-check.json",
+      "sha256": "8ef909e7dd5fdb13a9ceb8cc55ff01c8a169a1e1a5c0143490fc772419e66465"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/receipt.json",
+      "path": "receipt.json",
+      "sha256": "67afde1886cd952103a5be5ede142404af8d2cf8a1111ca9ce432d658db7821a"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/scalar-file-released-process.json",
+      "path": "scalar-file-released-process.json",
+      "sha256": "1ec45616652d786a3d63c1066e18f8e533d07418caa14081ab7d21f816df857b"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/scalar-file-retained-process.json",
+      "path": "scalar-file-retained-process.json",
+      "sha256": "52839ca16f5de312f1e7ad8ee958e827a9905e158826691005113dd349860f7d"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b454174b65bc401d84b04789eafa6764/scalar-stream-process.json",
+      "path": "scalar-stream-process.json",
+      "sha256": "c86fb131ccec9da899f2a4ed0b10f2aebafde830eee5a9075a920118ea213ae3"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/allocation-file-released-process.json",
+      "path": "history/allocation-file-released-process.json",
+      "sha256": "44220b0ab1ef6fe1add8b7ae8c6abbb3f13632a3f14c6d5efdad3536c61625b9"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/allocation-file-retained-process.json",
+      "path": "history/allocation-file-retained-process.json",
+      "sha256": "8bf3247157e70f8183b72e2be4747cc7aebb982249b88c18570a7048ff0af5ee"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/allocation-stream-process.json",
+      "path": "history/allocation-stream-process.json",
+      "sha256": "a7742adf6a9044b38748a757eb469af57db12417477e8890641d12d71a6456a0"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/build.txt",
+      "path": "history/build.txt",
+      "sha256": "a4dbb4445f2c5926a07b33ecedccecb7e44d0ca2cc2b591b0992b443cb12deb0"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/receipt.json",
+      "path": "history/receipt.json",
+      "sha256": "706246799ee31b55a4bef27f8446c92a1a886ca81d33216e37fffb0adb477df8"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/scalar-file-released-process.json",
+      "path": "history/scalar-file-released-process.json",
+      "sha256": "6b6dbd9cc62727e8f531d0cbf7b7c5340159d967e5488aea74fa6148415a02d2"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/scalar-file-retained-process.json",
+      "path": "history/scalar-file-retained-process.json",
+      "sha256": "9787422a63c4a24b4326ea35cb45252e854215cb360dcf69b74f91be408e5dc4"
+    },
+    {
+      "source": "artifacts/local-validation/g02/loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00/scalar-stream-process.json",
+      "path": "history/scalar-stream-process.json",
+      "sha256": "e6dbb2933317c9dfa09126d32603c3f2390523a308e4401a9f76e80efe9a1fa1"
+    }
+  ],
+  "baseline": "b8ba79b"
+}

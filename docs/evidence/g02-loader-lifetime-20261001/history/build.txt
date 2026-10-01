@@ -1,0 +1,13 @@
+  Определение проектов для восстановления...
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tools\g02-native-observer\LoaderLifetimeProbe\LoaderLifetimeProbe.csproj (за 112 мс).
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Modules\Strogo.Modules.csproj (за 109 мс).
+  Восстановлен C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Core\Kernel.Core.csproj (за 100 мс).
+  Kernel.Core -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Core\bin\Debug\net10.0\Kernel.Core.dll
+  Strogo.Modules -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Modules\bin\Debug\net10.0\Strogo.Modules.dll
+  LoaderLifetimeProbe -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tools\g02-native-observer\LoaderLifetimeProbe\bin\Debug\net10.0\Strogo.Modules.ObserverFixture.dll
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:09.32

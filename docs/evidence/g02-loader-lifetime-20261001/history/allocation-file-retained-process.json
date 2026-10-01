@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "fixture": "allocation",
+  "stdout": "{\"purpose\":\"loader-lifetime-physics-not-proof-or-admission\",\"mode\":\"file-retained\",\"runtimeDirectory\":\"C:\\\\Users\\\\Kibnet\\\\Documents\\\\Codex\\\\2026-09-04\\\\strogo\\\\.tools\\\\dotnet-sdk-10.0.400\\\\shared\\\\Microsoft.NETCore.App\\\\10.0.11\\\\\",\"functionId\":\"allocate\",\"entrySha256\":\"393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b\",\"packageDigest\":\"18298a939b4a64296f78fb6bda5f015fbfa3cc41eae027646d82921bedb96a0a\",\"observation\":{\"Location\":\"C:\\\\Users\\\\Kibnet\\\\Documents\\\\Codex\\\\2026-09-04\\\\strogo\\\\artifacts\\\\local-validation\\\\g02\\\\loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00\\\\allocation-file-retained\\\\generated.dll\",\"OwnerMatch\":true,\"WhileOwnHandle\":{\"Success\":false,\"HResult\":-2147024864},\"AfterDispose\":{\"Success\":false,\"HResult\":-2147024864},\"AfterGcWithReferences\":{\"Success\":false,\"HResult\":-2147024864}},\"history\":[],\"expectedOwner\":{\"type\":\"AllocationState\",\"value\":[{\"fieldId\":\"allocations\",\"value\":{\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"256\"},\"value\":[]}},{\"fieldId\":\"remaining\",\"value\":{\"type\":\"I64\",\"value\":\"5\"}}]},\"expectedReference\":{\"type\":\"AllocationState\",\"value\":[{\"fieldId\":\"allocations\",\"value\":{\"type\":{\"kind\":\"Seq\",\"elementType\":\"I64\",\"capacity\":\"256\"},\"value\":[]}},{\"fieldId\":\"remaining\",\"value\":{\"type\":\"I64\",\"value\":\"5\"}}]},\"ownerReferenceMatch\":true,\"sourceUnchanged\":true,\"copyUnchanged\":true}\r\n",
+  "pid": 318248,
+  "timedOut": false,
+  "mode": "file-retained",
+  "stderr": ""
+}

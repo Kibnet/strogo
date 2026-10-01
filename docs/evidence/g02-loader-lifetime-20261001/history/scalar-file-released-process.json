@@ -1,0 +1,9 @@
+{
+  "exitCode": 0,
+  "fixture": "scalar",
+  "stdout": "{\"purpose\":\"loader-lifetime-physics-not-proof-or-admission\",\"mode\":\"file-released\",\"runtimeDirectory\":\"C:\\\\Users\\\\Kibnet\\\\Documents\\\\Codex\\\\2026-09-04\\\\strogo\\\\.tools\\\\dotnet-sdk-10.0.400\\\\shared\\\\Microsoft.NETCore.App\\\\10.0.11\\\\\",\"functionId\":\"addOne\",\"entrySha256\":\"1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a\",\"packageDigest\":\"391cc52984cd5358fff40473f5241c1285eb262c149925c13bca9c002a2da268\",\"observation\":{\"Location\":\"C:\\\\Users\\\\Kibnet\\\\Documents\\\\Codex\\\\2026-09-04\\\\strogo\\\\artifacts\\\\local-validation\\\\g02\\\\loader-lifetime-b5bc2f3be1ec4aa5a543574dfce83a00\\\\scalar-file-released\\\\generated.dll\",\"OwnerMatch\":true,\"WhileOwnHandle\":{\"Success\":false,\"HResult\":-2147024864},\"AfterDispose\":{\"Success\":false,\"HResult\":-2147024864},\"AfterGcWithReferences\":null},\"history\":[{\"iteration\":0,\"collected\":true,\"reopen\":{\"Success\":true,\"HResult\":null}}],\"expectedOwner\":{\"type\":\"I64\",\"value\":\"1\"},\"expectedReference\":{\"type\":\"I64\",\"value\":\"1\"},\"ownerReferenceMatch\":true,\"sourceUnchanged\":true,\"copyUnchanged\":true}\r\n",
+  "pid": 317508,
+  "timedOut": false,
+  "mode": "file-released",
+  "stderr": ""
+}

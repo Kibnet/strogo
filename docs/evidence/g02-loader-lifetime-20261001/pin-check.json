@@ -1,0 +1,35 @@
+{
+  "scope": "six current executable/runtime file pins; not whole SDK or loaded-memory attestation",
+  "rows": [
+    {
+      "path": "dotnet.exe",
+      "matchesPin": true,
+      "sha256": "ab1b71fd3dd71062e074c9fab8312081a81b7f2b3e0327c48c4d249c8d1a3135"
+    },
+    {
+      "path": "host/fxr/10.0.11/hostfxr.dll",
+      "matchesPin": true,
+      "sha256": "44f97e946b36415176dbc56a4426565a5e9b3e722c0ad579e20a749e3c0c7bcd"
+    },
+    {
+      "path": "shared/Microsoft.NETCore.App/10.0.11/System.Private.CoreLib.dll",
+      "matchesPin": true,
+      "sha256": "ed80a1a5dd066c0407ad59686f9af90a4f3e55dbf3e4c973b53cc8c9d0706f82"
+    },
+    {
+      "path": "shared/Microsoft.NETCore.App/10.0.11/coreclr.dll",
+      "matchesPin": true,
+      "sha256": "c98c3078a4f2495dd7d3ced967c7a6981545194ed163454703580b740f435521"
+    },
+    {
+      "path": "shared/Microsoft.NETCore.App/10.0.11/clrjit.dll",
+      "matchesPin": true,
+      "sha256": "e7bf743e7bf9a01c8c2bcdc0d828212fd8dfc285be9d4ec21962becf456df648"
+    },
+    {
+      "path": "shared/Microsoft.NETCore.App/10.0.11/hostpolicy.dll",
+      "matchesPin": true,
+      "sha256": "ded1d42c38688a1cacd20026b1f981c22fd583f621b7123296ef0f2af9cd656d"
+    }
+  ]
+}

@@ -1,0 +1,449 @@
+{
+  "binaries": [
+    {
+      "sha256": "a386db205aa98f26c0d304a9f520ab2364fe3e6ab45e328e782f5f6c9de7c97c",
+      "name": "Kernel.Core.dll"
+    },
+    {
+      "sha256": "a3e2d8b6290b1a2c177901c2530e97d778139e2eed03ec201265559ef88fb011",
+      "name": "Kernel.Core.pdb"
+    },
+    {
+      "sha256": "2009443e11e55e0c0a80e56491f9d211cd8964f40a528f5c77a5260e24123c84",
+      "name": "Strogo.Modules.dll"
+    },
+    {
+      "sha256": "499db1e5a827de5cc6bd5935d756d2ee8a3d753d0b092c7e8cea9e6019ac8ef3",
+      "name": "Strogo.Modules.ObserverFixture.deps.json"
+    },
+    {
+      "sha256": "c5530b0827a6f38cba689465e52624e41727777492f85abaae5075a8f207d295",
+      "name": "Strogo.Modules.ObserverFixture.dll"
+    },
+    {
+      "sha256": "2930d58a6c898e2b49a16e9a4fba28244a349713879033af749a0e70a4f8313b",
+      "name": "Strogo.Modules.ObserverFixture.exe"
+    },
+    {
+      "sha256": "3ca7f6c455aabedb45489e558b1cee94880bf51d329b8aac02cbe27e44d9f9c2",
+      "name": "Strogo.Modules.ObserverFixture.pdb"
+    },
+    {
+      "sha256": "256dda2706e1151bb95987b6b5be610bf68d64e058285b19e7e958222fc90414",
+      "name": "Strogo.Modules.ObserverFixture.runtimeconfig.json"
+    },
+    {
+      "sha256": "cf5fc9df7044e85c723908c02c9746bd8ec7eef1d5deaaa0ff313a6cad90f782",
+      "name": "Strogo.Modules.pdb"
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/g02-native-observer/Run-LoaderLifetime.ps1",
+      "sha256": "cbaddd48b0c264df5ddd5f9b8e8036e469856db94003d352ef4a876638c99f95"
+    },
+    {
+      "path": "tools/g02-native-observer/LoaderLifetimeProbe/LoaderLifetimeProbe.csproj",
+      "sha256": "dc175a992df2ba602645bb2daa614d1dfa4b1ca763e5ca16fdaef62cc386e4e9"
+    },
+    {
+      "path": "tools/g02-native-observer/LoaderLifetimeProbe/NuGet.Config",
+      "sha256": "9508cae5f76364f56e80eb97cb16493977243cf38e5cca6284e3d74f83b20a2c"
+    },
+    {
+      "path": "tools/g02-native-observer/LoaderLifetimeProbe/packages.lock.json",
+      "sha256": "e777378f4388edae5471df899243201227155d69439583e8c12d9a0ad3cdbc1a"
+    },
+    {
+      "path": "tools/g02-native-observer/LoaderLifetimeProbe/Program.cs",
+      "sha256": "8e5f8817e36044e09497b4fed52b2a6f2b7e3192218455a529ae034a8ff6f63e"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs",
+      "sha256": "c8e2c2b3c1c2c3a7af4da76ff8433f86c69bfaaeb6d464961fd8d1b4c911ab80"
+    },
+    {
+      "path": "src/Strogo.Modules/G02PackageSnapshot.cs",
+      "sha256": "21b14a3ac8cf5430b29a7b88e1d71ae56634e25e5e4666d43f99be14b26b4382"
+    }
+  ],
+  "results": [
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "stream",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "addOne",
+        "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+        "packageDigest": "391cc52984cd5358fff40473f5241c1285eb262c149925c13bca9c002a2da268",
+        "observation": {
+          "Location": "",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": true,
+            "HResult": null
+          },
+          "AfterGcWithReferences": {
+            "Success": true,
+            "HResult": null
+          }
+        },
+        "history": [],
+        "expectedOwner": {
+          "type": "I64",
+          "value": "1"
+        },
+        "expectedReference": {
+          "type": "I64",
+          "value": "1"
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "fixture": "scalar",
+      "mode": "stream"
+    },
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "file-retained",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "addOne",
+        "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+        "packageDigest": "391cc52984cd5358fff40473f5241c1285eb262c149925c13bca9c002a2da268",
+        "observation": {
+          "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\loader-lifetime-b454174b65bc401d84b04789eafa6764\\scalar-file-retained\\generated.dll",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterGcWithReferences": {
+            "Success": false,
+            "HResult": -2147024864
+          }
+        },
+        "history": [],
+        "expectedOwner": {
+          "type": "I64",
+          "value": "1"
+        },
+        "expectedReference": {
+          "type": "I64",
+          "value": "1"
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "fixture": "scalar",
+      "mode": "file-retained"
+    },
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "file-released",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "addOne",
+        "entrySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+        "packageDigest": "391cc52984cd5358fff40473f5241c1285eb262c149925c13bca9c002a2da268",
+        "observation": {
+          "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\loader-lifetime-b454174b65bc401d84b04789eafa6764\\scalar-file-released\\generated.dll",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterGcWithReferences": null
+        },
+        "history": [
+          {
+            "iteration": 0,
+            "collected": true,
+            "reopen": {
+              "Success": true,
+              "HResult": null
+            }
+          }
+        ],
+        "expectedOwner": {
+          "type": "I64",
+          "value": "1"
+        },
+        "expectedReference": {
+          "type": "I64",
+          "value": "1"
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+      "fixture": "scalar",
+      "mode": "file-released"
+    },
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "stream",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "allocate",
+        "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+        "packageDigest": "18298a939b4a64296f78fb6bda5f015fbfa3cc41eae027646d82921bedb96a0a",
+        "observation": {
+          "Location": "",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": true,
+            "HResult": null
+          },
+          "AfterGcWithReferences": {
+            "Success": true,
+            "HResult": null
+          }
+        },
+        "history": [],
+        "expectedOwner": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "expectedReference": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "fixture": "allocation",
+      "mode": "stream"
+    },
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "file-retained",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "allocate",
+        "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+        "packageDigest": "18298a939b4a64296f78fb6bda5f015fbfa3cc41eae027646d82921bedb96a0a",
+        "observation": {
+          "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\loader-lifetime-b454174b65bc401d84b04789eafa6764\\allocation-file-retained\\generated.dll",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterGcWithReferences": {
+            "Success": false,
+            "HResult": -2147024864
+          }
+        },
+        "history": [],
+        "expectedOwner": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "expectedReference": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "fixture": "allocation",
+      "mode": "file-retained"
+    },
+    {
+      "report": {
+        "purpose": "loader-lifetime-physics-not-proof-or-admission",
+        "mode": "file-released",
+        "runtimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+        "functionId": "allocate",
+        "entrySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+        "packageDigest": "18298a939b4a64296f78fb6bda5f015fbfa3cc41eae027646d82921bedb96a0a",
+        "observation": {
+          "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\loader-lifetime-b454174b65bc401d84b04789eafa6764\\allocation-file-released\\generated.dll",
+          "OwnerMatch": true,
+          "WhileOwnHandle": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterDispose": {
+            "Success": false,
+            "HResult": -2147024864
+          },
+          "AfterGcWithReferences": null
+        },
+        "history": [
+          {
+            "iteration": 0,
+            "collected": true,
+            "reopen": {
+              "Success": true,
+              "HResult": null
+            }
+          }
+        ],
+        "expectedOwner": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "expectedReference": {
+          "type": "AllocationState",
+          "value": [
+            {
+              "fieldId": "allocations",
+              "value": {
+                "type": {
+                  "kind": "Seq",
+                  "elementType": "I64",
+                  "capacity": "256"
+                },
+                "value": []
+              }
+            },
+            {
+              "fieldId": "remaining",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ]
+        },
+        "ownerReferenceMatch": true,
+        "sourceUnchanged": true,
+        "copyUnchanged": true
+      },
+      "sha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "fixture": "allocation",
+      "mode": "file-released"
+    }
+  ],
+  "purpose": "isolated-loader-lifetime-preflight"
+}
