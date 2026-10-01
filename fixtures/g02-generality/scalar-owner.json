@@ -1,0 +1,335 @@
+{
+  "bundleId": "owner.generality.scalar-v2",
+  "entryContracts": [
+    {
+      "effects": [],
+      "functionRef": "advance.alpha-v2",
+      "id": "contract.alpha-v2",
+      "modelRef": "model.alpha-v2",
+      "parameters": [
+        {
+          "id": "value.alpha-v2",
+          "type": "I64"
+        }
+      ],
+      "requires": {
+        "args": [
+          {
+            "id": "value.alpha-v2",
+            "op": "param",
+            "type": "I64"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "9223372036854775806"
+          }
+        ],
+        "op": "i64.le",
+        "type": "Bool"
+      },
+      "returnType": "I64",
+      "witnesses": [
+        {
+          "arguments": [
+            {
+              "parameterId": "value.alpha-v2",
+              "value": {
+                "type": "I64",
+                "value": "-9223372036854775808"
+              }
+            }
+          ],
+          "id": "helper-0"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "value.alpha-v2",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            }
+          ],
+          "id": "helper-1"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "value.alpha-v2",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            }
+          ],
+          "id": "helper-2"
+        }
+      ]
+    },
+    {
+      "effects": [],
+      "functionRef": "choose.beta-v2",
+      "id": "contract.beta-v2",
+      "modelRef": "model.beta-v2",
+      "parameters": [
+        {
+          "id": "condition.beta-v2",
+          "type": "Bool"
+        },
+        {
+          "id": "left.beta-v2",
+          "type": "I64"
+        },
+        {
+          "id": "right.beta-v2",
+          "type": "I64"
+        }
+      ],
+      "requires": {
+        "args": [
+          {
+            "args": [
+              {
+                "id": "left.beta-v2",
+                "op": "param",
+                "type": "I64"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            ],
+            "op": "i64.le",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              {
+                "id": "right.beta-v2",
+                "op": "param",
+                "type": "I64"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            ],
+            "op": "i64.le",
+            "type": "Bool"
+          }
+        ],
+        "op": "bool.and",
+        "type": "Bool"
+      },
+      "returnType": "I64",
+      "witnesses": [
+        {
+          "arguments": [
+            {
+              "parameterId": "condition.beta-v2",
+              "value": {
+                "type": "Bool",
+                "value": true
+              }
+            },
+            {
+              "parameterId": "left.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            },
+            {
+              "parameterId": "right.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "10"
+              }
+            }
+          ],
+          "id": "branch-0"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "condition.beta-v2",
+              "value": {
+                "type": "Bool",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "left.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "0"
+              }
+            },
+            {
+              "parameterId": "right.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "10"
+              }
+            }
+          ],
+          "id": "branch-1"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "condition.beta-v2",
+              "value": {
+                "type": "Bool",
+                "value": true
+              }
+            },
+            {
+              "parameterId": "left.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "-9223372036854775808"
+              }
+            },
+            {
+              "parameterId": "right.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            }
+          ],
+          "id": "branch-2"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "condition.beta-v2",
+              "value": {
+                "type": "Bool",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "left.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "-9223372036854775808"
+              }
+            },
+            {
+              "parameterId": "right.beta-v2",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775806"
+              }
+            }
+          ],
+          "id": "branch-3"
+        }
+      ]
+    }
+  ],
+  "limits": {
+    "maxExpressionDepth": "16",
+    "maxExpressionNodes": "128",
+    "maxProofEvaluationSteps": "4096",
+    "maxWitnessValueNodes": "4096",
+    "maxWitnessesPerEntry": "8"
+  },
+  "models": [
+    {
+      "body": {
+        "args": [
+          {
+            "id": "value.alpha-v2",
+            "op": "param",
+            "type": "I64"
+          },
+          {
+            "op": "i64.const",
+            "type": "I64",
+            "value": "1"
+          }
+        ],
+        "op": "i64.add",
+        "type": "I64"
+      },
+      "id": "model.alpha-v2",
+      "parameters": [
+        {
+          "id": "value.alpha-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    },
+    {
+      "body": {
+        "args": [
+          {
+            "id": "condition.beta-v2",
+            "op": "param",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              {
+                "id": "left.beta-v2",
+                "op": "param",
+                "type": "I64"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "1"
+              }
+            ],
+            "op": "i64.add",
+            "type": "I64"
+          },
+          {
+            "args": [
+              {
+                "id": "right.beta-v2",
+                "op": "param",
+                "type": "I64"
+              },
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "1"
+              }
+            ],
+            "op": "i64.add",
+            "type": "I64"
+          }
+        ],
+        "op": "if",
+        "type": "I64"
+      },
+      "id": "model.beta-v2",
+      "parameters": [
+        {
+          "id": "condition.beta-v2",
+          "type": "Bool"
+        },
+        {
+          "id": "left.beta-v2",
+          "type": "I64"
+        },
+        {
+          "id": "right.beta-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    }
+  ],
+  "schemaVersion": "strogo.owner-bundle.v0.4",
+  "types": []
+}

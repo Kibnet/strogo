@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems><ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors><NoWarn>CS8981;CS1718</NoWarn>
+    <AssemblyName>strogo.generated</AssemblyName><RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeFrameworkVersion>10.0.11</RuntimeFrameworkVersion><TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
+    <SelfContained>true</SelfContained><PublishReadyToRun>true</PublishReadyToRun><PublishReadyToRunComposite>false</PublishReadyToRunComposite>
+    <Deterministic>true</Deterministic><CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile><NuGetAudit>false</NuGetAudit>
+    <PathMap>$(MSBuildProjectDirectory)=/_/strogo/g02</PathMap>
+    <Version>0.2.0</Version><AssemblyVersion>0.2.0.0</AssemblyVersion><FileVersion>0.2.0.0</FileVersion>
+    <InformationalVersion>0.2.0</InformationalVersion><IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <UseSharedCompilation>false</UseSharedCompilation>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="Generated.cs" /></ItemGroup>
+</Project>

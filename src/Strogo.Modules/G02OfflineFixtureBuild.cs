@@ -25,7 +25,7 @@ internal static class G02OfflineFixtureBuild
           <PropertyGroup>
             <OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework>
             <EnableDefaultCompileItems>false</EnableDefaultCompileItems><ImplicitUsings>enable</ImplicitUsings>
-            <Nullable>disable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors><NoWarn>CS8981</NoWarn>
+            <Nullable>disable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors><NoWarn>CS8981;CS1718</NoWarn>
             <AssemblyName>strogo.generated</AssemblyName><RuntimeIdentifier>win-x64</RuntimeIdentifier>
             <RuntimeFrameworkVersion>10.0.11</RuntimeFrameworkVersion><TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
             <SelfContained>true</SelfContained><PublishReadyToRun>true</PublishReadyToRun><PublishReadyToRunComposite>false</PublishReadyToRunComposite>
@@ -147,6 +147,7 @@ internal static class G02OfflineFixtureBuild
                 purpose = "fixture-only-not-admitted", sdkClosureDigest = sdk.Digest,
                 transcriptSha256 = Convert.ToHexStringLower(SHA256.HashData(translation.Verified.TranscriptBytes)),
                 generatedSourceSha256 = Convert.ToHexStringLower(SHA256.HashData(generated)),
+                projectSha256 = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(Project))),
                 assemblySha256 = Convert.ToHexStringLower(SHA256.HashData(assembly)),
                 packs = Packs.Select(pack => new { name = pack.Name, sha256 = pack.Sha256 }).ToArray(),
                 publishInventoryDigest,

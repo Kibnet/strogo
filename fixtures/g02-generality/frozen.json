@@ -1,0 +1,37 @@
+{
+  "files": [
+    {
+      "path": "allocation-alternative.json",
+      "sha256": "f22fb841a60e8aa029486f9495c170d1bb60305e1ef598728952750fe838db0a"
+    },
+    {
+      "path": "allocation-owner.json",
+      "sha256": "089f9a53fe0904aec6b00a2a975a86b53235a06cab2731e4e7dcb1339c1e97e4"
+    },
+    {
+      "path": "allocation-primary.json",
+      "sha256": "077051e72d0e77b138832fcfed2051bfaf723ea4d93ee79931b67b3a002799a2"
+    },
+    {
+      "path": "allocation-wrong.json",
+      "sha256": "5fcd96a90c214c687749af4d052d0b74f976c619be4f33ea1de259493c3afa59"
+    },
+    {
+      "path": "scalar-alternative.json",
+      "sha256": "1a2b0f7392bafbada4bc4619f7db9c8b052857a7c0ddfceb1639670306c1426a"
+    },
+    {
+      "path": "scalar-owner.json",
+      "sha256": "56d8352b9f1db75287f0d437e998f4554dc9e175dbd89fe049bec3bf02fdfae4"
+    },
+    {
+      "path": "scalar-primary.json",
+      "sha256": "eed262408c628dafbf2117a6e8dfc2445873b776d1a72ac33e8d78b60c6f6a1d"
+    },
+    {
+      "path": "scalar-wrong.json",
+      "sha256": "69965616fefe65e0127eab0499052c5777f5ae2bce4d0724a291cda2df05a8ab"
+    }
+  ],
+  "purpose": "validation-only-no-human-admission"
+}

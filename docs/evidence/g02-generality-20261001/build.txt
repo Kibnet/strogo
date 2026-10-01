@@ -1,0 +1,26 @@
+  Kernel.Core -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Core\bin\Debug\net10.0\Kernel.Core.dll
+  Strogo.Modules -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Modules\bin\Debug\net10.0\Strogo.Modules.dll
+  Strogo.Notation -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Notation\bin\Debug\net10.0\Strogo.Notation.dll
+  Kernel.Graph.Core -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Graph.Core\bin\Debug\net10.0\Kernel.Graph.Core.dll
+  Strogo.Experiments -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Experiments\bin\Debug\net10.0\Strogo.Experiments.dll
+  Kernel.Host -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Host\bin\Debug\net10.0\Kernel.Host.dll
+  Strogo.Experiments.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Experiments.Conformance\bin\Debug\net10.0\Strogo.Experiments.Conformance.dll
+  Strogo.Modules.Portability -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Modules.Portability\bin\Debug\net10.0\Strogo.Modules.Portability.dll
+  Kernel.Graph.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Kernel.Graph.Conformance\bin\Debug\net10.0\Kernel.Graph.Conformance.dll
+  Strogo.Modules.Owner.Cli -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.Modules.Owner.Cli\bin\Debug\net10.0\Strogo.Modules.Owner.Cli.dll
+  Strogo.Notation.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Notation.Conformance\bin\Debug\net10.0\Strogo.Notation.Conformance.dll
+  Strogo.Modules.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Modules.Conformance\bin\Debug\net10.0\Strogo.Modules.Conformance.dll
+  Kernel.Graph.Cli -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Graph.Cli\bin\Debug\net10.0\Kernel.Graph.Cli.dll
+  Kernel.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Kernel.Conformance\bin\Debug\net10.0\Kernel.Conformance.dll
+  Strogo.ExperimentCli -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Strogo.ExperimentCli\bin\Debug\net10.0\Strogo.ExperimentCli.dll
+  Strogo.Modules.Admission.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Modules.Admission.Conformance\bin\Debug\net10.0\Strogo.Modules.Admission.Conformance.dll
+  Kernel.Cli -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\src\Kernel.Cli\bin\Debug\net10.0\Kernel.Cli.dll
+  Strogo.Modules.Portability.PackageHarness -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Modules.Portability.PackageHarness\bin\Debug\net10.0\Strogo.Modules.Portability.PackageHarness.dll
+  Strogo.Modules.Portability.Conformance -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Modules.Portability.Conformance\bin\Debug\net10.0\Strogo.Modules.Portability.Conformance.dll
+  Strogo.Modules.Portability.JvmHarness -> C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\tests\Strogo.Modules.Portability.JvmHarness\bin\Debug\net10.0\Strogo.Modules.Portability.JvmHarness.dll
+
+Сборка успешно завершена.
+    Предупреждений: 0
+    Ошибок: 0
+
+Прошло времени 00:00:06.35

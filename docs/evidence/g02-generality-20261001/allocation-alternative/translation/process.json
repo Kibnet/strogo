@@ -1,0 +1,1 @@
+{"arguments":["translate","cs","candidate.dfy","--output","Generated.cs","--include-runtime","--enforce-determinism","--cores","2","--verification-time-limit","15"],"exitCode":0,"timeout":false}

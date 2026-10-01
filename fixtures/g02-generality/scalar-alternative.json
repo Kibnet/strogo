@@ -1,0 +1,111 @@
+{
+  "exports": [
+    "choose.beta-v2",
+    "advance.alpha-v2"
+  ],
+  "functions": [
+    {
+      "body": {
+        "nodes": [
+          {
+            "args": [
+              "condition.beta-v2",
+              "left.beta-v2",
+              "right.beta-v2"
+            ],
+            "elseRegion": {
+              "nodes": [],
+              "parameters": [
+                "branch.left",
+                "branch.right"
+              ],
+              "result": "branch.right"
+            },
+            "id": "selected",
+            "op": "if",
+            "thenRegion": {
+              "nodes": [],
+              "parameters": [
+                "branch.left",
+                "branch.right"
+              ],
+              "result": "branch.left"
+            },
+            "type": "I64"
+          },
+          {
+            "args": [
+              "selected"
+            ],
+            "functionRef": "advance.alpha-v2",
+            "id": "advanced",
+            "op": "call",
+            "type": "I64"
+          }
+        ],
+        "parameters": [
+          "condition.beta-v2",
+          "left.beta-v2",
+          "right.beta-v2"
+        ],
+        "result": "advanced"
+      },
+      "contractRef": "contract.beta-v2",
+      "id": "choose.beta-v2",
+      "parameters": [
+        {
+          "id": "condition.beta-v2",
+          "type": "Bool"
+        },
+        {
+          "id": "left.beta-v2",
+          "type": "I64"
+        },
+        {
+          "id": "right.beta-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    },
+    {
+      "body": {
+        "nodes": [
+          {
+            "args": [],
+            "id": "one",
+            "op": "i64.const",
+            "type": "I64",
+            "value": "-1"
+          },
+          {
+            "args": [
+              "value.alpha-v2",
+              "one"
+            ],
+            "id": "advanced",
+            "op": "i64.sub",
+            "type": "I64"
+          }
+        ],
+        "parameters": [
+          "value.alpha-v2"
+        ],
+        "result": "advanced"
+      },
+      "contractRef": "contract.alpha-v2",
+      "id": "advance.alpha-v2",
+      "parameters": [
+        {
+          "id": "value.alpha-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    }
+  ],
+  "imports": [],
+  "moduleId": "candidate.generality.scalar-v2",
+  "schemaVersion": "strogo.module.v0.2",
+  "types": []
+}

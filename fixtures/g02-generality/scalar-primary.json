@@ -1,0 +1,172 @@
+{
+  "exports": [
+    "choose.beta-v2",
+    "advance.alpha-v2"
+  ],
+  "functions": [
+    {
+      "body": {
+        "nodes": [
+          {
+            "args": [],
+            "id": "one",
+            "op": "i64.const",
+            "type": "I64",
+            "value": "1"
+          },
+          {
+            "args": [
+              "value.alpha-v2",
+              "one"
+            ],
+            "id": "advanced",
+            "op": "i64.add",
+            "type": "I64"
+          }
+        ],
+        "parameters": [
+          "value.alpha-v2"
+        ],
+        "result": "advanced"
+      },
+      "contractRef": "contract.alpha-v2",
+      "id": "advance.alpha-v2",
+      "parameters": [
+        {
+          "id": "value.alpha-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    },
+    {
+      "body": {
+        "nodes": [
+          {
+            "args": [
+              "left.beta-v2",
+              "left.beta-v2"
+            ],
+            "id": "same",
+            "op": "i64.eq",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              "condition.beta-v2",
+              "same"
+            ],
+            "id": "both",
+            "op": "bool.and",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              "both"
+            ],
+            "id": "inverted",
+            "op": "bool.not",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              "inverted"
+            ],
+            "id": "restored",
+            "op": "bool.not",
+            "type": "Bool"
+          },
+          {
+            "args": [],
+            "id": "false",
+            "op": "bool.const",
+            "type": "Bool",
+            "value": false
+          },
+          {
+            "args": [
+              "restored",
+              "false"
+            ],
+            "id": "condition",
+            "op": "bool.or",
+            "type": "Bool"
+          },
+          {
+            "args": [
+              "condition",
+              "left.beta-v2",
+              "right.beta-v2"
+            ],
+            "elseRegion": {
+              "nodes": [
+                {
+                  "args": [
+                    "branch.right"
+                  ],
+                  "functionRef": "advance.alpha-v2",
+                  "id": "called",
+                  "op": "call",
+                  "type": "I64"
+                }
+              ],
+              "parameters": [
+                "branch.left",
+                "branch.right"
+              ],
+              "result": "called"
+            },
+            "id": "selected",
+            "op": "if",
+            "thenRegion": {
+              "nodes": [
+                {
+                  "args": [
+                    "branch.left"
+                  ],
+                  "functionRef": "advance.alpha-v2",
+                  "id": "called",
+                  "op": "call",
+                  "type": "I64"
+                }
+              ],
+              "parameters": [
+                "branch.left",
+                "branch.right"
+              ],
+              "result": "called"
+            },
+            "type": "I64"
+          }
+        ],
+        "parameters": [
+          "condition.beta-v2",
+          "left.beta-v2",
+          "right.beta-v2"
+        ],
+        "result": "selected"
+      },
+      "contractRef": "contract.beta-v2",
+      "id": "choose.beta-v2",
+      "parameters": [
+        {
+          "id": "condition.beta-v2",
+          "type": "Bool"
+        },
+        {
+          "id": "left.beta-v2",
+          "type": "I64"
+        },
+        {
+          "id": "right.beta-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "I64"
+    }
+  ],
+  "imports": [],
+  "moduleId": "candidate.generality.scalar-v2",
+  "schemaVersion": "strogo.module.v0.2",
+  "types": []
+}

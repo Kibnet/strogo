@@ -1,0 +1,429 @@
+{
+  "bundleId": "owner.generality.alloc-v2",
+  "entryContracts": [
+    {
+      "effects": [],
+      "functionRef": "dispatch.alloc-v2",
+      "id": "contract.alloc-v2",
+      "modelRef": "allocate.model-v1",
+      "parameters": [
+        {
+          "id": "requests.alloc-v2",
+          "type": {
+            "capacity": "256",
+            "elementType": "I64",
+            "kind": "Seq"
+          }
+        },
+        {
+          "id": "available.alloc-v2",
+          "type": "I64"
+        }
+      ],
+      "requires": {
+        "args": [
+          {
+            "args": [
+              {
+                "op": "i64.const",
+                "type": "I64",
+                "value": "0"
+              },
+              {
+                "id": "available.alloc-v2",
+                "op": "param",
+                "type": "I64"
+              }
+            ],
+            "op": "i64.le",
+            "type": "Bool"
+          },
+          {
+            "binderId": "i",
+            "body": {
+              "args": [
+                {
+                  "op": "i64.const",
+                  "type": "I64",
+                  "value": "1"
+                },
+                {
+                  "args": [
+                    {
+                      "id": "requests.alloc-v2",
+                      "op": "param",
+                      "type": {
+                        "capacity": "256",
+                        "elementType": "I64",
+                        "kind": "Seq"
+                      }
+                    },
+                    {
+                      "binderId": "i",
+                      "op": "proof.bound",
+                      "type": "I64"
+                    }
+                  ],
+                  "op": "seq.get",
+                  "type": "I64"
+                }
+              ],
+              "op": "i64.le",
+              "type": "Bool"
+            },
+            "op": "forall.sequence",
+            "sequence": {
+              "id": "requests.alloc-v2",
+              "op": "param",
+              "type": {
+                "capacity": "256",
+                "elementType": "I64",
+                "kind": "Seq"
+              }
+            },
+            "type": "Bool"
+          }
+        ],
+        "op": "bool.and",
+        "type": "Bool"
+      },
+      "returnType": "State.alloc-v2",
+      "witnesses": [
+        {
+          "arguments": [
+            {
+              "parameterId": "requests.alloc-v2",
+              "value": {
+                "type": {
+                  "capacity": "256",
+                  "elementType": "I64",
+                  "kind": "Seq"
+                },
+                "value": []
+              }
+            },
+            {
+              "parameterId": "available.alloc-v2",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ],
+          "id": "empty-v1"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "requests.alloc-v2",
+              "value": {
+                "type": {
+                  "capacity": "256",
+                  "elementType": "I64",
+                  "kind": "Seq"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "4"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "3"
+                  },
+                  {
+                    "type": "I64",
+                    "value": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "parameterId": "available.alloc-v2",
+              "value": {
+                "type": "I64",
+                "value": "5"
+              }
+            }
+          ],
+          "id": "ordered-v1"
+        },
+        {
+          "arguments": [
+            {
+              "parameterId": "requests.alloc-v2",
+              "value": {
+                "type": {
+                  "capacity": "256",
+                  "elementType": "I64",
+                  "kind": "Seq"
+                },
+                "value": [
+                  {
+                    "type": "I64",
+                    "value": "9223372036854775807"
+                  }
+                ]
+              }
+            },
+            {
+              "parameterId": "available.alloc-v2",
+              "value": {
+                "type": "I64",
+                "value": "9223372036854775807"
+              }
+            }
+          ],
+          "id": "maximum-v1"
+        }
+      ]
+    }
+  ],
+  "limits": {
+    "maxExpressionDepth": "24",
+    "maxExpressionNodes": "512",
+    "maxProofEvaluationSteps": "4096",
+    "maxWitnessValueNodes": "1024",
+    "maxWitnessesPerEntry": "8"
+  },
+  "models": [
+    {
+      "body": {
+        "args": [
+          {
+            "id": "requests.alloc-v2",
+            "op": "param",
+            "type": {
+              "capacity": "256",
+              "elementType": "I64",
+              "kind": "Seq"
+            }
+          },
+          {
+            "args": [
+              {
+                "args": [],
+                "capacity": "256",
+                "elementType": "I64",
+                "op": "seq.empty",
+                "type": {
+                  "capacity": "256",
+                  "elementType": "I64",
+                  "kind": "Seq"
+                }
+              },
+              {
+                "id": "available.alloc-v2",
+                "op": "param",
+                "type": "I64"
+              }
+            ],
+            "fieldIds": [
+              "allocations",
+              "remaining"
+            ],
+            "op": "record.make",
+            "recordType": "State.alloc-v2",
+            "type": "State.alloc-v2"
+          },
+          {
+            "id": "available.alloc-v2",
+            "op": "param",
+            "type": "I64"
+          }
+        ],
+        "op": "fold",
+        "step": {
+          "body": {
+            "args": [
+              {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "id": "state",
+                        "op": "param",
+                        "type": "State.alloc-v2"
+                      }
+                    ],
+                    "fieldId": "allocations",
+                    "op": "record.get",
+                    "type": {
+                      "capacity": "256",
+                      "elementType": "I64",
+                      "kind": "Seq"
+                    }
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "id": "request",
+                            "op": "param",
+                            "type": "I64"
+                          },
+                          {
+                            "args": [
+                              {
+                                "id": "state",
+                                "op": "param",
+                                "type": "State.alloc-v2"
+                              }
+                            ],
+                            "fieldId": "remaining",
+                            "op": "record.get",
+                            "type": "I64"
+                          }
+                        ],
+                        "op": "i64.le",
+                        "type": "Bool"
+                      },
+                      {
+                        "id": "request",
+                        "op": "param",
+                        "type": "I64"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      }
+                    ],
+                    "op": "if",
+                    "type": "I64"
+                  }
+                ],
+                "op": "seq.append",
+                "type": {
+                  "capacity": "256",
+                  "elementType": "I64",
+                  "kind": "Seq"
+                }
+              },
+              {
+                "args": [
+                  {
+                    "args": [
+                      {
+                        "id": "state",
+                        "op": "param",
+                        "type": "State.alloc-v2"
+                      }
+                    ],
+                    "fieldId": "remaining",
+                    "op": "record.get",
+                    "type": "I64"
+                  },
+                  {
+                    "args": [
+                      {
+                        "args": [
+                          {
+                            "id": "request",
+                            "op": "param",
+                            "type": "I64"
+                          },
+                          {
+                            "args": [
+                              {
+                                "id": "state",
+                                "op": "param",
+                                "type": "State.alloc-v2"
+                              }
+                            ],
+                            "fieldId": "remaining",
+                            "op": "record.get",
+                            "type": "I64"
+                          }
+                        ],
+                        "op": "i64.le",
+                        "type": "Bool"
+                      },
+                      {
+                        "id": "request",
+                        "op": "param",
+                        "type": "I64"
+                      },
+                      {
+                        "op": "i64.const",
+                        "type": "I64",
+                        "value": "0"
+                      }
+                    ],
+                    "op": "if",
+                    "type": "I64"
+                  }
+                ],
+                "op": "i64.sub",
+                "type": "I64"
+              }
+            ],
+            "fieldIds": [
+              "allocations",
+              "remaining"
+            ],
+            "op": "record.make",
+            "recordType": "State.alloc-v2",
+            "type": "State.alloc-v2"
+          },
+          "parameters": [
+            {
+              "id": "index",
+              "type": "I64"
+            },
+            {
+              "id": "request",
+              "type": "I64"
+            },
+            {
+              "id": "state",
+              "type": "State.alloc-v2"
+            },
+            {
+              "id": "environmentAvailable",
+              "type": "I64"
+            }
+          ]
+        },
+        "type": "State.alloc-v2"
+      },
+      "id": "allocate.model-v1",
+      "parameters": [
+        {
+          "id": "requests.alloc-v2",
+          "type": {
+            "capacity": "256",
+            "elementType": "I64",
+            "kind": "Seq"
+          }
+        },
+        {
+          "id": "available.alloc-v2",
+          "type": "I64"
+        }
+      ],
+      "returnType": "State.alloc-v2"
+    }
+  ],
+  "schemaVersion": "strogo.owner-bundle.v0.4",
+  "types": [
+    {
+      "fields": [
+        {
+          "id": "allocations",
+          "type": {
+            "capacity": "256",
+            "elementType": "I64",
+            "kind": "Seq"
+          }
+        },
+        {
+          "id": "remaining",
+          "type": "I64"
+        }
+      ],
+      "id": "State.alloc-v2"
+    }
+  ]
+}

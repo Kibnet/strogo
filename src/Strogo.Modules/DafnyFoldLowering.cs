@@ -24,7 +24,15 @@ public sealed class DafnyFoldLoweringResult
         this.sourceBytes = sourceBytes.ToArray();
         this.normalizedSourceBytes = normalizedSourceBytes.ToArray();
         SourceMap = sourceMap;
-        Obligations = obligations;
+        var repeatedIds = obligations.GroupBy(item => item.Id, StringComparer.Ordinal)
+            .Where(group => group.Count() > 1).Select(group => group.Key).ToHashSet(StringComparer.Ordinal);
+        // Local node IDs can recur in different regions. Keep legacy unique IDs;
+        // qualify collisions by provenance, never drop an obligation or include a line number.
+        Obligations = obligations.Select(item => repeatedIds.Contains(item.Id)
+            ? item with { Id = "qualified." + CanonicalJson.RawDigest(
+                Encoding.UTF8.GetBytes("strogo.lowering.v0.1/qualified-obligation\n")
+                    .Concat(CanonicalJson.Encode(new { originalId = item.Id, entityId = item.EntityId, kind = item.Kind })).ToArray()) }
+            : item).ToImmutableArray();
         InvariantSpans = invariantSpans;
         SourceDigest = CanonicalJson.RawDigest(this.sourceBytes);
         NormalizedSourceDigest = CanonicalJson.RawDigest(this.normalizedSourceBytes);

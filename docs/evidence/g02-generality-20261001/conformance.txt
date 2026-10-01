@@ -1,0 +1,6 @@
+Evidence: C:\Users\Kibnet\Documents\Codex\2026-09-04\strogo\artifacts\local-validation\g02\generality-c9054595c5904e398f2415b65c011230
+Checking scalar/primary
+Checking scalar/alternative
+Checking allocation/primary
+Checking allocation/alternative
+PASS compiler/ABI generality checks=78 builds=4 loads=4

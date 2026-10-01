@@ -1,0 +1,465 @@
+{
+  "purpose": "validation-only-no-human-admission",
+  "baseCommit": "c8e91afd7ea7552376fa7e48caadb32e804c802c",
+  "copies": [
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\build.txt",
+      "target": "docs\\evidence\\g02-generality-20261001\\build.txt",
+      "sha256": "03410963aaac455b1973cd240002d461fb940645d650fe89dd73842e260c41de"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\module-conformance.txt",
+      "target": "docs\\evidence\\g02-generality-20261001\\module-conformance.txt",
+      "sha256": "94873a8875121bee9b7eac450e578b2e758a030c9dc569dad9e153f0e88787f7"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\conformance.txt",
+      "target": "docs\\evidence\\g02-generality-20261001\\conformance.txt",
+      "sha256": "e15720d295ae2bf8d00ba747a2572b96261639f1773a032feed72e0c5350c807"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\result.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\result.json",
+      "sha256": "66d5109a921e436d723a87654fe388403d477c8047cd940b599d86019c21c85d"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\report.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\report.json",
+      "sha256": "e1a28b8369c3baa68aaf6c1ddcce39d2054bcc840218b376d4d5e1d97e93ae35"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\candidate.dfy",
+      "sha256": "f872118c06e511192b94ed6e7feda18992a1f34fc013c3fa85dd5a7b2e3cf793"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\source-map.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\source-map.json",
+      "sha256": "8386cbbece66e2ff597436827e33f2a195a62e58bbbecfaaa680c6ec3841db43"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\transcript.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\transcript.json",
+      "sha256": "6ef68cb909cb53846c41405d3cc4514648c557a9c8927f35c860862a4aa21330"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\obligations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\obligations.json",
+      "sha256": "7b082d4e2258dcf5b517bdd31259a873f1adfa1c30214c5ebc2fdc38bcf3f0a6"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\invocations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\invocations.json",
+      "sha256": "1a523f23b48324cc35ff699835c7a14223e426a2fae63327081dbaeefb6032f5"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\proof\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\proof\\stdout.bin",
+      "sha256": "3b7fb3740043ea39514a7a54433ac8fc1372c1d2b40ab593793c1c29ef5e1184"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\proof\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\proof\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\proof\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\proof\\process.json",
+      "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\translation\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\translation\\stdout.bin",
+      "sha256": "3b7fb3740043ea39514a7a54433ac8fc1372c1d2b40ab593793c1c29ef5e1184"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\translation\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\translation\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\translation\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\translation\\process.json",
+      "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\compiled\\sgb-44f2471355f44002bdbbcb4978de9cf1\\receipt.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\build\\receipt.json",
+      "sha256": "280dba9a2e30422fdefec451eaac24dd300add89acfc59f70cdcae681ef025d1"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-primary\\compiled\\sgb-44f2471355f44002bdbbcb4978de9cf1\\Generated.csproj",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-primary\\build\\Generated.csproj",
+      "sha256": "4338461e1e07d7bbd294266b64abcd0595a1d61b774d9edbbe8f0727a7c12e52"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\candidate.dfy",
+      "sha256": "b2c7aef5cfa5af5cbd5602b14bd755476407347572861d2f73146194ac5f9695"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\source-map.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\source-map.json",
+      "sha256": "f043109f966811bb59f6eefc59987259eeabb8c815c82f4597642f82d6a78faa"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\transcript.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\transcript.json",
+      "sha256": "15a456df2afaa7c4bf9379f4b702aa3f7ae9dc8a52421b71e1c726466ba94d3c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\obligations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\obligations.json",
+      "sha256": "16cf17f464ff9600623a828f1845fe0528d6627150b8528c04761ce79fa1383e"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\invocations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\invocations.json",
+      "sha256": "1a523f23b48324cc35ff699835c7a14223e426a2fae63327081dbaeefb6032f5"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\proof\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\proof\\stdout.bin",
+      "sha256": "3b7fb3740043ea39514a7a54433ac8fc1372c1d2b40ab593793c1c29ef5e1184"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\proof\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\proof\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\proof\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\proof\\process.json",
+      "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\translation\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\translation\\stdout.bin",
+      "sha256": "3b7fb3740043ea39514a7a54433ac8fc1372c1d2b40ab593793c1c29ef5e1184"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\translation\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\translation\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\translation\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\translation\\process.json",
+      "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\compiled\\sgb-809e6c5e1de4433d8f9077a7ba498dbc\\receipt.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\build\\receipt.json",
+      "sha256": "eeac2e4d4e228fc2690d364cacba659be839e5e0bc319ab0f2cf31532de7621d"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-alternative\\compiled\\sgb-809e6c5e1de4433d8f9077a7ba498dbc\\Generated.csproj",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-alternative\\build\\Generated.csproj",
+      "sha256": "4338461e1e07d7bbd294266b64abcd0595a1d61b774d9edbbe8f0727a7c12e52"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\candidate.dfy",
+      "sha256": "7be56cca348239e1990dd8630ded3c96276f80f17b2d50675f6ea3fc71ef6915"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\source-map.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\source-map.json",
+      "sha256": "96aac36a7ab87d41392d83379406741b3065ec5fb0f9b43ee54bf7f084ace590"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\transcript.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\transcript.json",
+      "sha256": "edb0e51908388d5216beba6b3d882165073a8a739e0701b68bff1672ef92214d"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\obligations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\obligations.json",
+      "sha256": "d011d5ee8890cc23e19e44fc7d64ef802a44ddcc66f7816a0907391085455440"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\invocations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\invocations.json",
+      "sha256": "20fc45597a8c4f03bc3f007ee296929550fa236380b351f75ab14d7084fc19d6"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\proof\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\proof\\stdout.bin",
+      "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\proof\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\proof\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\proof\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\proof\\process.json",
+      "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\translation\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\translation\\stdout.bin",
+      "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\translation\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\translation\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\translation\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\translation\\process.json",
+      "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\compiled\\sgb-ec0d4f6e94b44174b8d887c3cfeacdde\\receipt.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\build\\receipt.json",
+      "sha256": "e65bcb5cf174fbd8bee1dffcd8a69c189fe48064e0a3f7abdb8c4d9c43407713"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-primary\\compiled\\sgb-ec0d4f6e94b44174b8d887c3cfeacdde\\Generated.csproj",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-primary\\build\\Generated.csproj",
+      "sha256": "4338461e1e07d7bbd294266b64abcd0595a1d61b774d9edbbe8f0727a7c12e52"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\candidate.dfy",
+      "sha256": "ac853d7b8d24968b24287b7c0a0211b149a81014330f59dbaa389bb7974c8868"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\source-map.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\source-map.json",
+      "sha256": "f317f5e24682a2e5a8dfb42f24b8dd7c65f7888ba4b11735e257430fe1e9ae4e"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\transcript.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\transcript.json",
+      "sha256": "ac5f7466af55ac07ede7fe9c20c1efeda7d7122c857f7fe43ffda59a444a369c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\obligations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\obligations.json",
+      "sha256": "d011d5ee8890cc23e19e44fc7d64ef802a44ddcc66f7816a0907391085455440"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\invocations.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\invocations.json",
+      "sha256": "20fc45597a8c4f03bc3f007ee296929550fa236380b351f75ab14d7084fc19d6"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\proof\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\proof\\stdout.bin",
+      "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\proof\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\proof\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\proof\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\proof\\process.json",
+      "sha256": "9ab3f33af7aa94b6afa09e3b13438f0940d9b0f91be370c27fb30355746890cd"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\translation\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\translation\\stdout.bin",
+      "sha256": "d7cd02bdbffeed2135b7f3ebf041beb02ab562d88badb50782c813b6b8985d6c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\translation\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\translation\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\translation\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\translation\\process.json",
+      "sha256": "5bb64672613bd6a39a342dc583b314c17fab2593c5eb0270c5c6581963a2ea37"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\compiled\\sgb-bc947b2559614c0eb637c22bf114b9cb\\receipt.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\build\\receipt.json",
+      "sha256": "1425ee3c2134cb969fa65782ce3dd8541adba7f439f353d841b023e9072c3df4"
+    },
+    {
+      "source": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-alternative\\compiled\\sgb-bc947b2559614c0eb637c22bf114b9cb\\Generated.csproj",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-alternative\\build\\Generated.csproj",
+      "sha256": "4338461e1e07d7bbd294266b64abcd0595a1d61b774d9edbbe8f0727a7c12e52"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-wrong\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-wrong\\candidate.dfy",
+      "sha256": "598562e8ae0f087fdba38497c9a14395c32d06e77f6e11e6366a06faa56deee3"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-wrong\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-wrong\\stdout.bin",
+      "sha256": "25d3b78420dd06782a41cb7fa2049da5408429e028a3a38a2e373ebbd26f2322"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-wrong\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-wrong\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\scalar-wrong\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\scalar-wrong\\process.json",
+      "sha256": "754e738f891cbd3e8168100ce001fe814a40931f55a8b0896abccec216a6a92a"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-wrong\\candidate.dfy",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-wrong\\candidate.dfy",
+      "sha256": "f54624c5d02559dbaf213016b6d93d25e3c326d102c00f55d378ed11913d904c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-wrong\\stdout.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-wrong\\stdout.bin",
+      "sha256": "6b0e15996bb3e1a6ece6667cf193e8ef6cc3d4d465b3771f451029968889eb18"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-wrong\\stderr.bin",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-wrong\\stderr.bin",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230\\allocation-wrong\\process.json",
+      "target": "docs\\evidence\\g02-generality-20261001\\allocation-wrong\\process.json",
+      "sha256": "754e738f891cbd3e8168100ce001fe814a40931f55a8b0896abccec216a6a92a"
+    },
+    {
+      "sha256": "87baf7758e6d27c0086c79538fa7bede372d8ae312e8b041d33986a6c05a38d4",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission-conformance.txt",
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\admission-conformance.txt"
+    },
+    {
+      "sha256": "757b04ac0252d5025f4cfb23292fdbc5b1f5940c340e13a220940326e03c9fa4",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission-result.json",
+      "source": "artifacts\\local-validation\\g02\\generality-validation-275184fa5e0145a9915d616ca3f6786d\\admission-result.json"
+    },
+    {
+      "sha256": "7175bdccadbbc3d20fd66e1ae290f3253c8013f7187fdca6a1fa621b5274181c",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\scalar\\transcript.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\scalar\\transcript.json"
+    },
+    {
+      "sha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\scalar\\source-map.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\scalar\\source-map.json"
+    },
+    {
+      "sha256": "4623d6ae109d3bcc799e3e9af9eff7589760be31ae721c0313d1e002ef7546d9",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\scalar\\obligations.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\scalar\\obligations.json"
+    },
+    {
+      "sha256": "7ce329b7f7625a49ec3dc3b994fda100607a4590c2aa95b93f13f5424b4547d4",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\scalar\\signed-session.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\scalar\\signed-session.json"
+    },
+    {
+      "sha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\scalar\\compiled-invocations.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\scalar\\compiled-invocations.json"
+    },
+    {
+      "sha256": "e06ad0d3b703d5fa11584ce33641c95bda19752dba30ac65f4374d9ce2655961",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\allocation\\transcript.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\allocation\\transcript.json"
+    },
+    {
+      "sha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\allocation\\source-map.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\allocation\\source-map.json"
+    },
+    {
+      "sha256": "e2c34a528015e2c5bcb64448dc3793691a33669ba787ca8488734aeaa3368e14",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\allocation\\obligations.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\allocation\\obligations.json"
+    },
+    {
+      "sha256": "9b50c149f50f29291e89a6b30bb6da79bdf9d5fbe81b9a89185a273c08701438",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\allocation\\signed-session.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\allocation\\signed-session.json"
+    },
+    {
+      "sha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7",
+      "target": "docs\\evidence\\g02-generality-20261001\\admission\\allocation\\compiled-invocations.json",
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-633fa10e590b4df2857b2dc0e0874692\\allocation\\compiled-invocations.json"
+    }
+  ],
+  "rawGenerality": "artifacts/local-validation/g02/generality-c9054595c5904e398f2415b65c011230",
+  "results": {
+    "assemblyLoads": 4,
+    "generalityExitCode": 0,
+    "generalityChecks": 78,
+    "builds": 4,
+    "moduleChecks": 362,
+    "fullAdmission": 343,
+    "fullAdmissionExitCode": 0
+  },
+  "rawValidation": "artifacts/local-validation/g02/generality-validation-275184fa5e0145a9915d616ca3f6786d",
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/DafnyFoldLowering.cs",
+      "sha256": "bfc15e12885f508d53a91ee20199c5b031d2c41378e0d5e9bceb74f25b3eb273"
+    },
+    {
+      "path": "src/Strogo.Modules/G02OfflineFixtureBuild.cs",
+      "sha256": "f85e5ff048c4f47295d5d49e37ff5187da3e1c3373432ed55e9fb7cd2930269f"
+    },
+    {
+      "path": "src/Strogo.Modules/G02ProofTranscript.cs",
+      "sha256": "e8e1862f3ae566d2c125cf3ff2bd051b6b40dc3af245932a2f90b1e784e2e8e6"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02GeneralityChecks.cs",
+      "sha256": "894d18910b1a87bd35568ffdc3b3238461db5a469539a93b36bc28971e4925b1"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs",
+      "sha256": "d84defae59ac1872893a7372982739963c72ff96d26b3e3e792aff72743385dc"
+    },
+    {
+      "path": "fixtures/g02-generality/allocation-alternative.json",
+      "sha256": "f22fb841a60e8aa029486f9495c170d1bb60305e1ef598728952750fe838db0a"
+    },
+    {
+      "path": "fixtures/g02-generality/allocation-owner.json",
+      "sha256": "089f9a53fe0904aec6b00a2a975a86b53235a06cab2731e4e7dcb1339c1e97e4"
+    },
+    {
+      "path": "fixtures/g02-generality/allocation-primary.json",
+      "sha256": "077051e72d0e77b138832fcfed2051bfaf723ea4d93ee79931b67b3a002799a2"
+    },
+    {
+      "path": "fixtures/g02-generality/allocation-wrong.json",
+      "sha256": "5fcd96a90c214c687749af4d052d0b74f976c619be4f33ea1de259493c3afa59"
+    },
+    {
+      "path": "fixtures/g02-generality/frozen.json",
+      "sha256": "f9526fccc2f525825ccddf3b2c9ac845f8387e2ee443d8b80b6add9465574d79"
+    },
+    {
+      "path": "fixtures/g02-generality/scalar-alternative.json",
+      "sha256": "1a2b0f7392bafbada4bc4619f7db9c8b052857a7c0ddfceb1639670306c1426a"
+    },
+    {
+      "path": "fixtures/g02-generality/scalar-owner.json",
+      "sha256": "56d8352b9f1db75287f0d437e998f4554dc9e175dbd89fe049bec3bf02fdfae4"
+    },
+    {
+      "path": "fixtures/g02-generality/scalar-primary.json",
+      "sha256": "eed262408c628dafbf2117a6e8dfc2445873b776d1a72ac33e8d78b60c6f6a1d"
+    },
+    {
+      "path": "fixtures/g02-generality/scalar-wrong.json",
+      "sha256": "69965616fefe65e0127eab0499052c5777f5ae2bce4d0724a291cda2df05a8ab"
+    }
+  ],
+  "rawAdmissionReplay": "artifacts/local-validation/g02/fresh-replay-633fa10e590b4df2857b2dc0e0874692"
+}

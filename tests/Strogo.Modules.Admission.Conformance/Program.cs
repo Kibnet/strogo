@@ -6,6 +6,12 @@ using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
 
+if (args is ["--g02-generality-only"])
+{
+    await G02GeneralityChecks.RunAsync(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../..")));
+    return;
+}
+
 if (args is ["--g02-wire-only"])
 {
     Console.WriteLine($"PASS strict invocation transport checks={G02InvocationChecks.Run()}");
