@@ -1,0 +1,124 @@
+{
+  "purpose": "host-context-fixture-not-human-admission",
+  "checks": 37,
+  "rows": [
+    {
+      "id": "shared-high-water",
+      "code": "OwnerStateRollbackDetected"
+    },
+    {
+      "id": "wrong-state-signature",
+      "code": "InvalidOwnerSignature"
+    },
+    {
+      "id": "empty-state-verifier",
+      "code": "ArtifactSizeInvalid"
+    },
+    {
+      "id": "state-oversize",
+      "code": "OwnerStateLimitExceeded"
+    },
+    {
+      "id": "state-missing",
+      "code": "OwnerStateUnavailable"
+    },
+    {
+      "id": "disposed-state",
+      "code": "OwnerHostDisposed"
+    },
+    {
+      "id": "disposed-trust",
+      "code": "OwnerHostDisposed"
+    },
+    {
+      "id": "disposed-directory",
+      "code": "OwnerHostDisposed"
+    },
+    {
+      "id": "config-version",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-unknown",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-missing-field",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-type",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "relative-key-path",
+      "code": "OperatorPathInvalid"
+    },
+    {
+      "id": "relative-state-path",
+      "code": "OperatorPathInvalid"
+    },
+    {
+      "id": "missing-store",
+      "code": "OwnerConfigurationUnavailable"
+    },
+    {
+      "id": "wrong-key-pin",
+      "code": "PinnedKeyMismatch"
+    },
+    {
+      "id": "config-duplicate",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-invalid-utf8",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-bom",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-empty",
+      "code": "OwnerConfigurationInvalid"
+    },
+    {
+      "id": "config-oversize",
+      "code": "OwnerConfigurationLimitExceeded"
+    },
+    {
+      "id": "config-missing-file",
+      "code": "OwnerConfigurationUnavailable"
+    },
+    {
+      "id": "key-missing-file",
+      "code": "OwnerConfigurationUnavailable"
+    },
+    {
+      "id": "key-oversize",
+      "code": "OwnerPublicKeyLimitExceeded"
+    },
+    {
+      "id": "key-boundary-invalid-der",
+      "code": "InvalidPublicKey"
+    },
+    {
+      "id": "key-empty",
+      "code": "InvalidPublicKey"
+    },
+    {
+      "id": "cli-tty-approve-contract",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "{\u0022status\u0022:\u0022Refused\u0022,\u0022stage\u0022:\u0022owner\u0022,\u0022code\u0022:\u0022InteractiveTerminalRequired\u0022}\r\n",
+      "outputCreated": false
+    },
+    {
+      "id": "cli-tty-advance-epoch",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "{\u0022status\u0022:\u0022Refused\u0022,\u0022stage\u0022:\u0022owner\u0022,\u0022code\u0022:\u0022InteractiveTerminalRequired\u0022}\r\n",
+      "outputCreated": false
+    }
+  ]
+}

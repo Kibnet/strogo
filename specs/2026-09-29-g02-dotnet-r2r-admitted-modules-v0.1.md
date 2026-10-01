@@ -521,3 +521,78 @@ Review passes: scope/evidence actual state+codec; contract provider-onlycatch; a
 Финальное локальное выполнение provider continuation: свежая Debug сборка0warnings/errors; full Admission apphost407PASS/exit0. Scalar и allocation signed-session58checks/33rows каждая. Четыре типа provider failure: no-load0+exclusive cleanup, late canonical admission/OwnerStateUnavailable без dispatch, malformed input без provider read, recovery с actual owner/reference output. Existing null/oversized/epoch/expiry corpus green. Evidence docs/evidence/g02-owner-provider-20261001:5 source SHA+7 exact raw copies. Независимый final evidence review pending. Свежая Unlimotion validation isValid=false, одна посторонняя MissingReverseLink; запись результата не выполнялась, чужой граф не изменялся. G02 и цель остаются активными.
 
 Финальный независимый scoped audit provider continuation: PASS, замечаний B/H/M/L нет. Проверены5/5 текущих source SHA,7/7 exact raw copies, build0/0 и Admission407PASS exit0. В обеих формах58checks/33rows:4no-load с loads0/cleanup,4late Refused/admission/OwnerStateUnavailable/readDelta1/dispatch0,4restored Returned/readDelta1/dispatch1 с совпадением actual owner/reference vector. Исходные null/oversize/epoch/expiry rows сохранены; malformed для каждого exception проверен исходниками. Аудит файлов/журналов без независимого consumer rerun, behavioral read-only при danger-full-access. Checkpoint проверен; общая цель не завершена.
+
+## G02 EXEC continuation: общий operator-owned host context (2026-10-01)
+
+### Outcome / AS-IS / scope
+Approved G02 §4 и frozen E05 §6 требуют host-owned trust config и fresh owner state для check/build/owner/runtime. На301a736 OwnerTrust существует, но Owner.Cli дважды дублирует parser trust config и File.ReadAllBytes(key/state). Public host config loader отсутствует. Неограниченное чтение до size check и раздельные реализации мешают собрать общий production путь. Результат этой поправки — публичный OwnerHostContext, реально используемый существующими approve-contract/advance-epoch для чтения anchor/state. Это необходимая часть G02, не замена обязательного check/build/admit/run.
+
+### Proposed API / source of truth
+`public sealed class OwnerHostContext : IDisposable` в Strogo.Modules:
+- `Open(string operatorConfigPath)` читает strict UTF8 closed object ровно schemaVersion/keyId/publicKeyPath/ownerStateStore. schema strogo.owner-trust-config.v0.1 сохранена. Operator config path нормализуется Path.GetFullPath; оба field paths должны быть fully qualified как в текущем CLI. Config может быть pretty JSON; canonical signed artifact rules не навязываются operator config. Missing/unknown/duplicate fields, неверный type/schema/UTF8/BOM отказаны OwnerConfigurationInvalid. Config/key reads ограничиваются ДО выделения всего содержимого.
+- `Trust` возвращает borrowed immutable-key OwnerTrust, owned context; общий high-water сохраняется между reads и будущими сессиями. KeyId проверяется по actual SPKI SHA256 существующим OwnerTrust. Конфигурация и публичный ключ читаются один раз; config/key edits после Open не меняют trust anchor или state directory. Rotation требует нового context/operator launch.
+- `OwnerStateDirectory` — зафиксированный абсолютный operator-owned путь для существующего epoch writer lock/atomic replace; не candidate input.
+- `ReadCurrentState()` возвращает новый независимый byte[] текущего owner-state.json, не verified/admitted value. Сам reader не выполняет криптографию: caller обязан проверять этими bytes через borrowed Trust/approved verifier. Это сохраняет signature/epoch/policy diagnostics и поток одного snapshot. Нет state cache, подписи, fallback, default key или bootstrap writer.
+- `Dispose` idempotent, освобождает owned Trust. Trust getter/ReadCurrentState после Dispose → OwnerHostDisposed. Host не закрывает borrowed Trust самостоятельно и закрывает context после потребителей. Lifecycle nonconcurrent, как текущие fixtures; не обещаем thread-safe concurrent Dispose.
+
+### Bounds / errors / filesystem TCB
+Config1..65536 bytes, public key1..16384 bytes, state0..65536 bytes (пустой state передаётся verifier как invalid signed artifact, чтобы не менять его diagnosis). Чтение через FileStream FileShare.Read|Delete позволяет cooperating epoch writer выполнить atomic replace; запрещено inplace write во время read. Ограничить Read до max+1, не выделять buffer по непроверенной длине; >max даёт OwnerConfigurationLimitExceeded/OwnerPublicKeyLimitExceeded/OwnerStateLimitExceeded. IO/Unauthorized/NotSupported на config/key → OwnerConfigurationUnavailable; на state → OwnerStateUnavailable. OwnerTrust InvalidPublicKey/PinnedKeyMismatch не маскировать. Config path invalid → OwnerConfigurationInvalid, относительные field paths → OperatorPathInvalid. State directory обязан существовать при Open; отсутствующий даёт OwnerConfigurationUnavailable. Нельзя автоматически создать store либо искать другую конфигурацию.
+
+Config/key/store и ancestors — operator-owned TCB с ACL provisioning вне EXEC по frozen E05. Этот helper не проверяет ACL, не запрещает все reparse aliases, не обеспечивает OS isolation/защиту от процесса того же пользователя. Подписанные snapshots и shared high-water защищают ошибки содержимого, а integrity store после restart остаётся host assumption. Политика immutable package paths здесь не переиспользуется как выдуманная host ACL гарантия.
+
+### Integrations / compatibility / ownership
+Owner.Cli approve-contract и advance-epoch используют context.Trust, context.ReadCurrentState, context.OwnerStateDirectory. Encrypted signer/provenance/TTY/digest confirmation/validity/expectedEpoch/exclusive writer lock/fsync/atomic replace unchanged. Операция advance-epoch сохраняет чтения внутри exclusive lock. Не создавать operator keys/ACL, не выполнять interactive approval человеком вместо него. Existing schema/keyId preserved, no persisted migration. Source/module/package/invocation не имеют поля для context/trust config.
+
+### User-Observable Scenarios / state matrix
+|Scenario|Expected|Evidence|AC|
+|---|---|---|---|
+|Open valid config + actual key|borrowed Trust matches pinned key; reads state0 then atomic replacement state1|real filesystem+signed state|1|
+|Config/key modified after Open|anchor/store frozen; state reads fresh old selected store|two stores/config replacement|2|
+|state1 verified then rollback state0|shared Trust OwnerStateRollbackDetected|actual signatures|3|
+|missing/oversized state|typed unavailable/limit, no silent fallback|reader fixture|4|
+|bad schema/duplicate/unknown/UTF8/relative field/pin|typed reject before use|config matrix|4|
+|Dispose|no reader/trust access; idempotent cleanup|library scenario|5|
+|Owner CLI redirected input|InteractiveTerminalRequired; no output files|existing subprocess gates + fresh apphost|6|
+
+### Decision Ledger / acceptance mapping
+Agent chooses reusable context and limits/read-sharing as bounded internal mechanism within approved host launch result; user owns key/config/ACL/semantic/release decisions outside this execution. No new public closure identity chosen. Acceptance:1actual reader with state signatures;2frozen anchor/config paths;3high-water via same borrowed Trust;4all config/key/state bounds and typed negatives;5ownership/disposal;6existing CLI gates and full Admission+build. New focused --g02-owner-host-only runner may create ephemeral test keys/state fixtures and execute helper checks only; no production signing flag. Full Admission uses same new checks plus existing proposal/epoch/ownerCLI/signature/runtime corpus.
+
+### Risk / rollback / objections / non-goals
+Public API is host bootstrap, not load/admission. Returning state bytes does not assert cryptographic validity; Trust must verify and callers still do. File share Delete gives snapshot semantics, not newest-at-return across concurrent rename; cooperating writers/reader may see before or after atomic commit, next read is fresh, no torn inplace bytes. No cache/retry. Rollback revert helper and CLI integration/tests, no format migration. Benchmarks/whole G02/closure/D02/native observer remain open. No UI/video artifact: library/backend canonical refusals. Profiles inherited expanded G02, central canonical template, applicable architecture/security/validation/workflow/delivery; UX N/A. Independent post-SPEC review required before source edits; in-scope changes already approved in active goal.
+
+### Planned files / evidence / quality gate
+OwnerHostContext.cs, Owner.Cli/Program.cs, new G02OwnerHostChecks.cs and Admission Program.cs, docs/g02-owner-host-context.md, evidence, knowledge log, Obsidian note. Current pinned build Kernel.slnx --no-restore, focused host runner, full Admission apphost. Source hashes/exact raw copies and independent post-EXEC audit required, detailed commit/push authorised. No Unlimotion graph repair: current unrelated MissingReverseLink prevents result recording, repository work continues.
+
+### Журнал действий агента
+2026-10-01 SPEC: current301a736 clean tree; actual Owner.Cli duplicate config/key/state reading and existing OwnerTrust pin/high-water inspected. Bounded reader/common context selected. No code changed; independent review next. G02 completion still requires public check/build/admit/run, exact owner decisions and machine execution evidence.
+Host context post-SPEC independent review PASS no B/H/M; EOF/max+1 loop explicitly required and implemented. EXEC authorised by existing in-scope goal approval. Owner key/state TCB and separate human gates unchanged.
+Host context static post-EXEC no B/H/M; LOW evidence boundary: redirected CLI subprocess gates stop before context, no positive interactive signing run. Explicit disposition in docs and K-G02-041: library fixtures + static CLI preservation, not human action. Actual focused37PASS, Debug0/0; full current Admission still live52254, final result pending.
+
+Host-context continuation quality audit (expanded).
+|Linter №|Вердикт|Evidence / plan|
+|---|---|---|
+|1|PASS|общий bootstrap реально используется Owner CLI|
+|2|PASS|current duplicate parser/read sites inspected|
+|3|PASS|нет общего bounded launch context|
+|4|PASS|anchor once / fresh state / raw vs verified|
+|5|PASS|public admission/ACL/closure/signing out of helper|
+|6|PASS|context owns Trust, host owns config/ACL|
+|7|PASS|approve/advance read sites and lock preserved|
+|8|PASS|max+1 read loop, no fallback/cache|
+|9|PASS|typed schema/pin/size/unavailable/disposed errors|
+|10|PASS|bounded allocation; no performance claim|
+|11|PASS|signed state unchanged, no migration|
+|12|PASS|schema v0.1 unchanged, pretty operator JSON|
+|13|PASS|revert helper/CLI/test integration, no data changes|
+|14|PASS|six AC cover actual snapshots/negative gates|
+|15|PASS|focused37 matrix plus original full Admission|
+|16|PASS|pinned solution build/focused/full apphost|
+|17|PASS|SPECreview→EXEC→fresh checks→evidence audit→commit/push|
+|18|PASS|internal mechanism approved; user-owned keys/D02/closure separate|
+|19|PASS|expanded continuation public host API/security|
+|20|PASS|shared trust/high-water, fail-closed host launch|
+Rubric6×5=30/30: outcome/as-is/design/security+rollback/tests/autonomous scope concrete above; не заменяет human gates. Role result: architect/security PASS frozenanchor/bounds/no rawstate admission; validation PASS plannedactualfilesystem matrix; workflow PASS no fabricated human action; delivery PASS no secret/privatekey persisted; UX N/A backend. Review scope files listed; independent spec/static source passes performed, no B/H/M; LOW CLI-positive evidence scope resolved by explicit limitation. Depth covers scope drift, AC, outputcontract, aliases/TCB, bounds/freshness, existing epoch/TTY regression and no unsupported native/performanceclaims. No-findings justification at currentphase: source loop/parser/lifetime/readsites/lock matched contract, tests expected runtime37PASS; full execution and final SHA/copy audit pending, not completion.
+
+Host context final execution: свежая Debug0warnings/errors, focused37PASS/exit0 и full Admission444PASS/exit0. Focused/full host reports37checks/28rows каждое; raw roots различны. Signed scalar/allocation58checks/33rows each, actual compiled outputs сохранены. Evidence docs/evidence/g02-owner-host-20261001:5 current source SHA+11 exact raw copies. Final independent audit pending. Положительное interactive signing не выполнялось; CLI отрицательные subprocess gates не доказывают этот путь. Новая публичная library bootstrap API используется Owner CLI, но public module check/build/admit/run и G02/full goal остаются открытыми. Свежая Unlimotion validation isValid=false с одной посторонней MissingReverseLink; execution result не записан, чужой граф не изменялся.
+
+Финальный независимый аудит host-context checkpoint: PASS, новых B/H/M/L нет. Проверены5/5 current source SHA и11/11 exact copies; свежие build0/0, focused37PASS и fullAdmission444PASS exit0. Два host reports37checks/28rows из distinct roots, оба CLI tty refusalsexit2/stdoutempty/nooutput. Signed scalar/allocation58/33 и actual owner/reference outputs сохранены. LOW evidence scope ранее закрыта явной границей: positive interactive signing не запускался, raw state требует verifier, public module admission и весь G02 не завершены. File/source/log audit без independent consumer rerun, behavioral read-only при danger-full-access.

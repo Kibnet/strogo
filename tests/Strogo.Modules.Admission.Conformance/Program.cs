@@ -6,6 +6,13 @@ using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
 
+if (args is ["--g02-owner-host-only"])
+{
+    var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+    G02OwnerHostChecks.Run(root, Path.Combine(root, "artifacts", "local-validation", "g02", "owner-host-" + Guid.NewGuid().ToString("N")));
+    return;
+}
+
 if (args is ["--g02-runtime-only"])
 {
     var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
@@ -423,6 +430,7 @@ extra.Add("candidateDigest", JsonSerializer.SerializeToElement(bundleDigest));
 Refuse(() => trust.VerifyContractApproval(JsonSerializer.SerializeToUtf8Bytes(extra), state0, bundleDigest, now), "ArtifactFieldsInvalid");
 
 var state1 = State(1);
+checks += G02OwnerHostChecks.Run(repoRoot, Path.Combine(repoRoot,"artifacts","local-validation","g02","owner-host-"+Guid.NewGuid().ToString("N")));
 Check(trust.VerifyOwnerState(state1).ApprovalEpoch == 1, "epoch advance");
 Refuse(() => trust.VerifyOwnerState(state0), "OwnerStateRollbackDetected");
 Refuse(() => trust.VerifyContractApproval(approval0, state1, bundleDigest, now), "ApprovalEpochMismatch");

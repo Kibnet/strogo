@@ -1,0 +1,83 @@
+{
+  "baseline": "301a736",
+  "purpose": "host-context-fixture-not-human-admission",
+  "copies": [
+    {
+      "source": "artifacts/local-validation/g02/owner-host-validation-e4f45765787e4dadb249320ed71a563c/build.txt",
+      "path": "build.txt",
+      "sha256": "daaf406f6ff2e07842255f77b00f2dba30f0b555231877f345143be1ac51462f"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-validation-e4f45765787e4dadb249320ed71a563c/focused.txt",
+      "path": "focused.txt",
+      "sha256": "dd2094f72eb202f0b3577ec9bb49568e00d8ddd2d561592d86f15156fd7aa6db"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-validation-e4f45765787e4dadb249320ed71a563c/focused-result.json",
+      "path": "focused-result.json",
+      "sha256": "bc8c2210a146d850184a5e5398c1ece7f36605799d6feada0ff59995923a0bac"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-validation-e4f45765787e4dadb249320ed71a563c/admission.txt",
+      "path": "admission.txt",
+      "sha256": "d226ed51e704eadcfbf60c9ed5c4554a5b46614bacb52344928e8a85ff205ddf"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-validation-e4f45765787e4dadb249320ed71a563c/result.json",
+      "path": "result.json",
+      "sha256": "b158b106ada1346f14d624063ed9109c9ea2b123e38f73bbceb6c2ae26c02a27"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-de3c49b1efe64d43b853166edbb6e365/report.json",
+      "path": "focused-report.json",
+      "sha256": "f82b319b73bd05e7d45f638233578ca605962e60e9fab361dc9947998a108ec5"
+    },
+    {
+      "source": "artifacts/local-validation/g02/owner-host-2ce00de5d4fa4610b0414bc9bd245b36/report.json",
+      "path": "full-host-report.json",
+      "sha256": "f82b319b73bd05e7d45f638233578ca605962e60e9fab361dc9947998a108ec5"
+    },
+    {
+      "source": "artifacts/local-validation/g02/fresh-replay-e07c4f0660924b89b32ad1dafa378fd6/scalar/signed-session.json",
+      "path": "scalar/signed-session.json",
+      "sha256": "e516d00173f2294823e1a74c2c17867017253360a7a35acbe21be0acda0d97ed"
+    },
+    {
+      "source": "artifacts/local-validation/g02/fresh-replay-e07c4f0660924b89b32ad1dafa378fd6/scalar/compiled-invocations.json",
+      "path": "scalar/compiled-invocations.json",
+      "sha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b"
+    },
+    {
+      "source": "artifacts/local-validation/g02/fresh-replay-e07c4f0660924b89b32ad1dafa378fd6/allocation/signed-session.json",
+      "path": "allocation/signed-session.json",
+      "sha256": "9659d56ac2585a410f033141597fa056776b463b747b465e3dc103e1da130259"
+    },
+    {
+      "source": "artifacts/local-validation/g02/fresh-replay-e07c4f0660924b89b32ad1dafa378fd6/allocation/compiled-invocations.json",
+      "path": "allocation/compiled-invocations.json",
+      "sha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7"
+    }
+  ],
+  "sources": [
+    {
+      "sha256": "17f1bf4b476e3d735b77046e156b5796847b15f164a735e63170f9adb3e77472",
+      "path": "src/Strogo.Modules/OwnerHostContext.cs"
+    },
+    {
+      "sha256": "85f8b011cda67987ea178b31b7b9a02ae7373e94f6be29a84f99061c7575a87e",
+      "path": "src/Strogo.Modules/OwnerAdmissionTrust.cs"
+    },
+    {
+      "sha256": "34b06c3907bd61853cb2960809e02f5f34eefcad07deb1dc7e00fa694c6f0069",
+      "path": "src/Strogo.Modules.Owner.Cli/Program.cs"
+    },
+    {
+      "sha256": "ac2e93ed7b628c86e4785b3e1a723922a45d6a108da27884890d22e472b9d983",
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02OwnerHostChecks.cs"
+    },
+    {
+      "sha256": "d0880dd981840ab479fd87fbda060e3b396f2e9fc1b1a8a17f3e301f6dcc9808",
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs"
+    }
+  ]
+}

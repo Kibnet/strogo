@@ -28,12 +28,8 @@ static int Run(string[] args)
 
         var output = Path.GetFullPath(options["out"]);
         if (File.Exists(output) || Directory.Exists(output)) return Refusal("OutputAlreadyExists");
-        var trustConfig = Config(options["trust-config"], "schemaVersion", "keyId", "publicKeyPath", "ownerStateStore");
-        Required(trustConfig, "schemaVersion", "strogo.owner-trust-config.v0.1");
-        var stateDirectory = AbsolutePath(trustConfig, "ownerStateStore");
-        var statePath = Path.Combine(stateDirectory, "owner-state.json");
-        var publicKey = File.ReadAllBytes(AbsolutePath(trustConfig, "publicKeyPath"));
-        using var trust = new OwnerTrust(publicKey, String(trustConfig, "keyId"));
+        using var hostContext = OwnerHostContext.Open(options["trust-config"]);
+        var trust = hostContext.Trust;
         var signerConfig = Config(options["signer-config"], "schemaVersion", "keyId", "publicKeyDigest", "encryptedPrivateKeyPath");
         Required(signerConfig, "schemaVersion", "strogo.owner-signer-config.v0.1");
         Required(signerConfig, "keyId", trust.KeyId);
@@ -50,7 +46,7 @@ static int Run(string[] args)
             return Refusal("InvalidTimestamp");
 
         var approvalId = Guid.NewGuid().ToString("N");
-        var stateBytes = File.ReadAllBytes(statePath);
+        var stateBytes = hostContext.ReadCurrentState();
         var bundleBytes = File.ReadAllBytes(Path.GetFullPath(options["bundle"]));
         var issuedAt = new DateTimeOffset(DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond * TimeSpan.TicksPerMillisecond, TimeSpan.Zero);
         var proposal = OwnerContractApprovalProposal.Prepare(trust, stateBytes, bundleBytes,
@@ -67,7 +63,7 @@ static int Run(string[] args)
             VerifyProvenance(provenance);
             using var signer = RSA.Create();
             signer.ImportFromEncryptedPem(File.ReadAllText(AbsolutePath(signerConfig, "encryptedPrivateKeyPath"), new UTF8Encoding(false, true)), password);
-            var artifact = proposal.Sign(signer, entered, File.ReadAllBytes(statePath), DateTimeOffset.UtcNow);
+            var artifact = proposal.Sign(signer, entered, hostContext.ReadCurrentState(), DateTimeOffset.UtcNow);
             WriteNewAtomically(output, artifact);
             Console.WriteLine("contractApprovalArtifactDigest=" + DomainHash("strogo.contract-approval.v0.2/artifact", artifact));
             return 0;
@@ -95,12 +91,10 @@ static int AdvanceEpoch(string[] args)
     if (!long.TryParse(options["expected-epoch"], NumberStyles.None, CultureInfo.InvariantCulture,
             out var expectedEpoch) || expectedEpoch.ToString(CultureInfo.InvariantCulture) != options["expected-epoch"])
         return Refusal("InvalidExpectedEpoch");
-    var trustConfig = Config(options["trust-config"], "schemaVersion", "keyId", "publicKeyPath", "ownerStateStore");
-    Required(trustConfig, "schemaVersion", "strogo.owner-trust-config.v0.1");
-    var stateDirectory = AbsolutePath(trustConfig, "ownerStateStore");
+    using var hostContext = OwnerHostContext.Open(options["trust-config"]);
+    var stateDirectory = hostContext.OwnerStateDirectory;
     var statePath = Path.Combine(stateDirectory, "owner-state.json");
-    var publicKey = File.ReadAllBytes(AbsolutePath(trustConfig, "publicKeyPath"));
-    using var trust = new OwnerTrust(publicKey, String(trustConfig, "keyId"));
+    var trust = hostContext.Trust;
     var signerConfig = Config(options["signer-config"], "schemaVersion", "keyId", "publicKeyDigest", "encryptedPrivateKeyPath");
     Required(signerConfig, "schemaVersion", "strogo.owner-signer-config.v0.1");
     Required(signerConfig, "keyId", trust.KeyId);
@@ -109,7 +103,7 @@ static int AdvanceEpoch(string[] args)
     // All cooperating state writers acquire this host-owned lock before reading the snapshot.
     using var stateLock = new FileStream(Path.Combine(stateDirectory, "owner-state.lock"),
         FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-    var stateBytes = File.ReadAllBytes(statePath);
+    var stateBytes = hostContext.ReadCurrentState();
     var issuedAt = new DateTimeOffset(DateTimeOffset.UtcNow.Ticks / TimeSpan.TicksPerMillisecond * TimeSpan.TicksPerMillisecond, TimeSpan.Zero);
     var proposal = OwnerStateEpochProposal.Prepare(trust, stateBytes, expectedEpoch, issuedAt);
     Console.WriteLine(proposal.Projection);
@@ -123,7 +117,7 @@ static int AdvanceEpoch(string[] args)
     {
         using var signer = RSA.Create();
         signer.ImportFromEncryptedPem(File.ReadAllText(AbsolutePath(signerConfig, "encryptedPrivateKeyPath"), new UTF8Encoding(false, true)), password);
-        var next = proposal.Sign(signer, entered, File.ReadAllBytes(statePath));
+        var next = proposal.Sign(signer, entered, hostContext.ReadCurrentState());
         ReplaceAtomically(statePath, next);
         Console.WriteLine("ownerStateArtifactDigest=" + DomainHash("strogo.owner-state.v0.2/artifact", next));
         return 0;
