@@ -14,7 +14,7 @@ Host передаёт путь пакета, ранее проверенный `
 
 OwnerTrust хранит общий high-water эпохи и digest состояния. Создание другой сессии не сбрасывает его. Новая эпоха может отозвать approval; возврат к старой эпохе или другое подписанное состояние той же эпохи приводит к `OwnerStateRollbackDetected`. При истечении срока отказ сохраняет исходный код verifier, например `ContractApprovalExpired` либо `ReleaseAdmissionExpired`.
 
-Provider null, `IOException`, `UnauthorizedAccessException` и `NotSupportedException` дают `admission/OwnerStateUnavailable`; больше65536 bytes — `OwnerStateLimitExceeded`. Release bytes ограничены65536 до копирования. Host должен обеспечить согласованность provider buffer до завершения копирования. Произвольное блокирование provider и враждебная concurrent mutation во время copy не прерываются этим механизмом; это доверенная граница host, не OS isolation.
+Provider null и recoverable исключения из самого вызова provider дают `admission/OwnerStateUnavailable`, включая `InvalidOperationException`, `ObjectDisposedException` и выброшенное provider `ModuleException`. Provider поставляет bytes и не выбирает код отказа verifier. `OutOfMemoryException` и `AccessViolationException` не перехватываются. Проверки null/длины и копирование выполняются отдельно; больше65536 bytes — `OwnerStateLimitExceeded`. Ошибки криптографической проверки, эпохи, срока действия и часов не маскируются этим перехватом. Release bytes ограничены65536 до копирования. Host должен обеспечить согласованность provider buffer до завершения копирования. Произвольное блокирование provider и враждебная concurrent mutation во время copy не прерываются этим механизмом; это доверенная граница host, не OS isolation.
 
 ## Ответ и смысл идентификаторов
 
@@ -40,3 +40,5 @@ Conformance использует свежий composed proof/build для scalar
 
 История решений и окончательные результаты: K-G02-036 в [журнале знаний](knowledge-log.md); утверждённая область — [G02 SPEC](../specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md). Финальная текущая сборка: Debug0 warnings/errors; fresh apphost Admission343PASS exit0, включая58 transport checks и26 session checks каждой формы. [Raw evidence и receipt](evidence/g02-signed-session-20261001/README.md).
 
+
+K-G02-040: расширена provider failure boundary. Свежая сборка0/0, Admission407PASS, signed scalar/allocation58checks/33rows. [Evidence](evidence/g02-owner-provider-20261001/receipt.json). Исторические числа выше относятся к прежней контрольной точке.

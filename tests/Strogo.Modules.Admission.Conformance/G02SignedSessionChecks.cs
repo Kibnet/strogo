@@ -135,6 +135,50 @@ internal static class G02SignedSessionChecks
                 Check(reads==2 && session.DispatchAttempts==0 && result.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="OwnerStateUnavailable","io-before-dispatch");
                 rows.Add(new { id="io-unavailable",response=result.RootElement.Clone(),providerReads=reads,dispatchAttempts=session.DispatchAttempts });
             }
+            foreach (var failure in new (string Id, Func<Exception> Create)[] {
+                ("invalid-operation", () => new InvalidOperationException("provider unavailable")),
+                ("disposed", () => new ObjectDisposedException("provider")),
+                ("io", () => new IOException("provider unavailable")),
+                ("forged-module", () => ModulesExceptionFactory.Error("admission", "ApprovalEpochMismatch")) })
+            {
+                using var trust = new OwnerTrust(publicKey,keyId);
+                var reads=0;var broken=true;
+                byte[] Provider(){reads++;if(broken)throw failure.Create();return state0;}
+                var before=loads;string? code=null;
+                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,new Clock(now),runtime); }
+                catch(ModuleException error){code=error.Code;}
+                Check(code=="OwnerStateUnavailable" && loads==before && reads==1,"provider-no-load-"+failure.Id);
+                ExclusiveReopen("provider-no-load-cleanup-"+failure.Id);
+                rows.Add(new { id="provider-no-load-"+failure.Id,code,assemblyLoads=loads-before,providerReads=reads,exclusiveReopen=true });
+                broken=false;
+                using(var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,new Clock(now),runtime))
+                {
+                    broken=true;var priorReads=reads;
+                    using(var result=JsonDocument.Parse(session.InvokeJson(request)))
+                    {
+                        var nested=result.RootElement.GetProperty("result");
+                        Check(nested.GetProperty("status").GetString()=="Refused" &&
+                            nested.GetProperty("error").GetProperty("stage").GetString()=="admission" &&
+                            nested.GetProperty("error").GetProperty("code").GetString()=="OwnerStateUnavailable" &&
+                            reads==priorReads+1 && session.DispatchAttempts==0,"provider-late-"+failure.Id);
+                        rows.Add(new { id="provider-late-"+failure.Id,response=result.RootElement.Clone(),providerReadsDelta=reads-priorReads,dispatchAttempts=session.DispatchAttempts });
+                    }
+                    priorReads=reads;
+                    using(var malformed=JsonDocument.Parse(session.InvokeJson(Encoding.UTF8.GetBytes("{}"))))
+                        Check(malformed.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="SchemaInvalid" && reads==priorReads && session.DispatchAttempts==0,"provider-codec-first-"+failure.Id);
+                    broken=false;priorReads=reads;
+                    using(var restored=JsonDocument.Parse(session.InvokeJson(request)))
+                    {
+                        var nested=restored.RootElement.GetProperty("result");
+                        var reference=ModulesReferenceEvaluator.Invoke(binding.Module,entry.Function.Id,entry.Function.Parameters.Select(parameter=>byId[parameter.Id]).ToArray()).Value;
+                        Check(nested.GetProperty("status").GetString()=="Returned" && reads==priorReads+1 && session.DispatchAttempts==1 &&
+                            CanonicalJson.Encode(nested.GetProperty("value")).SequenceEqual(CanonicalJson.Encode(OwnerBundleCodec.ValuePayload(witness.ModelResult,entry.Function.ReturnType))) &&
+                            OwnerContractEvaluator.StructuralEquals(reference,witness.ModelResult),"provider-restored-"+failure.Id);
+                        rows.Add(new { id="provider-restored-"+failure.Id,response=restored.RootElement.Clone(),providerReadsDelta=reads-priorReads,dispatchAttempts=session.DispatchAttempts,ownerReferenceMatch=true });
+                    }
+                }
+                ExclusiveReopen("provider-session-cleanup-"+failure.Id);
+            }
             var liveRuntime = G02RuntimeBinding.CaptureLive(); var runtimeObservation = liveRuntime; var captureFailure=false;
             var controlledRuntime = runtime.ObserveFixtureForChecks(() => captureFailure ? throw new IOException("runtime capture unavailable") : runtimeObservation);
             using (var trust = new OwnerTrust(publicKey,keyId))

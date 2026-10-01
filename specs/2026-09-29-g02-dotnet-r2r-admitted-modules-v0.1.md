@@ -453,3 +453,71 @@ Targeted review correction: updated earlier normative paragraphs to same idempot
 Actual final execution: Debug fullsolution0warnings/errors; focused runtime29PASS exit0, Modules362PASS; full fresh current apphost Admission359PASS exit0. Original scalar/allocation signed sessions34checks/21rows each; real outputs owner/reference agree, synthetic runtime-before-load/sdk-before-load loads0+cleanup, late/unavailable dispatchDelta0, codec order unchanged. Raw validation a3bfba9762e9411b98cdb564ae17ce63/focused fb6ff1ac92c543d089563c8ef72df47b/fresh76d7523c88284774883785d4cbfad07a. Evidence10sourceSHA+23exactcopies; failed intermediate builds/TPA snapshots retained explicitly historical. Final independent source/evidence audit pending. No public facade/admission/closure/D02/native/G05/G06 completion claim.
 
 Финальный независимый аудит исходников и evidence: PASS, замечаний нет. Проверены 10/10 текущих SHA исходников и 23/23 точные копии результатов; свежий Admission359PASS, focused29PASS, Modules362PASS, сборка0warnings/errors. Аудит проверял файлы и журналы, без независимого повторного исполнения. Запись результата в Unlimotion остаётся недоступна: свежая CLI validation выявила MissingReverseLink между посторонними задачами; исправление чужого графа не входит в этот этап. G02 и общая цель остаются активными.
+
+## G02 EXEC continuation: отказ при ошибке owner-state provider (2026-10-01)
+
+### Outcome / AS-IS / границы
+В утверждённом G02 каждая загрузка и каждый валидный вызов должны получать свежий owner state и выдавать typed refusal при его недоступности. Сейчас VerifyFresh catches только IOException/UnauthorizedAccessException/NotSupportedException; ObjectDisposedException/InvalidOperationException и прочие recoverable provider failures обходят ModuleException codec и выходят исключением. Исправление относится к approved fail-closed contract, не вводит public admission или новую identity formula. Профиль delivery-task/security, expanded continuation родительской SPEC; central stack и canonical template остаются указанными выше.
+
+### Решение и контракты
+Изолировать вызов stateProvider в собственном try/catch. Любая Exception кроме OutOfMemoryException/AccessViolationException от host provider переводится в OwnerStateUnavailable; это включает ModuleException, брошенное provider: provider не выбирает admission diagnosis. Null возвращает OwnerStateUnavailable. Проверка длины >65536 и копирование остаются отдельно, OwnerStateLimitExceeded сохраняется. Криптографические/epoch/expiry ошибки после получения snapshot не перехватываются этим catch. Runtime verification и dispatch следуют только после successful owner checks. Clock failures вне этой поправки: отдельный trusted host component, нельзя выдавать их за unavailable state. Никаких fallback/cache/retry или state high-water reset.
+
+### User-Observable Scenarios / состояния
+|Trigger|Результат|Evidence|AC|
+|---|---|---|---|
+|Provider throws до Open|OwnerStateUnavailable; generated loads0; package handles released|actual AssemblyLoad observer + exclusive reopen|1|
+|Provider throws после Open|canonical Refused/OwnerStateUnavailable; dispatchDelta0|signed-session JSON|2|
+|Malformed request при broken provider|прежний SchemaInvalid, provider не вызывается|read counter|3|
+|Provider возвращает oversized state|OwnerStateLimitExceeded, без dispatch|existing check|3|
+|Provider восстановлен|valid result; owner checks выполняются заново|owner/reference positive output|4|
+
+### Decision Ledger / интеграция
+Catch boundary вокруг provider call выбирает агент как внутренний механизм approved no-fallback refusal; user-owned bundle/public closure/release остаются отдельными решениями. Provider и clock задаёт host, module не может их передавать. Persisted formats/signatures/pins не меняются. Владение SDK/package и nonconcurrent lifecycle прежние. Меняются G02SignedFixtureSession.cs и G02SignedSessionChecks.cs; отдельный focused runner допускается только для повторного исполнения retained package/verified build fixtures, без fabrication approval. Prefer existing full Admission apphost.
+
+### Acceptance-to-Test Matrix
+1. До load: InvalidOperationException и forged ModuleException от provider => typed unavailable, actual loads0, exclusive reopen.
+2. После load: InvalidOperationException/ObjectDisposedException/IOException/forged ModuleException => structured unavailable, dispatch0 и read delta1.
+3. Неверный request не читает provider; oversized сохраняет специфический отказ; прежний owner/epoch/expiry/codec corpus green.
+4. После восстановления state valid invoke совпадает с owner/reference; disposal cleanup.
+5. Свежая сборка0warnings/errors и full Admission; evidence/raw failures сохранены отдельно; independent post-SPEC/post-EXEC review, repo knowledge log и Obsidian note, checkpoint commit/push. Full goal/G02 не закрываются.
+
+### Риски / альтернативы / Expected User Review Objections
+Почему не catch в codec? Он скрыл бы verifier/compiler failures и спутал состояние владельца с другими ошибками. Почему provider ModuleException нельзя пропустить? Host provider отвечает только за bytes; admission code определяет trusted verifier. Почему не catch fatal exceptions? Этот контракт не гарантирует восстановление процесса при нехватке памяти/нарушении памяти. Производительность не измеряется, исключения являются отказными сценариями. Альтернатива allowlist не покрывает произвольный provider; no fallback нужен независимо от типа recoverable failure.
+
+### Role-Based Review / stop
+Architecture/security: отдельная provider boundary, no identity changes; tester: no-load/late/codec/recovery checks; workflow: не заменяет public run или G05/G06; UX N/A, нет интерфейса. Independent review pending, до него реализация не начинается. Human approval на in-scope изменения дана в постоянной цели; новая semantic approval/admission не создаётся.
+
+### Журнал действий агента
+2026-10-01: inspected current 8281d27, actual provider catch and codec catch establish untyped exception escape; drafted scoped approved-contract correction, independent review next. CLI goal read confirms G02/D02 InProgress and G05/G06 pending; no completion claim.
+Post-SPEC независимый targeted review PASS, замечаний B/H/M/L нет: boundary, recoverable mapping, length/crypto/clock exclusion, no-load/late/restore matrix проверены по actual source. Переход EXEC разрешён существующим user approval на изменения в рамках цели.
+Rollback этой поправки: revert provider boundary и добавленные regression cases; никаких persisted migrations, ключей, новых approval или runtime pins. Команды: pinned dotnet build Kernel.slnx --no-restore и Admission apphost без аргументов; свежие журналы artifacts/local-validation/g02/provider-*. Scope changes — два source/test файла плюс docs/evidence/KB; UI planning/video N/A, backend canonical refusal без UI.
+
+Provider continuation: quality audit и role disposition (post-SPEC).
+|Linter №|Вердикт|Основание|
+|---|---|---|
+|1|PASS|canonical refusal beforeload/dispatch как outcome|
+|2|PASS|actual VerifyFresh и Invoke codec inspected|
+|3|PASS|provider exception escape|
+|4|PASS|boundary только host provider|
+|5|PASS|public identity/D02/clock/fatal вне поправки|
+|6|PASS|provider bytes vs verifier diagnosis|
+|7|PASS|Open и valid Invoke общий VerifyFresh|
+|8|PASS|read once/no fallback/no high-water reset|
+|9|PASS|unavailable, malformed, oversized, restore|
+|10|PASS|exception path, benchmark claim отсутствует|
+|11|PASS|persisted state и schema unchanged|
+|12|PASS|старые typed diagnostics сохраняются|
+|13|PASS|revert boundary/tests, без migration|
+|14|PASS|5 acceptance clauses|
+|15|PASS|4 exception variants no-load/late/restore|
+|16|PASS|pinned build+Admission apphost, no claims before exit0|
+|17|PASS|spec review→fix/tests→fresh build/full→audit→delivery|
+|18|PASS|in-scope approval; public owner gates separate|
+|19|PASS|expanded continuation security boundary|
+|20|PASS|fail-closed trust/profile preserved|
+Rubric: цель/границы5, AS-IS5, дизайн5, безопасность/rollback5, проверяемость5, автономность5 =30/30; числовая оценка не заменяет approval/review или фактическое выполнение.
+Review passes: scope/evidence actual state+codec; contract provider-onlycatch; adversarial forged ModuleException/late recovery; roles architecture/security/tester/workflow PASS, UI designer N/A backend; independent post-SPEC and static post-EXEC PASS no findings. Depth: scope unchanged, no unrelated diff, AC mapped, baseline null/oversize/crypto preserved, no performance/public claims. Full execution evidence pending, completion ещё не заявлена. No-findings justification: reviewer сверил literal catch boundaries и каждую добавленную ветку, выявленных конфликтов нет. Фактический sandbox danger-full-access; review поведенчески read-only.
+
+Финальное локальное выполнение provider continuation: свежая Debug сборка0warnings/errors; full Admission apphost407PASS/exit0. Scalar и allocation signed-session58checks/33rows каждая. Четыре типа provider failure: no-load0+exclusive cleanup, late canonical admission/OwnerStateUnavailable без dispatch, malformed input без provider read, recovery с actual owner/reference output. Existing null/oversized/epoch/expiry corpus green. Evidence docs/evidence/g02-owner-provider-20261001:5 source SHA+7 exact raw copies. Независимый final evidence review pending. Свежая Unlimotion validation isValid=false, одна посторонняя MissingReverseLink; запись результата не выполнялась, чужой граф не изменялся. G02 и цель остаются активными.
+
+Финальный независимый scoped audit provider continuation: PASS, замечаний B/H/M/L нет. Проверены5/5 текущих source SHA,7/7 exact raw copies, build0/0 и Admission407PASS exit0. В обеих формах58checks/33rows:4no-load с loads0/cleanup,4late Refused/admission/OwnerStateUnavailable/readDelta1/dispatch0,4restored Returned/readDelta1/dispatch1 с совпадением actual owner/reference vector. Исходные null/oversize/epoch/expiry rows сохранены; malformed для каждого exception проверен исходниками. Аудит файлов/журналов без независимого consumer rerun, behavioral read-only при danger-full-access. Checkpoint проверен; общая цель не завершена.

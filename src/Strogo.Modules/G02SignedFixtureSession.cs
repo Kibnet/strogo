@@ -75,18 +75,18 @@ internal sealed class G02SignedFixtureSession : IDisposable
 
     private (VerifiedContractApproval Semantic, VerifiedReleaseAdmission Release) VerifyFresh()
     {
-        byte[] state;
+        byte[] supplied;
         try
         {
-            var supplied = stateProvider();
-            if (supplied is null) throw Refuse("OwnerStateUnavailable");
-            if (supplied.Length > 65536) throw Refuse("OwnerStateLimitExceeded");
-            state = supplied.ToArray();
+            supplied = stateProvider();
         }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException or NotSupportedException)
+        catch (Exception error) when (error is not OutOfMemoryException and not AccessViolationException)
         {
             throw Refuse("OwnerStateUnavailable");
         }
+        if (supplied is null) throw Refuse("OwnerStateUnavailable");
+        if (supplied.Length > 65536) throw Refuse("OwnerStateLimitExceeded");
+        var state = supplied.ToArray();
         var now = clock.GetUtcNow();
         var identity = G02StoredIdentityVerifier.Verify(snapshot, trust, state, bundleDigest, now);
         var manifest = snapshot.Manifest;

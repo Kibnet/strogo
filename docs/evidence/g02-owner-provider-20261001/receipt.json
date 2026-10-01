@@ -1,0 +1,63 @@
+{
+  "copies": [
+    {
+      "path": "build.txt",
+      "source": "artifacts/local-validation/g02/provider-73fde71ab6f6457fbb1e5476f32da6dd/build.txt",
+      "sha256": "e8b8446f614ef05911017d13cd250e18c0ebe44b5e487d931e001e237abc885b"
+    },
+    {
+      "path": "admission.txt",
+      "source": "artifacts/local-validation/g02/provider-73fde71ab6f6457fbb1e5476f32da6dd/admission.txt",
+      "sha256": "9cdfd6161c1dde89f804794c4f6dce2b82674d5de8e100b107a698ada17af370"
+    },
+    {
+      "path": "result.json",
+      "source": "artifacts/local-validation/g02/provider-73fde71ab6f6457fbb1e5476f32da6dd/result.json",
+      "sha256": "0eb07d1a7c085c1fb07b8d0bf7605bb152ff3797cd54ef2932013934d868c21c"
+    },
+    {
+      "path": "scalar/signed-session.json",
+      "source": "artifacts/local-validation/g02/fresh-replay-670b012509f7445f8684ca7f47cf86d8/scalar/signed-session.json",
+      "sha256": "cfbd5a64dc5b1fbe88747eb326a4c5561fff53bcc25a12b7218cfb072be38eff"
+    },
+    {
+      "path": "scalar/compiled-invocations.json",
+      "source": "artifacts/local-validation/g02/fresh-replay-670b012509f7445f8684ca7f47cf86d8/scalar/compiled-invocations.json",
+      "sha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b"
+    },
+    {
+      "path": "allocation/signed-session.json",
+      "source": "artifacts/local-validation/g02/fresh-replay-670b012509f7445f8684ca7f47cf86d8/allocation/signed-session.json",
+      "sha256": "6d94d49d7ac2c047db637aa943351cf171d2f6344a33e38cb183a77d1a0475a5"
+    },
+    {
+      "path": "allocation/compiled-invocations.json",
+      "source": "artifacts/local-validation/g02/fresh-replay-670b012509f7445f8684ca7f47cf86d8/allocation/compiled-invocations.json",
+      "sha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7"
+    }
+  ],
+  "purpose": "research-fixture-not-public-admission",
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/G02SignedFixtureSession.cs",
+      "sha256": "d02bec5e155c3da838f063fe800395821ce3fdf98d2ca7e42bc8ddb06d813e7f"
+    },
+    {
+      "path": "src/Strogo.Modules/G02InvocationCodec.cs",
+      "sha256": "450df9de26dccc2c4171662f0fc873c68057af65aef865f7cd373b33558d90cc"
+    },
+    {
+      "path": "src/Strogo.Modules/OwnerAdmissionTrust.cs",
+      "sha256": "85f8b011cda67987ea178b31b7b9a02ae7373e94f6be29a84f99061c7575a87e"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs",
+      "sha256": "d5ed44a2aafd08909c5846daa1f4a58e3651f12f4af2cc5f0e9e8560a5c51ac9"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs",
+      "sha256": "eba8d4715eb126dbb477d6b01aacca299f020e783050df392a343a1ca4be4dba"
+    }
+  ],
+  "baseline": "8281d27"
+}
