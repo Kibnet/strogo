@@ -14,13 +14,15 @@ internal sealed class G02SignedFixtureSession : IDisposable
     private readonly TimeProvider clock;
     private readonly ModuleIr module;
     private readonly G02CompiledFixture fixture;
+    private readonly G02RuntimeBinding runtime;
+    private readonly string sdkDigest;
     private readonly string contractApprovalDigest;
     private readonly string releaseAdmissionDigest;
     private bool disposed;
     internal int DispatchAttempts { get; private set; } // Diagnostic adapter count, not native-entry evidence.
 
     private G02SignedFixtureSession(G02PackageSnapshot snapshot, G02VerifiedFixtureBuild verified,
-        OwnerTrust trust, Func<byte[]> stateProvider, byte[] releaseBytes, string bundleDigest, TimeProvider clock)
+        OwnerTrust trust, Func<byte[]> stateProvider, byte[] releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime)
     {
         this.snapshot = snapshot;
         this.trust = trust;
@@ -28,25 +30,29 @@ internal sealed class G02SignedFixtureSession : IDisposable
         this.releaseBytes = releaseBytes;
         this.bundleDigest = bundleDigest;
         this.clock = clock;
+        this.runtime = runtime;
+        sdkDigest = verified.Build.SdkClosureDigest;
         var (semantic, release) = VerifyFresh();
         contractApprovalDigest = semantic.ArtifactDigest;
         releaseAdmissionDigest = release.ArtifactDigest;
         snapshot.Revalidate();
+        runtime.Verify(sdkDigest);
         module = ModulesCompiler.Compile(ModulesParser.ParseModule(snapshot.ReadHeld(snapshot.Manifest.Files.Single(value => value.Role == "module").Path)));
         fixture = G02CompiledFixture.Open(snapshot, verified);
     }
 
     internal static G02SignedFixtureSession Open(string packagePath, G02VerifiedFixtureBuild verified,
-        OwnerTrust trust, Func<byte[]> stateProvider, ReadOnlySpan<byte> releaseBytes, string bundleDigest, TimeProvider clock)
+        OwnerTrust trust, Func<byte[]> stateProvider, ReadOnlySpan<byte> releaseBytes, string bundleDigest, TimeProvider clock, G02RuntimeBinding runtime)
     {
         ArgumentNullException.ThrowIfNull(verified);
         ArgumentNullException.ThrowIfNull(trust);
         ArgumentNullException.ThrowIfNull(stateProvider);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(runtime);
         if (releaseBytes.Length > 65536) throw Refuse("ReleaseAdmissionLimitExceeded");
         var immutableRelease = releaseBytes.ToArray();
         var snapshot = G02PackageSnapshot.OpenStructural(packagePath);
-        try { return new(snapshot, verified, trust, stateProvider, immutableRelease, bundleDigest, clock); }
+        try { return new(snapshot, verified, trust, stateProvider, immutableRelease, bundleDigest, clock, runtime); }
         catch { snapshot.Dispose(); throw; }
     }
 
@@ -57,6 +63,7 @@ internal sealed class G02SignedFixtureSession : IDisposable
             if (disposed) throw ModulesExceptionFactory.Error("package", "CompiledFixtureDisposed");
             _ = VerifyFresh();
             snapshot.Revalidate();
+            runtime.Verify(sdkDigest);
             DispatchAttempts++;
             return fixture.Invoke(functionId, arguments);
         });

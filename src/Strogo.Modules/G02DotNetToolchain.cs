@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Collections.Immutable;
 using System.Text.Json;
 using Microsoft.Win32.SafeHandles;
 
@@ -34,6 +35,37 @@ internal sealed class G02DotNetToolchain : IDisposable
     internal string ExecutablePath => System.IO.Path.Combine(DirectoryPath, "dotnet.exe");
     internal string Digest { get; private set; } = "";
     internal byte[] IdentityBytes { get; private set; } = [];
+    internal const string RuntimePrefix = "shared/Microsoft.NETCore.App/" + RuntimeVersion + "/";
+    internal const string HostFxrPath = "host/fxr/" + RuntimeVersion + "/hostfxr.dll";
+
+    internal ImmutableArray<G02SdkFile> RuntimeInventory()
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        return inventory.Where(file => file.Path.StartsWith(RuntimePrefix, StringComparison.Ordinal)).ToImmutableArray();
+    }
+
+    // Borrowed runtime gate uses the same retained handles; full SDK build verification is unchanged.
+    internal void RevalidateRuntimeFiles()
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        var runtime = RuntimeInventory();
+        using var root = G02WindowsHeldHandle.OpenDirectory(At(RuntimePrefix.TrimEnd('/')),
+            finalRoot + "\\" + RuntimePrefix.TrimEnd('/').Replace('/', '\\')).Handle;
+        var actual = Directory.EnumerateFileSystemEntries(At(RuntimePrefix)).Select(path =>
+        {
+            if ((File.GetAttributes(path) & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+                throw Refuse("BuildToolchainInventoryMismatch");
+            return RuntimePrefix + System.IO.Path.GetFileName(path);
+        }).Order(StringComparer.Ordinal).ToArray();
+        if (!actual.SequenceEqual(runtime.Select(file => file.Path), StringComparer.Ordinal))
+            throw Refuse("BuildToolchainInventoryMismatch");
+        foreach (var file in runtime.Append(inventory.Single(file => file.Path == HostFxrPath)))
+        {
+            using var current = G02WindowsHeldHandle.OpenFile(At(file.Path), finalRoot + "\\" + file.Path.Replace('/', '\\'));
+            if (Hash(current) != file.Sha256 || Hash(files[file.Path]) != file.Sha256)
+                throw Refuse("BuildToolchainFileMismatch");
+        }
+    }
 
     internal static G02DotNetToolchain Open(string repositoryRoot)
     {

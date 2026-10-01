@@ -1,0 +1,17 @@
+# G02: привязка runtime к закреплённой платформе
+
+K-G02-039. `G02RuntimeBinding` — внутренний механизм host, применённый к подписанным исследовательским сессиям. Он не создаёт человеческого допуска и не заменяет публичный `TrustedModuleRuntime`.
+
+Host удерживает `G02DotNetToolchain` всё время использования binding. Before load и перед каждым корректным JSON invoke сессия проверяет, что SDK digest свежей доказанной сборки совпадает с host SDK, затем проверяет runtime-файлы через retained handles и снимает состояние процесса. Binding заимствует SDK; закрытие SDK делает следующий check недоступным. Сессия остаётся nonconcurrent.
+
+Для текущего win-x64 profile закреплены runtime10.0.11 и189 файлов `shared/Microsoft.NETCore.App/10.0.11`, дополнительно проверяется `hostfxr.dll`. Проверяются actual runtime directory, CoreLib location, platform managed assembly names из pinned PE metadata, их TPA paths и уже loaded Default ALC/location. В native module list требуется exact pinned mapping `coreclr.dll`, `clrjit.dll`, `hostpolicy.dll`; присутствующий hostfxr также обязан совпасть. Full SDK build closure5577 не сокращён; per-invoke runtime subset — отдельная проверка.
+
+TPA содержит platform и application entries; app-only assemblies остаются host TCB. Для каждого platform name нужен минимум один путь, и каждый occurrence обязан совпасть с normalized exact pinned full Windows path. Повторы этого пути идемпотентны: actual .NET дважды перечислил CoreLib. Второй путь, даже с тем же/case-colliding именем, отказывает. Hardlink/symlink aliases не принимаются. PE assembly-name duplicates и несколько loaded CoreLib assemblies также отказывают. Причина правила описана в [SPEC](../specs/2026-09-29-g02-dotnet-r2r-admitted-modules-v0.1.md) и retained live observation.
+
+Неполное/недоступное наблюдение, capture failure и closed SDK при правильном ожидаемом digest дают `RuntimeBindingUnavailable`. Полное наблюдение с неверной identity/path даёт `RuntimeBindingMismatch`; неподдержанный OS/process architecture — `UnsupportedRuntimeBindingPlatform`. Digest chain проверяется до SDK lifecycle/files. Fallback отсутствует. Ошибка JSON и disposed session сохраняют прежний приоритет. Synthetic observation provider существует только во внутреннем conformance helper; candidate/input/package не могут задавать его.
+
+Это проверка файлов и наблюдаемых путей при доверенном host/CLR/OS. Она не доказывает identity уже отображённой памяти, отсутствие injection, корректность toolchain/CPU или использование конкретного R2R body. Public closureDigest, package roles, human D02/release gates и owner signatures этим механизмом не меняются. Other platforms, single-file и self-contained runtime потребуют собственного profile.
+
+Проверки: `Strogo.Modules.Admission.Conformance.exe --g02-runtime-only` запускает actual platform check и synthetic host-observation негативы. Полный apphost suite дополнительно проверяет signed scalar/allocation sessions, refusal before load и late refusal before dispatch. Не считать synthetic observation controls независимым native method-entry trace. Evidence и окончательные результаты сохраняются в `docs/evidence/g02-runtime-binding-20261001`.
+
+Основания API/TCB: [.NET default probing](https://learn.microsoft.com/en-us/dotnet/core/dependency-loading/default-probing), [CoreCLR AssemblyLoadContext design](https://github.com/dotnet/runtime/blob/main/docs/design/features/assemblyloadcontext.md).

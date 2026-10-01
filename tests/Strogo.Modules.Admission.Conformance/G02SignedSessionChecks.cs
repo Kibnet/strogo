@@ -17,7 +17,7 @@ internal static class G02SignedSessionChecks
 
     internal static int Run(string directory, string sourcePackage, G02VerifiedFixtureBuild verified,
         RSA owner, RSA impostor, byte[] publicKey, string keyId, byte[] state0, byte[] state1,
-        byte[] policyDriftState, OwnerContractBindingV04 binding, DateTimeOffset now)
+        byte[] policyDriftState, OwnerContractBindingV04 binding, DateTimeOffset now, G02RuntimeBinding runtime)
     {
         var root = Path.Combine(directory, "session-package");
         Directory.CreateDirectory(root);
@@ -69,7 +69,7 @@ internal static class G02SignedSessionChecks
                 (Id:"expiry", Bytes:Release(until:now.AddMinutes(-1)), Code:"ReleaseAdmissionExpired") })
             {
                 using var trust = new OwnerTrust(publicKey,keyId); var before=loads; string? code=null;
-                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,()=>state0,bad.Bytes,binding.Bundle.BundleDigest,new Clock(now)); }
+                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,()=>state0,bad.Bytes,binding.Bundle.BundleDigest,new Clock(now),runtime); }
                 catch (ModuleException error) { code=error.Code; }
                 Check(code==bad.Code && loads==before,"no-load-"+bad.Id); ExclusiveReopen("cleanup-"+bad.Id);
                 rows.Add(new { id="no-load-"+bad.Id,code,assemblyLoads=loads-before,exclusiveReopen=true });
@@ -77,7 +77,7 @@ internal static class G02SignedSessionChecks
             using (var trust = new OwnerTrust(publicKey,keyId))
             {
                 var before=loads;string? code=null;
-                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,()=>state1,Release(),binding.Bundle.BundleDigest,new Clock(now)); }
+                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,()=>state1,Release(),binding.Bundle.BundleDigest,new Clock(now),runtime); }
                 catch (ModuleException error) { code=error.Code; }
                 Check(code=="ApprovalEpochMismatch" && loads==before,"no-load-epoch");ExclusiveReopen("cleanup-epoch");
                 rows.Add(new { id="no-load-epoch",code,assemblyLoads=loads-before,exclusiveReopen=true });
@@ -88,7 +88,7 @@ internal static class G02SignedSessionChecks
                 byte[] Provider() { reads++; return state; }
                 var release=Release();var releaseIdentity=OwnerAdmissionWire.Hash("strogo.admission.v0.2/artifact",release);var before=loads;
                 clock.BeforeRead=()=>state[0]=0; // Mutation after provider copy, before both signature checks.
-                using var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,release,binding.Bundle.BundleDigest,clock);
+                using var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,release,binding.Bundle.BundleDigest,clock,runtime);
                 Check(reads==1 && loads==before+1,"open-fresh-copy");
                 Array.Clear(release); state=state0.ToArray();
                 var success=session.InvokeJson(request);
@@ -121,7 +121,7 @@ internal static class G02SignedSessionChecks
                 state=state1;Refused(request,"ApprovalEpochMismatch");
                 state=state0;Refused(request,"OwnerStateRollbackDetected");
                 var loadCount=loads;string? newSessionCode=null;
-                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,clock); }
+                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,clock,runtime); }
                 catch(ModuleException error){newSessionCode=error.Code;}
                 Check(newSessionCode=="OwnerStateRollbackDetected" && loads==loadCount,"shared-high-water");
                 rows.Add(new { id="shared-high-water",code=newSessionCode,assemblyLoads=loads-loadCount });
@@ -130,10 +130,47 @@ internal static class G02SignedSessionChecks
             using (var trust = new OwnerTrust(publicKey,keyId))
             {
                 var failed=false;var reads=0;byte[] Provider(){reads++;if(failed)throw new IOException("fixture unavailable");return state0;}
-                using var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,new Clock(now));
+                using var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,new Clock(now),runtime);
                 failed=true;using var result=JsonDocument.Parse(session.InvokeJson(request));
                 Check(reads==2 && session.DispatchAttempts==0 && result.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="OwnerStateUnavailable","io-before-dispatch");
                 rows.Add(new { id="io-unavailable",response=result.RootElement.Clone(),providerReads=reads,dispatchAttempts=session.DispatchAttempts });
+            }
+            var liveRuntime = G02RuntimeBinding.CaptureLive(); var runtimeObservation = liveRuntime; var captureFailure=false;
+            var controlledRuntime = runtime.ObserveFixtureForChecks(() => captureFailure ? throw new IOException("runtime capture unavailable") : runtimeObservation);
+            using (var trust = new OwnerTrust(publicKey,keyId))
+            {
+                runtimeObservation=liveRuntime with { CoreLibPath=Path.Combine(directory,"System.Private.CoreLib.dll") };
+                var before=loads;string? runtimeCode=null;
+                try { using var unexpected=G02SignedFixtureSession.Open(root,verified,trust,()=>state0,Release(),binding.Bundle.BundleDigest,new Clock(now),controlledRuntime); }
+                catch(ModuleException error){runtimeCode=error.Code;}
+                Check(runtimeCode=="RuntimeBindingMismatch" && loads==before,"runtime-before-load"); ExclusiveReopen("runtime-load-cleanup");
+                rows.Add(new { id="runtime-before-load",code=runtimeCode,assemblyLoads=loads-before,observationSource="synthetic-host-control" });
+                runtimeObservation=liveRuntime;
+                var wrongSdk=verified with { Build=verified.Build with { SdkClosureDigest=new string('a',64) } };
+                string? sdkCode=null;
+                try { using var unexpected=G02SignedFixtureSession.Open(root,wrongSdk,trust,()=>state0,Release(),binding.Bundle.BundleDigest,new Clock(now),runtime); }
+                catch(ModuleException error){sdkCode=error.Code;}
+                Check(sdkCode=="RuntimeBindingMismatch" && loads==before,"sdk-binding-before-load"); ExclusiveReopen("sdk-load-cleanup");
+                rows.Add(new { id="sdk-binding-before-load",code=sdkCode,assemblyLoads=loads-before });
+            }
+            using (var trust = new OwnerTrust(publicKey,keyId))
+            {
+                var reads=0; byte[] Provider(){reads++;return state0;}
+                using var session=G02SignedFixtureSession.Open(root,verified,trust,Provider,Release(),binding.Bundle.BundleDigest,new Clock(now),controlledRuntime);
+                using(var positive=JsonDocument.Parse(session.InvokeJson(request)))
+                    Check(positive.RootElement.GetProperty("result").GetProperty("status").GetString()=="Returned" && session.DispatchAttempts==1,"runtime-positive-dispatch");
+                runtimeObservation=liveRuntime with { CoreLibPath=Path.Combine(directory,"System.Private.CoreLib.dll") };
+                using(var late=JsonDocument.Parse(session.InvokeJson(request)))
+                    Check(late.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="RuntimeBindingMismatch" && session.DispatchAttempts==1,"runtime-late-before-dispatch");
+                rows.Add(new { id="runtime-late-before-dispatch",code="RuntimeBindingMismatch",dispatchAttemptsDelta=0,observationSource="synthetic-host-control" });
+                runtimeObservation=liveRuntime;captureFailure=true;
+                using(var failed=JsonDocument.Parse(session.InvokeJson(request)))
+                    Check(failed.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="RuntimeBindingUnavailable" && session.DispatchAttempts==1,"runtime-unavailable-before-dispatch");
+                rows.Add(new { id="runtime-unavailable-before-dispatch",code="RuntimeBindingUnavailable",dispatchAttemptsDelta=0 });
+                var priorReads=reads;
+                using(var malformed=JsonDocument.Parse(session.InvokeJson(Encoding.UTF8.GetBytes("{}"))))
+                    Check(malformed.RootElement.GetProperty("result").GetProperty("error").GetProperty("code").GetString()=="SchemaInvalid" && reads==priorReads && session.DispatchAttempts==1,"codec-before-runtime");
+                captureFailure=false;
             }
             ExclusiveReopen("final-cleanup");
         }

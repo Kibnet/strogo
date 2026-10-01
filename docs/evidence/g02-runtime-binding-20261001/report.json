@@ -1,0 +1,512 @@
+{
+  "purpose": "validation-only-no-human-admission",
+  "checks": 29,
+  "sdkDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+  "actualObservation": {
+    "Windows": true,
+    "Architecture": 1,
+    "RuntimeDirectory": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\",
+    "CoreLibPath": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.CoreLib.dll",
+    "TrustedAssemblyPaths": [
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.Admission.Conformance.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Kernel.Core.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.AppContext.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\netstandard.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.VisualBasic.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.CoreLib.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encoding.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.Lightweight.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\mscorlib.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.Win32.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ServiceModel.Web.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.CompilerServices.Unsafe.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Buffers.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.DataAnnotations.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Configuration.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Core.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Data.DataSetExtensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.NameResolution.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Data.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Handles.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Formats.Asn1.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.FileSystem.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Compression.FileSystem.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Debug.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Json.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Contracts.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Tools.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Tracing.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ServiceProcess.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Drawing.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Windows.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Dynamic.Runtime.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Globalization.Calendars.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.NonGeneric.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Globalization.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.InteropServices.RuntimeInformation.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Globalization.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.FileSystem.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Principal.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.Cng.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Serialization.Json.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Pipes.AccessControl.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Serialization.Xml.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.UnmanagedMemoryStream.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.ServicePoint.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.Csp.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Numerics.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Transactions.Local.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Drawing.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Numerics.Vectors.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.XmlDocument.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.ILGeneration.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ValueTuple.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.SecureString.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.Annotations.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Resources.Reader.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Resources.ResourceManager.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Intrinsics.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.Encoding.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Loader.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Serialization.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.Algorithms.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.OpenSsl.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.X509Certificates.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encoding.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Overlapped.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.TypeConverter.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Tasks.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Tasks.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Thread.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.ThreadPool.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Timer.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Transactions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Web.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.Linq.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.ReaderWriter.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.MemoryMappedFiles.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.Serialization.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.XDocument.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.XmlSerializer.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Numerics.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.XPath.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\WindowsBase.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.CSharp.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.VisualBasic.Core.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.Win32.Registry.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Concurrent.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encodings.Web.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Immutable.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Specialized.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.EventBasedAsync.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Security.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Console.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Data.Common.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.DiagnosticSource.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.FileVersionInfo.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Process.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.StackTrace.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.TextWriterTraceListener.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.TraceSource.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Formats.Tar.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Compression.Brotli.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Compression.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Compression.ZipFile.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.FileSystem.AccessControl.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.FileSystem.DriveInfo.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.FileSystem.Watcher.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.IsolatedStorage.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Pipelines.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Pipes.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.AsyncEnumerable.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.Expressions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.Parallel.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.Queryable.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Memory.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Http.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Http.Json.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.WebSockets.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.HttpListener.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Mail.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.NetworkInformation.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Ping.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Quic.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Requests.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.ServerSentEvents.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.Sockets.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.WebClient.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.WebHeaderCollection.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.WebProxy.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Net.WebSockets.Client.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ObjectModel.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.DataContractSerialization.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.Uri.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.Xml.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.Xml.Linq.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.DispatchProxy.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Metadata.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.TypeExtensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Resources.Writer.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Web.HttpUtility.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.CompilerServices.VisualC.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.InteropServices.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.InteropServices.JavaScript.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Serialization.Formatters.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Serialization.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.AccessControl.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Claims.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Principal.Windows.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encoding.CodePages.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.RegularExpressions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.AccessControl.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Channels.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Tasks.Dataflow.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Tasks.Parallel.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Xml.XPath.XDocument.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.CoreLib.dll"
+    ],
+    "ManagedAssemblies": [
+      {
+        "Name": "System.Private.CoreLib",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.CoreLib.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "Strogo.Modules.Admission.Conformance",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.Admission.Conformance.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Runtime",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Collections.Immutable",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Immutable.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Collections",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "Strogo.Modules",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Diagnostics.Process",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Process.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Text.Json",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Json.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Security.Cryptography",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "Kernel.Core",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Kernel.Core.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Linq",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Memory",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Memory.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Console",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Console.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.ComponentModel.Primitives",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.Primitives.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Threading.Thread",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Thread.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Text.Encoding.Extensions",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encoding.Extensions.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Runtime.InteropServices",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.InteropServices.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Numerics.Vectors",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Numerics.Vectors.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Threading",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Text.Encodings.Web",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encodings.Web.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Collections.Concurrent",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Concurrent.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Private.Uri",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.Uri.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Reflection.Emit.Lightweight",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.Lightweight.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Reflection.Primitives",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Primitives.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Reflection.Emit.ILGeneration",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.ILGeneration.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.IO.Pipelines",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Pipelines.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Collections.NonGeneric",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.NonGeneric.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "System.Runtime.Loader",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Loader.dll",
+        "DefaultContext": true
+      },
+      {
+        "Name": "Microsoft.Win32.Primitives",
+        "Location": "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.Win32.Primitives.dll",
+        "DefaultContext": true
+      }
+    ],
+    "NativeModulePaths": [
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.Admission.Conformance.exe",
+      "C:\\Windows\\SYSTEM32\\ntdll.dll",
+      "C:\\Windows\\System32\\KERNEL32.DLL",
+      "C:\\Windows\\System32\\KERNELBASE.dll",
+      "C:\\Windows\\SYSTEM32\\apphelp.dll",
+      "C:\\Windows\\System32\\SHELL32.dll",
+      "C:\\Windows\\System32\\msvcp_win.dll",
+      "C:\\Windows\\System32\\ucrtbase.dll",
+      "C:\\Windows\\System32\\USER32.dll",
+      "C:\\Windows\\System32\\win32u.dll",
+      "C:\\Windows\\System32\\GDI32.dll",
+      "C:\\Windows\\System32\\gdi32full.dll",
+      "C:\\Windows\\System32\\wintypes.dll",
+      "C:\\Windows\\System32\\combase.dll",
+      "C:\\Windows\\System32\\RPCRT4.dll",
+      "C:\\Windows\\System32\\ADVAPI32.dll",
+      "C:\\Windows\\System32\\msvcrt.dll",
+      "C:\\Windows\\System32\\sechost.dll",
+      "C:\\Windows\\System32\\bcrypt.dll",
+      "C:\\Windows\\System32\\IMM32.DLL",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\host\\fxr\\10.0.11\\hostfxr.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\hostpolicy.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\coreclr.dll",
+      "C:\\Windows\\System32\\ole32.dll",
+      "C:\\Windows\\System32\\OLEAUT32.dll",
+      "C:\\Windows\\System32\\bcryptPrimitives.dll",
+      "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.CoreLib.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.Admission.Conformance.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\clrjit.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Immutable.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Strogo.Modules.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Diagnostics.Process.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Json.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Security.Cryptography.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\tests\\Strogo.Modules.Admission.Conformance\\bin\\Debug\\net10.0\\Kernel.Core.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Linq.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Memory.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Console.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.ComponentModel.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.Thread.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encoding.Extensions.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.InteropServices.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Numerics.Vectors.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Threading.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Text.Encodings.Web.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.Concurrent.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Private.Uri.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.Lightweight.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Primitives.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Reflection.Emit.ILGeneration.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.IO.Pipelines.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Collections.NonGeneric.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\System.Runtime.Loader.dll",
+      "C:\\Users\\Kibnet\\Documents\\Codex\\2026-09-04\\strogo\\.tools\\dotnet-sdk-10.0.400\\shared\\Microsoft.NETCore.App\\10.0.11\\Microsoft.Win32.Primitives.dll"
+    ]
+  },
+  "rows": [
+    {
+      "id": "runtime-root",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "corelib-path",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "tpa-shadow",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "tpa-duplicate-foreign-path",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "tpa-case-collision",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "tpa-missing",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "managed-shadow",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "managed-context",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "managed-memory-only",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-shadow-coreclr.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-missing-coreclr.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-shadow-clrjit.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-missing-clrjit.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-shadow-hostpolicy.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "native-missing-hostpolicy.dll",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "hostfxr-shadow",
+      "code": "RuntimeBindingMismatch",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "null-observation",
+      "code": "RuntimeBindingUnavailable",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "empty-tpa",
+      "code": "RuntimeBindingUnavailable",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "omitted-managed",
+      "code": "RuntimeBindingUnavailable",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "empty-native",
+      "code": "RuntimeBindingUnavailable",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "missing-runtime-dir",
+      "code": "RuntimeBindingUnavailable",
+      "observationSource": "synthetic-conformance"
+    },
+    {
+      "id": "wrong-architecture",
+      "code": "UnsupportedRuntimeBindingPlatform",
+      "observationSource": "synthetic-conformance"
+    }
+  ],
+  "digestCode": "RuntimeBindingMismatch",
+  "captureCode": "RuntimeBindingUnavailable",
+  "writeDenied": true,
+  "disposedCode": "RuntimeBindingUnavailable",
+  "boundary": "Observed paths and retained pinned files, not memory/native attestation or production admission."
+}

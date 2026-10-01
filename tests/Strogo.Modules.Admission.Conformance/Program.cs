@@ -6,6 +6,13 @@ using System.Text.Json;
 using Kernel.Core;
 using Strogo.Modules;
 
+if (args is ["--g02-runtime-only"])
+{
+    var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+    G02RuntimeBindingChecks.Run(root, Path.Combine(root, "artifacts", "local-validation", "g02", "runtime-" + Guid.NewGuid().ToString("N")));
+    return;
+}
+
 if (args is ["--g02-generality-only"])
 {
     await G02GeneralityChecks.RunAsync(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../..")));
@@ -955,8 +962,10 @@ if (OperatingSystem.IsWindows())
             using var compiled = G02CompiledFixture.Open(snapshot, actual);
             var compiledIr = ModulesCompiler.Compile(positiveModule);
             var binding = OwnerContractBinderV04.Bind(compiledIr, positiveOwner);
+            using var runtimeSdk = G02DotNetToolchain.Open(repoRoot);
+            var runtimeBinding = G02RuntimeBinding.Open(runtimeSdk);
             checks += G02SignedSessionChecks.Run(Path.Combine(replayEvidence, shape), packageRoot, actual,
-                owner, impostor, publicKey, keyId, state0, state1, State(0, maxLifetime:3600), binding, now);
+                owner, impostor, publicKey, keyId, state0, state1, State(0, maxLifetime:3600), binding, now,runtimeBinding);
             var invocationRows = new List<object>();
             foreach (var entry in binding.Entries)
             {

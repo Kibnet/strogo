@@ -1,0 +1,175 @@
+{
+  "purpose": "validation-only-no-human-admission",
+  "baseCommit": "c116c936df186d734c09adb656b1136c33f70c2e",
+  "sources": [
+    {
+      "path": "src/Strogo.Modules/G02RuntimeBinding.cs",
+      "sha256": "fc679c47c18f8364d0984a78321201ec0a1984f3602e99940393469be5dc1af3"
+    },
+    {
+      "path": "src/Strogo.Modules/G02DotNetToolchain.cs",
+      "sha256": "9f3596636e8ca3a259925baa75d476930dd14e5925c0d0fce98d2dbf7ec4b7a7"
+    },
+    {
+      "path": "src/Strogo.Modules/G02SignedFixtureSession.cs",
+      "sha256": "57142b5669e79296bb3d097eabb3cd965318366880649d2896862e9f2831ef1f"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledFixture.cs",
+      "sha256": "c8e2c2b3c1c2c3a7af4da76ff8433f86c69bfaaeb6d464961fd8d1b4c911ab80"
+    },
+    {
+      "path": "src/Strogo.Modules/G02CompiledDispatch.cs",
+      "sha256": "14d23848ae01bdd0a1123abe49e8bb12d6e8fb77d81afa7623b530d730200248"
+    },
+    {
+      "path": "src/Strogo.Modules/G02PackageSnapshot.cs",
+      "sha256": "21b14a3ac8cf5430b29a7b88e1d71ae56634e25e5e4666d43f99be14b26b4382"
+    },
+    {
+      "path": "src/Strogo.Modules/OwnerAdmissionTrust.cs",
+      "sha256": "85f8b011cda67987ea178b31b7b9a02ae7373e94f6be29a84f99061c7575a87e"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/Program.cs",
+      "sha256": "eba8d4715eb126dbb477d6b01aacca299f020e783050df392a343a1ca4be4dba"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02RuntimeBindingChecks.cs",
+      "sha256": "7e031716202196a34159f4067fceb49c4eeed31a678dfb9d1f2e78afee0fda07"
+    },
+    {
+      "path": "tests/Strogo.Modules.Admission.Conformance/G02SignedSessionChecks.cs",
+      "sha256": "6bf9c1c53f7cab4dd9255d4a3c2b62249607703ed487e79a2f1b93a623a10b3b"
+    }
+  ],
+  "copies": [
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63\\build.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\build.txt",
+      "sha256": "0e9ccb91cf3d27522283376a32a2ec56e668a6cf6a3d50e84e9f09081d961104"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63\\focused.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\focused.txt",
+      "sha256": "e343577afac4029537cffa3964c3ed8469f7e56d1be3b28334ea738a05f0f003"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63\\result.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\result.json",
+      "sha256": "f5809523e4d49c93bd599ad933493594e2d916fa51c39f03f10c7b4e02981be4"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63\\admission.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\admission.txt",
+      "sha256": "0e88b2127f50e7630b1c6eeb3f9b01356dfa3d682c90dff45baa13103581331d"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63\\admission-result.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\admission-result.json",
+      "sha256": "5505fb20475f5ac4203e4d3706be6a540b1e276dc0aa7dbccca282d11a3cab67"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-fb6ff1ac92c543d089563c8ef72df47b\\actual-observation.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\actual-observation.json",
+      "sha256": "e154ca8a46fe0b926e82bfb9bb1633f04bc22019c0d307cde93598a47811590f"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-fb6ff1ac92c543d089563c8ef72df47b\\report.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\report.json",
+      "sha256": "bfc85630da84a93888f92d81202d17603ca1e8083215376eb18a7c0427827d6e"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\scalar\\signed-session.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\scalar\\signed-session.json",
+      "sha256": "0155568825e8c97e76b15136239a137a28609650fa99041a7a4b3d43db5b18f0"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\scalar\\compiled-invocations.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\scalar\\compiled-invocations.json",
+      "sha256": "3f00d7a2f82e611f7d991a7c61b411d49faf2389c848605bd1dad28afc8cfb6b"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\scalar\\transcript.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\scalar\\transcript.json",
+      "sha256": "32d2d84695e9e4eb1bbd5bcae607f98eed7af888a927a82a3a2f3744790733f2"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\scalar\\obligations.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\scalar\\obligations.json",
+      "sha256": "4623d6ae109d3bcc799e3e9af9eff7589760be31ae721c0313d1e002ef7546d9"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\scalar\\source-map.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\scalar\\source-map.json",
+      "sha256": "4c538a22886f185d4ad487f292ea2b93432260c556beb4294a8eaae934b07e56"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\allocation\\signed-session.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\allocation\\signed-session.json",
+      "sha256": "fcb9e3cf5c3a081afd2dfca48bece27bacf5eb81d2fb7e8069f8045ffe5ae1e6"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\allocation\\compiled-invocations.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\allocation\\compiled-invocations.json",
+      "sha256": "ba8b51ec7a9bae8fc62f6ae54cbda4daf6fd26b54e864e6122fabb1879aad7b7"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\allocation\\transcript.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\allocation\\transcript.json",
+      "sha256": "8587481238687be5123f0b67c4bc5271f049b61eebd16e9399ca0f5aa8641098"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\allocation\\obligations.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\allocation\\obligations.json",
+      "sha256": "e2c34a528015e2c5bcb64448dc3793691a33669ba787ca8488734aeaa3368e14"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a\\allocation\\source-map.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\allocation\\source-map.json",
+      "sha256": "41d1f857509490be027728fe789eb189bc8f1e926b8e28b75a9e19e115e2645c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-module-conformance.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\runtime-module-conformance.txt",
+      "sha256": "94873a8875121bee9b7eac450e578b2e758a030c9dc569dad9e153f0e88787f7"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-build.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\runtime-build.txt",
+      "sha256": "181a4ad5cf9ec60d979d9550b07d619c47714eb72381b5dfe777f43f15b1562c"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-focused.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\runtime-focused.txt",
+      "sha256": "367b9e74620d9ae015f54612d767107ca024739a3a3ffcd101c1b7fa0c1227cf"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-observed.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\runtime-observed.txt",
+      "sha256": "817f53fbe9c9f38f437896b644361f5b0289d20b1211367f33fd15f372f3462a"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-observation-build.txt",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\runtime-observation-build.txt",
+      "sha256": "31438824336c459549f2efa859bc2071443039558369278d0884dd749a3e5937"
+    },
+    {
+      "source": "artifacts\\local-validation\\g02\\runtime-bf3e32e995b9493b9adb633c802eb820\\actual-observation.json",
+      "target": "docs\\evidence\\g02-runtime-binding-20261001\\history\\first-observation.json",
+      "sha256": "e154ca8a46fe0b926e82bfb9bb1633f04bc22019c0d307cde93598a47811590f"
+    }
+  ],
+  "rawFocused": "artifacts\\local-validation\\g02\\runtime-fb6ff1ac92c543d089563c8ef72df47b",
+  "rawAdmission": "artifacts\\local-validation\\g02\\fresh-replay-76d7523c88284774883785d4cbfad07a",
+  "rawValidation": "artifacts\\local-validation\\g02\\runtime-validation-a3bfba9762e9411b98cdb564ae17ce63",
+  "results": {
+    "buildWarnings": 0,
+    "buildErrors": 0,
+    "focusedChecks": 29,
+    "moduleChecks": 362,
+    "admissionChecks": 359,
+    "signedChecksPerShape": 34,
+    "signedRowsPerShape": 21
+  }
+}
