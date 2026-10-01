@@ -1,0 +1,75 @@
+{
+  "purpose": "validation-only-no-human-admission",
+  "leftRoot": "artifacts\\local-validation\\g02\\generality-c9054595c5904e398f2415b65c011230",
+  "rightRoot": "artifacts\\local-validation\\g02\\generality-716d5e4933d74b4ba5af01f7fbf1db84",
+  "publishFilesIndependentlyChecked": 1520,
+  "rootReportByteEqual": true,
+  "rows": [
+    {
+      "id": "scalar-primary",
+      "equal": {
+        "candidate.dfy": true,
+        "source-map.json": true,
+        "transcript.json": true,
+        "obligations.json": true,
+        "invocations.json": true,
+        "Generated.cs": true,
+        "Generated.csproj": true,
+        "receipt.json": true,
+        "all190PublishFiles": true
+      },
+      "assemblySha256": "471eb7047d5cb630c0459f7a02e7f9295b7e5548fbb5eb51cf17ccd7dc453bad",
+      "publishInventoryDigest": "0373b0027c9a9b301b65b41261e5aa367c2f4a34e1ff14e54b43935cfa073034"
+    },
+    {
+      "id": "scalar-alternative",
+      "equal": {
+        "candidate.dfy": true,
+        "source-map.json": true,
+        "transcript.json": true,
+        "obligations.json": true,
+        "invocations.json": true,
+        "Generated.cs": true,
+        "Generated.csproj": true,
+        "receipt.json": true,
+        "all190PublishFiles": true
+      },
+      "assemblySha256": "da74c9b872c3a78c73881fac2cba42ea4ed85d089f182883596233a6299b0aa3",
+      "publishInventoryDigest": "980847b429b6b700c6ec87d276638ea412d6ea1257b2ca33c2ec73f7d6529035"
+    },
+    {
+      "id": "allocation-primary",
+      "equal": {
+        "candidate.dfy": true,
+        "source-map.json": true,
+        "transcript.json": true,
+        "obligations.json": true,
+        "invocations.json": true,
+        "Generated.cs": true,
+        "Generated.csproj": true,
+        "receipt.json": true,
+        "all190PublishFiles": true
+      },
+      "assemblySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+      "publishInventoryDigest": "11800eb0477783b3dae98b894c48dda1762c8b48ecd1001bde2f0bd114992ef2"
+    },
+    {
+      "id": "allocation-alternative",
+      "equal": {
+        "candidate.dfy": true,
+        "source-map.json": true,
+        "transcript.json": true,
+        "obligations.json": true,
+        "invocations.json": true,
+        "Generated.cs": true,
+        "Generated.csproj": true,
+        "receipt.json": true,
+        "all190PublishFiles": true
+      },
+      "assemblySha256": "55c4743dcb3dfaf84752d21e2ef3907306c4e79587b58d32afaacbdd4c80341b",
+      "publishInventoryDigest": "46ab8939228264ed00c3c772a63786bd175784bd7f53f5b96dffc798adb2cdc9"
+    }
+  ],
+  "passed": true,
+  "boundaries": "No public closure formula, approval, native execution or benchmark claim. Timing/path logs excluded; no canonical inventory digest recomputation."
+}

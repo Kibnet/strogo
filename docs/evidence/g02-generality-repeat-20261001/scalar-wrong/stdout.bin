@@ -1,0 +1,16 @@
+Prover error: Model parsing error: Invalid model: invalid element name 0.0, at line 143 (  0.0)
+
+Prover error: Could not parse any models
+
+candidate.dfy(78,2): Error: a postcondition could not be proved on this return path
+   |
+78 |   {
+   |   ^
+
+candidate.dfy(77,19): Related location: this is the postcondition that could not be proved
+   |
+77 |     ensures result == M001(p000, p001, p002)
+   |                    ^^
+
+
+Dafny program verifier finished with 18 verified, 1 error
