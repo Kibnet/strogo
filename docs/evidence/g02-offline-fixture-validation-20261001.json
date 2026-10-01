@@ -1,0 +1,16 @@
+{
+  "captureMode": "transcribed-exec-tool-result",
+  "sessionId": 29560,
+  "chunkId": "9523ef",
+  "command": ".tools/dotnet-sdk-10.0.400/dotnet.exe run --project tests/Strogo.Modules.Admission.Conformance --no-build",
+  "exitCode": 0,
+  "stdout": "PASS owner admission trust checks=168\r\n",
+  "rawRoot": "artifacts/local-validation/g02/fresh-replay-46cd3cefa5ed4d41953f516d43af60a9",
+  "finalBuild": {
+    "warnings": 0,
+    "errors": 0,
+    "configuration": "Debug",
+    "restore": "--no-restore",
+    "exitCode": 0
+  }
+}

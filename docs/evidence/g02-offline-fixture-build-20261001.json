@@ -1,0 +1,355 @@
+{
+  "limits": [
+    "One Windows host; held shared SDK and Dafny installation; each lane has fresh translation/work/cache/home.",
+    "Internal fixture API; receipts are diagnostic correlation, not normative package binding.",
+    "RTR header is not proof of actual native method execution.",
+    "No OS network isolation, host ACL, pre-write disk quota or memory budget.",
+    "No D02 semantic approval or release admission; G02 remains InProgress."
+  ],
+  "schemaVersion": "strogo.research.offline-fixture-build.v0.1",
+  "rawRoot": "artifacts/local-validation/g02/fresh-replay-3226740a247549b0a4440e36981f596a",
+  "purpose": "fixture-only-not-admitted",
+  "conformanceChecks": 168,
+  "shapes": [
+    {
+      "lanes": [
+        {
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-3226740a247549b0a4440e36981f596a/scalar/compiled-second/sgb-968bff1f701a43588bb1ef979728900f",
+          "receipt": {
+            "assemblySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+            "generatedSourceSha256": "8e07c8c121645ce5b20ff4c8fc15d5ddf576cc6f357599f22e219937d2c85a5a",
+            "packs": [
+              {
+                "name": "microsoft.aspnetcore.app.runtime.win-x64",
+                "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+              },
+              {
+                "name": "microsoft.netcore.app.crossgen2.win-x64",
+                "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+              },
+              {
+                "name": "microsoft.netcore.app.runtime.win-x64",
+                "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+              },
+              {
+                "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+                "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+              }
+            ],
+            "purpose": "fixture-only-not-admitted",
+            "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+            "transcriptSha256": "1fe2fcc9aafcbf7d7d26894bc784011af16e09027ca97fd8cbc070c4cec7e640"
+          },
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+          "commands": [
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "--locked-mode",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "publish",
+                "Generated.csproj",
+                "-c",
+                "Release",
+                "--no-restore",
+                "-o",
+                "publish",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            }
+          ]
+        },
+        {
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-3226740a247549b0a4440e36981f596a/scalar/compiled/sgb-e7446ebcea904a0fa4ee369f8afd8fe6",
+          "receipt": {
+            "assemblySha256": "1a7d9f9a1a1ff680ad9ee0cb84c3ef0db33dfa37a2921867b5cb4c6562918a5a",
+            "generatedSourceSha256": "8e07c8c121645ce5b20ff4c8fc15d5ddf576cc6f357599f22e219937d2c85a5a",
+            "packs": [
+              {
+                "name": "microsoft.aspnetcore.app.runtime.win-x64",
+                "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+              },
+              {
+                "name": "microsoft.netcore.app.crossgen2.win-x64",
+                "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+              },
+              {
+                "name": "microsoft.netcore.app.runtime.win-x64",
+                "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+              },
+              {
+                "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+                "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+              }
+            ],
+            "purpose": "fixture-only-not-admitted",
+            "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+            "transcriptSha256": "1fe2fcc9aafcbf7d7d26894bc784011af16e09027ca97fd8cbc070c4cec7e640"
+          },
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+          "commands": [
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "--locked-mode",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "publish",
+                "Generated.csproj",
+                "-c",
+                "Release",
+                "--no-restore",
+                "-o",
+                "publish",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            }
+          ]
+        }
+      ],
+      "laneCount": 2,
+      "sameAssembly": true,
+      "shape": "scalar",
+      "sameDeps": true,
+      "sameGeneratedSource": true
+    },
+    {
+      "lanes": [
+        {
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-3226740a247549b0a4440e36981f596a/allocation/compiled-second/sgb-b44ccbf85f4741cf818ef22f42ccd73b",
+          "receipt": {
+            "assemblySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+            "generatedSourceSha256": "3f5b0deabaa3e2589fa45084757b752d0a2d074e1445aafd757ecb5faf3d4286",
+            "packs": [
+              {
+                "name": "microsoft.aspnetcore.app.runtime.win-x64",
+                "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+              },
+              {
+                "name": "microsoft.netcore.app.crossgen2.win-x64",
+                "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+              },
+              {
+                "name": "microsoft.netcore.app.runtime.win-x64",
+                "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+              },
+              {
+                "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+                "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+              }
+            ],
+            "purpose": "fixture-only-not-admitted",
+            "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+            "transcriptSha256": "f2d20987dd313bdc901e4d890a52d8a10f1568c6ab92a21d7516c3c9bea4970a"
+          },
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+          "commands": [
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "--locked-mode",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "publish",
+                "Generated.csproj",
+                "-c",
+                "Release",
+                "--no-restore",
+                "-o",
+                "publish",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            }
+          ]
+        },
+        {
+          "rawDirectory": "artifacts/local-validation/g02/fresh-replay-3226740a247549b0a4440e36981f596a/allocation/compiled/sgb-909d9944ee6544cabda609097b919f05",
+          "receipt": {
+            "assemblySha256": "393224746ed1da28db3c30fd4f30a9976e389659007f36fa31d875016dc0b32b",
+            "generatedSourceSha256": "3f5b0deabaa3e2589fa45084757b752d0a2d074e1445aafd757ecb5faf3d4286",
+            "packs": [
+              {
+                "name": "microsoft.aspnetcore.app.runtime.win-x64",
+                "sha256": "40613e5e573ebc816744cf9020b1d96100a9ddf4939596e6ab635c16b13c51f7"
+              },
+              {
+                "name": "microsoft.netcore.app.crossgen2.win-x64",
+                "sha256": "edccdab06b7dde8a6325b85040dac511134ab139dd5f09407b233b92218ed904"
+              },
+              {
+                "name": "microsoft.netcore.app.runtime.win-x64",
+                "sha256": "822b247bddbd88a290a8072be89815ffeac26e5aac0d41b1eab95fda5279f443"
+              },
+              {
+                "name": "microsoft.windowsdesktop.app.runtime.win-x64",
+                "sha256": "3aaa3c2ac928a0da1d677caeee6405d1cdd0ae1ccd7a23a8e293a8cb6f009669"
+              }
+            ],
+            "purpose": "fixture-only-not-admitted",
+            "sdkClosureDigest": "4fadca12c77d7912c854f4262d15d9e129ef67b601bd5bd5496c8d84af39fe0a",
+            "transcriptSha256": "f2d20987dd313bdc901e4d890a52d8a10f1568c6ab92a21d7516c3c9bea4970a"
+          },
+          "depsSha256": "36320d4f3d8d0fae775bb6f66c88e9a51e41fe6fbe5a3b17eeefe6a30dc53bed",
+          "commands": [
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "--locked-mode",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "publish",
+                "Generated.csproj",
+                "-c",
+                "Release",
+                "--no-restore",
+                "-o",
+                "publish",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            },
+            {
+              "arguments": [
+                "restore",
+                "Generated.csproj",
+                "--configfile",
+                "NuGet.Config",
+                "-p:ImportDirectoryBuildProps=false",
+                "-p:ImportDirectoryBuildTargets=false",
+                "-p:ImportDirectoryPackagesProps=false",
+                "-p:UseSharedCompilation=false",
+                "-nr:false",
+                "-v:minimal"
+              ],
+              "exitCode": 0
+            }
+          ]
+        }
+      ],
+      "laneCount": 2,
+      "sameAssembly": true,
+      "shape": "allocation",
+      "sameDeps": true,
+      "sameGeneratedSource": true
+    }
+  ],
+  "date": "2026-10-01",
+  "finalValidation": "g02-offline-fixture-validation-20261001.json"
+}

@@ -739,6 +739,43 @@ if (OperatingSystem.IsWindows())
             CanonicalJson.Encode(positive.SourceMap), positive.Obligations);
         var firstReplay = await G02DafnyReplay.RunFixtureAsync(tool, positiveInputs, Path.Combine(replayEvidence, shape, "first"));
         var secondReplay = await G02DafnyReplay.RunFixtureAsync(tool, positiveInputs, Path.Combine(replayEvidence, shape, "second"));
+        var translation = await G02DafnyReplay.TranslateFixtureAsync(tool, positiveInputs,
+            Path.Combine(replayEvidence, shape, "translation"));
+        Check(translation.GeneratedSourceBytes is { Length: > 0 } &&
+              translation.Verified.TranscriptBytes.SequenceEqual(firstReplay.Verified.TranscriptBytes) &&
+              translation.Verified.ObligationVectorBytes.SequenceEqual(firstReplay.Verified.ObligationVectorBytes),
+            "held-source Dafny translation re-verifies the same normalized proof result");
+        using (var sdk = G02DotNetToolchain.Open(repoRoot))
+        {
+            RefusePackage(() => G02OfflineFixtureBuild.RunAsync(sdk, firstReplay, "unused",
+                Path.Combine(replayEvidence, shape, "missing-translation")).GetAwaiter().GetResult(), "VerifiedTranslationMissing");
+            var forgedCache = Path.Combine(replayEvidence, shape, "forged-pack-cache");
+            var firstPack = G02OfflineFixtureBuild.Packs[0].Name;
+            var forgedPackDirectory = Path.Combine(forgedCache, firstPack, "10.0.11");
+            Directory.CreateDirectory(forgedPackDirectory);
+            File.WriteAllText(Path.Combine(forgedPackDirectory, firstPack + ".10.0.11.nupkg"), "forged archive");
+            var refusalDiagnostic = Path.Combine(replayEvidence, shape, "forged-pack-refusal");
+            RefusePackage(() => G02OfflineFixtureBuild.RunAsync(sdk, translation, forgedCache,
+                refusalDiagnostic).GetAwaiter().GetResult(), "BuildPackDigestMismatch");
+            Check(!Directory.EnumerateFiles(refusalDiagnostic, "*-process.json", SearchOption.AllDirectories).Any(),
+                "forged offline pack refuses before any SDK subprocess");
+            var compiled = await G02OfflineFixtureBuild.RunAsync(sdk, translation,
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
+                Path.Combine(replayEvidence, shape, "compiled"));
+            Check(compiled.AssemblyBytes.Length > 0 && compiled.DepsBytes.Length > 0 && compiled.SdkClosureDigest == sdk.Digest,
+                "held SDK and pinned offline packs compile the translated fixture to a real ReadyToRun DLL");
+            var translationSecond = await G02DafnyReplay.TranslateFixtureAsync(tool, positiveInputs,
+                Path.Combine(replayEvidence, shape, "translation-second"));
+            Check(translationSecond.GeneratedSourceBytes!.SequenceEqual(translation.GeneratedSourceBytes!) &&
+                  translationSecond.Verified.TranscriptBytes.SequenceEqual(translation.Verified.TranscriptBytes),
+                "two fresh held-source translations produce byte-equal source and normalized proof transcript");
+            var compiledSecond = await G02OfflineFixtureBuild.RunAsync(sdk, translationSecond,
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"),
+                Path.Combine(replayEvidence, shape, "compiled-second"));
+            Check(compiled.AssemblyBytes.SequenceEqual(compiledSecond.AssemblyBytes) &&
+                  compiled.DepsBytes.SequenceEqual(compiledSecond.DepsBytes),
+                "two fresh translation/build roots and private caches produce byte-equal DLL and deps");
+        }
         Check(firstReplay.Verified.TranscriptBytes.SequenceEqual(secondReplay.Verified.TranscriptBytes) &&
               firstReplay.Verified.ObligationVectorBytes.SequenceEqual(secondReplay.Verified.ObligationVectorBytes),
             "two fresh pinned Dafny fixture runs produce byte-equal normative transcript and obligations");
